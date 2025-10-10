@@ -1,0 +1,110 @@
+ 
+@keyframes zoom-in {
+    0% {
+        transform: scale(.5, .5);
+    }
+    100% {
+        transform: scale(1, 1);
+    }
+}
+ 
+ 
+
+.zoomIn {
+    animation: zoom-in 1s ease;
+}
+
+/* todas las animaciones pausadas */
+.paused * { 
+	animation-play-state: paused;
+}
+
+
+
+h1, h2, h3, h4, h5, h6, [class*='heading-'] {
+    margin-top: 0;
+    margin-bottom: 0;
+    font-weight: 500;
+    color: #151515;
+    text-transform: capitalize;
+    letter-spacing: .024em;
+    word-spacing: .05em;
+}
+
+h1 a, h2 a, h3 a, h4 a, h5 a, h6 a, [class*='heading-'] a {
+    color: inherit;
+}
+
+h1 a:hover, h2 a:hover, h3 a:hover, h4 a:hover, h5 a:hover, h6 a:hover, [class*='heading-'] a:hover {
+    color: #6689ff;
+}
+
+h1,
+.heading-1 {
+    word-spacing: .08em;
+    font-size: 42px;
+    line-height: 1.30556;
+}
+
+@media (min-width: 992px) {
+    h1,
+    .heading-1 {
+        font-size: 72px;
+    }
+}
+
+h2,
+.heading-2 {
+    font-size: 36px;
+    line-height: 1.66667;
+}
+
+@media (min-width: 992px) {
+    h2,
+    .heading-2 {
+        font-size: 42px;
+    }
+}
+
+h3,
+.heading-3 {
+    font-size: 32px;
+    line-height: 1.3125;
+}
+
+h4,
+.heading-4 {
+    font-size: 21px;
+    line-height: 1.71429;
+}
+
+h5,
+.heading-5 {
+    font-size: 18px;
+    line-height: 1.71429;
+}
+
+h6,
+.heading-6 {
+    font-size: 16px;
+    line-height: 1.125;
+    text-transform: uppercase;
+}
+
+
+
+@media (max-width: 480px) {
+ 
+    .espacio{
+        margin-top: 20px;
+    }
+}
+
+.zoomIn {
+    animation: zoom-in 1s ease;
+}
+
+/* todas las animaciones pausadas */
+.paused * { 
+	animation-play-state: paused;
+}

@@ -1,0 +1,198 @@
+<app-new-nav></app-new-nav>
+<div class="container">
+    <div class="row">
+        <div class="col-12 mt-5 mb-5">
+            <!-- Header -->
+             <div class="row mb-3">
+                <div class="col-12">
+                    <h4 class="fs-4 fw-bold text-truncate">Solicitudes Citas de valuación</h4>
+                    <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item" [routerLink]="['/admin/valuator']">Overview</li>
+                            <li class="breadcrumb-item active" aria-current="page">Citas de valuación</li>
+                        </ol>
+                        <div class="d-flex justify-content-end p-3">
+                            <a mat-button (click)="newAppointment()"><i class="fa-solid fa-plus"></i> Agregar Cita de Valuación</a>
+                        </div>
+                    </nav>
+                </div>
+             </div>
+
+             <!-- Search Input -->
+             <div class="d-flex flex-wrap mb-3 barra">
+                <div class="col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Buscar...</mat-label>
+                        <input matInput [(ngModel)]="palabra_busqueda" (keyup)="searchKeyboard()" placeholder="Buscar por nombre, apellidos, marca, modelo, vin, año">
+                    </mat-form-field>
+                </div>
+             </div>
+
+             <mat-accordion class="custom-panel">
+              <mat-expansion-panel>
+
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                    Código de color
+                  </mat-panel-title>
+                </mat-expansion-panel-header>
+                <!-- <div style="border: 1px; padding: 8px; box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.2); width: fit-content;" class="mb-5"> -->
+                <div class="panel-content">
+                  <!-- Colors Code -->
+                   <div class="status-item mt-3">
+                     <mat-icon
+                       svgIcon="thumbs-up"
+                       style="fill: #B0BEC5; width: 16px; height: 16px;"
+                       aria-hidden="false"
+                       aria-label="No hay refacciones.">
+                     </mat-icon>
+                     <span>No hay refacciones / HyP.</span>
+                   </div>
+                   
+                   <div class="status-item">
+                     <mat-icon
+                       svgIcon="thumbs-up"
+                       style="fill: #8c0a0a; width: 16px; height: 16px;"
+                       aria-hidden="false"
+                       aria-label="Refacciones no cotizadas.">
+                     </mat-icon>
+                     <span>Refacciones / HyP NO cotizadas.</span>
+                   </div>
+                   
+                   <div class="status-item">
+                     <mat-icon
+                       svgIcon="thumbs-up"
+                       style="fill: #26a680; width: 16px; height: 16px;"
+                       aria-hidden="false"
+                       aria-label="Refacciones cotizadas.">
+                     </mat-icon>
+                     <span>Refacciones / HyP cotizadas.</span>
+                   </div>
+                </div>
+
+              </mat-expansion-panel>
+             </mat-accordion>
+
+
+             <!-- Table -->
+              <div class="dflex justify-content-center mat-table-container mt-5">
+                <div class="mat-elevation-z8 w-100">
+                    <table mat-table [dataSource]="dataSource" class="w-100">
+                        
+                         <ng-container matColumnDef="id">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header>#</th>
+                            <td mat-cell *matCellDef="let row; let i = index">{{ i + 1 }}</td> <!---->
+                         </ng-container>
+
+                         <ng-container matColumnDef="name">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header>Nombre cliente</th>
+                            <td mat-cell *matCellDef="let row">{{row.appointment.customer.name}}</td>
+                          </ng-container>
+                         
+                          <ng-container matColumnDef="lastName">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header>Apellidos cliente</th>
+                            <td mat-cell *matCellDef="let row">{{row.appointment.customer.last_name}}</td>
+                          </ng-container>
+                          
+                          <ng-container matColumnDef="brand">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header>Marca auto</th>
+                            <td mat-cell *matCellDef="let row">{{row.appointment.vehicle.brand_name}}</td>
+                          </ng-container>
+                          
+                          <ng-container matColumnDef="model">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header>Modelo auto</th>
+                            <td mat-cell *matCellDef="let row">{{row.appointment.vehicle.model_name}}</td>
+                          </ng-container>
+                          
+                          <ng-container matColumnDef="vin">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header>VIN</th>
+                            <!-- <td mat-cell *matCellDef="let row">{{row.appointment.vehicle.vin === null ? '00000000000000000' : row.appointment.vehicle.vin}}</td> -->
+                            <td mat-cell *matCellDef="let row">{{row.vehicle === null ? '00000000000000000' : row.vehicle.vin}}</td>
+                          </ng-container>
+                          
+                          <ng-container matColumnDef="year">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header>Año</th>
+                            <td mat-cell *matCellDef="let row">{{row.appointment.vehicle.year}}</td> 
+                          </ng-container>
+                          
+                          <ng-container matColumnDef="status">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header>Estatus Valuación</th>
+                            <td mat-cell *matCellDef="let row">
+                              <span class="badge rounded-pill" [ngClass]="{
+                                'bg-secondary' : row.status === 'to_appraise',
+                                'bg-primary' : row.status === 'on_progress' || row.status === 'checklist_ready',
+                                'bg-warning text-dark' : row.status === 'valuated'
+                              }">
+                                {{
+                                  (row.status === 'to_appraise') ? 'Por valuar' : 
+                                  (row.status === 'on_progress') ? 'En progreso' : 
+                                  (row.status === 'checklist_ready') ? 'Listo p/valuar' :
+                                  (row.status === 'valuated') ? 'Valuado' : 'L.P. Venta'
+                                }}
+                              </span>
+                            </td> 
+                          </ng-container>
+
+                          <ng-container matColumnDef="statusParts">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header>Refacciones</th>
+                            <td mat-cell *matCellDef="let row">
+                              <mat-icon svgIcon="thumbs-up" 
+                                        aria-hidden="false" 
+                                        aria-label="Example thumbs up SVG icon"
+                                        [ngClass]="{
+                                          'thumbup-gray': row.status_parts === 'on_hold' || row.status_parts === 'pending_entry',
+                                          'thumbup-red': row.status_parts === 'pending_review',
+                                          'thumbup-green': row.status_parts === 'parts_done'
+                                        }">
+                              </mat-icon>
+                            </td>
+                          </ng-container>
+                          
+                          <ng-container matColumnDef="statusRepairs">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header>HyP</th>
+                            <td mat-cell *matCellDef="let row">
+                              <mat-icon svgIcon="thumbs-up" 
+                                        aria-hidden="false" 
+                                        aria-label="Example thumbs up SVG icon"
+                                        [ngClass]="{
+                                          'thumbup-gray': row.status_repairs === 'on_hold' || row.status_repairs === 'pending_entry',
+                                          'thumbup-red': row.status_repairs=== 'pending_review',
+                                          'thumbup-green': row.status_repairs=== 'repairs_done'
+                                        }">
+                              </mat-icon>
+                            </td>
+                          </ng-container>
+                          
+                          
+                          <ng-container matColumnDef="actions">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header>Acciones</th>
+                            <td mat-cell *matCellDef="let row">
+                              <!-- <span [ngClass]="{ 'bg-primary': row.status === 'to_appraise' }" [matMenuTriggerFor]="menu">Acciones</span> -->
+                               <button *ngIf=" row.status === 'to_appraise' || row.status === 'on_progress' || row.status === 'checklist_ready' || row.status === 'valuated' " mat-button type="button" class="btn text-dark mx-2" [matMenuTriggerFor]="menu">
+                                  Opciones
+                               </button>
+                              <mat-menu #menu="matMenu">
+                                <a mat-menu-item [routerLink]="['/admin/valuator/checklist/', row.uuid]">
+                                  <i class="fa-solid fa-pen"></i>
+                                  Comenzar
+                                </a>
+                                <a mat-menu-item [routerLink]="['/admin/valuator/quote-request/', row.uuid]" *ngIf="row.status === 'checklist_ready' && row.status_parts === 'parts_done' || row.status === 'valuated' ">
+                                  Valuar
+                                </a>
+                                <a mat-menu-item (click)="openBottomSheetDocumentation(row.uuid, row.acquisition_pdf)" *ngIf="row.status === 'checklist_ready' && row.status_parts === 'parts_done' || row.status === 'valuated' ">
+                                  <i class="fi fi-rr-folder"></i>
+                                  Documentación
+                                </a>
+                              </mat-menu>
+                            </td>
+                          </ng-container>
+                         
+                         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                         <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+                    </table>
+                    <mat-paginator [pageSize]="10" [length]="length" [pageIndex]="page - 1" (page)="paginationChange($event)"></mat-paginator>
+                </div>
+              </div>
+        </div>
+    </div>
+</div>

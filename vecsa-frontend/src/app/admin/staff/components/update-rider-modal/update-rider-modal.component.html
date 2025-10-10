@@ -1,0 +1,173 @@
+<div class="container">
+    <div class="row">
+        <div class="col-12 col-12 mt-5 mb-5">            
+            <!-- Form -->
+            <div class="row">
+                <div class="col-12">
+                    <!-- Title -->
+                    <div class="row">
+                        <div class="col-12 text-center">
+                            <h1 class=fw-bold>Actualizar vehículo</h1>
+                            <span>Por favor, actualice los campos del vehículo.</span>
+                            <hr />
+                        </div>
+                    </div>
+                    <ng-container *ngIf="spinner; else elseTemplate">
+                        <app-sk-cube></app-sk-cube>
+                    </ng-container>
+
+                    <ng-template #elseTemplate>
+                             <!-- Form -->
+                              <ng-container *ngIf="mostrar; else esleTempleteKm">
+                                    <!-- <ng-container *ngIf="kmIni; else esleTempleteKmIni"> -->
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <form [formGroup]="form" (ngSubmit)="onSubmit(kmIni)">
+                                                    <div class="row">
+                                                        <!-- <div class="col-12 col-lg-6">
+                                                            <div class="row paddingInputs">
+                                                                <div class="col-12">
+                                                                    <mat-form-field appearance="outline">
+                                                                        <mat-label>Kilometraje Inicial:</mat-label>
+                                                                        <input matInput type="text" formControlName="mileage" placeholder="Nuevo kilometraje" minlength="1" maxlength="191" >
+                                                                    </mat-form-field>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-12 d-flex justify-content-center mb-5">
+                                                                <img  [src]="imgKmI" alt="Previsualización" class="img-prev" width="200" height="200"> 
+                                                            </div>
+                                                        </div> -->
+                                                        <div  class="col-12 col-lg-12">
+                                                            <div class="row paddingInputs">
+                                                                <div class="col-12 ">
+                                                                    <mat-form-field appearance="outline">
+                                                                        <mat-label>Kilometraje Final:</mat-label>
+                                                                        <input matInput type="text" formControlName="mileage_fin" placeholder="Nuevo kilometraje" minlength="1" maxlength="191"  required>
+                                                                        <mat-hint *ngIf="kmInvalid">Escribe el kilometraje final. </mat-hint>
+                                                                    </mat-form-field>
+                                                                </div>
+                                                            </div>
+                                                            <!-- <div class="col-12 d-flex justify-content-center mb-5">
+                                                                <img *ngIf="imagePromo2" [src]="imagePromo2" alt="Previsualización" class="img-prev" width="200" height="200"> 
+                                                            </div>
+                                                            <div class="col-12 ">
+                                                                <label for="image2" class="drop-container">
+                                                                    <span class="drop-title">Drop files here</span>
+                                                                    or
+                                                                    <input type="file" id="picture" accept=".png, .jpg, .jpeg, .webp" (change)="assignImagePromo2($event)" required>
+                                                                </label>          
+                                                            </div> -->
+                                                        </div>
+                                                    </div>
+                                                    <div class="row mt-5">
+                                                        <div class="col-12 text-end">
+                                                            <button mat-raised-button type="submit" class="marginButtons btn abcars-background-color-blue  mx-3 px-3" >                                    
+                                                                <span >Actualizar</span>
+                                                            </button>                                            
+                    
+                                                            <button mat-raised-button type="button"class="marginButtons btn  mx-3 px-3" (click)="close()">                                    
+                                                                Cancelar
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                    
+                                                </form>
+                                            </div>
+                                        </div>
+                                    <!-- </ng-container> -->
+                                    <!-- <ng-template #esleTempleteKmIni>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <form [formGroup]="form" (ngSubmit)="onSubmit(kmIni)">
+                                                    <div class="row">
+                                                        <div class="col-12 ">
+                                                            <div class="row paddingInputs">
+                                                                <div class="col-12">
+                                                                    <mat-form-field appearance="outline">
+                                                                        <mat-label>Kilometraje Inicial:</mat-label>
+                                                                        <input matInput type="text" formControlName="mileage" placeholder="Nuevo kilometraje" minlength="1" maxlength="191" >
+                                                                    </mat-form-field>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-12 d-flex justify-content-center mb-5">
+                                                                <img *ngIf="imagePromo" [src]="imagePromo" alt="Previsualización" class="img-prev" width="200" height="200"> 
+                                                            </div>
+                                                            <div class="col-12 ">
+                                                                <label for="image2" class="drop-container">
+                                                                    <span class="drop-title">Drop files here</span>
+                                                                    or
+                                                                    <input type="file" id="picture" accept=".png, .jpg, .jpeg, .webp" (change)="assignImagePromo($event)" required>
+                                                                </label>          
+                                                            </div>
+                                                        </div>
+                                                    
+                                                    </div>
+                                                    <div class="row mt-5">
+                                                        <div class="col-12 text-end">
+                                                            <button mat-raised-button type="submit" class="marginButtons btn abcars-background-color-blue  mx-3 px-3">                                    
+                                                                <span >Actualizar</span>
+                                                            </button>                                            
+                    
+                                                            <button mat-raised-button type="button"class="marginButtons btn  mx-3 px-3" (click)="close()">                                    
+                                                                Cancelar
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                    
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </ng-template> -->
+                              </ng-container>
+                              <ng-template #esleTempleteKm>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <form [formGroup]="form">
+                                            <div class="row">
+                                                <!-- <div class="col-12 col-lg-6">
+                                                    <div class="row paddingInputs">
+                                                        <div class="col-12">
+                                                            <mat-form-field appearance="outline">
+                                                                <mat-label>Kilometraje Inicial:</mat-label>
+                                                                <input matInput type="text" formControlName="mileage" placeholder="Nuevo kilometraje" minlength="1" maxlength="191" >
+                                                            </mat-form-field>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-12 d-flex justify-content-center mb-5">
+                                                        <img  [src]="imgKmI" alt="Previsualización" class="img-prev" width="200" height="200"> 
+                                                    </div>
+                                                </div> -->
+                                                <div  class="col-12 col-lg-12">
+                                                    <div class="row paddingInputs">
+                                                        <div class="col-12 ">
+                                                            <mat-form-field appearance="outline">
+                                                                <mat-label>Kilometraje Final:</mat-label>
+                                                                <input matInput type="text" formControlName="mileage_fin" placeholder="Nuevo kilometraje" minlength="1" maxlength="191" >
+                                                            </mat-form-field>
+                                                        </div>
+                                                    </div>
+                                                    <!-- <div class="col-12 d-flex justify-content-center mb-5">
+                                                        <img  [src]="imgKmF" alt="Previsualización" class="img-prev" width="200" height="200"> 
+                                                    </div> -->
+                                                    
+                                                </div>
+                                            </div>
+                                            <div class="row mt-5">
+                                                <div class="col-12 text-end">
+                                                    <button mat-raised-button type="button"class="marginButtons btn  mx-3 px-3" (click)="close()">                                    
+                                                        Cancelar
+                                                    </button>
+                                                </div>
+                                            </div>
+            
+                                        </form>
+                                    </div>
+                                </div>
+                              </ng-template>
+                    </ng-template>
+                    
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>

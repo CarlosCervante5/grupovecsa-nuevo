@@ -1,0 +1,294 @@
+<div class="container">
+    <div class="row">
+        <div class="col-12 mt-5 mb-5">
+            <div class="row">
+                <div class="col-12">
+                    <div class="row">
+                        <div class="col-12 text-center">
+                            <h1 class=fw-bold>Nuevo rider</h1>
+                            <span>Por favor, ingrese los datos del rider...</span>
+                            <hr />
+                        </div>
+                    </div>
+
+                    <ng-container *ngIf="spinner; else elseTemplate">
+                        <app-sk-cube></app-sk-cube>
+                    </ng-container>
+
+                    <ng-template #elseTemplate>
+                        <div class="row">
+                            <!-- <div class="col-12">
+                                <form [formGroup]="form" (ngSubmit)="onSubmit()">
+                                    <div class="row paddingInputs">
+                                        <div class="col-12 ">
+                                            <mat-form-field appearance="outline" class="example-full-width">
+                                                <mat-label>Nombre(s)</mat-label>
+                                                <input matInput type="text" placeholder="Alfredo" formControlName="name">
+                                                <mat-hint *ngIf="nameInvalid">Complete su nombre(s).</mat-hint>
+                                            </mat-form-field>
+                                        </div>
+                                    </div>
+                                    <div class="row paddingInputs">
+                                        <div class="col-12">
+                                            <mat-form-field appearance="outline" class="example-full-width">
+                                                <mat-label>Apellidos</mat-label>
+                                                <input matInput type="text" placeholder="Guzmán" formControlName="last_name">
+                                                <mat-hint *ngIf="lastnameInvalid">Complete sus apellidos.</mat-hint>
+                                            </mat-form-field>
+                                        </div>
+                                    </div>
+                                    <div class="row paddingInputs">
+                                        <div class="col-12">
+                                            <mat-form-field appearance="outline" class="example-full-width">
+                                                <mat-label>Correo</mat-label>
+                                                <input matInput type="email" placeholder="a@b.c" formControlName="email">
+                                                <mat-hint *ngIf="emailOneInvalid">Ingrese un correo electrónico válido.</mat-hint>
+                                            </mat-form-field>
+                                        </div>
+                                    </div>
+                                    <div class="row paddingInputs">
+                                        <div class="col-12">
+                                            <mat-form-field appearance="outline" class="example-full-width">
+                                                <mat-label>Teléfono</mat-label>
+                                                <input matInput type="tel" placeholder="1234567890" formControlName="phone_1">
+                                                <mat-hint *ngIf="phoneOneInvalid">Ingrese un número telefónico válido.</mat-hint>
+                                            </mat-form-field>
+                                        </div>
+                                    </div>
+                                    <div class="row paddingInputs">
+                                        <div class="col-12">
+                                            <mat-form-field appearance="outline" class="example-full-width">
+                                                <mat-label>Tu moto actual</mat-label>
+                                                <input matInput type="text" placeholder="" formControlName="model">
+                                                <mat-hint *ngIf="modelInvalid">Ingrese un modelo válido.</mat-hint>
+                                            </mat-form-field>
+                                        </div>
+                                    </div>
+                                    <div class="row paddingInputs">
+                                        <div class="col-12">
+                                            <mat-form-field appearance="outline" class="example-full-width">
+                                                <mat-label>Año del modelo:</mat-label>
+                                                <input matInput type="number" formControlName="year" placeholder="2004" minlength="1" maxlength="191" required>
+                                                <mat-hint >Escribe el año del modelo.</mat-hint>
+                                            </mat-form-field>
+                                        </div>
+                                    </div>
+                                    <div class="row paddingInputs">
+                                        <div class="col-12 ">
+                                            <mat-form-field appearance="outline" class="example-full-width">
+                                                <mat-label>Vin:</mat-label>
+                                                <input matInput type="text" formControlName="vin" placeholder="Vin" minlength="1" maxlength="191" required>
+                                                <mat-hint >Escribe el vin</mat-hint>
+                                            </mat-form-field>
+                                        </div>
+                                    </div>
+                                    <div class="row paddingInputs">
+                                        <div class="col-12">
+                                            <mat-form-field appearance="outline" class="example-full-width">
+                                                <mat-label>Kilometraje:</mat-label>
+                                                <input matInput type="number" formControlName="mileage" placeholder="Kilometraje" minlength="1" maxlength="191" required>
+                                                <mat-hint >Escribe el kilometraje</mat-hint>
+                                            </mat-form-field>
+                                        </div>
+                                    </div>
+                                    <div class="row paddingInputs">
+                                                <input matInput type="text" formControlName="origin_agency" placeholder="agencia" minlength="1" maxlength="191" style="display: none;">
+                                    </div>
+                                    <div class="col-12 paddingInputs">
+                                        <mat-form-field appearance="outline" class="example-full-width">
+                                            <mat-label>Recompesas:</mat-label>
+                                            <input type="text" matInput formControlName="reward_uuid" [matAutocomplete]="autoReward">
+                                            <mat-autocomplete #autoReward="matAutocomplete" (optionSelected)="onRewardSelected($event)">
+                                                <mat-option *ngFor="let reawrds of filteredRewards | async" [value]="reawrds.name" [id]="reawrds.uuid">
+                                                    {{reawrds.name}}
+                                                </mat-option>
+                                            </mat-autocomplete>
+                                        </mat-form-field>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-12 text-end">
+                                            <button mat-raised-button type="submit" class="marginButtons btn abcars-background-color-blue  mx-3 px-3" >                                    
+                                                <span >Ingresar</span>
+                                                
+                                            </button>                                            
+    
+                                            <button mat-raised-button type="button"class="marginButtons btn  mx-3 px-3" (click)="close()">                                    
+                                                Cancelar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div> -->
+
+                            <div class="col-12 mb-2">
+                                <form [formGroup]="form" (ngSubmit)="onSubmit()">
+                                    <div class="row">                            
+                                        <div class="col-12 col-md-6">
+                                            <mat-form-field appearance="outline">
+                                                <mat-label>Nombre(s)</mat-label>
+                                                <input matInput type="text" placeholder="Alfredo" formControlName="name">
+                                                <mat-hint *ngIf="nameInvalid">Complete su nombre(s).</mat-hint>
+                                            </mat-form-field>
+                                        </div>
+        
+                                        <div class="col-12 col-md-6">
+                                            <mat-form-field appearance="outline">
+                                                <mat-label>Apellidos</mat-label>
+                                                <input matInput type="text" placeholder="Guzmán" formControlName="last_name">
+                                                <mat-hint *ngIf="lastnameInvalid">Complete sus apellidos.</mat-hint>
+                                            </mat-form-field>
+                                        </div>
+        
+                                        <div class="col-12 col-md-6">
+                                            <mat-form-field appearance="outline">
+                                                <mat-label>Correo</mat-label>
+                                                <input matInput type="email" placeholder="a@b.c" formControlName="email">
+                                                <mat-hint *ngIf="emailOneInvalid">Ingrese un correo electrónico válido.</mat-hint>
+                                            </mat-form-field>
+                                        </div>
+        
+                                        <div class="col-12 col-md-6">
+                                            <mat-form-field appearance="outline">
+                                                <mat-label>Teléfono</mat-label>
+                                                <input matInput type="tel" placeholder="1234567890" formControlName="phone_1">
+                                                <mat-hint *ngIf="phoneOneInvalid">Ingrese un número telefónico válido.</mat-hint>
+                                            </mat-form-field>
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <mat-form-field appearance="outline">
+                                                <mat-label>Moto actual</mat-label>
+                                                <input matInput type="text" placeholder="" formControlName="model">
+                                                <mat-hint *ngIf="modelInvalid">Ingrese un modelo válido.</mat-hint>
+                                            </mat-form-field>
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <mat-form-field appearance="outline">
+                                                <mat-label>Año modelo</mat-label>
+                                                <input matInput type="number" placeholder="" formControlName="year" class="no-spinner">
+                                                <mat-hint *ngIf="yearInvalid">Ingrese un año válido.</mat-hint>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <div class="col-12 col-md-6">
+                                            <mat-form-field appearance="outline">
+                                                <mat-label>Agencia de procedencia:</mat-label>
+                                                <mat-select formControlName="origin_agency">
+                                                    <mat-option value="hub_serdán">Hub Serdán</mat-option>
+                                                    <mat-option value="vecsa_puebla">Vecsa Puebla</mat-option>
+                                                    <mat-option value="vecsa_hidalgo">Vecsa Hidalgo</mat-option>
+                                                    <mat-option value="vecsa_oaxaca">Vecsa Oaxaca</mat-option>
+                                                    <mat-option value="vecsa_veracruz">Vecsa Veracruz</mat-option>
+                                                </mat-select>
+                                                <mat-hint *ngIf="agencyInvalid">Seleccione una agencia.</mat-hint>
+                                            </mat-form-field>
+                                        </div>
+                                        
+                                    </div>
+
+                                    <div [ngClass]="[tallas ? 'col-12' : 'd-none']">
+                                        <div class="mt-2 align-items-center">
+                                            <div class="col-auto"></div>
+                                        
+                                            <div class="col-auto event-info">
+                                                <h3 class="fw-bold mb-0" style="font-size: x-large;">Talla de rider</h3>
+                                            </div>
+                                            
+                                            <div class="col-auto"></div>
+                                        </div>
+                        
+                                        <!-- Accesorios  -->
+                                        <div class="records row mb-5">
+                                            <ng-container *ngIf="quiz_active; else quizzes_accesories">
+                                                <app-sk-cube></app-sk-cube>
+                                            </ng-container>
+                                
+                                            <ng-template  #quizzes_accesories>
+                                                <div class="row mb-3">
+                                                    <div class="col-auto"></div>
+                                                
+                                                    <div class="col auto"></div>
+                                                    
+                                                    <div class="col-12 col-lg-4">
+                                                        <div class="d-flex align-items-center justify-content-end" style="height: 100%;">
+                                                            
+                                                            <h6 class="fw-light me-2 mb-0" style="font-size: medium; padding-right: 10px;">Género:</h6>
+                        
+                                                            <mat-chip-listbox class="mat-chip-grid" aria-label="{{ clothes_gender!.name }}" (change)="onChipGenderChange($event, clothes_gender!.uuid)">
+                                                                <div *ngFor="let value of clothes_gender?.values; let i = index">
+                                                                    <mat-chip-option 
+                                                                        class="chip-option"
+                                                                        [value]="value"
+                                                                        [selected]="value === clothes_gender?.selected_value"
+                                                                        [disabled]="form.invalid || spinner"
+                                                                        >
+                                                                        {{ value }}
+                                                                    </mat-chip-option>
+                                                                </div>
+                                                            </mat-chip-listbox>
+                        
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                
+                                                <ng-container >
+                                                    <div 
+                                                        class="col-12 col-lg-6 mt-3 mb-3"
+                                                        style="padding: 0;" 
+                                                        [ngClass]="{'d-none': (accesories[0].question_type == 'ropa femenina' && (gender != 'M')) || (accesories[0].question_type == 'ropa masculina' && (gender == 'M'))}"
+                                                    >
+                                                        <div class="row align-items-center">
+                                                            <div class="col-2 d-flex justify-content-center">
+                                                                <div class="image_container">
+                                                                    <img class="image_quiz" src="{{ accesories[0].image_path }}" alt="{{ accesories[0].name }}">
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <div class="col-10">
+                                                                <div class="mb-2 mt-2">
+                                                                    <h6 class="fw-light mb-0" style="font-size: medium;">{{ accesories[0].name }}:</h6>
+                                                                </div>
+                                                                <div class="d-flex flex-wrap">
+                                                                    <mat-chip-listbox class="mat-chip-grid" aria-label="{{ accesories[0].name }}" (change)="onChipSelectionChange($event, accesories[0].uuid)">
+                                                                        <div *ngFor="let value of accesories[0].values; let i = index">
+                                                                            <mat-chip-option 
+                                                                                class="chip-option"
+                                                                                [value]="value"
+                                                                                [selected]="value === accesories[0].selected_value"
+                                                                                [disabled]="form.invalid || spinner"
+                                                                                >
+                                                                                {{ value }}
+                                                                            </mat-chip-option>
+                                                                        </div>
+                                                                    </mat-chip-listbox>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </ng-container>
+                                            </ng-template>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-12 text-end">
+                                            <button mat-raised-button type="submit" class="marginButtons btn abcars-background-color-blue  mx-3 px-3" >                                    
+                                                <span >Ingresar</span>
+                                                
+                                            </button>                                            
+    
+                                            <button mat-raised-button type="button"class="marginButtons btn  mx-3 px-3" (click)="close()">                                    
+                                                Cancelar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </ng-template>
+                        
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

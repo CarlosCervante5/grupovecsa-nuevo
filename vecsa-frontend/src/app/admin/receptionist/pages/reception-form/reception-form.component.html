@@ -1,0 +1,574 @@
+<app-new-nav></app-new-nav>
+<div class="container">
+    <div class="row spacetop" > <!--style="margin-top: 70px;"-->
+        <div class="col-12 mt-4" >
+
+            <div class="row">   
+                <div class="col-12">
+                    <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item" [routerLink]="['/admin/receptionist/']">Overview</li>
+                            <li class="breadcrumb-item active" aria-current="page">Formulario de Recepción</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+
+            <form [formGroup]="form" (ngSubmit)="onSubmit()"> <!---->
+                <div class="col-12 pt-5">
+                    <div class="row">
+                        <!-- Date -->
+                        <div class="col-12 col-md-4">
+                            <mat-form-field appearance="outline">
+                                <mat-label>Fecha:</mat-label>
+                                <input matInput [matDatepickerFilter] = "myFilter" [matDatepicker]="picker" [(ngModel)]="today" [min]="minDate" [max]="maxDate" formControlName="date">
+
+                                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                                <mat-datepicker #picker></mat-datepicker>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Hour -->
+                        <div class="col-12 col-md-4">
+                            <mat-form-field appearance="outline">
+                                <mat-label>Hora:</mat-label>
+                                <input matInput type="time" [(ngModel)]="currentTime" formControlName="hour" format="hh:mm" min="09:00" max="18:00" step="900">
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Departure Time -->
+                        <div class="col-12 col-md-4">
+                            <mat-form-field appearance="outline">
+                                <mat-label>Hora de salida:</mat-label>
+                                <input matInput type="time" formControlName="departureTime" format="hh:mm" min="09:00" max="18:00" step="900">
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Sales advisor -->
+                        <div class="col-12 col-md-4">
+                            <mat-form-field appearance="outline">
+                                <mat-label>Asesor de ventas</mat-label>
+                                <mat-select placeholder="Seleccione el asesor" formControlName="salesAdvisor" (selectionChange)="onChangeSalesAdvisor()">
+                                    <mat-option value="Jorge Fernando Rojas Rosas">Jorge Fernando Rojas Rosas</mat-option>
+                                    <mat-option value="Shamanta Yanin Jorge Rodriguez">Shamanta Yanin Jorge Rodriguez</mat-option>
+                                    <mat-option value="Mario Alberto Lopez Soto">Mario Alberto Lopez Soto</mat-option>
+                                    <mat-option value="Armando Santander Colin">Armando Santander Colin</mat-option>
+                                    <mat-option value="Enrique Guillermo Garduño Maldonado">Enrique Guillermo Garduño Maldonado</mat-option>
+                                    <mat-option value="Miguel Angel Peralta Vazquez">Miguel Angel Peralta Vazquez</mat-option>
+                                    <mat-option value="Gonzalo Quintana Morales">Gonzalo Quintana Morales</mat-option>
+                                    <mat-option value="Brenda Araceli Loazano Grosso">Brenda Araceli Loazano Grosso</mat-option>
+                                    <mat-option value="Alfredo Diaz Avila">Alfredo Diaz Avila</mat-option>
+                                    <mat-option value="Israel Rojas Lazcano">Israel Rojas Lazcano</mat-option>
+                                    <mat-option value="Pablo Isaac Ruiz Herrera">Pablo Isaac Ruiz Herrera</mat-option>
+                                    <mat-option value="Raul Rojas Navarrete">Raul Rojas Navarrete</mat-option>
+                                    <mat-option value="Luis Angel Escamilla Morgado">Luis Angel Escamilla Morgado</mat-option>
+                                    <mat-option value="Juan Luis Ayala Valdez">Juan Luis Ayala Valdez</mat-option>
+                                    <mat-option value="Rebeca Lopez Rodriguez">Rebeca Lopez Rodriguez</mat-option>
+                                    <mat-option value="Sergio Saul Trujillo Sanchez">Sergio Saul Trujillo Sanchez</mat-option>
+                                    <mat-option value="Yovana Barquera Cardoso">Yovana Barquera Cardoso</mat-option>
+                                    <mat-option value="Norberto Remos Valdez">Norberto Remos Valdez</mat-option>
+                                    <mat-option value="Alan Cruz Pacheco Jimenez">Alan Cruz Pacheco Jimenez</mat-option>
+                                    <mat-option value="David Alberto Camacho Callejas">David Alberto Camacho Callejas</mat-option>
+                                    <mat-option value="Victor Antonio Calva Lopez">Victor Antonio Calva Lopez</mat-option>
+                                    <mat-option value="Julio Enrique Meneses Martinez">Julio Enrique Meneses Martinez</mat-option>
+                                    <mat-option value="Julio Alberto Borbolla Cervantes">Julio Alberto Borbolla Cervantes</mat-option>
+                                    <mat-option value="Jafet Salgado Beltran">Jafet Salgado Beltran</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="row-12 col-md-4">
+                            <mat-form-field appearance="outline">
+                                <mat-label>Departamento</mat-label>
+                                <mat-select placeholder="Nuevos, Seminuevos, Otro" formControlName="department"> <!--#department-->
+                                    <mat-option value="bmw">BMW</mat-option>
+                                    <mat-option value="mini">MINI</mat-option>
+                                    <mat-option value="motorrad">MOTORRAD</mat-option>
+                                    <mat-option value="seminuevos">SEMINUEVOS</mat-option>
+                                    <mat-option value="gerencia">GERENCIA</mat-option>
+                                    <mat-option value="administrativo">ADMINISTRATIVO</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <mat-form-field appearance="outline">
+                                <mat-label>Segmento de marca</mat-label>
+                                <mat-select placeholder="Elija por favor la marca" formControlName="segment">
+                                    <mat-option value="bmw">BMW</mat-option>
+                                    <mat-option value="mini">MINI</mat-option>
+                                    <mat-option value="multimarca">MULTIMARCA</mat-option>
+                                    <mat-option value="smart">SMART</mat-option>
+                                    <mat-option value="core">CORE</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="col-12 mt-4">
+                    <h4 class="heading-4 horizontal_line mb-4"><span>Tipo de visita</span></h4>
+                    <div class="row mt-4">
+                        
+                        <div class="row-12 col-md-4">
+                            <mat-form-field appearance="outline">
+                                <mat-label>Tipo de venta</mat-label>
+                                <mat-select placeholder="NUEVOS, SEMINUEVOS" formControlName="saleType">
+                                    <mat-option value="NUEVOS">NUEVOS</mat-option>
+                                    <mat-option value="SEMINUEVOS">SEMINUEVOS</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="row-12 col-md-4">
+                            <mat-form-field appearance="outline">
+                                <mat-label>Tipo de visita</mat-label>
+                                <mat-select placeholder="FRESH UP, CITA BDC, etc." formControlName="visitType">
+                                    <mat-option value="fresh Up">Fresh Up (visita a piso 1a vez)</mat-option>
+                                    <mat-option value="cita bdc">Cita BDC (1a cita)</mat-option>
+                                    <mat-option value="be back">Be back</mat-option>
+                                    <mat-option value="cita Virtual">Cita Virtual</mat-option>
+                                    <mat-option value="cita snv">CITA SNV</mat-option>
+                                    <mat-option value="llamada">Llamada</mat-option>
+                                    <mat-option value="reingreso">Reingreso</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        
+                        
+                        <div class="row-12 col-md-4">
+                            <mat-form-field appearance="outline">
+                                <mat-label>¿Es la primera vez que nos visita?</mat-label>
+                                <mat-select placeholder="Elija Si o No" formControlName="visitFirsTime">
+                                    <mat-option value="si">Si</mat-option>
+                                    <mat-option value="no">No</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                        
+                    </div>
+
+                    <div class="row mt-4">
+                        
+
+                        <div class="row-12 col-md-4">
+                            <mat-form-field appearance="outline">
+                                <mat-label>Forma de contacto</mat-label>
+                                <mat-select placeholder="Elija por favor el tipo de visita" formControlName="contactSalesplace">
+                                    <mat-option value="VISITA A PISO">Visita a piso</mat-option>
+                                    <mat-option value="BASE DE DATOS">Base de datos</mat-option>
+                                    <mat-option value="LLAMADA">Llamada</mat-option>
+                                    <mat-option value="INTERNET / LEAD">Internet / Lead</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <mat-form-field appearance="outline">
+                                <mat-label>¿Cómo se enteró de nosotros?</mat-label>
+                                <mat-select placeholder="Elija una opción:" formControlName="howFindOut">
+                                    <mat-option value="AB Cars">AB Cars</mat-option>
+                                    <mat-option value="Base de datos">Base de datos</mat-option>
+                                    <mat-option value="Campaña">Campaña</mat-option>
+                                    <mat-option value="Cliente Anterior">Cliente Anterior</mat-option>
+                                    <mat-option value="Compro otro auto">Compro otro auto</mat-option>
+                                    <mat-option value="Conocia la agencia">Conocia la agencia</mat-option>
+                                    <mat-option value="Demos gratis">Demos gratis</mat-option>
+                                    <mat-option value="Espectacular">Espectacular</mat-option>
+                                    <mat-option value="Evento">Evento</mat-option>
+                                    <mat-option value="Facebook">Facebook</mat-option>
+                                    <mat-option value="Iba pasando">Iba pasando</mat-option>
+                                    <mat-option value="Instagram">Instagram</mat-option>
+                                    <mat-option value="Lead">Lead</mat-option>
+                                    <mat-option value="Lead Buffer">Lead Buffer</mat-option>
+                                    <mat-option value="LLamada">LLamada</mat-option>
+                                    <mat-option value="Lona instalada en la agencia">Lona instalada en la agencia</mat-option>
+                                    <mat-option value="Mercado Libre">Mercado Libre</mat-option>
+                                    <mat-option value="Pagina Web">Pagina Web</mat-option>
+                                    <mat-option value="Paso a checar agencias">Paso a checar agencias</mat-option>
+                                    <mat-option value="Paso por aqui">Paso por aqui</mat-option>
+                                    <mat-option value="Prospeccion">Prospección</mat-option>
+                                    <mat-option value="Recomendacion">Recomendación</mat-option>
+                                    <mat-option value="Redes Sociales">Redes Sociales</mat-option>
+                                    <mat-option value="Trabaja por la zona">Trabaja por la zona</mat-option>
+                                    <mat-option value="Venia de Servicio">Venia de Servicio</mat-option>
+                                    <mat-option value="Vio la SUV en la calle">Vio la SUV en la calle</mat-option>
+                                    <mat-option value="Vive cerca">Vive cerca</mat-option>
+                                    <mat-option value="Vive por la zona">Vive por la zona</mat-option>
+                                    <mat-option value="Whatsapp">Whatsapp</mat-option>
+                                    <mat-option value="Ya es cliente">Ya es cliente</mat-option>
+                                    <mat-option value="Youtube">Youtube</mat-option>
+                                </mat-select>
+                                <mat-hint *ngIf="howFindOutInvalid">Seleccione un departamento.</mat-hint>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <mat-form-field appearance="outline">
+                                <mat-label>Comentario del cómo se enteró.</mat-label>
+                                <mat-select placeholder="Elija una opción:" formControlName="contactSub">
+                                    <mat-option value="Anuncio">Anuncio</mat-option>
+                                    <mat-option value="Cartera">Cartera</mat-option>
+                                    <mat-option value="Espectaculares">Espectaculares</mat-option>
+                                    <mat-option value="Evento">Evento</mat-option>
+                                    <mat-option value="Iba pasando">Iba pasando</mat-option>
+                                    <mat-option value="Lead buffer">Lead buffer</mat-option>
+                                    <mat-option value="Le gusta la marca">Le gusta la marca</mat-option>
+                                    <mat-option value="Llamada">Llamada</mat-option>
+                                    <mat-option value="Lona">Lona</mat-option>
+                                    <mat-option value="Pagina web">Página web</mat-option>
+                                    <mat-option value="Plaza comercial">Plaza </mat-option>
+                                    <mat-option value="Prospeccion">Prospección</mat-option>
+                                    <mat-option value="Radio">Radio</mat-option>
+                                    <mat-option value="Recomendacion">Recomendación</mat-option>
+                                    <mat-option value="Redes sociales">Redes sociales</mat-option>
+                                    <mat-option value="Refacciones">Refacciones</mat-option>
+                                    <mat-option value="Servicio">Servicio</mat-option>
+                                    <mat-option value="Trabaja por la zona">Trabaja por la zona</mat-option>
+                                    <mat-option value="TV">TV</mat-option>
+                                    <mat-option value="Ubicacion">Ubicación</mat-option>
+                                    <mat-option value="Vive por la zona">Vive por la zona</mat-option>
+                                    <mat-option value="Volanteo">Volanteo</mat-option>
+                                    <mat-option value="Whatsapp">Whatsapp</mat-option>
+                                    <mat-option value="Ya es cliente">Ya es cliente</mat-option>
+                                    <mat-option value="Campaña">Campaña</mat-option>
+                                    
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="col-12 mt-4">
+                    <h4 class="heading-4 horizontal_line mb-4"><span>Datos del cliente</span></h4>
+                    <div class="row">
+
+                        <div class="col-12 col-md-2">
+                            <mat-form-field appearance="outline">
+                                <mat-label>Id CRM</mat-label>
+                                <input matInput type="number" placeholder="1231232" #idCRM (keyup)="maxLengthCheck(idCRM)" maxlength="15" formControlName="idCRM"> 
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-12 col-md-2">
+                            <mat-form-field appearance="outline">
+                                <mat-label>Honorífico</mat-label>
+                                <input matInput type="text" placeholder="Sr, Sra, Srta, etc." formControlName="honorific">
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <mat-form-field appearance="outline">
+                                <mat-label>Nombre:</mat-label>
+                                <input matInput type="text" placeholder="Suministre el nombre del cliente." formControlName="clientName">     
+                                <mat-hint *ngIf="clientNameInvalid">Escriba el nombre del cliente.</mat-hint>                                                                 
+                            </mat-form-field> 
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <mat-form-field appearance="outline">
+                                <mat-label>Edad</mat-label>
+                                <!-- <input matInput type="tel" placeholder="34" #age (keyup)="maxLengthAge(age)" maxlength="2" formControlName="clientAge" required> -->
+                                <mat-select placeholder="Seleccione rango de edad" formControlName="clientAge">
+                                    <mat-option value="+60 años"> Más de 60 años</mat-option>
+                                    <mat-option value="50-60 años">50-60 años</mat-option>
+                                    <mat-option value="40-50 años">40-50 años</mat-option>
+                                    <mat-option value="30-40 años">30-40 años</mat-option>
+                                    <mat-option value="20-30 años">20-30 años</mat-option>
+                                </mat-select>
+                                <mat-hint *ngIf="clientAgeInvalid">Por favor ingrese la edad.</mat-hint>                                                                 
+                            </mat-form-field> 
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <mat-form-field appearance="outline">
+                                <mat-label>Teléfono</mat-label>
+                                <input matInput type="tel" placeholder="1234567890" #phone (keyup)="maxLengthCheck(phone)" maxlength="10" formControlName="clientPhone">     
+                                <mat-hint *ngIf="clientPhoneInvalid">Ingrese un número telefónico válido.</mat-hint>                                                                 
+                            </mat-form-field> 
+                        </div>
+
+                        <div class="col-12 col-md-4">                                        
+                            <mat-form-field appearance="outline">
+                                <mat-label>Correo Electrónico</mat-label>
+                                <input matInput type="email" placeholder="a@b.c" formControlName="clientEmail">
+                                <mat-hint *ngIf="clientEmailInvalid">Ingrese un correo electrónico válido.</mat-hint>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="row-12 col-md-4">
+                            <mat-form-field appearance="outline">
+                                <mat-label>Medio de contacto preferido</mat-label>
+                                <mat-select placeholder="WhatsApp, Correo" formControlName="preferredMedium">
+                                    <mat-option value="whatsapp">WhatsApp</mat-option>
+                                    <mat-option value="correo">Correo</mat-option>
+                                    <mat-option value="llamada">Llamada</mat-option>
+                                </mat-select>
+                                <mat-hint *ngIf="preferredMediumInvalid">Seleccione el medio de contacto preferido.</mat-hint>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 mt-4">
+                    <h4 class="heading-4 horizontal_line mb-4"><span>Vehículo de interés</span></h4>
+                    <div class="row">
+                        <!-- Brands -->
+                        <div class="col-12 col-md-4">
+                            <mat-form-field appearance="outline">
+                                <mat-label>Marca que busca</mat-label>
+
+                                <mat-select placeholder="Seleccionar una Marca" formControlName="brand">
+                                    <mat-option *ngFor="let brand of brands" (click)="getModelsByBrand(brand.name)" value="{{brand.name}}">{{ brand.name | titlecase }}</mat-option>
+                                </mat-select>
+
+                                <mat-hint *ngIf="brandInvalid">Seleccione una marca.</mat-hint>
+                            </mat-form-field>
+                        </div>
+                        <!-- Model -->
+                        <div class="col-12 col-md-4">
+                            <mat-form-field appearance="outline">
+                                <mat-label>Modelo</mat-label>
+                                <mat-select placeholder="Seleccione un modelo" formControlName="model">
+                                    <mat-option *ngFor="let model of models" value="{{model.name}}">{{ model.name | titlecase }}</mat-option>
+                                </mat-select>
+                                <mat-hint *ngIf="modelInvalid">Seleccione un modelo.</mat-hint>
+                            </mat-form-field>
+                        </div>
+                        <!-- Year -->
+                        <div class="col-12 col-md-4">
+                            <mat-form-field appearance="outline">
+                                <mat-label>Año</mat-label>
+                                <mat-select placeholder="Seleccione el año del vehículo" formControlName="year">
+                                    <mat-option *ngFor="let year of years; let i = index" value="{{ year }}">{{ year }}</mat-option>
+                                </mat-select>
+                                <mat-hint *ngIf="yearInvalid">Seleccione un año.</mat-hint>
+                            </mat-form-field>
+                        </div>
+                        <!-- Version -->
+                        <div class="col-12 col-md-4">
+                            <!-- Version -->
+                            <mat-form-field appearance="outline">
+                                <mat-label>Versión</mat-label>
+                                <input matInput type="text" placeholder="Especifique la versión del auto" formControlName="version">
+                                <mat-hint *ngIf="versionInvalid">Escriba la versión de su vehículo.</mat-hint>
+                            </mat-form-field>
+                        </div>
+                        <!-- Color -->
+                        <div class="col-12 col-md-4">
+                            <mat-form-field appearance="outline">
+                                <mat-label>Color</mat-label>
+                                <input matInput type="text" placeholder="Color" formControlName="color">
+                                <mat-hint *ngIf="colorInvalid">Proporcione el color del vehículo.</mat-hint>
+                            </mat-form-field>
+                        </div>
+                        <!-- Accessories -->
+                        <div class="col-12 col-md-4">
+                            <mat-form-field appearance="outline">
+                                <mat-label>Accessorios: <span>${{accessories.value | number:'.2-2' }}</span></mat-label>
+                                <input matInput type="text" placeholder="Coloque la cantidad sin comas ni signo de $" #accessories formControlName="accessories">
+                                <mat-hint *ngIf="accessoriesInvalid">Proporcione la cantidad sin comas ni signo de $.</mat-hint>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 mt-4">
+                    <h4 class="heading-4 horizontal_line mb-4"><span>Segunda opción de auto o color o versión</span></h4>
+                    <div class="row">
+                        <!-- Brands Second Option -->
+                        <div class="col-12 col-md-4">
+                            <mat-form-field appearance="outline">
+                                <mat-label>Marca segunda opción</mat-label>
+                                <mat-select placeholder="Seleccionar una Marca" formControlName="brandSecondOption">
+                                    <mat-option *ngFor="let brand of brands" (click)="getSecondModels(brand.name)" value="{{brand.name}}">{{ brand.name | titlecase }}</mat-option> <!---->
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                        <!-- Model Second Option-->
+                        <div class="col-12 col-md-4">
+                            <mat-form-field appearance="outline">
+                                <mat-label>Modelo segunda opción</mat-label>
+                                <mat-select placeholder="Seleccione un modelo" formControlName="modelSecondOption">
+                                    <mat-option *ngFor="let model of secondModels" value="{{model.name}}">{{ model.name | titlecase }}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                        <!-- Version Second Option-->
+                        <div class="col-12 col-md-4">
+                            <!-- Version -->
+                            <mat-form-field appearance="outline">
+                                <mat-label>Versión</mat-label>
+                                <input matInput type="text" placeholder="Especifique la versión del auto" formControlName="versionSecondOption">
+                            </mat-form-field>
+                        </div>
+                        <!-- Color -->
+                        <div class="col-12 col-md-4">
+                            <mat-form-field appearance="outline">
+                                <mat-label>Color</mat-label>
+                                <input matInput type="text" placeholder="Color" formControlName="colorSecondOption">
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Test Drive -->
+                        <div class="row-12 col-md-4">
+                            <mat-form-field appearance="outline">
+                                <mat-label>¿Realizó prueba de manejo?</mat-label>
+                                <mat-select placeholder="Si, No" formControlName="testDrive">
+                                    <mat-option value="si">Si</mat-option>
+                                    <mat-option value="no">No</mat-option>
+                                </mat-select>
+                                <mat-hint *ngIf="testDriveInvalid">Seleccione la opción correspondiente.</mat-hint>
+                            </mat-form-field>
+                        </div>
+                        <!-- Received quote -->
+                        <div class="row-12 col-md-4">
+                            <mat-form-field appearance="outline">
+                                <mat-label>¿Recibió cotización?</mat-label>
+                                <mat-select placeholder="Si, No" formControlName="receivedQuote">
+                                    <mat-option value="si">Si</mat-option>
+                                    <mat-option value="no">No</mat-option>
+                                </mat-select>
+                                <mat-hint *ngIf="receivedQuoteInvalid">Seleccione la opción correspondiente.</mat-hint>
+                            </mat-form-field>
+                        </div>
+                        <!-- F&I -->
+                        <div class="row-12 col-md-4">
+                            <mat-form-field appearance="outline">
+                                <mat-label>¿Lo atendió F&I?</mat-label>
+                                <mat-select placeholder="Si, No" formControlName="FAndI">
+                                    <mat-option value="si">Si</mat-option>
+                                    <mat-option value="no">No</mat-option>
+                                </mat-select>
+                                <mat-hint *ngIf="FAndiInvalid">Seleccione la opción correspondiente.</mat-hint>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-12 mt-4">
+                    <h4 class="heading-4 horizontal_line mb-4"><span>Toma a cuenta</span></h4>
+                    <div class="row">
+                        <!-- Leave car on account -->
+                        <div class="row-12 col-md-4">
+                            <mat-form-field appearance="outline">
+                                <mat-label>¿Desea dejar auto a cuenta?</mat-label>
+                                <mat-select placeholder="Si, No" formControlName="leaveCarOnAccount" #leaveCar>
+                                    <mat-option value="si" (click)="changeCarAccount()">Si</mat-option>
+                                    <mat-option value="no">No</mat-option>
+                                </mat-select>
+                                <mat-hint *ngIf="leaveCarOnAccountInvalid">Seleccione la opción correspondiente.</mat-hint>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="row-12 col-md-4" *ngIf="leaveCar.value === 'si' ">
+                            <mat-form-field appearance="outline">
+                                <mat-label>Auto actual del cliente</mat-label>
+                                <input matInput type="text" placeholder="Especifique el auto actual del cliente" formControlName="customersCurrentCar" > <!--required-->
+                            </mat-form-field>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="col-12 mt-4">
+                    <h4 class="heading-4 horizontal_line mb-4"><span>Pase F&I</span></h4>
+                    <div class="row">
+                        <div class="row-12 col-md-4">
+                            <mat-form-field appearance="outline">
+                                <mat-label>¿Se perfiló al cliente?</mat-label>
+                                <mat-select placeholder="Si, No" formControlName="wasClientProfile">
+                                    <mat-option value="si">Si</mat-option>
+                                    <mat-option value="no">No</mat-option>
+                                </mat-select>
+                                <mat-hint *ngIf="wasClientProfileInvalid">Seleccione la opción correspondiente.</mat-hint>
+                            </mat-form-field>
+                        </div>
+                        <div class="row-12 col-md-4">
+                            <mat-form-field appearance="outline">
+                                <mat-label>¿Se llevó solicitud?</mat-label>
+                                <mat-select placeholder="Si, No" formControlName="wasApplicationTaken">
+                                    <mat-option value="si">Si</mat-option>
+                                    <mat-option value="no">No</mat-option>
+                                </mat-select>
+                                <mat-hint *ngIf="wasApplicationTakenInvalid">Seleccione la opción correspondiente.</mat-hint>
+                            </mat-form-field>
+                        </div>
+                        <div class="row-12 col-md-4">
+                                <mat-form-field appearance="outline">
+                                    <mat-label>Comentarios F&I.</mat-label>
+                                    <textarea matInput placeholder="Comentarios F&I" formControlName="commentaryFAndI"></textarea>
+                                </mat-form-field>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 mt-4">
+                    <h4 class="heading-4 horizontal_line mb-4"><span>Financiamiento</span></h4>
+                    <div class="row">
+                        <div class="col-12 col-md-4">
+                            <mat-form-field appearance="outline">
+                                <mat-label>Financiamiento</mat-label>
+                                <mat-select placeholder="Elige una opción de las siguientes" formControlName="financingType">
+                                    <mat-option value="financiera f.s.">Financiera F.S.</mat-option>
+                                    <mat-option value="contado">Contado</mat-option>
+                                    <mat-option value="no definido">No definido</mat-option>
+                                    <mat-option value="banco">Banco</mat-option>
+                                    <mat-option value="arrendamiento">Arrendamiento</mat-option>
+                                </mat-select>
+                                <mat-hint *ngIf="financingTypeInvalid">Por favor, seleccione una opción de financiamiento</mat-hint>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <mat-form-field appearance="outline">
+                                <mat-label>Inversión inicial: <span>${{ initialInvest.value | number:'.2-2' }}</span> </mat-label>
+                                <input matInput type="text" placeholder="Coloque la cantidad sin comas ni signo de $" #initialInvest formControlName="initialInvestment">
+                                <mat-hint *ngIf="initialInvestmentInvalid">Proporcione la cantidad sin comas ni signo de $.</mat-hint>
+                            </mat-form-field>
+                        </div>
+                        
+                        <div class="col-12 col-md-4">
+                            <mat-form-field appearance="outline">
+                                <mat-label>Mensualidad deseada: <span>${{ monthlyPayment.value | number:'.2-2' }}</span> </mat-label>
+                                <input matInput type="text" placeholder="Coloque la cantidad sin comas ni signo de $" #monthlyPayment formControlName="monthlyPayment">
+                                <mat-hint *ngIf="monthlyPaymentInvalid">Proporcione la cantidad sin comas ni signo de $.</mat-hint>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <mat-form-field appearance="outline">
+                                <mat-label>Plazo ¿Cuántos meses?: {{termHowManyMonths.value | number}} meses</mat-label>
+                                <input matInput type="text"  minlength="1" maxlength="2" placeholder="12" #termHowManyMonths formControlName="termHowManyMonths"> <!--(keyup)="maxLengthAge(termHowManyMonths)"-->
+                                <mat-hint *ngIf="termHowManyMonthsInvalid">Proporcione la cantidad del plazo a meses.</mat-hint>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="row-12 col-md-4">
+                            <mat-form-field appearance="outline">
+                                <mat-label>Comentarios</mat-label>
+                                <textarea matInput placeholder="Comentarios financiamiento" formControlName="commentaryFinancing"></textarea>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 mb-5 text-end">                        
+                        <button mat-button type="submit" class="btn abcars-background-color-blue rounded-pill mx-2 px-3" [disabled]="form.invalid || spinner"> <!---->
+                            <span *ngIf="!spinner">Enviar</span>
+                            <span *ngIf="spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>                                    
+                        </button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+</div>

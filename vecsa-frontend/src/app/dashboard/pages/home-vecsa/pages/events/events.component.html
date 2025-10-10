@@ -1,0 +1,27 @@
+<nav-promotions></nav-promotions>
+
+<div class="container" style="max-width: 1140px;">  
+    <div class="col-3">
+        <a class="text-decoration-none text-dark flecha" href="https://grupovecsa.com/" style="display: flex;">
+            <img src="assets/icons-fontawesome/circle-left-regular.svg" width="20px" height="20px" style="padding-right: 3px;" alt="Arrow Back">
+            <span>Regresar</span>
+        </a>
+    </div>
+
+    <div class="row align-items-center mt-3">
+        <div class="col-auto">
+            <h3 class="fw-bold titulo" >VECSA Promotions</h3>
+            <br>
+            <h6 class="fw-light textos">Aquí podrás consultar las promociones.</h6>
+        </div>
+
+        <div class="col-auto"></div>
+    </div>
+
+    <div class="container">
+        <div class="mg titles" *ngFor="let campaigns of campaigns">
+            <h3 class="fw-bold campañas" id="{{ campaigns.uuid }}">{{ campaigns.name }} {{ currentMonth }}</h3>
+            <app-swiper [images]="campaigns.promotions" [slidesPerView]="1"></app-swiper>
+        </div>
+    </div>
+</div>

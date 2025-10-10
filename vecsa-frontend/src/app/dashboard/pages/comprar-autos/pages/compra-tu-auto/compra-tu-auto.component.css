@@ -1,0 +1,150 @@
+.container {    
+    background-color: white;
+}
+
+.text{
+    /* font-family: BMW !important; */
+    font-weight: bold !important;
+}
+
+.chip-list {
+    width: 100%;
+}
+
+.sliderPrecios{
+    display: flex;
+}
+
+mat-slider {
+    width: 100%;
+}
+
+/* Circle Color */
+::ng-deep .mat-accent .mat-slider-thumb {
+    background-color: #383838 !important;
+}
+
+/* Background when is cliked  */
+::ng-deep .mat-accent .mat-slider-thumb-label {
+    background-color: #191919 !important;
+    /*replace with your color*/
+    padding: 20px;
+}
+
+/* Line color mat-slider */
+::ng-deep .mat-accent .mat-slider-track-fill {
+    background-color: #008bcc !important;
+}
+
+.mat-chip.mat-standard-chip.mat-chip-selected.mat-primary {
+    background-color: #008bcc !important;
+    color: white !important;
+}
+
+mat-accordion mat-expansion-panel {
+    width: 100%;
+    border-radius: 10px !important;
+}
+
+.widget-heading h1 {
+    font-size: 20px;
+    margin-bottom: 40px;
+    position: relative;
+}
+
+.widget-heading h1::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -15px;
+    height: 2px;
+    width: 70px;
+    background: #008bcc;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.search-navbar {
+    z-index: 4;
+    background-color: white;
+    display: flex;
+    justify-content: center;
+}
+
+.content {
+    padding-top: 1rem;
+    z-index: 3;
+    background-color: white;
+    display: flex;
+    justify-content: center;
+}
+
+.button-BuscameUnAuto{
+    background-color: #1057DB;
+    color: aliceblue;
+}
+
+.buttonFiltro{
+    background-color: #fff;
+    color: white;
+    padding: 10px;
+ }
+
+.searchIcon{
+    font-size: 25px;
+}
+ 
+ .slider{
+    display: flex;
+    justify-content: center;
+    justify-items: center;
+    height: 150px;
+}
+.swiper-container {
+    width: 90%;
+    height: 100%;
+}
+
+.slide-custom{
+    width: 95%;
+    height: 120px;
+    display: flex;
+    justify-content: center;
+    justify-items: center;
+    color: #ffffff;
+}
+.img-camp {
+    
+    height: 100% !important;
+    object-fit: cover; 
+    border-radius: 10px;
+  }
+
+  .botones{
+    padding: 0px;
+  }
+
+  @media (max-width: 500px){
+   .content{
+    margin-left: 10px;
+    margin-right: 10px;
+   }
+   .search-navbar{
+    padding: 0px;
+   }
+}
+
+/* .inmovil{
+    position: fixed;
+    width: 300px;
+    height: 100vh;
+    overflow: hidden;
+    padding-bottom: 20px;
+}
+
+.movil{
+    margin-left: 300px;
+    width: calc(100% - 300px);;
+} */

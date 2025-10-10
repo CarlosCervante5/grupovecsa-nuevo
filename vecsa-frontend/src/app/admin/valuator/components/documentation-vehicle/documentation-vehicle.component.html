@@ -1,0 +1,165 @@
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="row">
+                <div class="col-12 mb-2">
+                    <h2 class="fs-4 fw-light text-center">Checklist toma seminuevos</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Documentation -->
+
+    <ng-container *ngIf="spinner; else elseTemplate">
+        <app-sk-cube></app-sk-cube>
+    </ng-container>
+    <ng-template #elseTemplate>
+        <div class="row">
+        <mat-stepper #stepper>
+            <mat-step [stepControl]="takeInformationForm" errorMessage="La información es requerida">
+                <form [formGroup]="takeInformationForm">
+                    <ng-template matStepLabel>Información de la toma</ng-template>
+                    <div class="col-12">
+                        <div class="row">
+                            <div *ngFor="let checkInformation of informationGathering" class="col-12 col-sm-12 col-md-6 col-lg-3 col-xl-3">
+                                <div class="col">
+                                    <mat-form-field appearance="outline" *ngIf="checkInformation.value_type === 'select' ">
+                                        <mat-label>{{checkInformation.name}}</mat-label>
+                                        <mat-select [formControlName]="checkInformation.uuid" placeholder="Seleccione una opción" (selectionChange)="onSelectChange($event, checkInformation.uuid)" required>
+                                            <mat-option *ngFor="let value of checkInformation.values" [value]="value">{{ value }}</mat-option>
+                                        </mat-select>
+                                        <mat-hint *ngIf="takeInformationForm.get(checkInformation.uuid)?.invalid && takeInformationForm.get(checkInformation.uuid)?.touched">
+                                            Por favor seleccione una opción
+                                        </mat-hint>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" *ngIf="checkInformation.value_type === 'number' ">
+                                        <mat-label> {{ checkInformation.name }} </mat-label>
+                                        <input matInput type="number" [formControlName]="checkInformation.uuid" (input)="onInputChange($event, checkInformation.uuid)" (focus)="inputFocus = true" (blur)="onInputBlur(checkInformation.uuid)" > <!--required-->
+                                        <!-- <mat-slide-toggle [formControlName]="checkInformation.uuid"> {{checkInformation.name}} </mat-slide-toggle> -->
+                                        <!-- <mat-hint *ngIf="takeInformationForm.get(checkInformation.uuid)?.invalid && takeInformationForm.get(checkInformation.uuid)?.touched">
+                                            Por favor ingrese el valor.
+                                        </mat-hint> -->
+                                    </mat-form-field>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div *ngFor="let checkInformationT of informationGatheringT; let i = index" class="col-12 col-sm-12 col-md-6 col-lg-3 col-xl-3 pb-4">
+                                <div class="col">
+                                    <mat-slide-toggle [formControlName]="checkInformationT.uuid" (change)="onTenancyChange(checkInformationT.uuid, (year - i), $event)">
+                                        {{ year- i }}
+                                    </mat-slide-toggle>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="mt-3">
+                        <button mat-button type="button" matStepperNext class="btn abcars-background-color-blue mt-3 mx-2 px-3">
+                            Siguiente
+                        </button>
+                    </div>
+                </form>
+            </mat-step>
+
+            <mat-step [stepControl]="documentationCarForm" errorMessage="La información es requerida">
+                <form [formGroup]="documentationCarForm">
+                    <ng-template matStepLabel>Documentación de la unidad</ng-template>
+                    <div class="col-12">
+                        <div class="row">
+                            <div *ngFor="let checkUnitDocument of unitDocumentation" class="col-12 col-sm-12 col-md-6 col-lg-3 col-xl-3">
+                                <div *ngIf="checkUnitDocument.section_name === 'Documentación de la unidad' " class="row">
+                                    <div class="col">
+                                        <mat-form-field appearance="outline" *ngIf="checkUnitDocument.value_type === 'select' ">
+                                            <mat-label> {{ checkUnitDocument.name }} </mat-label>
+                                            <mat-select [formControlName]="checkUnitDocument.uuid" placeholder="Seleccione una opción" (selectionChange)="onSelectChange($event, checkUnitDocument.uuid)" required> 
+                                                <mat-option *ngFor="let valueUnitDocument of checkUnitDocument.values" [value]="valueUnitDocument">{{valueUnitDocument}}</mat-option>
+                                            </mat-select>
+                                            <mat-hint *ngIf="documentationCarForm.get(checkUnitDocument.uuid)?.invalid && documentationCarForm.get(checkUnitDocument.uuid)?.touched ">
+                                                Por favor seleccione una opción.
+                                            </mat-hint>
+                                        </mat-form-field>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <button mat-button type="button" matStepperPrevious class="btn abcars-background-color-black mt-3 mx-2 px-3">
+                            Regresar
+                        </button>
+                        <button mat-button type="button" matStepperNext class="btn abcars-background-color-blue mt-3 mx-2 px-3">
+                            Siguiente
+                        </button>
+                    </div>
+                </form>
+            </mat-step>
+
+            <mat-step [stepControl]="documentsPlateProceduresForm" errorMessage="La información es requerida">
+                <form [formGroup]="documentsPlateProceduresForm"> <!--(ngSubmit)="onSubmit()"-->
+                    <ng-template matStepLabel>Documentos para tramites de placas</ng-template>
+                    <div class="col-12">
+                        <div class="row">
+                            <div *ngFor="let checkPlateDocuments of plateDocuments" class="col-12 col-sm-12 col-md-6 col-lg-3 col-xl-3">
+                                <div *ngIf="checkPlateDocuments.section_name === 'Fotos' || checkPlateDocuments.section_name === 'Documentos para tramites de placas'  " class="row">
+                                    <div class="col">
+                                        <mat-form-field appearance="outline" *ngIf="checkPlateDocuments.value_type === 'select' ">
+                                            <mat-label> {{checkPlateDocuments.name}} </mat-label>
+                                            <mat-select [formControlName]="checkPlateDocuments.uuid" placeholder="Seleccione una opción" (selectionChange)="onSelectChange($event, checkPlateDocuments.uuid)" required>
+                                                <mat-option *ngFor="let valuePlateDocuments of checkPlateDocuments.values" [value]="valuePlateDocuments"> {{valuePlateDocuments}} </mat-option>
+                                            </mat-select>
+                                            <mat-hint *ngIf="documentsPlateProceduresForm.get(checkPlateDocuments.uuid)?.invalid && documentsPlateProceduresForm.get(checkPlateDocuments.uuid)?.touched">
+                                                Por favor seleccione una opción.
+                                            </mat-hint>
+                                        </mat-form-field>
+
+                                        <mat-form-field appearance="outline" *ngIf="checkPlateDocuments.value_type === 'textArea' ">
+                                            <mat-label>{{checkPlateDocuments.name}}</mat-label>
+                                            <textarea matInput (input)="onInputChange($event, checkPlateDocuments.uuid)" (focus)="inputFocus = true" (blur)="onTextAreaBlur(checkPlateDocuments.uuid)" >{{checkPlateDocuments.selected_value}}</textarea>
+                                            <!-- <textarea matInput formControlName="{{ checkPlateDocuments.uuid }}" (focus)="inputFocus = true" (blur)="onTextAreaBlur(checkPlateDocuments.uuid)" >{{checkPlateDocuments.selected_value}}</textarea> -->
+                                        </mat-form-field>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <button mat-button type="button" matStepperPrevious class="btn abcars-background-color-black mt-3 mx-2 px-3">
+                            Regresar
+                        </button>
+
+                        <button mat-raised-button type="button" class="btn abcars-background-color-blue mt-3 mx-2 px-3" (click)="uploadDocumentInput.click()" [disabled]="spinner">   <!--*ngIf="btn_load"-->                                         
+                            <span *ngIf="!spinner">Cargar expediente</span>
+                            <span *ngIf="spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        </button>
+                        <input type="file" accept=".pdf" class="d-none" #uploadDocumentInput (change)="uploadDocuments($event)">
+                        <!-- <input type="file" accept=".pdf, .png, .jpg, .jpeg" class="d-none" #uploadDocumentInput (change)="uploadDocuments($event)"> -->
+
+                        <a href="{{url}}" target="_blank" style="text-decoration:none"> <!--href="{{url}}/api/getpdfwatch/{{ sellyourcarID }}"-->
+                            <button *ngIf="btn_watch" mat-raised-button type="button" class="btn abcars-background-color-blue mt-3 mx-2 px-3">
+                                Ver Expediente
+                            </button>
+                        </a>
+
+                        <!-- <button mat-button type="submit" matStepperNext class="btn abcars-background-color-blue mt-3 mx-2 px-3" [disabled]="spinnerEnvio">
+                            <span *ngIf="!spinnerEnvio">{{save_documents ? 'Actualizar' : 'Enviar'}} </span>
+                            <span *ngIf="spinnerEnvio" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        </button> -->
+
+                        <button mat-button type="button" class="btn abcars-background-color-black mt-3 mx-2 px-3" (click)="closeWindow()">
+                            Cerrar
+                        </button>
+
+                    </div>
+                </form>
+            </mat-step>
+
+        </mat-stepper>
+        </div>
+    </ng-template>
+</div>

@@ -1,0 +1,80 @@
+<app-new-nav></app-new-nav>
+<div class="container">
+    <div class="row">
+        <div class="col-12 mt-5 mb-5">
+            <!-- Breadcrumb -->    
+            <div class="row">
+                <div class="col-8">
+                    <h4 class="fs-4 fw-bold text-truncate">Administrar Eventos</h4>
+                    <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item" [routerLink]="['/admin/gestor']">Overview</li>
+                            <li class="breadcrumb-item active" aria-current="page">Eventos</li>
+                        </ol>
+                    </nav>
+                </div>       
+            </div>
+                    
+            <div class="row">
+                <div class="col-lg-4 col-md-6 col-sm-12 mt-2 mb-2">
+                    <mat-card class="example-card">
+                        <mat-card-header>                          
+                          <mat-card-title class="mat-title">Video</mat-card-title>
+                          <mat-card-subtitle>Administrar video principal</mat-card-subtitle>                          
+                        </mat-card-header> 
+                    
+                        <img mat-card-image [src]="principal_video_path" class="card-img-top fade-in-image card-image" alt="imagen de video">                        
+                        <mat-card-actions>
+                            <!-- <button mat-button (click)="loadVideo()" *ngIf="principal_video_path != undefined && principal_video_path.length == 0">Cargar video</button> -->
+                            <!-- <button mat-button (click)="loadVideo()" >Cargar video</button>
+                            <button mat-button  *ngIf="principal_video_path != undefined && principal_video_path.length > 0">Eliminar video actual</button> (click)="deleteVideo('video')" -->
+                            <button mat-button (click)="showEvents('video')" *ngIf="has_video">Ve eventos con video</button>
+                            <button mat-button (click)="createEvent('video')">Crear nuevo evento</button>                            
+                        </mat-card-actions>                        
+                    </mat-card>                   
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-12 mt-2 mb-2">
+                    <mat-card class="example-card">
+                        <mat-card-header>                          
+                          <mat-card-title class="mat-title">Calendario</mat-card-title>
+                          <mat-card-subtitle>Administrar imagenes</mat-card-subtitle>                          
+                        </mat-card-header>                                                
+                        <img mat-card-image [src]="principal_calendar_path" class="card-img-top fade-in-image card-image" alt="imagen del calendario">                        
+                        <mat-card-actions>
+                            <button mat-button (click)="showEvents('schedule')" *ngIf="has_calendar">Ve eventos del calendario</button>
+                            <button mat-button (click)="createEvent('schedule')">Crear nuevo evento</button>                            
+                        </mat-card-actions>                        
+                    </mat-card>                   
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-12 mt-2 mb-2">
+                    <mat-card class="example-card">
+                        <mat-card-header>                          
+                          <mat-card-title class="mat-title">Comunidad</mat-card-title>
+                          <mat-card-subtitle>Administrar comunidad</mat-card-subtitle>                          
+                        </mat-card-header>                        
+                        <img mat-card-image [src]="principal_community_path" class="card-img-top fade-in-image card-image" alt="imagen comunidad">                        
+                        <mat-card-actions>
+                            <button mat-button (click)="showEvents('community')" *ngIf="has_community">Ve eventos de la comunidad</button>
+                            <button mat-button (click)="createEvent('community')">Crear nuevo evento</button>
+                        </mat-card-actions>                        
+                    </mat-card>                   
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-12 mt-2 mb-2">
+                    <mat-card class="example-card">
+                        <mat-card-header>
+                            <mat-card-title class="mat-title">Imagen Principal</mat-card-title>
+                            <mat-card-subtitle>Administrar imagen principal</mat-card-subtitle>
+                        </mat-card-header>
+                        <img mat-card-image [src]="principal_image_path" class="card-img-top fade-in-image card-image" alt="video">
+                        <mat-card-actions>
+                            
+                            <button mat-button (click)="showEvents('principal')" *ngIf="has_principal">Ve eventos de la imagen principal</button>
+                            <button mat-button (click)="createEvent('principal')">Crear nuevo evento</button> 
+                        </mat-card-actions>                        
+                    </mat-card>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

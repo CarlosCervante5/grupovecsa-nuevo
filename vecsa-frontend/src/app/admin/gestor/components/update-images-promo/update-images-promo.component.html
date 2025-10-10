@@ -1,0 +1,37 @@
+<div cdkDropList class="list" (cdkDropListDropped)="drop($event)">
+    <div class="box" *ngFor="let image of imagesForSlider; let i = index" cdkDrag>
+        <div class="row">
+            <div class="col-2">
+                posición {{ i + 1 }}
+            </div>
+            <div class="col-7">
+                <div>
+                    <b>Url:</b> {{ image.path }}
+                </div>
+                <div class="trash-content">
+                    <i class="fas fa-solid fa-trash trash" (click)="deleteImagePromo(image.id)"></i>
+                </div>
+                <div class="col-12 mt-3">
+                    <mat-form-field appearance="outline">
+                        <mat-label>Legal:</mat-label>
+                        <textarea matInput #legales placeholder="Descripción de Legales" id="" cols="30" rows="2" (click)="onActive(i)">{{image.legal}}</textarea>
+                    </mat-form-field>
+                </div>
+                <button type="button" class="marginButtons btn abcars-background-color-blue" (click)="onSubmit(image.id, legales, i)" [disabled]="disabled[i] === true">
+                    Enviar
+                </button>
+            </div>
+            <div class="col-3">
+                <img class="card-img-top img-fluid img-size-sm" [src]="image.path" alt="{{ image.id}}">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-2">
+    <div class="col-12 text-center">
+        <button type="button" aria-label="Borrar imágenes" class="marginButtons btn abcars-background-color-blue mx-3 px-3" (click)="changeOrderPromo()">
+            Actualizar orden
+        </button>
+    </div>
+</div>

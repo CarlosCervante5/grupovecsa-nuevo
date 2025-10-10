@@ -1,0 +1,79 @@
+<div class="container">
+    <div class="col-12 text-center">
+        <h1 class=fw-bold>Solicitud de refacciones</h1>
+        <span>Agregar refacción.</span>
+        <hr />
+    </div>
+    <div>
+        <form [formGroup]="form" >
+            <div class="row">
+                <!-- Input para el nombre -->
+                <div class="col-12 col-md-12">
+                    <mat-form-field appearance="outline">
+                        <mat-label>Nombre de la refacción:</mat-label>
+                        <input matInput type="text" formControlName="name" placeholder="Nombre" minlength="1" maxlength="191" required>
+                        <mat-hint *ngIf="nameInvalid">Escribe el nombre de la refacción</mat-hint>
+                    </mat-form-field>
+                </div>
+                <!-- Input para la cantidad de refacciones-->
+                <div class="col-12 col-md-6">
+                    <mat-form-field appearance="outline">
+                        <mat-label>Piezas (Cantidad):</mat-label>
+                        <input matInput type="number" formControlName="amount" #amount placeholder="Nombre" placeholder="1" min="1" minlength="1" maxlength="2" (keyup)="maxLengthCheck(amount)" required>
+                        <mat-hint *ngIf="nameInvalid">Escribe el nombre de la refacción</mat-hint>
+                    </mat-form-field>
+                </div>
+                <!-- Time -->
+                <div class="col-12 col-md-6">
+                    <mat-form-field appearance="outline">
+                        <mat-label>Tiempo (Horas)</mat-label>
+                        <input matInput type="number" formControlName="hours" min="0" placeholder="1 o 0.3" required>
+                        <mat-hint *ngIf="hoursInvalid">Ingrese el número de horas.</mat-hint>
+                    </mat-form-field>
+                </div>
+            </div>
+            <div class="row mt-5">
+                <div class="col-12 text-end">
+                    <button mat-raised-button type="submit" class="marginButtons btn abcars-background-color-blue  mx-3 px-3" (click)="onSubmit()" [disabled]="form.invalid" >                                    
+                        <span >Registrar</span>
+                    </button>  
+
+                    <button mat-raised-button type="button"class="marginButtons btn  mx-3 px-3" (click)="close()">                                    
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <hr>
+
+        <div class="row">
+            <div class="col-12 mt-2 mb-3">
+                <h4 class="d-flex justify-content-between align-items-center mb-3">
+                  <span class="fw-bold">Solicitud de Refacciones</span>
+                  <span class="badge bg-primary rounded-pill">{{ list_spare_parts.length }}</span>
+                </h4>
+                <ng-container *ngIf="list_spare_parts.length === 0; else elseTemplate">
+                    <div class="alert alert-info text-center" role="alert">                            
+                        Aún no has agregado ninguna refaccion a solicitar.
+                    </div>
+                </ng-container>
+                <ng-template #elseTemplate>
+                    <div class="overflow-auto" style="max-height: 250px;">
+                        <ol class="list-group list-group-numbered">
+                            <li class="list-group-item d-flex justify-content-between align-items-start" *ngFor="let part of list_spare_parts; let i = index">
+                                <div class="ms-2 me-auto">
+                                    <div class="fw-bold">{{ part.name }}</div>
+                                    <small class="text-muted mx-2">Cantidad: {{ part.quantity }} pza(s)</small>
+                                    <small class="text-muted">Ensamble: {{ part.labor_time }} hrs(s)</small>
+                                </div>
+
+                                <span class="badge bg-danger p-2" (click)="deletePart(part.valuation_uuid, i)"><i class="fi fi-rr-cross-circle"></i></span>
+                            </li>
+                        </ol>
+                    </div>
+                </ng-template>
+            </div>
+        </div>
+    </div>
+</div>

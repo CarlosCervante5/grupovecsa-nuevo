@@ -1,0 +1,53 @@
+.desk{
+	padding-left: 15%;
+	padding-right: 15%;
+}
+
+@media (max-width: 750px){
+	.desk{
+		padding: 0;
+	}
+    .btn {
+      width: 100%;
+      }
+
+	  h2{
+		font-size: 20px !important;
+	  }
+ 
+  }
+
+@media (max-width: 1000px) {
+	.desk{
+		padding: 0;
+	}
+    .margen1{
+      margin-top: 30px;
+    }
+    
+  }
+
+@media (max-width: 575px) {
+	.rd-form .button {
+		display: block;
+		width: 100%;
+	}
+}
+
+.gutters-14 {
+	margin-left: -7px;
+	margin-right: -7px;
+}
+.gutters-14 [class*='col-'] {
+	padding-left: 7px;
+	padding-right: 7px;
+}
+
+.img-lg{
+	width: 100%;
+}
+
+.btn-submit{
+	width: 150px;
+	height: 50px;
+}

@@ -1,0 +1,26 @@
+<div class="row">    
+    <div class="col-md-12 col-sm-12 col-lg-12 d-flex justify-content-center align-items-center">
+        <div class="scrollable-container">
+            <div class="scrollable-content ">                
+                <div target="_top" class="album-item" *ngFor="let image of images; let i = index">
+                    <!-- Mostrar video si es necesario -->
+                     <ng-container *ngIf="isVideo(image.multimedia_path); else imageTemplate">
+                        <video [src]="image.multimedia_path" controls muted autoplay loop class="card-img-top fade-in-image card-image"></video>
+                        <div class="trash-content">
+                            <i class="fas fa-solid fa-trash trash cursor-p" (click)="deleteEventImage( image.uuid , i)"></i>
+                        </div>
+                     </ng-container>
+                     <!-- Plantilla para imagen -->
+                      <ng-template #imageTemplate>
+                        <div target="_top" class="album-item" [style.background-image]=" 'url('+ image.multimedia_path +')' ">
+                            <div class="trash-content">
+                                <i class="fas fa-solid fa-trash trash cursor-p" (click)="deleteEventImage( image.uuid , i)"></i>
+                            </div>
+                        </div>
+                      </ng-template>
+                      
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

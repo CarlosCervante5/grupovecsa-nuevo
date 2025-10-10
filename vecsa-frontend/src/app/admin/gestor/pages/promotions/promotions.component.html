@@ -1,0 +1,46 @@
+<app-new-nav></app-new-nav>
+<div class="container">
+    <div class="row">
+        <div class="col-12 mt-5 mb-5">
+            <!-- Breadcrumb -->
+            <div class="row">   
+                <div class="col-12">
+                    <h4 class="fs-4 fw-bold text-truncate">Administrar Campañas</h4>
+                    <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item" [routerLink]="['/admin/gestor/']">Overview</li>
+                            <li class="breadcrumb-item active" aria-current="page">Campañas</li>
+                        </ol>
+                        <div class="d-flex justify-content-end p-3">
+                            <a mat-button (click)="newCampaing()"><img src="assets/icons-fontawesome/circle-plus.svg" alt="flecha" width="17px" height="17px"> Agregar Campaña</a>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Cards -->
+            <div class="row">
+                <div class="col-lg-4 col-md-6 col-sm-12 mt-2 mb-2" *ngFor="let campaign of campaigns">
+                    <mat-card class="example-card" id="{{campaign.uuid}}">
+                        <div class="d-flex justify-content-end mt-2">
+                            <button mat-button (click)="deleteCampaign(campaign.uuid)"><img src="assets/icons-fontawesome/x-solid.svg" alt="flecha" width="17px" height="17px"></button>
+                        </div>
+                        <mat-card-header class="d-flex justify-content-between">
+                                <mat-card-title >{{ campaign.name | uppercase }} </mat-card-title>
+                                <mat-card-title class="mat-subtitle "><span style="font-style: italic; font-size: medium;">{{ campaign.category | uppercase }}</span> </mat-card-title>
+                                <mat-card-title class="mat-subtitle ">{{ campaign.begin_date }} al {{campaign.end_date}} </mat-card-title>
+                        </mat-card-header>
+                        <img mat-card-image [src]="campaign.promo_Path ? campaign.promo_Path : campai(null)" class="card-img-top fade-in-image card-image" alt="{{ campaign.name | titlecase }}"> 
+                        <!-- <img mat-card-image  class="card-img-top fade-in-image card-image" [src]="campaign.promo_Path" alt="campaña"> -->
+                        <mat-card-actions>
+                            <button mat-button (click)="openBottomSheet(campaign.uuid)">Agregar promociones</button>
+                            <button mat-button (click)="openUpdateOrder( campaign.uuid, campaign.promotions )" >Ordenar promociones</button>
+                            <!-- <button mat-button>Eliminar imágenes</button> -->
+                        </mat-card-actions>
+                    </mat-card>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

@@ -1,0 +1,19 @@
+<mat-card class="example-card">
+    <mat-card-header>      
+      <mat-card-title>Cargar video</mat-card-title>      
+    </mat-card-header>    
+    <mat-card-content class="m-5">
+        <div class="avatar-edit">
+            <label for="video" class="drop-container">                
+                <input type="file" id="picture" accept=".mp4" (change)="assignImage($event)" required>
+            </label>            
+        </div>
+    </mat-card-content>
+    <mat-card-actions class="mx-auto">
+      <button mat-button class="btn abcars-background-color-blue mx-2" (click)="uploadVideo()" [disabled]="disabled">Subir</button>
+      <button mat-button class="btn abcars-background-color-black" (click)="close()">Cancelar</button>
+    </mat-card-actions>
+    <mat-card-footer *ngIf="loading">
+      <mat-progress-bar mode="indeterminate" class="mt-5"></mat-progress-bar>
+    </mat-card-footer>
+</mat-card>

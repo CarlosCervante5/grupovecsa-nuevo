@@ -1,0 +1,46 @@
+    a{
+        text-decoration: none; /* Elimina el subrayado */
+        color: #000 !important;
+        display: flex;
+        justify-content: center;
+        justify-items: center;
+        font-size: medium;
+    }
+    a:hover, a:focus {
+        text-decoration: none; /* Asegura que el subrayado no aparezca al pasar el cursor */
+        box-shadow: none; /* Elimina el sombreado */
+        outline: none; /* Elimina el borde de enfoque (focus) */
+        }
+
+    a i{
+        font-size: large;
+    }
+    a:hover{
+        -webkit-transform:scale(1.3);
+        transform:scale(1.3);
+    }
+
+    .mat-icon{
+        height: 40px;
+        width: 40px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .w-100 {
+        width: 100%;
+    }
+
+    table .mat-mdc-header-cell{
+        background: #94bcf4;
+    }
+
+    @media(min-width: 300px) and (max-width: 1200px){
+        .toggle-button {
+        display: contents !important; /* Mostrar botón */
+        }
+        
+    }
+    .toggle-button {
+        display: none; /* Mostrar botón */
+    }

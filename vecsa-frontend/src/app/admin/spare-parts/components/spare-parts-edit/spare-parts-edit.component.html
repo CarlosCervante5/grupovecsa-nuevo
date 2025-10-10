@@ -1,0 +1,136 @@
+<div class="container">
+    <div class="row">
+        <div class="col-12 mt-3 mb-3">
+            <h1 class="text-center fw-bold">Actualizar información de Refacción</h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 mb-3">
+            <form [formGroup]="form" (ngSubmit)="onSubmit()">
+                <div class="row">
+                    <h3 class="text-muted">Refacción Original</h3>
+
+                    <!-- <div class="col-6"> -->
+                    <div class="col-4">
+                        <mat-form-field appearance="outline">
+                            <mat-label>Precio</mat-label>
+                            <input matInput type="number" formControlName="priceOriginal" placeholder="1" min="0" max="1000000" required>
+                            <mat-hint *ngIf="invalidPriceOriginal">Establecer precio de la refacción original.</mat-hint>
+                        </mat-form-field> 
+                    </div>
+                    
+                    <!-- <div class="col-6"> -->
+                    <div class="col-4">
+                        <mat-form-field appearance="outline">
+                            <mat-label>Fecha de Entrega</mat-label>
+                            <input matInput [matDatepicker]="pickerOriginal" placeholder="dd/mm/yyyy" [min]="date" formControlName="timeOriginal" #timeOriginal (dateChange)="timeEmmitter($event, 'timeOriginal')" required>
+                            <mat-hint *ngIf="invalidTimeOriginal">Ingrese fecha de entrega de pieza original.</mat-hint>
+                            
+                            <mat-datepicker-toggle matSuffix [for]="pickerOriginal"></mat-datepicker-toggle>
+                            <mat-datepicker touchUi #pickerOriginal></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+                    
+                    <!-- <div class="col-6"> -->
+                    <div class="col-4">
+                        <mat-form-field appearance="outline">
+                            <mat-label>Proveedor Refacción Original</mat-label>
+                            <input matInput type="text" formControlName="supplyOriginal" required>
+                            <mat-hint *ngIf="invalidSupplyOriginal">Ingrese nombre del proveedor.</mat-hint>
+                        </mat-form-field> 
+                    </div>
+                </div>
+
+                <div class="row">
+                    <h3 class="text-muted">Refacción Generica</h3>
+
+                    <div class="col-4">
+                        <mat-form-field appearance="outline">
+                            <mat-label>Precio</mat-label>
+                            <input matInput type="number" formControlName="priceGeneric" placeholder="1" min="0" max="1000000" > 
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-4">
+                        <mat-form-field appearance="outline">
+                            <mat-label>Fecha de Entrega</mat-label>
+                            <input matInput [matDatepicker]="pickerGeneric" placeholder="dd/mm/yyyy" [min]="date" formControlName="timeGeneric" #timeGeneric (dateChange)="timeEmmitter($event, 'timeGeneric')"> 
+
+                            <mat-hint *ngIf="form.get('timeGeneric')!.hasError('required') && form.get('timeGeneric')!.touched">
+                                Establezca la fecha de entrega para la refacción genérica.
+                            </mat-hint>
+
+                            <mat-datepicker-toggle matSuffix [for]="pickerGeneric"></mat-datepicker-toggle>
+                            <mat-datepicker touchUi #pickerGeneric></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-4">
+                        <mat-form-field appearance="outline">
+                            <mat-label>Proveedor Refacción Genérica</mat-label>
+                            <input matInput type="text" formControlName="supplyGeneric" > 
+
+                            <mat-hint *ngIf="form.get('supplyGeneric')!.hasError('required') && form.get('supplyGeneric')!.touched">
+                                Ingrese el nombre del proveedor de la refacción genérica.
+                            </mat-hint>
+
+                        </mat-form-field> 
+                    </div>
+                </div>
+
+                <div class="row">
+                    <h3 class="text-muted">Refacción Usada/Reparada</h3>
+
+                    <div class="col-4">
+                        <mat-form-field appearance="outline">
+                            <mat-label>Precio</mat-label>
+                            <input matInput type="number" formControlName="priceUsed" placeholder="1" min="0" max="1000000" > 
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-4">
+                        <mat-form-field appearance="outline">
+                            <mat-label>Fecha de Entrega</mat-label>
+                            <input matInput [matDatepicker]="pickerUsed" placeholder="dd/mm/yyyy" [min]="date" formControlName="timeUsed" #timeUsed (dateChange)="timeEmmitter($event, 'timeUsed')"> 
+
+                            <mat-hint *ngIf="form.get('timeUsed')!.hasError('required') && form.get('timeUsed')!.touched">
+                                Establezca la fecha de entrega para la refacción usada.
+                            </mat-hint>
+
+                            <mat-datepicker-toggle matSuffix [for]="pickerUsed"></mat-datepicker-toggle>
+                            <mat-datepicker touchUi #pickerUsed></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-4">
+                        <mat-form-field appearance="outline">
+                            <mat-label>Proveedor Refacción Usada/Reparada</mat-label>
+                            <input matInput type="text" formControlName="supplyUsedRepair" > 
+
+                            <mat-hint *ngIf="form.get('supplyUsedRepair')!.hasError('required') && form.get('supplyUsedRepair')!.touched">
+                                Ingrese el nombre del proveedor de la refacción usada.
+                            </mat-hint>
+                            
+                        </mat-form-field> 
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 mt-3 mb-3 text-center">
+                        <button mat-button type="submit" class="btn abcars-background-color-blue" [disabled]="form.invalid">                            
+                            <span *ngIf="!spinner">Guardar</span>
+                            <span *ngIf="spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        </button>
+
+                        <button mat-raised-button type="button" class="btn abcars-background-color-secondary px-2 text-dark" (click)="closeSheet()">
+                            Cancelar
+                        </button>
+
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>

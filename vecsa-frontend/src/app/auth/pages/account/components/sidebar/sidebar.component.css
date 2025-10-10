@@ -1,0 +1,33 @@
+ul li{
+    text-decoration: none;
+    color: #fff;
+    list-style-type: none;
+    padding-top: 50px;
+    padding-bottom: 50px;
+}
+.sidebar{
+    background: linear-gradient(to bottom, #AFAFAF, #dddddd);
+    display: block;
+    border-radius: 10px;
+    height: 100%;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+}
+.menu{
+    text-align: center;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+}
+
+ul li :hover{
+    background-color: #3985ED;
+    -webkit-transform:scale(1.3);
+    transform:scale(1.3);
+    border-radius: 5px;
+    padding: 10px; /* Ajusta este valor para aumentar el espacio */
+    margin: -5px; 
+}
+i{
+    font-size: 30px;
+}
+

@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /externals/terminos-y-condiciones
+Disallow: /auth/iniciar-sesion
+Disallow: /auth/recuperar-cuenta
+Disallow: /auth/registro
+Sitemap: http://localhost:4200/sitemap.xml

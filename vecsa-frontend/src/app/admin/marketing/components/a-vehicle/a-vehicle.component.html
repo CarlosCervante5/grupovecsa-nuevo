@@ -1,0 +1,44 @@
+<mat-card class="example-card">
+      
+  <div class="row title-row">
+    <div class="col-2 d-flex justify-content-center">
+          <img *ngIf="vehicle.page_status == 'active'" src="assets/icons-fontawesome/power-off-solid-green.svg" alt="flecha" width="24px" height="24px">
+          <img *ngIf="vehicle.page_status != 'active'" src="assets/icons-fontawesome/power-off-solid-red.svg" alt="flecha" width="24px" height="24px">
+          <!-- <i class="fas fa-solid fa-power-off" [ngClass]="{'green': vehicle.page_status == 'active', 'red': vehicle.page_status != 'active'}"></i> -->
+    </div>
+    <div class="col-10">
+      <mat-card-title class="mat-title text-responsive text-center">{{ vehicle.name }}</mat-card-title>
+    </div>
+  </div>
+
+  <div class="row subtitle-row">
+    <div class="col-6">
+      {{ vehicle.vin }}
+    </div>
+    <div class="col-6">
+      <mat-checkbox [(ngModel)]="checked" (change)="cardChecked()">
+        Seleccionar
+      </mat-checkbox>
+    </div>
+  </div>
+
+  <div class="row" style="align-self: center; width: 95%;">
+    <div class="col-6 text-center pt-1 pb-1 fs-4">
+      {{ vehicle.mileage | number }} km
+    </div>
+    <div class="col-6 text-center pt-1 pb-1 fs-4">
+      {{ vehicle.sale_price | currency:'$ ':'symbol':'1.2-2' }}
+    </div>
+  </div>
+
+  <img mat-card-image [src]="vehicle.first_image ? image(vehicle.first_image.service_image_url) : image(null)" class="card-img-top fade-in-image card-image" alt="{{ vehicle.name | titlecase }}">
+  
+  <mat-card-actions>
+    <button class='custom-button' mat-button (click)="openBottomSheet( vehicle.uuid )">Agregar imágenes</button>
+    <button class='custom-button' mat-button *ngIf="vehicle.images.length > 0" (click)="openUpdateOrder( vehicle.uuid, vehicle.images )">Actualizar imágenes</button>
+    <button class='custom-button' mat-button (click)="eliminar( vehicle.uuid )">Eliminar vehículo</button>
+    <button class='custom-button' mat-button (click)="openUpdateVehicleSheet( vehicle.uuid )">Actualizar vehículo</button>
+  </mat-card-actions>
+  
+</mat-card>   
+

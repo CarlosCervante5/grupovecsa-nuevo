@@ -1,0 +1,210 @@
+<!-- Contact Form-->
+<div class="container desk">
+  <section class="section section-sm section-last bg-default text-left" id="contacts">
+    <div class="container">
+
+      <div class="row ">
+        <article>
+          <div>
+            <h2 style="font-weight: bold !important">
+              Nos complace tenerle como parte de
+              la familia de BMW
+              Motorrad. 
+            </h2>
+            <p style=" line-height: 1.5; font-size: 13px;"> 
+              Para ofrecerle una experiencia personalizada le pedimos que
+              complete este breve formulario; comprender mejor sus
+              preferencias en tallas, colores y gustos es esencial para
+              proporcionarle productos adaptados a su estilo de vida y personalidad. <br>
+              Agradecemos de antemano su participación para seguir ofreciéndole productos
+              excepcionales que reflejen la calidad y elegancia característicos de BMW
+              Motorrad.</p>
+          </div>
+        </article>
+      </div>
+
+      <form class="rd-form rd-form-variant-2 rd-mailform  " [formGroup]="formLead" (ngSubmit)="onSubmit()">
+        <div class="row gutters-14">
+          <div class="col-md-4">
+            <div class="row paddingInputs">
+              <div class="col-12 ">
+                  <mat-form-field appearance="outline" class="example-full-width">
+                      <mat-label>Nombre:</mat-label>
+                      <input matInput type="text" formControlName="name" placeholder="Nombre" minlength="1" maxlength="191" required>
+                      <mat-hint >Escribe el nombre</mat-hint>
+                  </mat-form-field>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="row paddingInputs">
+              <div class="col-12 ">
+                  <mat-form-field appearance="outline" class="example-full-width">
+                      <mat-label>Email:</mat-label>
+                      <input matInput type="email" formControlName="email" placeholder="Email" minlength="1" maxlength="191" required>
+                      <mat-hint >Escribe el correo</mat-hint>
+                  </mat-form-field>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="row paddingInputs">
+              <div class="col-12 ">
+                  <mat-form-field appearance="outline" class="example-full-width">
+                      <mat-label>Celular:</mat-label>
+                      <input matInput type="text" formControlName="celular" placeholder="Celular" minlength="1" maxlength="191" required>
+                      <mat-hint >Escribe el número de celular</mat-hint>
+                  </mat-form-field>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="container mt-5">
+          <div class="row ">
+            <div class="col-md-12 col-sm-12 col-lg-12 ">
+              <!-- Imagen para pantallas grandes (lg) -->
+              <img class="img-lg" src="./assets/landings/rider/img1.jpg">
+            </div>
+            <div class="col-md-12 col-sm-12 col-lg-12 ">
+              <h2 class="card-text titles" style="font-family: BMW; margin-top: 4%;">¿PODRIA PROPORCIONAR EL MODELO DE
+                SU MOTOCICLETA?
+              </h2>
+              <hr>
+              <div class="row paddingInputs">
+                <div class="col-12 ">
+                    <mat-form-field appearance="outline" class="example-full-width">
+                        <mat-label>Modelo:</mat-label>
+                        <input matInput type="text" formControlName="model" placeholder="Modelo" minlength="1" maxlength="191" required>
+                        <mat-hint >Escribe el modelo</mat-hint>
+                    </mat-form-field>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row mt-3 ">
+            <div class="col-md-12 col-sm-12 col-lg-12 ">
+              <!-- Imagen para pantallas grandes (lg) -->
+              <img class="img-lg" src="./assets/landings/rider/img2.jpg">
+            </div>
+            <div class="col-md-12 col-sm-12 col-lg-12  ">
+              <h2 class="card-text titles" style="font-family: BMW; margin-top: 4%;">¿CUÁL ES SU TALLA DE GUANTES?
+              </h2>
+              <hr>
+              <mat-form-field appearance="outline" class="example-full-width">
+                <mat-label>SELECCIONE SU TALLA:</mat-label>
+                <mat-select #fontSize formControlName="jacket">
+                  <mat-option value="ch">CHICA</mat-option>
+                  <mat-option value="m">MEDIANA</mat-option>
+                  <mat-option value="g">GRANDE</mat-option>
+                  <mat-option value="xl">EXTRA GRANDE</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div class="row mt-3 ">
+            <div class="col-md-12 col-sm-12 col-lg-12 ">
+              <!-- Imagen para pantallas grandes (lg) -->
+              <img class="img-lg" src="./assets/landings/rider/img3.jpg">
+            </div>
+            <div class="col-md-12 col-sm-12 col-lg-12  ">
+              <h2 class="card-text titles" style="font-family: BMW; margin-top: 4%;">¿CUÁL ES SU TALLA DE CHAMARRA?
+              </h2>
+              <hr>
+              <mat-form-field appearance="outline" class="example-full-width">
+                <mat-label>SELECCIONE SU TALLA:</mat-label>
+                <mat-select #fontSize formControlName="jacket">
+                  <mat-option value="ch">CHICA</mat-option>
+                  <mat-option value="m">MEDIANA</mat-option>
+                  <mat-option value="g">GRANDE</mat-option>
+                  <mat-option value="xl">EXTRA GRANDE</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div class="row mt-3 ">
+            <div class="col-md-12 col-sm-12 col-lg-12 ">
+              <!-- Imagen para pantallas grandes (lg) -->
+              <img class="img-lg" src="./assets/landings/rider/img4.jpg">
+            </div>
+            <div class="col-md-12 col-sm-12 col-lg-12  ">
+              <h2 class="card-text titles" style="font-family: BMW; margin-top: 4%;">¿CUÁL ES LA TALLA DE SU CALZADO?
+              </h2>
+              <hr>
+              <mat-form-field appearance="outline" class="example-full-width">
+                <mat-label>SELECCIONE SU TALLA:</mat-label>
+                <mat-select #fontSize formControlName="footwear">
+                  <mat-option value="25">25</mat-option>
+                  <mat-option value="25">25.5</mat-option>
+                  <mat-option value="25">26</mat-option>
+                  <mat-option value="25">26.5</mat-option>
+                  <mat-option value="25">27</mat-option>
+                  <mat-option value="25">27.5</mat-option>
+                  <mat-option value="25">28</mat-option>
+                  <mat-option value="25">28.5</mat-option>
+                  <mat-option value="25">29</mat-option>
+                  <mat-option value="25">29.5</mat-option>
+                  <mat-option value="25">30</mat-option>
+                  <mat-option value="25">31</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div class="row mt-3 ">
+            <div class="col-md-12 col-sm-12 col-lg-12 ">
+              <!-- Imagen para pantallas grandes (lg) -->
+              <img class="img-lg" src="./assets/landings/rider/img5.jpg">
+            </div>
+            <div class="col-md-12 col-sm-12 col-lg-12  ">
+              <h2 class="card-text titles" style="font-family: BMW; margin-top: 4%;">¿CUÁL ES SU MEDIDA DE CASCO?
+              </h2>
+
+              
+              <hr>
+              <mat-form-field appearance="outline">
+                <mat-label>SELECCIONE SU TALLA</mat-label>
+                <mat-select matInput formControlName="helmet" required>
+                  <mat-option value="ch">CHICA</mat-option>
+                  <mat-option value="m">MEDIANA</mat-option>
+                  <mat-option value="g">GRANDE</mat-option>
+                  <mat-option value="xl">EXTRA GRANDE</mat-option>
+                </mat-select>
+                <mat-hint *ngIf="helmetInvalid">SELECCIONE UNA TALLA.</mat-hint>
+            </mat-form-field>
+            </div>
+          </div>
+
+          <div class="row mt-3 ">
+            <div class="col-md-12 col-sm-12 col-lg-12 ">
+              <img class="img-lg" src="./assets/landings/rider/img6.jpg">
+            </div>
+            <div class="col-md-12 col-sm-12 col-lg-12  ">
+              <h2 class="card-text titles" style="font-family: BMW; margin-top: 4%;">¿CUÁL ES SU COLOR PREFERIDO?
+              </h2>
+              <hr>
+              <div class="row paddingInputs">
+                <div class="col-12 ">
+                    <mat-form-field appearance="outline" class="example-full-width">
+                        <mat-label>Color:</mat-label>
+                        <input matInput type="text" formControlName="color" placeholder="Color" minlength="1" maxlength="191" required>
+                        <mat-hint >Escriba un color</mat-hint>
+                    </mat-form-field>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+        <div class="d-flex justify-content-end m-4">
+          <button class="btn btn-primary btn-lg btn-submit" type="submit"
+          [disabled]="formLead.invalid || disabled">Enviar</button>
+        </div>
+      </form>
+    </div>
+  </section>
+</div>

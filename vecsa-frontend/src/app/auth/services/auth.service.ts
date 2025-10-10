@@ -1,0 +1,104 @@
+import { Injectable } from '@angular/core';
+import { Observable, BehaviorSubject } from 'rxjs';
+import { tap } from 'rxjs/operators';
+
+// Form
+import { UntypedFormGroup } from '@angular/forms';
+
+// HTTP Client
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+
+// Enviroment
+import { environment } from '@environments/environment';
+
+// Interfaces
+import { RecoverAccount , ResetPassword, LoginResponse, LogoutResponse, RegisterResponse} from '@interfaces/auth.interface';
+
+
+@Injectable({
+    providedIn: 'root'
+})
+
+export class AuthService {
+
+    private authStatus = new BehaviorSubject<boolean>(this.hasToken());
+    public authStatus$ = this.authStatus.asObservable();
+
+    // Global Url
+    private url: string = environment.baseUrl;
+
+    // Headers
+    private headers = new HttpHeaders().set('Content-Type', 'application/json').set('X-Requested-With', 'XMLHttpRequest');
+
+    constructor(private _http: HttpClient) { }
+
+    private hasToken(): boolean {
+        return !!localStorage.getItem('user_token');
+    }
+
+    /**
+     * API Login
+     */
+    public login(user: UntypedFormGroup): Observable<LoginResponse> {   
+        return this._http.post<LoginResponse>(`${ this.url }/api/auth/login`, user, { headers: this.headers }).pipe(
+            tap(response => {
+                if (response.data.token) {
+                    localStorage.setItem('user_token', response.data.token);
+                    const { token, ...userData } = response.data;
+                    localStorage.setItem('user_data', JSON.stringify(userData));
+                    this.authStatus.next(true);
+                }
+            })
+        );
+    }
+
+    /**
+     * API Logout
+     */
+    public logout(): Observable<LogoutResponse> {
+
+        let user_token = localStorage.getItem('user_token');
+        let headers = new HttpHeaders().set('Authorization', `Bearer ${user_token}`);
+
+        return this._http.post<LogoutResponse>(`${ this.url }/api/auth/logout`, null , { headers }).pipe(
+            tap(() => this.authStatus.next(false))
+        );
+    }
+
+    public getUserFromStorage(): any | null {
+        const userData = localStorage.getItem('user_data');
+        if (userData) {
+            return JSON.parse(userData);
+        }
+        return null;
+    }
+
+    /**
+     * API Register
+     */
+    public register(user: UntypedFormGroup): Observable<RegisterResponse> {
+        return this._http.post<RegisterResponse>(`${ this.url }/api/auth/register`, user, { headers: this.headers });
+    }
+
+    /**
+     * API recover account
+     */
+    public recoverAccount(email: string): Observable<RecoverAccount> {
+        let body = {
+        "email":email
+        }
+        return this._http.post<RecoverAccount>(`${ this.url }/api/auth/recover_account`, body);
+    }
+
+    public resetPassword( token_user :string, token_validate :string, password:string, confirmPassword:string ): Observable<ResetPassword>{
+        
+        let body = {
+        "token_user":token_user,
+        "token_validate": token_validate,
+        "password":password,
+        "password_confirmation":confirmPassword
+        }
+
+        return this._http.post<ResetPassword>(`${ this.url }/api/auth/reset_password`, body);
+    }
+}

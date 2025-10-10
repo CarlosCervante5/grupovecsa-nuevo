@@ -1,0 +1,242 @@
+<app-new-nav></app-new-nav>
+<div class="container">
+    <div class="row">
+        <div class="col-12 mt-5">
+            <div class="text-center">
+                <h1 class="fs-2 fw-bold">Cotización de la solicitud Vender tu Auto</h1>
+                <h2 class="fs-3 fw-light">Realiza la cotización del Auto Solicitado.</h2>
+                <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item" [routerLink]="['/admin/valuator']">Overview</li>
+                        <li class="breadcrumb-item" [routerLink]="['/admin/valuator/appointment']">Citas de Valuación</li>
+                        <li class="breadcrumb-item active" aria-current="page">Cotización</li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="row mt-5 mb-5">
+                <mat-stepper linear #stepper>
+                    <mat-step [stepControl]="quotationForm" errorMessage="La información es requerida.">
+                        <form [formGroup]="quotationForm" (ngSubmit)="onSubmit()">
+                            <ng-template matStepLabel>Cotización</ng-template>
+                            <div class="col-12">
+                                <div class="mt-3 text-end">
+                                    <button mat-button type="button" class="btn abcars-background-color-blue"> <!--(click)="openBottomSheetRating()"-->
+                                        <i class="fi fi-rr-settings"></i>
+                                        Ver valoración
+                                    </button>
+                                </div>
+
+                                <div class="row">
+                                    <h3 class="fw-light text-truncate">
+                                        Cotización.
+                                        <i class="fas fa-level-down-alt"></i>
+                                    </h3>
+                                    <div class="col-12 col-sm-12 col-md-6 col-lg-4 col-xl-4">
+                                        <div class="row">
+
+                                            <div class="col">
+                                                <h3 class="fw-light text-truncate">
+                                                    Referencia Libro Guía Autométrica:
+                                                </h3>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col ps-5">
+                                                    <mat-form-field appearance="outline">
+                                                        <input matInput type="number" placeholder="$000000" min="0" max="9999999999" formControlName="take" #take  maxlength="10"  required> <!--(keyup)="maxLengthCheck(take)"-->
+                                                        <mat-label>Toma: <span> ${{ take.value | number: '.2-2' }} </span> </mat-label>
+                                                        <mat-hint *ngIf="takeInvalid">Proporcione el precio de toma.</mat-hint>
+                                                    </mat-form-field>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col ps-5">
+                                                    <mat-form-field appearance="outline">
+                                                        <input matInput type="number" placeholder="$000000" min="1" max="9999999999" formControlName="sale" #sale maxlength="10"  required> <!--(keyup)="maxLengthCheck(sale)"-->
+                                                        <mat-label>Venta: <span> ${{ sale.value | number:'.2-2' }} </span></mat-label>
+                                                        <mat-hint *ngIf="saleInvalid">Proporcione el precio de venta.</mat-hint>
+                                                    </mat-form-field>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="row">
+
+                                            <div class="col">
+                                                <h3 class="fw-light text-truncate">
+                                                    Referencia Intelimotors:
+                                                </h3>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col ps-5">
+                                                    <mat-form-field appearance="outline">
+                                                        <input matInput type="number" placeholder="$000000" min="0" max="9999999999" formControlName="take_intelimotors" #take_intelimotors  maxlength="10" required> <!--(keyup)="maxLengthCheck(take_intelimotors)"-->
+                                                        <mat-label>Toma: <span> ${{ take_intelimotors.value | number:'.2-2' }}</span></mat-label>
+                                                        <mat-hint *ngIf="takeIntelimotorsInvalid">Proporcione el precio de toma.</mat-hint>
+                                                    </mat-form-field>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col ps-5">
+                                                    <mat-form-field appearance="outline">
+                                                        <input matInput type="number" placeholder="$000000" min="1" max="9999999999" formControlName="sale_intelimotors" #sale_intelimotors  maxlength="10"  required> <!--(keyup)="maxLengthCheck(sale_intelimotors)"-->
+                                                        <mat-label>Venta: <span> ${{ sale_intelimotors.value | number:'.2-2' }} </span> </mat-label>
+                                                        <mat-hint *ngIf="saleIntelimotorsInvalid">Proporcione el precio de venta.</mat-hint>
+                                                    </mat-form-field>
+                                                </div>
+                                            </div>
+                                            
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-sm-12 col-md-6 col-lg-4 col-xl-4">
+                                        <div class="row">
+                                            <div class="col">
+                                                <h3 class="fw-light text-truncate">
+                                                    Reacondicionamiento:
+                                                </h3>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col ps-5">
+                                                    <mat-form-field appearance="outline" class="opacity-75">
+                                                        <input matInput type="text" placeholder="$000000" min="0" max="9999999999" formControlName="workforce" #workforce  maxlength="10" [readonly]="workforceInactive"> <!--(keyup)="maxLengthCheck(workforce)" (change)="onCotizacion()"-->
+                                                        <mat-label>Mano de obra: <span> ${{ workforce.value | number:'.2-2' }} </span> </mat-label>
+                                                        <mat-hint *ngIf="workforceInvalid">Proporcione el precio.</mat-hint>
+                                                    </mat-form-field>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col ps-5">
+                                                    <mat-form-field appearance="outline" class="opacity-75">
+                                                        <input matInput type="text" placeholder="$000000" min="1" max="9999999999" formControlName="spare_parts" #spare_parts  maxlength="10" [readonly]="sparePartsInactive"> <!--(keyup)="maxLengthCheck(spare_parts)" (change)="onCotizacion()"-->
+                                                        <mat-label>Partes/refacciones: <span> ${{ spare_parts.value | number:'.2-2' }} </span> </mat-label>
+                                                        <mat-hint *ngIf="spare_partsInvalid">Proporcione el precio.</mat-hint>
+                                                    </mat-form-field>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col ps-5">
+                                                    <mat-form-field appearance="outline" class="opacity-75">
+                                                        <input matInput type="text" placeholder="$000000" min="1" max="9999999999" formControlName="hyp" #hyp  maxlength="10" readonly> <!--(keyup)="maxLengthCheck(hyp)" (change)="onCotizacion()"-->
+                                                        <mat-label>HyP: <span> ${{ hyp.value | number:'.2-2' }} </span></mat-label>
+                                                        <mat-hint *ngIf="hypInvalid">Proporcione el precio.</mat-hint>
+                                                    </mat-form-field>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col ps-5">
+                                                    <mat-form-field appearance="outline" class="opacity-75">
+                                                        <input matInput type="number" formControlName="total" #total readonly>
+                                                        <mat-label>Total: <span> ${{ total.value | number:'.2-2' }} </span> </mat-label>
+                                                    </mat-form-field>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-sm-12 col-md-6 col-lg-4 col-xl-4">
+                                        <div class="row">
+                                            <div class="col">
+                                                <h3 class="fw-light text-truncate">
+                                                    Valor toma y Oferta final:
+                                                </h3>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col ps-5">
+                                                    <mat-form-field appearance="outline">
+                                                        <input matInput type="number" placeholder="$000000" min="1" max="9999999999" formControlName="take_value" #take_value  maxlength="10"  required> <!--(keyup)="maxLengthCheck(take_value)"-->
+                                                        <mat-label>Valor toma: <span> ${{ take_value.value | number:'.2-2' }} </span> </mat-label>
+                                                        <mat-hint *ngIf="take_valueInvalid">Proporcione el precio de toma final.</mat-hint>
+                                                    </mat-form-field>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col ps-5">
+                                                    <mat-form-field appearance="outline">
+                                                        <input matInput type="number" placeholder="$000000" min="1" max="9999999999" formControlName="final_offer" #final_offer  maxlength="10"  required> <!--(keyup)="maxLengthCheck(final_offer)"-->
+                                                        <mat-label>Oferta final: <span> ${{ final_offer.value | number:'.2-2' }}</span> </mat-label> 
+                                                        <mat-hint *ngIf="final_offerInvalid">Proporcione el precio de oferta final.</mat-hint>
+                                                    </mat-form-field>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-sm-12 col-md-6 col-lg-12 col-xl-12">
+                                        <div class="row mt-3">
+                                            <div class="col-12 col-sm-12 col-md-12 col-lg-4 col-xl-4">
+                                                <mat-slide-toggle formControlName="direct_purchase" (change)="checkedp = !checkedp">
+                                                    Compra directa
+                                                </mat-slide-toggle>
+                                            </div>
+                                            <div class="col-12 col-sm-12 col-md-12 col-lg-4 col-xl-4">
+                                                <mat-slide-toggle formControlName="take_into_account"  (change)="checkedt = !checkedt">
+                                                    Toma a cuenta
+                                                </mat-slide-toggle>
+                                            </div>
+                                            <div class="col-12 col-sm-12 col-md-12 col-lg-4 col-xl-4">
+                                                <mat-slide-toggle formControlName="direct_purchase_take_account"  (change)="checkedpt = !checkedpt"> 
+                                                    Compra directa/Toma a cuenta
+                                                </mat-slide-toggle>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-sm-12 col-md-6 col-lg-12 col-xl-12">
+                                        <div class="row mt-5">
+                                            <div class="col-12 col-sm-12 col-md-12 col-lg-4 col-xl-4">
+                                                <mat-form-field appearance="outline">
+                                                    <mat-label>Vendedor</mat-label>
+                                                    <mat-select placeholder="Seleccione un vendedor" formControlName="seller" required>
+                                                        <mat-option *ngFor="let seller of sellers" [value]="seller.uuid"> {{ seller.user_profile.name | titlecase }} {{ seller.user_profile.last_name | titlecase }}</mat-option>
+                                                    </mat-select>
+                                                    <mat-hint *ngIf="sellerInvalid">Seleccione un vendedor.</mat-hint>
+                                                </mat-form-field>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-sm-12 col-md-6 col-lg-12 col-xl-12">
+                                        <div class="row">
+                                            <div class="col mt-5">
+                                                <h3 class="fw-light text-truncate">
+                                                    Comentarios:
+                                                </h3>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col">
+                                                    <mat-form-field class="example-full-width" appearance="outline">
+                                                        <mat-label>Deja un comentario</mat-label>
+                                                        <textarea rows="6" matInput placeholder="Déjanos saber que es lo que opinas..." formControlName="comments"></textarea>
+                                                    </mat-form-field>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="mt-3">
+                                <button mat-button type="submit" matStepperNext class="btn abcars-background-color-blue" [disabled]="quotationForm.invalid">
+                                    <span>Enviar</span>
+                                </button>
+                            </div>
+
+                        </form>
+                    </mat-step>
+                </mat-stepper>
+            </div>
+        </div>
+    </div>
+</div>

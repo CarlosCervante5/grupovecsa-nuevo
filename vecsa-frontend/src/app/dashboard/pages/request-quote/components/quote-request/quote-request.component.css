@@ -1,0 +1,19 @@
+:host {
+  display: block;
+}
+
+.spacetop {
+  margin-top: 70px;
+}
+
+.horizontal_line {
+  width: 100%;       
+  border-bottom: 1px solid #000; 
+  line-height: 0.6em;
+  margin: 0 0 20px; 
+} 
+  
+.horizontal_line span { 
+    background: #fff; 
+    padding-right: 10px;
+}

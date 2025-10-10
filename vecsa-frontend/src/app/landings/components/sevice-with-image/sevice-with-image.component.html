@@ -1,0 +1,29 @@
+<section class="content">
+    <div class="row ">
+        <div class="col-sm-12 col-md-6" [ngClass]="{'order-md-1': service_image.first_image, 'order-md-2': !service_image.first_image}">
+            <div class="service-container" [ngClass]="{'left': service_image.first_image, 'right': !service_image.first_image}">
+                <div [class]="'image ' +  service_image.image_class"></div>
+            </div>                
+        </div> 
+        <div class="col-sm-12 col-md-6" [ngClass]="{'order-md-1': !service_image.first_image, 'order-md-2': service_image.first_image}">
+            <div class="service-container" [ngClass]="{'left': !service_image.first_image, 'right': service_image.first_image,  'mover': service_image.first_image}">
+                <div class="service">
+                    <div class="price">
+                        <span class="texto{{service_image.brand}}">{{ service_image.price }}</span>
+                    </div>                        
+                    <div class="description-service">
+                        <span class="texto{{service_image.brand}}">{{ service_image.service1 }}</span>
+                        <span class="texto{{service_image.brand}}">{{ service_image.service2 }}</span>
+                    </div> 
+                </div>
+                <div class="clearfix"></div>
+                <hr class="bar">
+                <div class="service-list">
+                    <ul>
+                        <li class="texto{{service_image.brand}}" *ngFor="let element of service_image.list">{{ element }}</li>                        
+                    </ul>
+                </div>
+            </div>
+        </div>                       
+    </div>
+</section>

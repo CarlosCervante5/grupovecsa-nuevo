@@ -1,0 +1,91 @@
+img{
+    width: 100%;
+}
+.btn {
+ 	color: rgb(0, 0, 0) !important;
+	border: 2px solid;
+	background-color: rgba(255, 255, 255, 0);
+	border-color: rgb(0, 0, 0) ;
+	padding: 17px ;
+	font-size: 17px; 
+	text-align: center;
+	width: 60%;
+ 
+    margin-top: 20px;
+}
+
+.card-title{
+    font-weight: bold;
+    font-size: 15px;
+    font-family: bmw;
+}
+
+.card-text{
+    font-size: 18px;
+}
+
+@media (max-width: 750px){
+    .btn {
+      width: 100%;
+      }
+
+ 
+  }
+
+
+ 
+
+  /* Pantallas grandes (lg) */
+@media (min-width: 992px) {
+    .img-md,
+    .img-sm {
+      display: none;
+    }
+    
+  }
+  
+  /* Pantallas medianas (md) */
+  @media (max-width: 991px) and (min-width: 768px) {
+    .img-lg,
+    .img-sm {
+      display: none;
+    }
+  }
+  
+  /* Pantallas pequeñas (sm) */
+  @media (max-width: 767px) {
+    .img-lg,
+    .img-md {
+      display: none;
+    }
+
+
+  }
+
+
+  @media (max-width: 1000px) {
+    .margen1{
+      margin-top: 30px;
+    }
+    
+  }
+
+  .margen1{
+    margin-top: 50px;
+  }
+  
+.txt{
+    font-size: 35px;
+    font-family: BMW;
+}
+
+.txt2{
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.margen
+{
+  margin-top: 50px;
+  margin-bottom: 50px;
+}

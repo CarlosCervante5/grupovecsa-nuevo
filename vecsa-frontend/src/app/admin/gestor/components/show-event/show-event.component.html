@@ -1,0 +1,35 @@
+<mat-card *ngFor="let event of events; index as i" class="m-5">
+    <mat-card-header>
+        <mat-card-title>{{ event.name }}</mat-card-title>
+        <!-- <mat-card-subtitle>{{ event.subtitle }}</mat-card-subtitle>       -->
+    </mat-card-header>               
+    <mat-card-content class="mt-3">        
+        <div class="row">
+            <div class="col-3">
+                <img [src]="event.image_path" >    
+            </div>        
+            <div class="col-9" >
+                <div class="trash-content">
+                    <img src="assets/icons-fontawesome/trash-solid_negro.svg" alt="flecha" width="22px" height="22px" (click)="deleteEvent( event.uuid)">
+                </div>
+                <!-- <p>
+                    Marca: {{ event.brand }}
+                </p> -->
+                <p>
+                    Fecha de evento: {{ event.begin_date| date:'YYYY-MM-dd' }}
+                </p>                              
+                <p class="mt-3">
+                    <label for="images" class="drop-container">               
+                        <input type="file" id="picture" [attr.accept]=" event.type === 'video' ? '.mp4, .mov, .avi' : '.png, .jpg, .jpeg, .webp' " multiple (change)="assignImagePromo($event, i)" required> 
+                    </label> 
+                    <button mat-button class="btn abcars-background-color-blue mx-2" (click)="uploadImagesPromo( event.uuid, i )" [disabled]="disabled[i] === true" [class.spinner]="loading">{{ !loading ? 'Subir' : '' }}</button>                
+                </p>                            
+            </div>
+        </div>    
+        <div class="row">
+            <div class="col-12">
+                <app-event-card [images]="event.multimedia"></app-event-card> 
+            </div>  
+        </div>    
+    </mat-card-content>        
+  </mat-card>

@@ -1,0 +1,27 @@
+
+<div #myModal class="modal" (click)="closeModal('yes')">
+    <div class="modal-container position-relative">
+        <img class="modal-content" #img01>
+        <span class="btnClose" (click)="closeModal('yes')">   
+                <img src="assets/icons-fontawesome/x.png" alt="flecha" width="10px" height="10px">
+        </span> 
+        <button *ngIf="specificationsLink" mat-raised-button class="btnEsp">
+            <a [href]="specificationsLink" target="_blank">Descarga</a>
+        </button>
+        <div class="texto"> 
+            <div #caption></div> 
+        </div> 
+    </div>
+</div>
+
+
+<div class="col-12">
+        <swiper-container [slidesPerView]="ancho" speed="500" loop="true" navigation="true" zoom="true">
+                <swiper-slide class="slider-c2" *ngFor="let imagen of images; let i = index">
+                    <div class="slide-custom" (click)="showModal( imagen.image_path, imagen.legal, imagen.spec_sheet)">
+                            <img class="img-swiper-thumbs-1" src="{{imagen.image_path}}" alt="{{ i }}">
+                    </div>
+                </swiper-slide>  
+        </swiper-container>
+ </div>
+

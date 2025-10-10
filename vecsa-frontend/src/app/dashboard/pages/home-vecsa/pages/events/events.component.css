@@ -1,0 +1,102 @@
+ 
+*{
+    font-family: 'Mulish' ;
+}
+.zoomIn {
+    animation: zoom-in 1s ease;
+}
+
+/* todas las animaciones pausadas */
+.paused * { 
+	animation-play-state: paused;
+}
+ 
+.container {    
+    background-color: white;
+}
+
+.flecha{
+
+}
+
+.btn-flecha{
+    border-radius: 50% !important; 
+    border-color: black !important; 
+    height: 20px !important;
+    width: 20px !important; 
+    display: grid !important; 
+    justify-content: center !important; 
+    align-content: center !important; 
+    margin-right: 5px !important; 
+    box-sizing: border-box !important;
+}
+
+
+.campañas{
+    font-size: x-large;
+    text-transform: uppercase;
+}
+.textos{
+    font-size: large;
+    text-align: justify;
+    margin-left: 0px;
+    margin-right: 0px;
+}
+.titulo{
+    font-size: x-large;
+    margin-left: 0px;
+    margin-right: 0px;
+}
+.flecha{
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+}
+
+@media (max-width: 500px){
+    .flecha{
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+    .titulo{
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+}
+
+ 
+
+ 
+@media (max-width: 768px) 
+{
+
+    .hero{
+        background-image: url('/assets/cards/BANNER_820X410.jpg');
+        background-size: cover;
+        background-position: center;
+        height: 410px; /* Toma toda la altura de la ventana gráfica */
+        color: white;
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .mg{
+        margin-top: 20px;
+     }
+     .campañas{
+        font-size: medium;
+     }
+     .textos{
+        font-size: medium;
+        margin-left: 10px;
+        margin-right: 10px;
+     }
+}
+.mg{
+    margin-top: 30px;
+ }

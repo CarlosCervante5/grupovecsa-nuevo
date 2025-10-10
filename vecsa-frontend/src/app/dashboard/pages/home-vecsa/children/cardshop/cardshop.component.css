@@ -1,0 +1,54 @@
+ h2{
+ 
+	line-height: 1.6;
+
+ }
+
+.btn {
+	margin-top: 40px;
+	color: white;
+	border: 2px solid;
+	background-color: white;
+	border-color: black;
+	padding: 17px ;
+	font-size: 17px; 
+	text-align: center;
+	width: 70%;
+	color: black;
+	margin: auto;
+	display: block;
+	}
+	
+ .mg{
+ 	margin-top: 70px;
+	margin-bottom: 70px;
+  }
+
+  @media (max-width: 1100px) {
+	.btn{
+		width: 100%;
+	}
+  }
+
+
+ @media (max-width: 750px){
+	.mg2{
+		margin-top: 70px;
+		margin-bottom: 70px;
+	}
+	.btn{
+		width: 100%;
+	}
+}
+
+.image{
+	width: 64px; 
+	height: 64px;
+	margin: auto;
+	display: block;
+	margin-bottom: 30px;
+}
+
+.text-center{
+	font-family: BMW;
+}

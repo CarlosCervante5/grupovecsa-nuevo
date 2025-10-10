@@ -1,0 +1,40 @@
+
+
+.mat-title {
+    height: 60px;
+}
+
+.card-image {
+    object-fit: scale-down;
+    height: 23rem;        
+    width:auto;
+}
+
+@media screen and (max-width: 990px) and (min-width: 770px)  {
+    .mat-title {
+        height: 90px;
+    }
+}
+
+@media screen and (max-width: 767px) and (min-width: 0px)  {
+    .card-image {
+        object-fit: scale-down;
+        height: 35rem;        
+        width:auto;
+    }
+}
+
+input[type="file"] {
+    display: none;
+}
+
+.custom-file-upload {
+    border: 1px solid #ccc;
+    display: inline-block;
+    padding: 7px 12px;
+    cursor: pointer;
+}
+
+::ng-deep .margintop {
+    margin-top: 20% !important;
+}

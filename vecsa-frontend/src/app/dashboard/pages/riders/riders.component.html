@@ -1,0 +1,402 @@
+<div class="container">
+    <div>
+        <div class="row">
+            <ng-container *ngIf="activeC; else elseTemplate">
+                <app-sk-cube></app-sk-cube>
+            </ng-container>
+
+            <ng-template  #elseTemplate>
+                    
+
+                <div class="align-items-center justify-content-center" id="top">
+                    <div class="d-flex justify-content-center align-items-center">
+                        <picture>
+                            <!-- Imagen para pantallas grandes -->
+                            <source media="(min-width: 1000px)" srcset="assets/octoberfest/banner.png">
+                            <!-- Imagen para pantallas medianas -->
+                            <source media="(min-width: 768px)" srcset="assets/octoberfest/banner.png">
+                            <!-- Imagen para pantallas pequeñas -->
+                            <img src="assets/octoberfest/banner_min.png" class="centered-img" alt="Banner">
+                        </picture>
+                    </div>
+                </div>
+                <div class="mt-5 align-items-center">
+
+                    <div class="col-auto"></div>
+            
+                    <div class="col-auto event-info">
+                        <p style="line-height: normal;" >Hagamos juntos del Oktoberfest una tradición rider, descubriendo nuevas rutas y amigos para compartirlas.</p>
+                    </div>
+
+                    <div class="col-auto"></div>
+                    
+                </div>
+
+                <hr>
+                <div class="align-items-center">
+                    <div class="col-auto"></div>
+                
+                    <div class="col-auto event-info">
+                        <h3 class="fw-bold mb-0" style="font-size: x-large;">Itinerario</h3>
+                    </div>
+
+                    <div class="col-auto"></div>
+                </div>
+
+                <div class="align-items-center justify-content-center">
+
+                    <div class="col-6 d-flex flex-row">
+                        <button (click)="toggleTable()" class="btn btn-primary event-info me-2" style="font-size: small;">
+                            {{ isTableCollapsed ? 'Mostrar' : 'Ocultar' }}
+                        </button>
+                        
+                        <button (click)="downloadPdf()" class="btn btn-secondary event-info" style="font-size: small;">
+                            Descargar PDF
+                        </button>  
+                    </div>
+
+                    <div class="col-auto">
+                    </div>
+                    
+                    <div class="col-auto"></div>
+                    
+                </div>
+
+                <div class="align-items-center justify-content-center">
+
+                    <div class="col-auto"></div>
+            
+                    <div class="col-10 event-info" style="width: 100%;">
+                        <div [ngClass]="{'collapsed': isTableCollapsed}" class="table-container">
+                            <table border="1" cellpadding="10" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>Día</th>
+                                        <th>Hora</th>
+                                        <th>Actividad</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="day-separator">
+                                        <td class="table-day" rowspan="4"><strong>Viernes 18 de Octubre</strong></td>
+                                        <td class="table-hour">3:00 pm</td>
+                                        <td class="table-description">Recepción de motos en Motorrad Vecsa Hidalgo con aperitivos </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="table-hour">4:30 pm</td>
+                                        <td class="table-description">Check-in hotel GAMMA</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="table-hour">6:00 pm</td>
+                                        <td class="table-description">Rodada nocturna con destino a Mineral del Monte</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="table-hour">9:00 pm</td>
+                                        <td class="table-description">Pernota hotel sede</td>
+                                    </tr>
+                                    <tr class="day-separator">
+                                        <td class="table-day" rowspan="7"><strong>Sábado 19 de de Octubre</strong></td>
+                                        <td class="table-hour">9:00 am</td>
+                                        <td class="table-description">Desayuno Hotel Gamma</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="table-hour">11:00 am</td>
+                                        <td class="table-description">Ruta turística</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="table-hour">7:00 pm</td>
+                                        <td class="table-description">Recepción en salón GAMMA</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="table-hour">7:30 pm</td>
+                                        <td class="table-description">Presentación R1300 GS ADV a cargo del gerente de MOTORRAD Vecsa Hidalgo</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="table-hour">8:00 pm</td>
+                                        <td class="table-description">Cena para nuestros invitados</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="table-hour">9:00 pm</td>
+                                        <td class="table-description">Música con apoyo de banda de rock</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="table-hour">11:00 pm</td>
+                                        <td class="table-description">Término del evento </td>
+                                    </tr>
+                                    <tr class="day-separator">
+                                        <td class="table-day" rowspan="2"><strong>Domingo 20 de Octubre</strong></td>
+                                        <td class="table-hour">9:00 am</td>
+                                        <td class="table-description">Desayuno Hotel Gamma</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="table-hour">11:00 am</td>
+                                        <td class="table-description">Despedida a todos los riders</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>                
+                    </div>
+                    
+                    <div class="col-auto"></div>
+                    
+                </div>
+                
+                <hr>
+                <div class="align-items-center">
+                    <div class="col-auto"></div>
+                
+                    <div class="col-auto event-info">
+                        <h3 class="fw-bold mb-0" style="font-size: x-large;">Llena con tus datos</h3>
+                    </div>
+
+                    <div class="col-auto"></div>
+                </div>
+                
+                <div [ngClass]="[!isMobileView ? 'row' : '']">
+                    <!-- Picture -->
+                    <div class="col-12 col-md-3 mt-4">
+                        <div class="foto">
+                            <div class="row">
+                                <div class="col-6 col-md-12 col-lg-12 col-img">
+                                    <img id="imagePreview" [src]="image_path" alt="User Picture Imagen" class="img-fluid-f">
+                                </div>
+                                <div class="col-6 col-md-12 col-lg-12 col-img">
+                                    <label for="picture" class="btn-img">
+                                        <span class="btn-cambiar"><i class="fa-solid fa-pen-to-square" ></i>¡Sube tu fotografía!</span>
+                                        <input type='file' id="picture" accept=".png, .jpg, .jpeg"  (change)="onImageSelected($event)"/>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Information -->
+                     
+                    <div class="col-12 col-md-9 mt-4 mb-2">
+
+                        <!-- Form Customer -->
+                        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+                            
+                            <div class="row">                            
+                                <div class="col-12 col-md-6">
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Nombre(s)</mat-label>
+                                        <input matInput type="text" placeholder="Alfredo" formControlName="name">
+                                        <mat-hint *ngIf="nameInvalid">Complete su nombre(s).</mat-hint>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="col-12 col-md-6">
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Apellidos</mat-label>
+                                        <input matInput type="text" placeholder="Guzmán" formControlName="last_name">
+                                        <mat-hint *ngIf="lastnameInvalid">Complete sus apellidos.</mat-hint>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="col-12 col-md-6">
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Correo</mat-label>
+                                        <input matInput type="email" placeholder="a@b.c" formControlName="email">
+                                        <mat-hint *ngIf="emailOneInvalid">Ingrese un correo electrónico válido.</mat-hint>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="col-12 col-md-6">
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Teléfono</mat-label>
+                                        <input matInput type="tel" placeholder="1234567890" formControlName="phone_1">
+                                        <mat-hint *ngIf="phoneOneInvalid">Ingrese un número telefónico válido.</mat-hint>
+                                    </mat-form-field>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Tu moto actual</mat-label>
+                                        <input matInput type="text" placeholder="" formControlName="model">
+                                        <mat-hint *ngIf="modelInvalid">Ingrese un modelo válido.</mat-hint>
+                                    </mat-form-field>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Año modelo</mat-label>
+                                        <input matInput type="number" placeholder="" formControlName="year" class="no-spinner">
+                                        <mat-hint *ngIf="yearInvalid">Ingrese un año válido.</mat-hint>
+                                    </mat-form-field>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Agencia de procedencia:</mat-label>
+                                        <mat-select formControlName="origin_agency">
+                                            <mat-option value="hub_serdán">Hub Serdán</mat-option>
+                                            <mat-option value="vecsa_puebla">Vecsa Puebla</mat-option>
+                                            <mat-option value="vecsa_hidalgo">Vecsa Hidalgo</mat-option>
+                                            <mat-option value="vecsa_oaxaca">Vecsa Oaxaca</mat-option>
+                                            <mat-option value="vecsa_veracruz">Vecsa Veracruz</mat-option>
+                                        </mat-select>
+                                        <mat-hint *ngIf="agencyInvalid">Seleccione una agencia.</mat-hint>
+                                    </mat-form-field>
+                                </div>
+                                
+                            </div>
+                            
+
+                        </form>
+
+                    </div>
+                </div>
+
+                <div [ngClass]="[tallas ? 'col-12' : 'd-none']">
+                    <div class="mt-2 align-items-center">
+                        <div class="col-auto"></div>
+                    
+                        <div class="col-auto event-info">
+                            <h3 class="fw-bold mb-0" style="font-size: x-large;">Talla de tu preferencia</h3>
+                        </div>
+                        
+                        <div class="col-auto"></div>
+                    </div>
+    
+                    <!-- Accesorios  -->
+                    <div class="records row mb-5">
+                        <ng-container *ngIf="quiz_active; else quizzes_accesories">
+                            <app-sk-cube></app-sk-cube>
+                        </ng-container>
+            
+                        <ng-template  #quizzes_accesories>
+                            <div class="row mb-3">
+                                <div class="col-auto"></div>
+                            
+                                <div class="col auto"></div>
+                                
+                                <div class="col-12 col-lg-4">
+                                    <div class="d-flex align-items-center justify-content-end" style="height: 100%;">
+                                        
+                                        <h6 class="fw-light me-2 mb-0" style="font-size: medium; padding-right: 10px;">Género:</h6>
+    
+                                        <mat-chip-listbox class="mat-chip-grid" aria-label="{{ clothes_gender!.name }}" (change)="onChipGenderChange($event, clothes_gender!.uuid)">
+                                            <div *ngFor="let value of clothes_gender?.values; let i = index">
+                                                <mat-chip-option 
+                                                    class="chip-option"
+                                                    [value]="value"
+                                                    [selected]="value === clothes_gender?.selected_value"
+                                                    [disabled]="form.invalid || spinner"
+                                                    >
+                                                    {{ value }}
+                                                </mat-chip-option>
+                                            </div>
+                                        </mat-chip-listbox>
+    
+                                    </div>
+                                </div>
+                            </div>
+            
+                            <ng-container >
+                                <div 
+                                    class="col-12 col-lg-6 mt-3 mb-3"
+                                    style="padding: 0;" 
+                                    [ngClass]="{'d-none': (accesories[0].question_type == 'ropa femenina' && (gender != 'M')) || (accesories[0].question_type == 'ropa masculina' && (gender == 'M'))}"
+                                >
+                                    <div class="row align-items-center">
+                                        <div class="col-2 d-flex justify-content-center">
+                                            <div class="image_container">
+                                                <img class="image_quiz" src="{{ accesories[0].image_path }}" alt="{{ accesories[0].name }}">
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-10">
+                                            <div class="mb-2 mt-2">
+                                                <h6 class="fw-light mb-0" style="font-size: medium;">{{ accesories[0].name }}:</h6>
+                                            </div>
+                                            <div class="d-flex flex-wrap">
+                                                <mat-chip-listbox class="mat-chip-grid" aria-label="{{ accesories[0].name }}" (change)="onChipSelectionChange($event, accesories[0].uuid)">
+                                                    <div *ngFor="let value of accesories[0].values; let i = index">
+                                                        <mat-chip-option 
+                                                            class="chip-option"
+                                                            [value]="value"
+                                                            [selected]="value === accesories[0].selected_value"
+                                                            [disabled]="form.invalid || spinner"
+                                                            >
+                                                            {{ value }}
+                                                        </mat-chip-option>
+                                                    </div>
+                                                </mat-chip-listbox>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </ng-container>
+                        </ng-template>
+                    </div>
+                </div>
+
+                <hr />
+
+                <div #myModal class="modal">
+                    <div class="modal-container card">
+                        <span class="btnClose" (click)="closeModal()">
+                            <i class="fas fa-times-circle icon"></i>
+                        </span>
+                        <div class="texto">
+                            <div #caption class="event-info"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-2 align-items-center">
+                    <div class="col-auto"></div>
+                
+                    <div class="col-auto event-info" style="margin-left: 10px;">
+                        <p><strong>Cuota de recuperación:</strong></p>
+                        <ul>
+                            <li>
+                                <strong >Piloto:</strong> $1,775
+                                <a href="javascript:void(0)" (click)="openModal('Welcome Kit piloto')" class="view-more" style="padding-left: 3px;"><i style="font-size: small;" class="fas fa-info-circle"></i></a>
+                            </li>
+                            <li>
+                                <strong >Acompañante:</strong> $1,210
+                                <a href="javascript:void(0)" (click)="openModal('Welcome Kit acompañante')" class="view-more" style="padding-left: 3px;"><i style="font-size: small;" class="fas fa-info-circle"></i></a>
+                            </li>
+                        </ul>
+                        <p><strong>Realiza tu aportación vía transferencia *:</strong></p>
+                        <ul>
+                            <li><strong>Banco:</strong> BBVA</li>
+                            <li><strong>Titular:</strong> Vehículos Europeos de Calidad Hidalgo S.A. De C.V.</li>
+                            <li><strong>Cuenta:</strong> 0109369562</li>
+                            <li><strong>Clabe:</strong> 012650001093695623</li>
+                        </ul>
+                        <p>
+                            <strong>Compártenos tu recibo al WhatsApp:</strong>
+                            <a target="_blank" href="https://api.whatsapp.com/send?phone=7717954749&text=Me gustaría información de éste evento" class="center-text-icon" style="color: rgba(0, 0, 0, .87);">
+                                <span style="margin-left: 3px;">771 795 47 49</span>
+                                <img src="assets/img/contacto.jpeg" alt="" width="30px" height="30px">
+                            </a>
+                        </p>
+                        <p><strong>(* En el concepto de la transferencia por favor incluye tu nombre y teléfono)</strong></p>
+
+                    </div>
+                    
+                    <div class="col-auto"></div>
+                </div>
+
+                <div class="col-12 col-md-4 mt-4 mx-auto text-center">
+                    <div class="text-center mt-3">
+                        <button mat-raised-button type="submit" (click)="onSubmit()"
+                            class="btn abcars-background-color-blue mt-3  mx-2 px-3"
+                            [disabled]="!status"
+                            >
+                            <span *ngIf="!spinner">¡Registrate!</span>
+                            <span *ngIf="spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        </button>
+                    </div>
+                </div>
+
+            </ng-template>
+
+        </div>
+    </div>
+</div>
+
+<!-- <div class="return-container">
+    <button (click)="scrollToTop()" class="return-link">
+        <i class="fa-solid fa-circle-arrow-up"></i>
+    </button>
+</div> -->

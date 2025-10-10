@@ -1,0 +1,334 @@
+.text{
+    margin: 3%;
+ 
+}
+
+
+ 
+  
+#hero:before {
+    content: "";
+    background: rgba(0, 0, 0, 0.5);
+    position: absolute;
+    bottom: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+}
+
+#hero h1 {
+    margin: 0 0 10px 0;
+    font-size: 48px;
+    font-weight: 700;
+    line-height: 56px;
+    text-transform: uppercase;
+    color: #fff;
+}
+
+#hero h2 {
+    color: #eee;
+    margin-bottom: 30px;
+    font-size: 24px;
+}
+
+#hero .btn-get-started {
+    font-family: "BMW", "Raleway", sans-serif;
+    text-transform: uppercase;
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    display: inline-block;
+    padding: 10px 28px;
+    transition: 0.5s;
+    border: 2px solid #fff;
+    color: #fff;
+}
+
+#hero .btn-get-started:hover {
+    background: #008bcc;
+    border-color: #008bcc;
+}
+
+@media (min-width: 1024px) {
+    #hero {
+        background-attachment: fixed;        
+    }
+}
+
+@media (max-width: 768px) {
+    #hero {
+        text-align: center;
+    }
+
+    #hero .container {
+        padding-top: 40px;
+    }
+
+    #hero h1 {
+        font-size: 28px;
+        line-height: 36px;
+    }
+
+    #hero h2 {
+        font-size: 18px;
+        line-height: 24px;
+        margin-bottom: 30px;
+    }
+}
+
+/*--------------------------------------------------------------
+# About
+--------------------------------------------------------------*/
+
+#about {
+    margin-top: 6rem;
+    margin-bottom: 6rem;
+}
+
+.about .content h3 {
+    font-weight: 600;
+    font-size: 26px;
+}
+
+.about .content ul {
+    list-style: none;
+    padding: 0;
+}
+
+.about .content ul li {
+    padding-bottom: 10px;
+}
+
+.about .content ul i {
+    font-size: 20px;
+    padding-right: 4px;
+    color: #008bcc;
+}
+
+.about .content p:last-child {
+    margin-bottom: 0;
+}
+
+
+element.style {
+}
+h1, h2, h3, h4, h5, h6 {
+    font-family: "BMW", "Raleway", sans-serif;
+}
+.h4, h4 {
+    font-size: 2.3rem;
+}
+.h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    line-height: 1.2;
+}
+*, ::after, ::before {
+    box-sizing: border-box;
+}
+
+h4 {
+    display: block;
+    margin-block-start: 1.33em;
+    margin-block-end: 1.33em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;    
+}
+
+/*--------------------------------------------------------------
+# Team
+--------------------------------------------------------------*/
+.team {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+
+@keyframes fadeInUp {
+    from {
+        transform: translate3d(0,400px,0);        
+    }
+
+    to {
+        transform: translate3d(0,0,0);
+        opacity: 1
+    }
+}
+@keyframes fade-left {
+    from {
+        transform:translate3d(100px,0,0)
+    }
+    to {
+        transform: translate3d(0,0,0);
+        opacity: 1
+    }
+}
+
+@keyframes fade-right {
+    from {
+        transform:translate3d(-100px,0,0)
+    }
+    to {
+        transform: translate3d(0,0,0);
+        opacity: 1
+    }
+}
+
+@keyframes zoom-in {
+    0% {
+        transform: scale(.5, .5);
+    }
+    100% {
+        transform: scale(1, 1);
+    }
+}
+
+.animated {
+    animation-duration: 1s;
+    animation-fill-mode: both;
+    -webkit-animation-duration: 2s;
+    -webkit-animation-fill-mode: both
+}
+
+.animatedFadeInUp {
+    opacity: 0
+}
+
+.fadeInUp {
+    opacity: 0;
+    animation-name: fadeInUp;
+    -webkit-animation-name: fadeInUp;
+}
+
+.fadeLeft {
+    opacity: 0;
+    animation-name: fade-left;
+    -webkit-animation-name: fade-left;
+}
+
+.fadeRight {
+    opacity: 0;
+    animation-name: fade-right;
+    -webkit-animation-name: fade-right;
+}
+
+.zoomIn {
+    animation: zoom-in 1s ease;
+}
+
+/* todas las animaciones pausadas */
+.paused * { 
+	animation-play-state: paused;
+}
+
+
+
+h1, h2, h3, h4, h5, h6, [class*='heading-'] {
+    margin-top: 0;
+    margin-bottom: 0;
+    font-weight: 500;
+    color: #151515;
+    text-transform: capitalize;
+    letter-spacing: .024em;
+    word-spacing: .05em;
+}
+
+h1 a, h2 a, h3 a, h4 a, h5 a, h6 a, [class*='heading-'] a {
+    color: inherit;
+}
+
+h1 a:hover, h2 a:hover, h3 a:hover, h4 a:hover, h5 a:hover, h6 a:hover, [class*='heading-'] a:hover {
+    color: #8a4dca;
+}
+
+h1,
+.heading-1 {
+    word-spacing: .08em;
+    font-size: 42px;
+    line-height: 1.30556;
+}
+
+@media (min-width: 992px) {
+    h1,
+    .heading-1 {
+        font-size: 72px;
+    }
+}
+
+h2,
+.heading-2 {
+    font-size: 36px;
+    line-height: 1.66667;
+}
+
+@media (min-width: 992px) {
+    h2,
+    .heading-2 {
+        font-size: 42px;
+    }
+}
+
+h3,
+.heading-3 {
+    font-size: 32px;
+    line-height: 1.3125;
+}
+
+h4,
+.heading-4 {
+    font-size: 21px;
+    line-height: 1.71429;
+}
+
+h5,
+.heading-5 {
+    font-size: 18px;
+    line-height: 1.71429;
+}
+
+h6,
+.heading-6 {
+    font-size: 16px;
+    line-height: 1.125;
+    text-transform: uppercase;
+}
+
+
+
+@media (max-width: 480px) {
+ 
+    .espacio{
+        margin-top: 20px;
+    }
+}
+
+.zoomIn {
+    animation: zoom-in 1s ease;
+}
+
+/* todas las animaciones pausadas */
+.paused * { 
+	animation-play-state: paused;
+}
+
+
+.movil{
+    display: none;
+}
+
+.desktop{
+    display: block;
+    margin-top: 70px;
+}
+
+
+@media (max-width: 100px) {
+    .movil{
+        display: block;
+        margin-top: 70px;
+    }
+
+    .desktop{
+        display: none;
+    }
+}

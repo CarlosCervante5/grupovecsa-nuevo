@@ -1,0 +1,369 @@
+<div class="container">
+    <div class="row">
+        <div class="col-12 col-12 mt-5 mb-5">            
+            <!-- Form -->
+            <div class="row">
+                <div class="col-12">
+                    <!-- Title -->
+                    <div class="row">
+                        <div class="col-12 text-center">
+                            <h1 class=fw-bold>Actualizar vehículo</h1>
+                            <span>Por favor, actualice los campos del vehículo.</span>
+                            <hr />
+                        </div>
+                    </div>
+                    <ng-container *ngIf="isNotVehicle; else elseTemplate">
+                        <div class="col-12">
+                            <div class="sk-cube-grid">
+                                <div class="sk-cube sk-cube1"></div>
+                                <div class="sk-cube sk-cube2"></div>
+                                <div class="sk-cube sk-cube3"></div>
+                                <div class="sk-cube sk-cube4"></div>
+                                <div class="sk-cube sk-cube5"></div>
+                                <div class="sk-cube sk-cube6"></div>
+                                <div class="sk-cube sk-cube7"></div>
+                                <div class="sk-cube sk-cube8"></div>
+                                <div class="sk-cube sk-cube9"></div>
+                            </div>
+                        </div>
+                    </ng-container>
+    
+                    <ng-template #elseTemplate>
+                        <!-- Form -->
+                        <div class="row">
+                            <div class="col-12">
+                                <form [formGroup]="form" (ngSubmit)="onSubmit()">
+                                    
+                                    <div class="row paddingInputs">
+                                        <div class="col-12">
+                                            <mat-form-field appearance="outline">
+                                                <mat-label>Nombre del vehículo:</mat-label>
+                                                <input matInput type="text" formControlName="name" placeholder="Nuevo nombre" minlength="1" maxlength="191" required>
+                                                <mat-hint *ngIf="nameInvalid">Escribe el nuevo nombre del vehículo. </mat-hint>
+                                            </mat-form-field>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row paddingInputs">
+                                        <div class="col-12">
+                                            <mat-form-field appearance="outline" class="example-full-width">
+                                                <mat-label>Oportunidad:</mat-label>
+                                                <textarea matInput cdkTextareaAutosize cdkAutosizeMinRows="5" cdkAutosizeMaxRows="10" formControlName="description" placeholder="Nueva descripción"></textarea>
+                                                <mat-hint *ngIf="descriptionInvalid">Escribe la nueva oportunidad del vehículo.</mat-hint>
+                                            </mat-form-field>
+                                        </div>
+                                    </div>
+
+                                    <div class="row paddingInputs">
+                                        <div class="col-12">
+                                            <!-- <mat-form-field appearance="outline" class="example-full-width">
+                                                <mat-label>Promoción:</mat-label>
+                                                <textarea  matInput
+                                                cdkTextareaAutosize
+                                                cdkAutosizeMinRows="5"
+                                                cdkAutosizeMaxRows="10"  formControlName="promotion" [(ngModel)]="vehicle.promotion" placeholder="Nueva promoción"></textarea>
+                                             </mat-form-field> -->
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-12 col-md-3 paddingInputs">
+                                            <mat-form-field appearance="outline" class="example-full-width">
+                                                <mat-label>Vin del vehículo</mat-label>
+                                                <input matInput type="text" formControlName="vin" placeholder="CXD..." minlength="1" maxlength="17" required>
+                                                <mat-hint *ngIf="vinInvalid">Escribe el VIN del vehículo.</mat-hint>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <div class="col-12 col-md-3 paddingInputs">
+                                            <mat-form-field appearance="outline" class="example-full-width">
+                                                <mat-label>Sucursal del vehículo</mat-label>
+                                                <input matInput type="text" formControlName="dealership_name" placeholder="Nueva sucursal" minlength="1" maxlength="191" required>
+                                                <mat-hint *ngIf="dealershipInvalid">Escribe la nueva sucursal del vehículo.</mat-hint>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <div class="col-12 col-md-3 paddingInputs">
+                                            <mat-form-field appearance="outline" class="example-full-width">
+                                                <mat-label>Ubicación del vehículo</mat-label>
+                                                <input matInput type="text" formControlName="location" placeholder="Nueva ubicación" minlength="1" maxlength="191" required>
+                                                <mat-hint *ngIf="locationInvalid">Escribe la nueva ubicación del vehículo.</mat-hint>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <div class="col-12 col-md-3 paddingInputs">
+                                            <mat-form-field appearance="outline" class="example-full-width">
+                                                <mat-label>Fecha de compra</mat-label>
+                                                <input matInput type="date" formControlName="purchase_date" minlength="1" maxlength="191" required>
+                                                <mat-hint *ngIf="purchaseDateInvalid">Escribe la nueva fecha de compra.</mat-hint>
+                                            </mat-form-field>
+                                        </div>
+                                    
+                                        <div class="col-12 col-md-3 paddingInputs">
+                                            <!-- Price -->
+                                            <mat-form-field appearance="outline" class="example-full-width">
+                                                <mat-label>Precio de venta</mat-label>
+                                                <input matInput type="number" formControlName="sale_price" minlength="1" maxlength="191" required>
+                                                <mat-hint *ngIf="salePriceInvalid">Escribe el nuevo precio de venta.</mat-hint>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <div class="col-12 col-md-3 paddingInputs">
+                                            <!-- Price -->
+                                            <mat-form-field appearance="outline" class="example-full-width">
+                                                <mat-label>Precio de lista</mat-label>
+                                                <input matInput type="number" formControlName="list_price" minlength="1" maxlength="191" required>
+                                                <mat-hint *ngIf="listPriceInvalid">Escribe el nuevo precio de lista.</mat-hint>
+                                            </mat-form-field>
+                                        </div>
+                                        
+                                        <div class="col-12 col-md-3 paddingInputs">
+                                            <mat-form-field appearance="outline" class="example-full-width">
+                                                <mat-label>Tipo de vehículo:</mat-label>
+                                                <mat-select formControlName="type" >
+                                                    <mat-option value="car">Auto</mat-option>
+                                                    <mat-option value="moto">Motocicleta</mat-option>
+                                                    <mat-option value="truck">Camión</mat-option>
+                                                    <mat-option value="other">Otro</mat-option>
+                                                </mat-select>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <div class="col-12 col-md-3 paddingInputs">
+                                            <mat-form-field appearance="outline" class="example-full-width">
+                                                <mat-label>Categoría de vehículo:</mat-label>
+                                                <mat-select formControlName="category">
+                                                    <mat-option value="new">Nuevo</mat-option>
+                                                    <mat-option value="pre_owned">Seminuevo</mat-option>
+                                                    <mat-option value="demo">Demo</mat-option>
+                                                </mat-select>
+                                            </mat-form-field>
+                                        </div>
+                                    
+                                        <div class="col-12 col-md-3 paddingInputs">
+                                            <mat-form-field appearance="outline" class="example-full-width">
+                                                <mat-label>Número de cilindros:</mat-label>
+                                                <input matInput type="number" formControlName="cylinders" minlength="1" maxlength="5" required>
+                                                <mat-hint *ngIf="cylindersInvalid">Escribe el nuevo número de cilindros.</mat-hint>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <div class="col-12 col-md-3 paddingInputs">
+                                            <mat-form-field appearance="outline" class="example-full-width">
+                                                <mat-label>Color exterior:</mat-label>
+                                                <input matInput type="text" formControlName="exterior_color" minlength="1" maxlength="191" required>
+                                                <mat-hint *ngIf="colorExtInvalid">Escribe el nuevo color exterior.</mat-hint>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <div class="col-12 col-md-3 paddingInputs">
+                                            <mat-form-field appearance="outline" class="example-full-width">
+                                                <mat-label>Color interior:</mat-label>
+                                                <input matInput type="text" formControlName="interior_color" minlength="1" maxlength="191" required>
+                                                <mat-hint *ngIf="colorIntInvalid">Escribe el nuevo color interior.</mat-hint>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <div class="col-12 col-md-3 paddingInputs">
+                                            <!-- Type-->
+                                            <mat-form-field appearance="outline" class="example-full-width">
+                                                <mat-label>Estatus del vehículo:</mat-label>
+                                                <mat-select formControlName="page_status">
+                                                    <mat-option value="active">Activo</mat-option>
+                                                    <mat-option value="inactive">Inactivo</mat-option>
+                                                    <mat-option value="sale">Vendido</mat-option>
+                                                </mat-select>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <div class="col-12 col-md-3 paddingInputs">
+                                            <mat-form-field appearance="outline" class="example-full-width">
+                                                <mat-label>Transmisión:</mat-label>
+                                                <mat-select formControlName="transmission">
+                                                    <mat-option value="automatic">Automático</mat-option>
+                                                    <mat-option value="manual">Manual</mat-option>
+                                                    <mat-option value="semiautomatic">Semi-automática</mat-option>
+                                                    <mat-option value="cvt">CVT</mat-option>
+                                                    <mat-option value="triptronic">Triptronic</mat-option>
+                                                    <mat-option value="dual-clutch">Dual-clutch</mat-option>
+                                                </mat-select>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <div class="col-12 col-md-3 paddingInputs">
+                                            <mat-form-field appearance="outline" class="example-full-width">
+                                                <mat-label>Tipo de combustible:</mat-label>
+                                                <mat-select formControlName="fuel_type">
+                                                    <mat-option value="gasoline">Gasolina</mat-option>
+                                                    <mat-option value="diesel">Diesel</mat-option>
+                                                    <mat-option value="electric">Eléctrico</mat-option>
+                                                    <mat-option value="hybrid">Híbrido</mat-option>
+                                                    <mat-option value="hydrogen">Hidrógeno</mat-option>
+                                                    <mat-option value="natural_gas">Gas Natural</mat-option>
+                                                </mat-select>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <div class="col-12 col-md-3 paddingInputs">
+                                            <mat-form-field appearance="outline" class="example-full-width">
+                                                <mat-label>Kilometraje:</mat-label>
+                                                <input matInput type="number" formControlName="mileage" minlength="1" maxlength="191" required>
+                                                <mat-hint *ngIf="kmInvalid">Actualiza el kilometraje.</mat-hint>
+                                            </mat-form-field>
+                                        </div>
+                                        
+                                        <div class="col-12 col-md-3 paddingInputs">
+                                            <mat-form-field appearance="outline" class="example-full-width">
+                                                <mat-label>Marca</mat-label>
+                                                <input type="text" matInput formControlName="brand" [matAutocomplete]="autoBrand">
+                                                <mat-autocomplete #autoBrand="matAutocomplete" (optionSelected)="onBrandSelected($event)">
+                                                    <mat-option *ngFor="let brand of filteredBrands | async" [value]="brand.name">
+                                                        {{ brand.name }}
+                                                    </mat-option>
+                                                </mat-autocomplete>
+                                                <mat-hint *ngIf="brandInvalid">Escribe la marca del vehículo.</mat-hint>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <div class="col-12 col-md-3 paddingInputs">
+                                            <mat-form-field appearance="outline" class="example-full-width">
+                                                <mat-label>Línea del vehículo</mat-label>
+                                                <input type="text" matInput formControlName="line" [matAutocomplete]="autoLine">
+                                                <mat-autocomplete #autoLine="matAutocomplete" (optionSelected)="onLineSelected($event)">
+                                                    <mat-option *ngFor="let line of filteredLines | async" [value]="line.name">
+                                                        {{ line.name }}
+                                                    </mat-option>
+                                                </mat-autocomplete>
+                                                <mat-hint *ngIf="lineInvalid">Escribe la línea del vehículo.</mat-hint>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <div class="col-12 col-md-3 paddingInputs">
+                                            <mat-form-field appearance="outline" class="example-full-width">
+                                                <mat-label>Modelo</mat-label>
+                                                <input type="text" matInput formControlName="model" [matAutocomplete]="autoModel">
+                                                <mat-autocomplete #autoModel="matAutocomplete" (optionSelected)="onModelSelected($event)">
+                                                    <mat-option *ngFor="let model of filteredModels | async" [value]="model.name">
+                                                        {{ model.name }}
+                                                    </mat-option>
+                                                </mat-autocomplete>
+                                                <mat-hint *ngIf="modelInvalid">Escribe el modelo del vehículo.</mat-hint>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <div class="col-12 col-md-3 paddingInputs">
+                                            <mat-form-field appearance="outline" class="example-full-width">
+                                                <mat-label>Año del modelo</mat-label>
+                                                <input matInput type="text" formControlName="year" placeholder="Nuevo año" minlength="1" maxlength="191" required>
+                                                <mat-hint *ngIf="yearModelInvalid">Escribe el nuevo año del modelo.</mat-hint>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <div class="col-12 col-md-3 paddingInputs">
+                                            <mat-form-field appearance="outline" class="example-full-width">
+                                                <mat-label>Versión</mat-label>
+                                                <input type="text" matInput formControlName="version" [matAutocomplete]="autoVersion">
+                                                <mat-autocomplete #autoVersion="matAutocomplete" (optionSelected)="onVersionSelected($event)">
+                                                    <mat-option *ngFor="let version of filteredVersions | async" [value]="version.name">
+                                                        {{ version.name }}
+                                                    </mat-option>
+                                                </mat-autocomplete>
+                                                <mat-hint *ngIf="versionInvalid">Escribe la versión del vehículo.</mat-hint>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <div class="col-12 col-md-3 paddingInputs">
+                                            <mat-form-field appearance="outline" class="example-full-width">
+                                                <mat-label>Carocería</mat-label>
+                                                <input type="text" matInput formControlName="body" [matAutocomplete]="autoBody">
+                                                <mat-autocomplete #autoBody="matAutocomplete" (optionSelected)="onBodySelected($event)">
+                                                    <mat-option *ngFor="let body of filteredBodies | async" [value]="body.name">
+                                                        {{ body.name }}
+                                                    </mat-option>
+                                                </mat-autocomplete>
+                                                <mat-hint *ngIf="bodyInvalid">Escribe la carrocería del vehículo.</mat-hint>
+                                            </mat-form-field>
+                                        </div>                                      
+
+                                        <div class="col-12 col-md-3 paddingInputs">                                            
+                                            <mat-form-field appearance="outline" class="example-full-width">
+                                                <mat-label>Precio de oferta:</mat-label>
+                                                <input matInput type="number" formControlName="offer_price" minlength="1" maxlength="191">
+                                                <mat-hint *ngIf="form.get('offer_price')?.hasError('lessThanOrEqualToZero') && form.get('offer_price')?.touched">
+                                                    El precio de oferta debe ser mayor a cero.
+                                                </mat-hint>
+                                                <mat-hint *ngIf="form.get('offer_price')?.hasError('greaterThanSalePrice') && form.get('offer_price')?.touched">
+                                                    El precio de oferta debe ser menor al precio de venta.
+                                                </mat-hint>
+                                                <mat-hint *ngIf="form.get('offer_price')?.hasError('notANumber') && form.get('offer_price')?.touched">
+                                                    El precio de oferta debe ser un número válido.
+                                                </mat-hint>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <div class="col-12 col-md-3 paddingInputs">
+                                            <mat-form-field appearance="outline" class="example-full-width">
+                                                <mat-label>Campaña</mat-label>
+                                                <mat-chip-grid #chipGrid aria-label="campaign selection">
+                                                
+                                                        <mat-chip-row *ngFor="let camp of camps">
+                                                            {{camp}}
+                                                            <button matChipRemove [attr.aria-label]="'remove ' + camp" (click)="remove(camp)">
+                                                              <mat-icon>cancel</mat-icon>
+                                                            </button>
+                                                          </mat-chip-row>
+                                                    
+                                                </mat-chip-grid>
+                                                <input type="text" matInput formControlName="campaign_2" [matAutocomplete]="autoCampaign" [matChipInputFor]="chipGrid" (matChipInputTokenEnd)="add($event)">
+
+                                                <mat-autocomplete #autoCampaign="matAutocomplete" (optionSelected)="onCampaignSelected($event)">
+                                                    <mat-option *ngFor="let camp of filteredCampaigns | async" [value]="camp.name" [id]="camp.uuid">
+                                                        {{ camp.name }}
+                                                    </mat-option>
+                                                </mat-autocomplete>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <div class="col-12 col-md-3 paddingInputs">                                            
+                                            <mat-form-field appearance="outline" class="example-full-width">
+                                                <mat-label>Enlace a hoja de especificaciones:</mat-label>
+                                                <input matInput type="text" formControlName="spec_sheet" minlength="1" maxlength="191">
+                                            </mat-form-field>
+                                        </div>
+                                        <!-- <div class="col-12 col-md-4 paddingInputs border">
+                                            <section class="example-section" formControlName="campaign_2">
+                                                    <mat-checkbox *ngFor="let camp of filteredCampaigns | async" formControlName="camp.name">
+                                                        {{ camp.name }}
+                                                    </mat-checkbox>
+                                            </section>
+                                        </div> -->
+
+                                    </div>
+                                  
+                                   
+ 
+                                    <div class="row">
+                                        <div class="col-12 text-end">
+                                            <button mat-raised-button type="submit" class="marginButtons btn abcars-background-color-blue  mx-3 px-3" [disabled]="form.invalid || button">                                    
+                                                <span *ngIf="!button; else elseButton">Actualizar</span>
+                                                <ng-template #elseButton>
+                                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                </ng-template>
+                                            </button>                                            
+
+                                            <button mat-raised-button type="button"class="marginButtons btn  mx-3 px-3" (click)="close()">                                    
+                                                Cancelar
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                </form>
+                            </div>
+                        </div>
+                    </ng-template>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

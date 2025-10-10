@@ -1,0 +1,56 @@
+/* The Modal (background) */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: none;
+    justify-items: center;
+    z-index: 2000;
+}
+
+.modal-container {
+    position: relative;
+    width: auto;
+    max-width: 90%;
+}
+
+.modal-content {
+    width: 100%;
+    max-height: 80vh;
+    object-fit: cover;
+}
+
+.btnClose {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    z-index: 10;
+    color: white;
+    font-size: 24px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.5);
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+    padding: 3px;
+}
+
+.btnClose:hover{
+    background-color: rgba(0, 0, 0, 0.7);
+    box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.7);
+    transform: scale(1.1);
+    transition: all 0.3s ease;
+}
+
+.texto {
+    color: white;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.icon{
+    color: #ffffff;
+    font-size: 35px;
+}

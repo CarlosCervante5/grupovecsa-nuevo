@@ -1,0 +1,101 @@
+
+
+.mat-title {
+    height: 60px;
+}
+
+.card-image {
+    object-fit: scale-down;
+    min-height: 40.5rem;
+}
+
+@media screen and (max-width: 990px) and (min-width: 770px)  {
+    .mat-title {
+        height: 90px;
+    }
+}
+
+@media screen and (max-width: 767px) and (min-width: 0px)  {
+    .card-image {
+        object-fit: scale-down;
+        height: 35rem;        
+        width:auto;
+    }
+}
+
+input[type="file"] {
+    display: none;
+}
+
+.custom-file-upload {
+    border: 1px solid #ccc;
+    display: inline-block;
+    padding: 7px 12px;
+    cursor: pointer;
+}
+
+::ng-deep .margintop {
+    margin-top: 20% !important;
+}
+
+.red {
+    color: red;
+    font-size: large;
+}
+
+.green {
+    color: green;
+    font-size: large;
+}
+
+.border-start {
+    border-left: 1px solid #ddd;
+}
+
+.border-end {
+    border-right: 1px solid #ddd;
+}
+
+.border-bottom {
+    border-bottom: 1px solid #ddd;
+}
+
+.w-100 {
+    width: 100%;
+}
+
+.text-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.padding-col {
+    padding-top: 15px; 
+    padding-bottom: 15px;
+}
+
+@media (max-width: 768px) {
+    .d-flex {
+        flex-direction: column;
+    }
+}
+
+
+.custom-button {
+    background-color: white;
+    border: 1px solid #ccc;
+    color: black;
+    padding: 0.5rem 1rem;
+    transition: background-color 0.3s ease;
+}
+
+.custom-button:hover {
+    background-color: #f5f5f5;
+}
+
+.custom-button:disabled {
+    background-color: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    color: #b0b0b0;
+}

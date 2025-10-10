@@ -1,0 +1,27 @@
+.portfolio-title {
+    font-size: 20px;
+    text-align: center;
+    line-height: 2;
+    font-family: BMW;
+}
+
+.portfolio-image {
+    height: 50%;
+    width: 100%;
+}
+
+.portafolio-subtitle {
+    font-size: 16px;
+    text-align: center;
+    color: rgb(39, 96, 241);
+    line-height: 1;
+}
+
+.contenedor {
+    margin-bottom: 15px; 
+}
+
+.portfolio-thumb {
+    box-shadow: 6px 10px 5px 0px  ;
+
+}

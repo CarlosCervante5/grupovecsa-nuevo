@@ -1,0 +1,131 @@
+<div class="container">
+    <div class="row">
+        <div class="col-12 mt-5 mb-5">
+            <!-- Header -->
+            <div class="row mb-3">
+                <div class="col-12">
+                    <h4 class="fs-4 fw-bold text-truncate">Riders</h4>
+                    <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item" [routerLink]="['/admin/staff/']">Overview</li>
+                            <li class="breadcrumb-item active" aria-current="page">Riders</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Search-->
+           <!-- Buscar y Agregar Cliente -->
+          <div class="d-flex flex-wrap mb-3 barra">
+            <div class="col-lg-12 col-md-12 col-sm-12 mb-2">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Buscar...</mat-label>
+                <input  matInput (keyup)="applyFilter($event)" placeholder="Búsqueda..." #input>
+              </mat-form-field>
+            </div>
+          </div>
+  
+          <!-- Tabla -->
+          <div class="d-flex justify-content-center mat-table-container">
+            <div class=" w-100">
+              <table mat-table [dataSource]="dataSource" class="w-100">
+                <!-- Columnas de la tabla -->
+              
+                <ng-container matColumnDef="name">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header [ngStyle]="{'font-weight': 'bold'}">Nombre</th>
+                  <td mat-cell *matCellDef="let row" [ngStyle]="{'background-color': row.color}">{{ row.name }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="talla">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header [ngStyle]="{'font-weight': 'bold'}">Talla</th>
+                  <td mat-cell *matCellDef="let row" [ngStyle]="{'background-color': row.color}">{{ row.talla }}</td>
+                </ng-container>
+                
+
+                <ng-container matColumnDef="agencia">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header [ngStyle]="{'font-weight': 'bold'}">Agencia</th>
+                  <td mat-cell *matCellDef="let row" [ngStyle]="{'background-color': row.color}">{{ row.agencia }}</td>
+                </ng-container>
+                
+                <ng-container matColumnDef="telefono" class="ocultas">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header [ngStyle]="{'font-weight': 'bold'}">Teléfono</th>
+                  <td mat-cell *matCellDef="let row" [ngStyle]="{'background-color': row.color}">{{ row.telefono }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="email">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header [ngStyle]="{'font-weight': 'bold'}">Email</th>
+                  <td mat-cell *matCellDef="let row" [ngStyle]="{'background-color': row.color}">{{ row.email }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="model">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header [ngStyle]="{'font-weight': 'bold'}">Modelo</th>
+                  <td mat-cell *matCellDef="let row" [ngStyle]="{'background-color': row.color}">{{ row.model }}</td>
+                </ng-container>
+                <ng-container matColumnDef="año">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header [ngStyle]="{'font-weight': 'bold'}">Año</th>
+                  <td mat-cell *matCellDef="let row" [ngStyle]="{'background-color': row.color}">{{ row.year }}</td>
+                </ng-container>
+          
+                <!-- <ng-container matColumnDef="vin">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header [ngStyle]="{'font-weight': 'bold'}">Vin</th>
+                  <td mat-cell *matCellDef="let row" [ngStyle]="{'background-color': row.color}">{{ row.vin }}</td>
+                </ng-container> -->
+          
+                <ng-container matColumnDef="kilometraje">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header [ngStyle]="{'font-weight': 'bold'}">Kilometraje</th>
+                  <td mat-cell *matCellDef="let row" [ngStyle]="{'background-color': row.color}">{{ row.kilometraje }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="puntos">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header [ngStyle]="{'font-weight': 'bold'}">Puntos</th>
+                  <td mat-cell *matCellDef="let row" [ngStyle]="{'background-color': row.color}">{{ row.puntos }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="status">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header [ngStyle]="{'font-weight': 'bold'}">Pagado</th>
+                  <td mat-cell *matCellDef="let row" [ngStyle]="{'background-color': row.color}">
+                    <!-- <p>No <mat-slide-toggle [checked]="row.status == 'pagado'" (change)="onPagoChange(row.customer, row.vehicle_uuid, row.reward_uuid, $event.checked)">Si</mat-slide-toggle></p> -->
+                    <!-- <ng-container *ngIf="row.status == null || row.status == 'null'">
+                      <b>Por pagar</b> 
+                    </ng-container>
+                    <ng-container *ngIf="row.status == 'pagado' ">
+                      <b style="color: green;">Pagado</b>
+                    </ng-container> -->
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="fecha">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header [ngStyle]="{'font-weight': 'bold'}">Fecha de registro</th>
+                  <td mat-cell *matCellDef="let row" [ngStyle]="{'background-color': row.color}">{{ row.fecha }}</td>
+                </ng-container>
+
+          
+                <ng-container matColumnDef="actions">
+                  <th mat-header-cell *matHeaderCellDef [ngStyle]="{'font-weight': 'bold'}">Acciones</th>
+                  <td mat-cell *matCellDef="let row" [ngStyle]="{'background-color': row.color}">
+                    <div class="d-grid justify-content-center">
+
+                      <!-- <a (click)="updateRider(row.customer_reward_uuid, row.initialM, row.finallyM)" class="btn" matTooltipPosition="above" style="background-color: #619cce;">
+                        <span style="color: #fff; font-size: 8px;">Actualizar Kilometraje</span>
+                      </a>
+                      
+                      <a  (click)="updateInfoRider(row.customer_reward_uuid)" class="btn btn-link mt-3"  matTooltipPosition="above" style="background-color: #3985ED">
+                        <span style="color: #fff; font-size: 8px;">Actualizar Rider</span>
+                      </a> -->
+                      
+                    </div>
+                  </td>
+                </ng-container>
+
+                <!-- Fila de encabezado y datos -->
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                
+              </table>
+              <mat-paginator [pageSize]="paginate" [length]="length" [pageIndex]="pageIndex - 1" (page)="paginationChange($event)"   aria-label="Select page of riders"></mat-paginator>
+            </div> 
+          </div>
+  
+        </div>
+    </div>
+</div>

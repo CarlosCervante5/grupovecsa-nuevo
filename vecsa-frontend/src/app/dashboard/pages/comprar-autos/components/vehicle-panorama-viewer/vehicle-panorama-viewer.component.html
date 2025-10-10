@@ -1,0 +1,37 @@
+<div class="card shadow bg-body rounded h-100 card-element" style="padding-bottom: 14px; border: -0.5px solid"> <!-- style="width: 18rem;"-->
+    
+    <div class="price-container">
+        <div class="image-container"> <!--class="cover-image"-->
+            <!--
+            <img loading="lazy" [src]="vehicle_image" class="card-img-top fade-in-image" width="300" alt="{{ vehicle.name | titlecase }}">
+            -->
+            <canvas id="canvas" class="canvas" loading="lazy" #canvas></canvas>
+            <input type="range" name="" min="1" [max]="this.vehicle.vehicle_images.length" step="1" value="1" id="slider" #slider (input)="handleInputSlider()">
+        </div>
+        
+        <div class="price-align">
+            <div class="price" *ngIf="!priceOffer">
+                ${{ vehicle.salePrice | number:'.2-2' }}
+            </div>
+            
+            <div class="price" *ngIf="priceOffer">
+                ${{ vehicle.priceOffer | number:'.2-2' }}
+                <div class="my-tag">
+                    <div class="tag-choice" *ngIf="priceOffer">
+                        <span class="badge rounded-pill price-promo" style="background: #1057DB;">¡PROMOCIÓN!</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card-body font-generic">
+            <p class="card-text">Disponible</p>
+            <p class="card-text text-truncate">{{ vehicle.name | titlecase }}</p>
+            <p class="card-text">{{ vehicle.km | number:'.2-2' }} km </p>
+            <p class="card-text">{{ vehicle.transmission | titlecase }}</p>
+            <p class="card-text">Año: {{ vehicle.yearModel }}</p>
+            <p class="card-text">Ubicación: {{ vehicle.location | titlecase }}</p>
+    </div>
+
+</div>

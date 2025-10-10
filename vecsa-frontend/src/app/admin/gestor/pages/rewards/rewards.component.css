@@ -1,0 +1,57 @@
+a{
+    text-decoration: none; /* Elimina el subrayado */
+    color: #000 !important;
+    display: flex;
+    justify-content: center;
+    justify-items: center;
+}
+a:hover, a:focus {
+    text-decoration: none; /* Asegura que el subrayado no aparezca al pasar el cursor */
+    box-shadow: none; /* Elimina el sombreado */
+    outline: none; /* Elimina el borde de enfoque (focus) */
+  }
+
+.mat-icon{
+  height: 40px;
+  width: 40px;
+  display: flex;
+  justify-content: center;
+}
+
+.w-100 {
+  width: 100%;
+}
+
+/* Ajusta el tamaño de la tabla para diferentes dispositivos */
+@media (max-width: 576px) {
+    .mat-elevation-z8 {
+      box-shadow: none;
+    }
+  }
+
+.mat-table-container {
+width: 100%;
+}
+.mat-table {
+width: 100%; /* Asegura que la tabla ocupe todo el ancho disponible */
+}
+
+/* Ajusta las celdas de la tabla para evitar el desbordamiento */
+.mat-cell, .mat-header-cell {
+    white-space: nowrap; /* Evita que el texto se divida en múltiples líneas */
+    padding: 8px; /* Ajusta el padding según sea necesario */
+    margin: 0;
+  }
+
+  @media(min-width: 300px) and (max-width: 991px){
+    .mat-table-container{
+      overflow-x: auto;
+      display: block;
+    }
+  }
+  @media(min-width: 992px) and (max-width: 1320px){
+    .mat-table-container{
+      overflow-x: visible;
+    }
+  }
+  

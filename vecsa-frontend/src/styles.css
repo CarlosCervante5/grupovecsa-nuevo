@@ -1,0 +1,523 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* You can add global styles to this file, and also import other style files */
+ /* styles.css o styles.scss */
+
+
+@font-face {
+    font-family: 'BMW';
+    src: url("assets/Fonts/BMWTypeNextTT-Light.ttf");
+}
+
+*{
+    font-family: 'Mulish';
+}
+
+.swal2-popup {
+    font-size: medium;
+}
+
+.mat-drawer-content{
+    background-color: #fff;
+    /* display: none; */
+    overflow-x: hidden !important;
+}
+ 
+.titles{
+    font-size: 30px !important;
+    font-family: 'Mulish' !important;
+}
+
+:root {
+    --abcars-color: #008bcc;
+    --abcars-offer: #191919;
+    --abcars-color-light: rgba(235, 209, 154, 0);
+    --abcars-color-secondary: #191919;
+    --abcars-color-black: #474849;
+    --abcars-color-card: #F2F2F2;
+    --abcars-color-danger: #d9534f;
+    --abcars-color-blue: #008bcc;
+    --price-title:  20px;
+    --price-promo:  8px;
+    --font-generic: 14px;
+}
+
+
+html {
+    font-size: 62.5%; }
+    @media (max-width: 75em) {
+        html {
+        font-size: 56.25%; } }
+    @media (max-width: 56.25em) {
+        html {
+        font-size: 50%; } }
+    @media (min-width: 112.5em) {
+        html {
+        font-size: 75%; } 
+}
+
+body {
+    margin: 0;
+}
+
+/*--------------------------------------------------------------
+# General
+--------------------------------------------------------------*/
+body {
+    font-family: 'Mulish' !important;
+    color: #444444;
+}
+
+a {
+    color: #008bcc;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #008bcc;
+    text-decoration: none;
+}
+
+h1{
+    font-family:  'Mulish' !important;
+}
+h2{
+    font-family:  'Mulish' !important;
+}
+h3{
+    font-family:  'Mulish' !important;
+}
+h4{
+    font-family:  'Mulish' !important;
+}
+h5{
+    font-family:  'Mulish' !important;
+}
+h6 {
+    font-family:  'Mulish' !important;
+}
+
+button {
+    text-transform: uppercase;
+}
+
+li {
+    cursor: pointer;
+}
+
+.mat-horizontal-content-container {
+    overflow: visible !important;
+}
+
+.mat-typography {
+    font-family: "Mulish";
+}
+
+
+/* Colors ABCars Main */
+
+.abcars-color {
+    color: var(--abcars-color);
+}
+
+.abcars-offer {
+    color: var(--abcars-offer);
+}
+
+.abcars-color-hover {
+    color: var(--abcars-color);
+}
+
+.abcars-color-hover:hover {
+    color: var(--abcars-color-secondary);
+}
+
+.abcars-color-nav-primary {
+    background-color: var(--abcars-color);
+    border-color: var(--abcars-color);
+    color: white;
+}
+
+.abcars-color-blue{
+    background-color: #1057DB;
+    transition: 0.5s !important;
+    background-size: 200% auto !important;
+    border-radius: 20px !important;
+}
+
+/* Button Color Main */
+
+.abcars-background-color {
+    background-image: linear-gradient(to right, #191919 0%, #008bcc 1%, #191919 100%) !important;
+    transition: 0.5s !important;
+    background-size: 200% auto !important;
+    box-shadow: 0 0 20px #eee !important;
+    border-radius: 20px !important;
+}
+.abcars-background-color-yellow {
+    background-image: linear-gradient(to right, #191919 0%, #008bcc 51%, #191919 100%) !important;
+    transition: 0.5s !important;
+    background-size: 200% auto !important;
+    box-shadow: 0 0 20px #eee !important;
+}
+
+.abcars-background-color-blue {
+    background-color: var(--abcars-color-blue) !important; 
+    border-color: var(--abcars-color-blue) !important;
+    color: white !important; 
+}
+
+.abcars-background-color-blue {
+    background-color: var(--abcars-color-blue) !important; 
+    border-color: var(--abcars-color-blue) !important;
+    color: white !important; 
+}
+
+.abcars-background-color:hover {
+    background-position: right center;
+    /* change the direction of the change here */
+    color: #fff;
+    text-decoration: none;
+}
+
+.abcars-background-color-secondary {
+    background-color: var(--abcars-color-secondary);
+    border-color: var(--abcars-color-secondary);
+    color: white;
+}
+
+.btn-background-blackgray {
+    background-color: #273746 !important;
+    border-color: #273746 !important;
+    color: white !important;
+}
+
+.btn-background-blackgray:hover {
+    background-color: #566573 !important;
+    border-color: #566573 !important;    
+}
+
+.abcars-background-color-danger {
+    background-color: var(--abcars-color-danger) !important;
+    border-color: var(--abcars-color-danger) !important;
+    color: white !important;
+}
+
+.abcars-background-color-black {
+    background-color: var(--abcars-color-black) !important;
+    border-color: var(--abcars-color-black) !important;
+    color: white !important;
+}
+
+.abcars-background-color-black:hover {
+    background-color: var(--abcars-color-black) !important;
+    border-color: var(--abcars-color-black) !important;
+    color: var(--abcars-color) !important;
+}
+
+.abcars-background-btn-black {
+    background-color: var(--abcars-color-black) !important;
+    border-color: var(--abcars-color-black) !important;
+    color: white !important;
+}
+
+.abcars-background-btn-black:hover {
+    background-color: var(--abcars-color-secondary) !important;
+    border-color: var(--abcars-color-secondary) !important;
+    color: white !important;
+}
+
+.abcars-color-btn-secondary {
+    background-color: var(--abcars-color-secondary) !important;
+    border-color: var(--abcars-color-secondary) !important;
+    color: white !important;
+}
+
+
+/* Cards background */
+
+.abcars-background-card-home {
+    background-color: var(--abcars-color-card) !important;
+    border-color: var(--abcars-color-card) !important;
+    border: 0px !important;
+}
+
+.card-tittle-home{
+    padding-left: 5%;
+}
+
+/* checkbox */
+.mat-mdc-checkbox.mat-accent {
+
+    --mdc-checkbox-selected-focus-icon-color: #008bcc;
+    --mdc-checkbox-selected-hover-icon-color: #008bcc;
+    --mdc-checkbox-selected-icon-color: #008bcc;
+    --mdc-checkbox-selected-pressed-icon-color: #008bcc;
+}
+
+.mat-mdc-checkbox.mat-accent .mdc-checkbox--selected~.mdc-checkbox__ripple {
+    background: #008bcc;
+}
+
+
+/* Styles of Components */
+
+c-vender-autos-vehicle {
+    cursor: pointer;
+}
+
+c-vender-autos-vehicle.pic img {
+    height: 180px !important;
+}
+
+
+/* Prevent to download images */
+
+img {
+    pointer-events: none;
+}
+
+mat-form-field {
+    width: 100%;
+}
+
+
+/* Change Colors mat-form-field */
+.mat-focused .mat-form-field-label {
+    color: #191919 !important;
+}
+
+.mat-form-field-appearance-outline.mat-focused .mdc-text-field--focused .mdc-notched-outline__trailing {
+    color: #008bcc !important;
+    border-color: #008bcc !important;
+}
+
+
+.mat-form-field-appearance-outline.mat-focused .mdc-text-field--focused .mdc-notched-outline__leading {
+    color: #008bcc !important;
+    border-color: #008bcc !important;
+}
+
+.mat-form-field-appearance-outline.mat-focused .mdc-text-field--focused .mdc-notched-outline__notch {
+    color: #008bcc !important;
+    border-color: #008bcc !important;
+
+}
+
+.mat-form-field-appearance-outline.mat-focused .mdc-text-field--focused .mdc-notched-outline__notch .mdc-floating-label--float-above {
+    color: #008bcc !important;
+}
+
+.mat-line{
+    display: inline-flex;
+    padding-right: 10px;
+    padding-bottom: 20px;
+    font-size: 13px;
+    font-family: 'Mulish' ;
+}
+
+.mat-mdc-standard-chip.mat-primary.mat-mdc-chip-selected, .mat-mdc-standard-chip.mat-primary.mat-mdc-chip-highlighted {
+    --mdc-chip-elevated-container-color: #008bcc;
+    --mdc-chip-elevated-disabled-container-color: #008bcc;
+    
+}
+
+.material-icons {
+    /* font-size: 13px; */
+    font-size: 24px;
+}
+
+.mat-mdc-list-item-unscoped-content .mat-icon {
+    padding-top: 12px;
+}
+
+.mat-mdc-slider.mat-primary {
+    --mdc-slider-handle-color: #008bcc !important;
+    --mdc-slider-focus-handle-color: #008bcc !important;
+    --mdc-slider-hover-handle-color: #008bcc !important;
+    --mdc-slider-active-track-color: #008bcc !important;
+    --mdc-slider-inactive-track-color: #008bcc !important;
+    --mdc-slider-with-tick-marks-active-container-color: #fff;
+    --mdc-slider-with-tick-marks-inactive-container-color: #008bcc !important;
+    --mat-mdc-slider-ripple-color: #008bcc !important;
+    --mat-mdc-slider-hover-ripple-color: rgba(63, 81, 181, 0.05);
+    --mat-mdc-slider-focus-ripple-color: rgba(63, 81, 181, 0.2);
+}
+
+/* Style mat-slide-toggle */
+.mat-mdc-slide-toggle.mat-accent {
+    --mdc-switch-selected-focus-state-layer-color: #fff !important;
+    --mdc-switch-selected-handle-color: #fff !important;
+    --mdc-switch-selected-hover-state-layer-color: #fff !important;
+    --mdc-switch-selected-pressed-state-layer-color: #fff !important;
+    --mdc-switch-selected-focus-handle-color: #ffffff !important; 
+    --mdc-switch-selected-hover-handle-color: #008bcc !important;
+    --mdc-switch-selected-pressed-handle-color: #008bcc !important;
+
+    --mdc-switch-selected-focus-track-color: #008bcc !important; 
+    --mdc-switch-selected-hover-track-color: #008bcc !important;
+    --mdc-switch-selected-pressed-track-color: #008bcc !important;
+    --mdc-switch-selected-track-color: #008bcc;
+}
+
+/* Change color checkbox */
+
+.mat-checkbox-checked.mat-accent .mat-checkbox-background,
+.mat-checkbox-indeterminate.mat-accent .mat-checkbox-background {
+    background-color: #383838 !important;
+}
+
+
+/* Styles General Elements DOM */
+
+.ns-resize {
+    cursor: ns-resize;
+}
+
+
+/* Styles of data table */
+.example-container {
+    height: 100%;
+    width: 100%;
+    max-width: 100%;
+    overflow: auto;
+}
+table {
+    width: 800px;
+}
+td.mat-column-star {
+    width: 50px;
+    padding-right: 8px;
+}
+th.mat-column-position, td.mat-column-position {
+    padding-left: 15px;
+}
+
+table {
+    width: 100%;
+    height: 200px;
+    overflow: auto;
+}
+
+@media(max-width:650px)
+{
+    .td__mag{
+        display: inline-block;
+        flex-direction: column;
+        width: 50%;
+        align-items: center;
+        justify-content: center center;
+        text-align: center;
+        margin-top: 20px;
+        height: 50px
+    }
+    .td__mm{
+        display: inline-block;
+        flex-direction: column;
+        width: 33.3%;
+        align-items: center;
+        justify-content: center center;
+        text-align: center;
+        margin-top: 20px;
+        height: 60px;
+    }
+    .td__table{
+        justify-content: space-between;
+        margin-right: 7px;
+    }
+    .th__table
+    {
+        display: none;
+    }
+    .td__table[data-titulo]{
+        display: flex;
+        flex-direction: row;
+    }
+    .td__table[data-titulo]::before{
+        content: attr(data-titulo);
+        text-transform: uppercase;
+        width: 80px;
+        margin-left: 7px;
+        font-weight: 700;
+    }
+    .td__table:first-child{
+        margin-top: 25px;
+    }
+}
+.td__table:first-child{
+    padding-right: 15px;
+}
+.in::placeholder{
+    color: black;
+    font-weight: bold;
+}
+
+/* Este estilo se tiene que eliminar */
+.mat-paginator {
+    background: #fff0;
+}
+
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+    select:focus,
+    textarea:focus,
+    input:focus {
+        font-size: 16px;
+    }
+}
+.mat-expansion-panel-body{
+    padding: 0;
+    margin-bottom: 10px;
+}
+
+.f-regular {
+    font-family: 'Mulish' !important;
+    margin-right: 4px;
+}
+
+.f-bold {
+    font-family: 'Mulish' ;
+    margin-right: 4px;
+}
+
+.f-thin {
+    font-family: 'Mulish' ;
+    margin-right: 4px;
+}
+
+ 
+  
+.bmw{
+    font-family: 'Mulish' ;
+}
+
+.gridOtros {
+    margin: 10px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+}
+
+.dragImaCars {
+    border: rgba(0, 0, 0, 0.336) 2px dotted;
+    width: 100%;
+    height: 100%;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.containerl {
+    margin: 0 auto;
+    border-radius: 10px;
+}
+
+.img-cars {
+    width: 100%;
+}
+
+input[type=password]::-ms-reveal,
+input[type=password]::-ms-clear
+{
+  display: none;
+}

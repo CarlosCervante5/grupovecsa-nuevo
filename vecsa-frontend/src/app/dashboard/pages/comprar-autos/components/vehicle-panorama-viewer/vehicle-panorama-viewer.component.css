@@ -1,0 +1,140 @@
+.fade-in-image { animation: fadeIn .6s; }
+
+@keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+.price-container {
+    position: relative;
+    
+}
+
+/* .cover-image {
+    object-fit: cover;
+} */
+
+.price {
+    position: absolute;
+    color: white;
+    background-color: #191919;
+    width: 197px;
+    height: 31px;
+    padding-top: 5px;
+    border-radius: 15px 0px 0px 0px;
+    text-align: center;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--price-title);
+}
+
+.price-align {
+    width: 100%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+}
+
+.price-promo {
+    font-size: var(--price-promo);
+    margin-right: 30px;
+}
+
+.font-generic {
+    font-size: var(--font-generic);
+}
+
+.view-deep-container {
+    position: relative;
+    margin-top: 12px;
+}
+
+.view {
+    position: absolute;
+    background-color: #191919;
+    width: 100%; 
+    height: 31px;
+    padding-top: 5px;
+    border-radius: 0px 0px 15px 0px;
+    display: flex;
+    align-items: center;
+    text-decoration: none; 
+    color: white;
+    z-index: 1;
+}
+
+.deep {
+    position: absolute;
+    color: white;
+    background-color: #EEB838;
+    width: 100%; 
+    height: 31px;
+}
+
+.view-deep {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.tag-choice { 
+    display: block;
+    position: absolute;
+    padding: 2px 8px;
+    z-index: 2;
+}
+
+.my-tag {
+    width: 20px;
+    height: 70px;
+    display: flex;
+    flex-direction: row-reverse;
+}
+
+.card {
+    border-radius: 8px !important;
+    overflow: hidden;
+}
+
+.card .image-container {
+    width: 100%;
+    height: 250px;
+    object-fit: cover !important;
+}
+
+.card-text {
+    margin: 0px 0px 0px;
+}
+
+@media screen and (max-width: 1091px) {
+    .card .image-container {
+        width: 100%;
+        height: 200px; /**Eran 450px */
+        object-fit: cover;
+        
+    }
+}
+
+.card-element {
+    transition: transform 0.1s ease;
+}
+
+.card-element:hover {
+    transform: scale(1.01);
+}
+
+input{
+    position: absolute;
+    width: 80%;  
+    height: 100%;  
+    bottom: 5%;
+    left: 10%;
+    opacity: 0;
+}
+
+canvas {    
+    position: absolute;
+    top:20%;
+}

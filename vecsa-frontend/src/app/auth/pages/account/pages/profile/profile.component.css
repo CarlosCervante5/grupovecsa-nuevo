@@ -1,0 +1,780 @@
+
+.card {
+    cursor: pointer;    
+    border-radius: 30px !important;
+    transition: transform 0.5s ease; 
+}
+
+.parrafo{
+    font-size: large;
+    text-align: justify;
+}
+
+.barra{
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.card:hover {
+    transform: scale(1.05);
+    border-color: var(--abcars-color-secondary);
+}
+
+.btn-rewards {
+    background-color: var(--abcars-color-secondary);
+}
+
+.texto_ini{
+    padding-left: 2%;
+    padding-bottom: 2%;
+    padding-top: 2%;
+    padding-right: 0;
+}
+
+.body-rewards {
+    padding-left: 10% !important;
+}
+
+.rewards-background-color {
+    background-image: url('/assets/images/abcars-images/banner-profile.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: top;
+}
+
+.user{
+    margin: 0 ;
+    padding: 0;
+}
+.contenedor{
+    background-color: #f1f1f1;
+    padding: 1rem;
+    height: 30%;
+    border-radius: 10px;
+}
+.records{
+    padding-top: 1rem;
+}
+
+.grafica-individual{
+    width: 100%;
+    height: 100px;
+}
+.canvas{
+    width: 100%;
+    height: 100%;
+}
+.perfil{
+    width: 100%;
+    border-radius: 10px;
+    background: linear-gradient(to bottom, #5ba0ff, #94bcf4);
+    padding: 1rem;
+}
+.tarjeta{
+    border-radius: 10px;
+    background: linear-gradient(to bottom, #5ba0ff, #94bcf4);
+    padding: 1rem;
+    color: #fff;
+    margin: 2rem;
+    width: 95%;
+    /* display: flex;
+    justify-content: center;
+    justify-items: center; */
+    /* transition: box-shadow 0.3s ease; */
+}
+.tarjeta:hover{
+    /* box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); Sombra al pasar el mouse */
+    /* transform: scale(1.05); Aumenta el tamaño de la tarjeta al 105% */
+    /* cursor: pointer;  */
+}
+
+
+pre{
+    overflow: hidden !important;
+}
+.carusel{
+    width: 100%;
+    height: 400px;
+}
+
+.vertical_S {
+    height: 440px; /* Ajusta según sea necesario */
+    width: 90%;   /* Asegúrate de que tenga un ancho */
+    border-radius: 20px;
+}
+
+.slider-c2 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 25% !important;
+    width: 100%;
+    padding: 10px;
+    background: linear-gradient(to bottom, #AFAFAF, #dddddd);
+    border-radius: 10px;
+    margin-bottom: 5px !important;
+}
+
+.slide-small{
+    width: 90%;
+    height: 90%;
+}
+
+.img-small {
+    border-radius: 20px;
+    width: 100%;
+    height: 100%;
+    min-height: 75px;
+}
+
+.slide-title {
+    font-size: 12px;
+    font-weight: bold;
+    margin: 0;
+}
+
+.slide-title-date {
+    font-size: 12px;
+    font-weight: 300;
+    margin: -15px 0 10px 0;
+}
+
+.slide-btn {
+    width: 75px;
+    background-color: #3985ED;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    text-transform: capitalize;
+    margin-right: 20px;
+}
+
+.img-banner {
+    width: 100%;
+    height: 50%;
+}
+
+/**Estilo para que los madales y los carruselos se adapten a la pantalla */
+/* @media screen and (min-width: 1091px) and (max-width: 2560px) {
+    .modal{
+        padding-top: 2% !important;
+    }
+    .slider-c2{
+        height: 30% !important;
+        width: 100% !important;
+    }
+} */
+
+
+@import url('https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,200..1000;1,200..1000&display=swap');
+
+
+/* The Modal (background) */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: none;
+    justify-items: center;
+    z-index: 2000;
+}
+
+.modal-container {
+    position: relative;
+    width: auto;
+    max-width: 90%;
+}
+
+.modal-content {
+    width: 100%;
+    max-height: 80vh;
+    object-fit: cover;
+}
+
+.btnClose {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    z-index: 10;
+    color: white;
+    font-size: 24px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.5);
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+    padding: 3px;
+}
+
+.btnClose:hover{
+    background-color: rgba(0, 0, 0, 0.7);
+    box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.7);
+    transform: scale(1.1);
+    transition: all 0.3s ease;
+}
+
+.texto {
+    color: white;
+    text-align: center;
+    margin: 0px;
+    margin-bottom: 3px;
+    /* overflow-wrap: break-word; Alternativa para mayor compatibilidad */
+    /* font-size: 1.5rem; */
+    white-space: nowrap !important; 
+    overflow: hidden !important; 
+    text-overflow: ellipsis !important;
+}
+
+.icon{
+    color: #ffffff;
+    font-size: 35px;
+}
+
+.promos{
+    margin: 2rem;
+    height: 350px;
+    width: 90%;
+    display: flex;
+    justify-content: center;
+}
+
+/* swiper de promociones */
+.s-promos {
+    height: 300px !important; /* Ajusta según sea necesario */
+    width: 100%  !important;   /* Asegúrate de que tenga un ancho */
+}
+
+.slider2 {
+    height: 100% !important;
+    width: 400px;
+}
+
+.sl2{
+    height: 100%;
+}
+
+.imgS2 {
+    width: 95%;
+    height: 100%;
+}
+
+.texto_puntos{
+    font-size: x-large;
+    padding-top: 10px;
+}
+.texto-email{
+    font-size: xx-small;
+    color: white;
+    text-align: center;
+    margin: 0px;
+    margin-bottom: 3px;
+}
+.bienvenida{
+    font-size: medium;
+}
+
+.taza{
+    width: calc(100% + 40px);
+    height: auto;
+    position: absolute;
+    z-index: 1;
+    top: -65px;
+    left: -20px;
+}
+
+@media screen and (min-width: 1092px) and (max-width: 1200px) {
+    .taza{
+        width: calc(100% + 80px) !important;
+        top: -60px !important;
+        left: -60px !important;
+    }
+
+}
+@media screen and (min-width: 992px) and (max-width: 1091px) {
+    .modal{
+        padding-top: 20% !important;
+    }
+    .slider-c2{
+        height: 32% !important;
+        width: 100% !important;
+    }
+    .modal-content{
+        max-width: 100%;
+    }
+    .slider2 {
+        height: 95% !important;
+        width: 400px !important;
+    }
+    .s-promos{
+        display: flex;
+        justify-content: center;
+        width: 100% !important;
+    }
+    .texto{
+        font-size: medium;
+    }
+    .posicion-u{
+        font-size:  clamp(10px, 4vw, 15px) !important;
+        padding-left: 20px !important;
+        padding-top: 0px !important;
+        padding-right: 20px !important;
+        width: 45px !important; 
+        height: 45px !important;
+    }
+    .taza{
+        width: calc(100% + 80px) !important;
+        top: -60px !important;
+        left: -60px !important;
+    }
+
+}
+
+@media screen and (min-width: 768px) and (max-width: 991px) {
+    .texto_ini{
+        padding-left: 3%;
+        padding-bottom: 3%;
+        padding-top: 3%;
+        padding-right: 0;
+    }
+    .modal{
+        padding-top: 15% !important;
+    }
+    .slider-c2{
+        height: 30% !important;
+        width: 100% !important;
+    }
+    .modal-content{
+        max-width: 100%;
+    }
+    .slider2 {
+        height: 95% !important;
+        width: 400px !important;
+    }
+    .s-promos{
+        display: flex;
+        justify-content: center;
+        width: 100% !important;
+    }
+    .texto{
+        font-size: x-large;
+    }
+    .texto-email{
+        font-size: small;
+    }
+    .imagen-copa{
+        background-size: 70% !important;
+    }
+    .taza{
+        width: calc(100% + 90px) !important;
+        top: -60px !important;
+        left: -60px !important;
+    }
+
+    .posicion-u{
+        font-size:  clamp(10px, 4vw, 15px) !important;
+        padding-left: 20px !important;
+        padding-top: 0px !important;
+        padding-right: 20px !important;
+        width: 30px !important; 
+        height: 30px !important;
+    }
+}
+
+@media screen and (min-width: 541px) and (max-width: 767px) {
+    .texto_ini{
+        padding-left: 5%;
+        padding-bottom: 5%;
+        padding-top: 5%;
+        padding-right: 0;
+    }
+    .modal{
+        padding-top: 200px !important;
+    }
+    .slider-c2{
+        height: 30% !important;
+        width: 100% !important;
+    }
+    .modal-content{
+        max-width: 100%;
+    }
+    .slider2 {
+        height: 95% !important;
+        width: 370px !important;
+    }
+    .s-promos{
+        display: flex;
+        justify-content: center;
+        width: 95% !important;
+    }
+    .texto{
+        font-size: x-large;
+    }
+    .texto-email{
+        font-size: small;
+    }
+    .imagen-copa{
+        background-size: 80% !important;
+    }
+    .taza{
+        width: calc(100% + 100px) !important;
+        top: -45px !important;
+        left: -60px !important;
+    }
+}
+
+@media screen and (min-width: 451px) and (max-width: 540px) {
+    .texto_ini{
+        padding-left: 5%;
+        padding-bottom: 5%;
+        padding-top: 5%;
+        padding-right: 0;
+    }
+    .modal{
+        padding-top: 80px !important;
+    }
+    button {
+        font-size: 12px;
+    }
+    .slider-c{
+        height: 300px !important;
+    }
+    .slider-c2{
+        height: 30%!important;
+        width: 100%!important;
+    }
+    .slider2 {
+        height: 95% !important;
+        width: 350px !important;
+    }
+    .s-promos{
+        display: flex;
+        justify-content: center;
+        width: 95% !important;
+    }
+    .texto{
+        font-size: x-large;
+    }
+    .texto-email{
+        font-size: small;
+    }
+
+    .punto_N{
+        font-size: 350% !important;
+     }
+     .posicion-p{
+         font-size: 250% !important;
+     }
+     .puntos_targs{
+         font-size: 200% !important;
+     }
+     .imagen-copa{
+        background-size: 100% !important;
+    }
+    .taza{
+        width: calc(100% + 130px) !important;
+        top: -45px !important;
+        left: -80px !important;
+    }
+    .whatsapp-container{
+        display: block !important;
+    }
+}
+
+@media screen and (min-width: 350px) and (max-width: 450px){
+    .modal{
+        padding-top: 200px !important;
+    }
+    .texto_ini{
+        padding-left: 8%;
+        padding-bottom: 8%;
+        padding-top: 8%;
+        padding-right: 0;
+    }
+    .slider-c{
+        height: 300px !important;
+    }
+    .swiperV{
+       width: 90% !important;
+    }
+
+    .slider-c2{
+        height: 30% !important;
+        width: 100% !important;
+    }
+
+    .slider2 {
+        height: 95% !important;
+        width: 350px !important;
+    }
+    .s-promos{
+        display: flex;
+        justify-content: center;
+        width: 95% !important;
+    }
+    .texto_puntos{
+        font-size: 2rem !important;
+    }
+    .texto{
+        font-size: small;
+    }
+    .texto-email{
+        font-size: small;
+    }
+    .bienvenida{
+        font-size: medium;
+    }
+    .punto_N{
+       font-size: 350% !important;
+    }
+    .posicion-p{
+        font-size: 250% !important;
+    }
+    .puntos_targs{
+        font-size: 200% !important;
+    }
+    .posicion-u{
+        font-size:  clamp(20px, 4vw, 25px) !important;
+        padding-left: 20px !important;
+        padding-top: 0px !important;
+        padding-right: 20px !important;
+        width: 45px !important; 
+        height: 45px !important;
+    }
+
+    .taza{
+        width: calc(100% + 130px) !important;
+        top: -25px !important;
+        left: -80px !important;
+    }
+    .whatsapp-container{
+        display: block !important;
+    }
+    .img-tags{
+        width: 40px !important;
+        height: 40px !important;
+    }
+}
+
+@media screen and (min-width: 300px) and (max-width: 349px){
+    .modal{
+        padding-top: 200px !important;
+    }
+    .texto_ini{
+        padding-left: 8%;
+        padding-bottom: 8%;
+        padding-top: 8%;
+        padding-right: 0;
+    }
+    .slider-c{
+        height: 300px !important;
+    }
+    .swiperV{
+       width: 90% !important;
+    }
+
+    .slider-c2{
+        height: 30% !important;
+        width: 100% !important;
+    }
+
+    .slider2 {
+        height: 95% !important;
+        width: 350px !important;
+    }
+    .s-promos{
+        display: flex;
+        justify-content: center;
+        width: 95% !important;
+    }
+    .texto_puntos{
+        font-size: 2rem !important;
+    }
+    .texto{
+        font-size: small;
+    }
+    .texto-email{
+        font-size: small;
+    }
+    .bienvenida{
+        font-size: small;
+    }
+    .punto_N{
+       font-size: 250% !important;
+    }
+    .posicion-p{
+        font-size: 200% !important;
+    }
+    .puntos_targs{
+        font-size: 150% !important;
+    }
+    .posicion-u{
+        font-size: clamp(20px, 4vw, 25px)!important;
+        padding-left: 20px !important;
+        padding-top: 0px !important;
+        padding-right: 20px !important;
+        width: 45px !important; 
+        height: 45px !important;
+    }
+
+    .taza{
+        width: calc(100% + 120px) !important;
+        top: -18px !important;
+        left: -70px !important;
+    }
+    .img-tags{
+        width: 40px !important;
+        height: 40px !important;
+    }
+    .return-container{
+        display: block !important;
+    }
+}
+
+.img-tags{
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border-color: #fff;
+}
+.puntos_targs{
+    font-size: 250%;
+     margin: 0 !important; 
+     font-weight: 500;
+}
+
+.parrafo{
+    font-size: medium;
+    text-align: left;
+}
+
+.users{
+    font-size: x-large;
+    margin: 0 !important;
+    font-weight: 500;
+    white-space: nowrap; /* Evita el salto de línea */
+    overflow: hidden; /* Oculta el contenido desbordante */
+    text-overflow: ellipsis; /* Agrega puntos suspensivos */
+}
+
+.pMes{
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: center;
+    background: linear-gradient(to bottom, #AFAFAF, #dddddd);
+    height: 130px;
+    border-radius: 10px;
+    color: #fff;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.grafica{
+    background: linear-gradient(to bottom, #AFAFAF, #c5c5c5);
+    display: block;
+    border-radius: 10px;
+    color: #fff;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.graphic {
+    width: 105%;
+    height: 300px;
+    margin-top: 0;
+}
+
+.profile {
+    display: flex;
+    justify-content: center;
+    align-items: center
+}
+
+.div1{
+    background: linear-gradient(to bottom, #5ba0ff, #94bcf4);
+    border-radius: 10px;
+    padding: 4%;
+    color: #fff;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.posicion-u{
+  width: 65px;
+  height: 65px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  font-weight: 900;
+  overflow: hidden;  /* Evita que el contenido se desborde */
+  text-align: center;
+  white-space: nowrap;
+  font-size: clamp(1rem, 5vw, 2.5rem); /* Tamaño de fuente dinámico */
+  max-width: 65px;  /* Asegura que el contenedor no crezca */
+  line-height: 1; 
+}
+
+.punto_N{
+    /* width: 65px;
+    height: 65px; */
+    font-size: 500%;
+    /* padding-left: 30px !important;
+    padding-top: 0px !important;
+    padding-right: 30px !important;
+    display: flex;
+    justify-content: center; */
+    /* background: linear-gradient(to bottom, #5ba0ff, #94bcf4); */
+    border-radius: 10px;
+    font-weight: 900 !important;
+}
+
+.posicion-p{
+    /* padding: 30px; */
+    font-size: 350%;
+    font-weight: 900 !important;
+    padding-top: 1rem;
+    text-align: -webkit-center;
+}
+
+.imagen-copa{
+    background-image: url('../../../../../../assets/img/copa.png');
+    background-size:90%; /* Ajusta la imagen para cubrir todo el div */
+    background-position: center; /* Centra la imagen */
+    background-repeat: no-repeat; /* Evita que la imagen se repita */
+}
+
+
+.return-container {
+    display: none;
+    position: fixed;
+    bottom: 50px; 
+    left: 80%;
+    z-index: 1000;
+  }
+  
+  .return-link {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    cursor: pointer;
+    box-shadow: 0px 4px 10px rgba(83, 141, 248, 0.5);
+
+  }
+
+  .return-link:hover{
+    background-color: #94bcf4;
+    box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.7);
+    transform: scale(1.1);
+    transition: all 0.3s ease;
+  }
+  
+  .return-link i {
+    font-size: 35px;
+    color: #5ba0ff;
+  }
+

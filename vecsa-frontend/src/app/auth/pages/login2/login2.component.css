@@ -1,0 +1,104 @@
+
+
+.image-container {
+    position: relative; /* Posiciona el contenedor relativamente */
+    display: inline-block; /* Asegura que el tamaño se ajuste a la imagen */
+    height: 400px;
+    width: 100%;
+}
+.background-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; 
+}
+.titulo{
+    font-size: x-large;
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+.texto{
+    font-size: large;
+    text-align: justify;
+    margin-left: 0px;
+    margin-right: 0px;
+}
+.texto_negrita{
+    font-weight: 700;
+    font-size: large;
+}
+a{
+    color: #fff;
+}
+
+.overlay-button {
+    width: 180px;
+    height: 40px;
+    position: absolute; /* Posiciona el botón absolutamente respecto al contenedor */
+    top: 80%; /* Centra verticalmente */
+    left: 70%; /* Centra horizontalmente */
+    transform: translate(-50%, -50%); /* Ajusta para centrar */
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    background-color:#619cce; /* Color de fondo con opacidad */
+    border: none; /* Sin borde */
+    /*padding: 11px 50px 11px 50px; /* Espaciado interno */
+    cursor: pointer; /* Cambia el cursor al pasar por encima */
+    border-radius: 0px; /* Esquinas redondeadas */
+    text-decoration: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    /* text-transform: none;Evita que las letras sean en mayusculas */
+    /* width: 300px;
+    height: 100px; */
+}
+
+.overlay-button:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Aumenta el sombreado al pasar el ratón */
+}
+.btn-log{
+    padding: 11px 90px 11px 90px;
+    font-size: 14px;
+    color: #fff;
+    background-color:#619cce;
+    border-radius: 0px;
+    width: 60%;
+}
+
+@media screen and (max-width: 500px) {
+    .overlay-button{
+        left: 80%;
+        width: 100px;
+        height: 40px;
+        font-size: 9px;
+        white-space: nowrap;
+        /* padding: 10px 20px 10px 20px !important; */
+    }
+    .btn-log{
+        width: 90%;
+    }
+    .texto{
+        font-size: medium;
+        margin-left: 10px;
+        margin-right: 10px;
+        text-align: left;
+    }
+    .titulo{
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+    .registro{
+        margin-left: 15px;
+        margin-top: 10px;
+    }
+    .image-container{
+        height: 200px;
+    }
+    .texto_negrita{
+        font-size: medium;
+    }
+    .flecha{
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+}

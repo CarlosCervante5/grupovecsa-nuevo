@@ -1,0 +1,56 @@
+.info-text {
+    font-weight: 700;
+    font-size: 24px;
+}
+
+.info-text span {
+    color: var(--abcars-color);
+}
+
+.benefits-text {
+    font-weight: 500;
+    font-size:22px;
+}
+
+.image_box {            
+    width: 100%;
+    padding: 1rem;      
+    position:relative; 
+    height: 400px;          
+    backface-visibility: hidden;      
+}
+
+.principal_image_car {
+    position: absolute;
+    top: 70%;
+    left: 35%;
+    transform: translate(-50%, -50%);
+    width: 125%;
+    z-index:1;   
+                
+    animation: moveInBottom 2s ease-out .75;
+    animation-fill-mode: backwards;
+}
+
+@media only screen and (max-width: 1200px) and (min-width: 992px)  {      
+    .principal_image_car {        
+      top: 60%;
+      left: 40%;        
+      width: 125%;                                    
+    }
+}
+
+@media only screen and (max-width: 991px)  {
+    .image_box { height:300px; }
+    .principal_image_car {        
+      top: 50%;
+      left: 50%;        
+      width: 100%;                                    
+    }
+  }
+  @media only screen and (max-width: 750px)  {
+    .image_box { height:200px; }
+  }
+  @media only screen and (max-width: 450px)  {
+    .image_box { height:100px; }
+  }
