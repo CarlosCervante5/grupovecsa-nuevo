@@ -1,0 +1,108 @@
+:host {
+  display: block;
+}
+
+.spacetop {
+  margin-top: 70px;
+}
+
+::ng-deep .mat-step-header .mat-step-icon-selected {
+  background-color: #707070 !important; 
+}
+
+::ng-deep .mat-step-header .mat-step-icon-state-edit {
+  background-color: #FFCB54 !important; 
+}
+
+.horizontal_line {
+  width: 100%;       
+  border-bottom: 1px solid #000; 
+  line-height: 0.6em;
+  margin: 0 0 20px; 
+} 
+
+.horizontal_line span { 
+    background: #fff; 
+    padding-right: 10px;
+}
+
+.heading-4 {
+  font-size:16px;
+  font-weight: 540;      
+}
+
+.image_box {            
+  width: 100%;
+  padding: 1rem;      
+  position:relative; 
+  height: 500px;    
+  backface-visibility: hidden;      
+}
+
+.image_car {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 85%;
+  z-index:1;   
+              
+  animation: moveInBottom 2s ease-out .75;
+  animation-fill-mode: backwards;
+}
+
+.footer_image_car{      
+  position: absolute;
+  top: 79%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  animation: moveInBottom 2s ease-out .75;
+  animation-fill-mode: backwards;     
+}
+
+@keyframes moveInBottom {      
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -45%);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  } 
+}
+
+@media only screen and (max-width: 1200px) and (min-width: 1051px)  {
+  .image_box { height:450px; }
+  .footer_image_car{ top: 75%; }
+}
+
+@media only screen and (max-width: 1050px) and (min-width: 901px)  {
+  .image_box { height:400px; }
+  .footer_image_car{ top: 73%; }
+}
+
+@media only screen and (max-width: 900px) and (min-width: 751px)  {
+  .image_box { height:350px; }
+  .footer_image_car{ top: 71%; }
+}
+
+@media only screen and (max-width: 750px) and (min-width: 601px)  {
+  .image_box { height:300px; }
+  .footer_image_car{ top: 69%; }
+}
+
+@media only screen and (max-width: 600px) and (min-width: 451px)  {
+  .image_box { height:250px; }
+  .footer_image_car{ top: 71%; width: 95%; }
+}
+
+@media only screen and (max-width: 450px) and (min-width: 301px)  {
+  .image_box { height:200px; }
+  .footer_image_car{ top: 71%; width: 95%; }
+}
+
+@media only screen and (max-width: 300px) and (min-width: 151px)  {
+  .image_box { height:150px; }
+  .footer_image_car{ top: 68%; width: 95%; }
+}

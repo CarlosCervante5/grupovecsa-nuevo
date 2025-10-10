@@ -1,0 +1,323 @@
+.chip-option {
+    min-width: 50px; /* Ancho mínimo */
+    min-height: 50px; /* Altura mínima */
+    display: flex; /* Habilita el flexbox */
+    justify-content: center; /* Centra el contenido horizontalmente */
+    align-items: center; /* Centra el contenido verticalmente */
+    flex-direction: column; /* Organiza el contenido en columna */
+    margin: 2px !important; /* Espaciado entre chips */
+    position: relative; /* Para posicionar la flecha */
+    text-align: center !important; /* Asegúrate de que el texto esté centrado */
+    padding-left: 5px;
+}
+
+.mdc-evolution-chip-set__chips {
+    display: flex;
+    flex-flow: wrap;
+    justify-content: center;
+}
+
+.image_container {
+    width: 60px;  /* Define el ancho del contenedor */
+    height: 60px; /* Define la altura del contenedor */
+    overflow: hidden; /* Oculta cualquier parte de la imagen que sobresalga */
+    display: flex; /* Permite centrar la imagen si es necesario */
+    justify-content: center; /* Centra la imagen horizontalmente */
+    align-items: center; /* Centra la imagen verticalmente */
+}
+
+.image_quiz {
+    max-width: 100%; /* Asegura que la imagen no sobrepase el ancho del contenedor */
+    max-height: 100%; /* Asegura que la imagen no sobrepase la altura del contenedor */
+    width: auto; /* Permite que la imagen mantenga su ancho original */
+    height: auto; /* Permite que la imagen mantenga su altura original */
+    object-fit: contain; /* Asegura que la imagen se ajuste dentro del contenedor */
+}
+
+.img-fluid-f {
+    width: 100%;               /* Hace que la imagen ocupe el 100% del ancho de su contenedor */
+    height: auto;              /* Mantiene la proporción de la imagen */
+    max-width: 200px;          /* El ancho máximo es 200px */
+    max-height: 250px;         /* El alto máximo es 250px */
+    border-radius: 50%;        /* Hace que la imagen sea redonda */
+    padding-top: 8%;           /* Padding superior */
+    padding-bottom: 8%;        /* Padding inferior */
+    object-fit: cover;         /* Asegura que la imagen cubra el contenedor y se recorte si es necesario */
+    min-height: 250px;
+}
+
+.foto{
+    background: linear-gradient(to bottom, #5ba0ff, #94bcf4);
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+}
+
+
+.card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.card {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #ffffff;
+    cursor: move;
+}
+
+.special-card {
+    max-height: 80px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+}
+  
+.special-card .card-body {
+    padding: 10px;
+}
+
+.image_card {
+    object-fit: cover;
+    height: 65%;
+    width: 65%;
+    align-self: center;
+}
+
+.return-container {
+    display: none;
+    position: fixed;
+    bottom: 50px; 
+    left: 80%;
+    z-index: 1000;
+}
+  
+.return-link {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    cursor: pointer;
+    background-color: rgba(255, 252, 252, 0.5);
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+
+}
+
+.return-link:hover{
+    background-color: rgba(0, 0, 0, 0.7);
+    box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.7);
+    transform: scale(1.1);
+    transition: all 0.3s ease;
+}
+
+.texto{
+    font-size: large;
+    color: black;
+}
+
+@media screen and (min-width: 1400px){
+
+    .card {
+        min-height: 350px;
+    }
+}
+
+@media screen and (min-width: 1231px) and (max-width: 1400px){
+    .card-body {
+        min-height: 165px; /* Ajustar altura del contenido */
+    }
+
+    .card {
+        min-height: 355px;
+    }
+}
+
+
+@media screen and (min-width: 900px) and (max-width: 1230px){
+    .img-fluid-f{
+        margin-left: 10px;
+        width: 150px !important;
+        height: 170px;
+        min-height: 150px;
+    }
+
+    .card-body {
+        min-height: 165px; /* Ajustar altura del contenido */
+    }
+
+    .card {
+        min-height: 300px;
+    }
+}
+
+@media screen and (min-width: 769px) and (max-width: 900px){
+    .img-fluid-f{
+        width: 150px !important;
+        height: 170px;
+        min-height: 150px;
+    }
+
+    .card-body {
+        min-height: 190px; /* Ajustar altura del contenido */
+    }
+}
+
+
+@media screen and (min-width: 513px) and (max-width: 768px){
+    .img-fluid-f{
+        width: 70px !important;
+        height: 90px;
+        min-height: 70px;
+    }
+}
+
+@media screen and (min-width: 441px) and (max-width: 512px){
+    .img-fluid-f{
+        width: 100px !important;
+        height: 120px;
+        min-height: 100px;
+    }
+    
+    .return-container{
+        display: block !important;
+    }
+}
+
+@media screen and (min-width: 350px) and (max-width: 440px){
+    .img-fluid-f{
+        width: 100px !important;
+        height: 120px;
+        min-height: 100px;
+    }
+
+    .return-container{
+        display: block !important;
+    }
+    .image_container{
+        margin-left: 10px;
+    }
+}
+
+@media screen and (max-width: 349px){
+    .img-fluid-f{
+        width: 100px !important;
+        height: 120px;
+        min-height: 100px;
+    }
+
+    .return-container{
+        display: block !important;
+    }
+
+    .chip-option {
+        min-width: 32px;
+        min-height: 32px;
+        font-size: x-small;
+        padding-left: 0;
+    }
+
+    .texto {
+        font-size: small; 
+    }
+}
+
+/* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    background-color: rgba(245, 245, 245, 0.8);
+}
+
+.modal-container {
+    background-color: white; /* Card background */
+    padding: 20px;
+    border-radius: 10px; /* Rounded corners */
+    max-width: 500px; /* Max width of the modal */
+    text-align: center; /* Center the text */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Card shadow */
+    width: 90%; /* Responsive width */
+    position: relative;
+    margin-left: 5%;
+}
+
+.modal-content {
+    width: 100%;
+    max-height: 80vh;
+    object-fit: cover;
+}
+
+.btnClose {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    z-index: 10;
+    color: white;
+    font-size: 24px;
+    border-radius: 50%;
+    background-color: #fff;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+    padding: 3px;
+    height: 24px;
+    width: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btnClose:hover{
+    
+    box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.7);
+    transform: scale(1.1);
+    transition: all 0.3s ease;
+}
+
+
+.indicator-text {
+    font-size: 0.9rem;
+    color: #757575;
+    margin-bottom: 0.5rem;
+}
+
+.indicator-bar {
+    height: 4px;
+    background-color: #e0e0e0;
+    border-radius: 2px;
+    position: relative;
+}
+
+.bar-line {
+    height: 4px;
+    background-color: #3f51b5;
+    border-radius: 2px;
+}
+
+.arrows span {
+    position: relative;
+    top: -12px;
+    font-size: 1.5rem;
+}
+
+
+.circle-number {
+    color: white; /* Texto en blanco */
+    background-color: #429dc7; /* Fondo azul */
+    border-radius: 50%; /* Forma circular */
+    text-align: center; /* Centrar el texto */
+    display: inline-block; /* Hacer que el elemento sea inline */
+    width: 30px; /* Ancho del círculo */
+    height: 30px; /* Altura del círculo */
+    line-height: 30px; /* Alinear el texto verticalmente */
+    font-weight: bold; /* Hacer el texto más llamativo */
+    font-size: 1.2rem; /* Tamaño del texto */
+}

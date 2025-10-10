@@ -1,0 +1,74 @@
+<!-- Contact Form-->
+ 
+<div class="container section "> 
+    <section class=" text-left" >
+ 
+          <h2   class="titles text{{Marca.brand}}">RESERVA TU CITA</h2>
+          <div class="row">
+                 <p style="font-size: 20px; " class="text{{Marca.brand}}">Por favor completa el formulario y nos comunicaremos en breve.</p>
+ 
+          </div>
+  
+          <form class="rd-form rd-form-variant-2 rd-mailform"  [formGroup]="formCita" (ngSubmit)="onSubmit()" >
+            <div class="row  ">
+              <div class="col-md-4">
+                <div class="form-wrap"  >
+                  <input class="form-input text{{Marca.brand}}" id="name" type="text" name="name" formControlName="name" required>
+                  <label class="form-label text{{Marca.brand}}" for="name">Nombre</label>
+                  <mat-hint class="text{{Marca.brand}}" *ngIf="nameInvalid">Complete su nombre(s).</mat-hint>
+
+                 </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-wrap" >
+                  <input class="form-input text{{Marca.brand}}" id="email" type="text" name="email" formControlName="email" required>
+                  <label class="form-label text{{Marca.brand}}" for="email">E-mail</label>
+                  <mat-hint class="text{{Marca.brand}}" *ngIf="emailInvalid">Escriba un correo electrónico válido.</mat-hint>
+                 </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-wrap" >
+                  <input class="form-input text{{Marca.brand}}" id="phone" type="text" name="phone" formControlName="phone" required>
+                  <label class="form-label text{{Marca.brand}}" for="phone">Celular</label>
+                  <mat-hint *ngIf="phoneInvalid" class="text{{Marca.brand}}">Su número debe ser de 10 dígitos, verifique.</mat-hint>
+                 </div>
+              </div>
+              <div class="col-lg-6 col-md-6 col-sm-12">
+                <div class="form-wrap" >
+
+                <mat-label class="text{{Marca.brand}}">Selecciona la Fecha de tu Cita:</mat-label>                        
+                <input  class="form-input text{{Marca.brand}}" matInput type="date" formControlName="date" >
+                <mat-hint class="text{{Marca.brand}}" *ngIf="dateInvalid">Selecciona una Fecha Valida. </mat-hint>
+                </div>
+               </div>
+
+               <div class=" col-lg-6 col-md-6 col-sm-12">
+                <div class="form-wrap" >
+                <mat-label class="text{{Marca.brand}}">Selecciona la Hora de tu Cita:</mat-label>                        
+                <input   class="form-input text{{Marca.brand}}" matInput type="time" formControlName="hour" >
+                <mat-hint class="text{{Marca.brand}}" *ngIf="hourInvalid">Selecciona la Hora.</mat-hint>
+                </div>
+               </div>
+              <div class="col-12 mt-2">
+                <div class="form-wrap" >
+                    <textarea class="form-input textarea-lg text{{Marca.brand}}" id="description" name="description" formControlName="description" required></textarea>
+                    <label class="form-label text{{Marca.brand}}" for="description">Mensaje</label>   
+                    <mat-hint class="text{{Marca.brand}}" *ngIf="messageInvalid">Escriba un mensaje</mat-hint>           
+                 </div>
+              </div>
+            </div>
+            <div class="row mt-4">
+              <button  class="btn text{{Marca.brand}}" type="submit" [disabled]="formCita.invalid || disabled" >Enviar</button>
+
+            </div>
+            <div class="row "  class="text-center">
+             <h2 class="mt-4 texto text{{Marca.brand}}" >O, AGENDAR VIA WHATSAPP</h2> 
+            </div>
+            <div class="row mt-4">
+              <a href="https://api.whatsapp.com/send?phone=5217717955325&text=Quisiera%20Agendar%20Mi%20Cita%20A%20Servicio%20Para%20{{Marca.brand}}" target="_blank" class="btn2">
+                <img  src="./assets/icons/whatsapp.png" style="width: 20px; filter: invert(100);"  alt="">             </a>
+ 
+            </div>
+          </form>      
+     </section>
+  </div>

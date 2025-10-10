@@ -1,0 +1,108 @@
+<div class="d-flex justify-content-center">
+    <nav  id='top' class="navbar navbar-expand-lg navbar-light">
+        <div class="container-fluid">
+              <div class="container-fluid cont_edit">
+                    <!-- <a href="https://grupovecsa.com/"> -->
+                    <a class="" href="https://grupovecsa.com/">
+                      <span><img class="img_nav" src="assets/logos_nav/Logo_Promociones_Azul.png" alt="" style="height: 49px;"/></span>
+                    </a>
+                    <button class="navbar-toggler btn-menu" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                      <span><img src="assets/icons-fontawesome/bars-solid.svg" alt="flecha" style="font-size: 40px; fill: #6495ed;"></span>
+                    </button>
+              </div>
+                  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="navbar-nav ms-auto">
+                           <li>
+                            <a class="nav-link" href="https://grupovecsa.com/">Grupo VECSA</a>
+                           </li>
+                          <li class="nav-item dropdown" *ngIf="nuevos.length != 0" >
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                              Vehículos nuevos
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                              <li *ngFor="let n of nuevos">
+                                <a class="dropdown-item" (click)="scrollToTop(n.uuid)">
+                                  {{n.name | uppercase}}
+                                </a>
+                              </li>
+                            </ul>
+                          </li>
+
+                          <li class="nav-item" *ngIf="nuevos.length == 0">
+                            <a class="nav-link" role="button" aria-expanded="false">
+                              Vehículos nuevos
+                            </a>
+                          </li>
+
+
+
+                          <li class="nav-item dropdown" *ngIf="after.length != 0">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                              Aftersales
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                              <li *ngFor="let a of after">
+                                <a class="dropdown-item" (click)="scrollToTop(a.uuid)" >
+                                  {{a.name | uppercase}}
+                                </a>
+                              </li>
+                              <!-- <li><a class="dropdown-item" (click)="closeNavbar()">BMW</a></li>
+                              <li><a class="dropdown-item" (click)="closeNavbar()">MINI</a></li>
+                              <li><a class="dropdown-item" (click)="closeNavbar()">MOTORRAD</a></li>
+                              <li><a class="dropdown-item" (click)="closeNavbar()">CHEVROLET</a></li> -->
+                            </ul>
+                          </li>
+                          <li class="nav-item" *ngIf="after.length == 0">
+                            <a class="nav-link" role="button" aria-expanded="false">
+                              Aftersales
+                            </a>
+                          </li>
+
+
+                          <li class="nav-item dropdown" *ngIf="semi.length != 0">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                              Vehículos seminuevos
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                              <li *ngFor="let s of semi">
+                                <a class="dropdown-item" (click)="scrollToTop(s.uuid)">
+                                  {{s.name | uppercase}}
+                                </a>
+                              </li>
+                              <!-- <li><a class="dropdown-item" (click)="closeNavbar()">BMW</a></li>
+                              <li><a class="dropdown-item" (click)="closeNavbar()">MINI</a></li>
+                              <li><a class="dropdown-item" (click)="closeNavbar()">MOTORRAD</a></li>
+                              <li><a class="dropdown-item" (click)="closeNavbar()">CHEVROLET</a></li> -->
+                            </ul>
+                          </li>
+                          <li class="nav-item" *ngIf="semi.length == 0">
+                            <a class="nav-link" role="button" aria-expanded="false">
+                              Vehículos seminuevos
+                            </a>
+                          </li>
+
+
+                          <li *ngIf="!auth_user" class="nav-item">
+                            <a class="nav-link" [routerLink]="['/auth/iniciar-sesion']" (click)="closeNavbar()">
+                              <img src="assets/icons-fontawesome/user-regular.svg" alt="flecha" width="22px" height="22px">
+                            <p class="d-block d-lg-none"> Mi Cuenta</p></a>
+                          </li>
+          
+                          <li *ngIf="auth_user" class="nav-item dropdown">
+                            
+                            <a class="nav-link dropdown-toggle" href="#" role="button" id="navbarDropdownAccount" data-bs-toggle="dropdown" aria-expanded="false">
+                              <img src="assets/icons-fontawesome/user-regular.svg" alt="flecha" width="22px" height="22px">
+                              <p class="d-block d-lg-none"> Mi Cuenta</p>
+                            </a>
+          
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownAccount">
+                              <li><a class="dropdown-item" (click)="closeNavbar()" [routerLink]="[url_dashboard]">DASHBOARD</a></li>
+                              <li><a class="dropdown-item" (click)="logout()" > CERRAR SESIÓN <i class="fas fa-sign-out-alt"></i></a></li>
+                            </ul>
+                          </li>
+          
+                        </ul>
+                  </div>
+        </div>
+      </nav>
+  </div>

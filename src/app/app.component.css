@@ -1,0 +1,211 @@
+/* styles.css o styles.scss */
+@import "swiper/swiper-bundle.min.css";
+
+
+.promocion{
+    color: #008bcc !important;
+}
+mat-sidenav {      
+    background-color: var(--white);
+}
+
+.content {
+    margin-top: 0;
+    z-index: 3;
+    background-color: white;
+}
+
+
+.navbar {    
+    position: fixed;    
+    z-index: 999999;    
+    width: 100%;
+    padding-top: 0px;
+    padding-bottom: 0px;
+}
+
+.pe-3 {
+    padding-right: 13rem !important;
+}
+
+.toolbar-filler {
+    flex: 1 1 auto;
+}
+
+.router-background {
+    background-color: white;
+    /* display: flex;
+    flex-wrap: wrap; */
+}
+
+.login-button {
+    background-color: #008bcc;
+    border-color: #ffcc54be;    
+    color: white;
+}
+
+.login-button:hover {
+    background-color: #ffcc54be !important;
+    border-color: #ffcc54be !important;    
+    color: white;
+}
+
+.navbar-position {
+    float: right;
+}
+
+.navbar-assist-index {
+    top: 0px;
+    z-index: 98;
+}
+
+.navbar-navegation-index {
+    z-index: 99;
+    background: #F2F2F2;
+    border-bottom-left-radius: 50px;
+    border-bottom-right-radius: 50px;
+}
+/*Sidevar*/
+.menu_sidevar:hover{
+    background-color: #008bcc;
+ 
+    display: flex;
+ 
+}
+.menu_sidenav{
+    background-color: #D9D9D9;
+}
+.menu_sidevar{
+    position: relative;
+}
+.menu_sidevar div {
+    padding-bottom: 0 !important;
+}
+.menu_icon_sidevar{
+    width: 30px;
+}
+
+.nav-link {
+    /* color:#fff; */
+    color:#fcfcfc !important;
+    font-weight: 700;
+}
+
+a, a:focus, a:active {
+	color: #6689ff;
+}
+
+a:hover, a:active {
+	color: #1a4eff;
+}
+
+.logo {
+    font-size: 2.7rem;
+    /* margin: 6rem;     */
+    margin: 1rem;    
+    padding: 0;
+    line-height: 1;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;  
+    font-family: "Mulish";      ;
+}
+
+.logo a {
+    position: absolute;
+    /* top: 25px; */
+    top: 10px;
+    color: #fff;
+}
+
+.logo img {
+    /* max-height: 40px; */
+    max-height: 50px;
+}
+
+.container-fluid  {
+    /* background: rgba(25, 25, 25, 0.95); */
+    background: rgba(0, 0, 0, 0.329);
+    transition: all 0.5s;
+    z-index: 9999999;
+    height: 71px;
+    color: white !important;
+}
+
+.container-fluid .fixed-top {
+    background: #191919;
+}
+.pointer {
+    cursor: pointer;
+    color: #191919;
+}
+.navbar #aqui {
+    color:black !important;
+    top:-10px !important;     
+}
+
+.navbar #aqui mat-icon {
+    font-size: 30px;
+    height: 30px;
+    width: 30px;
+}
+
+#menu-toggle mat-icon {    
+    font-size: 30px;
+    height: 30px;
+    width: 30px;
+}
+
+mat-list-item:hover {
+    background: #008bcc;        
+}
+
+mat-list-item:hover .mat-line {       
+    color: #fff !important
+}
+
+.mat-line {
+    padding-bottom: 0px;
+}
+
+@media (min-width: 992px){
+    .navbar-expand-lg .navbar-nav .nav-link {
+        /* padding-left: 2.5rem !important; */
+        padding-left: 1.5rem !important;
+    }
+}
+
+.marginButtons{
+    color: white !important;
+    margin: 5px;
+    filter: invert(100%);
+}
+
+.shareButton{
+    padding: 0;
+    border: none;
+    background: none;
+    color: white !important; 
+}
+
+.ima{
+    width: 20px;
+    margin-left: 7px;
+    margin-bottom: 3px;
+}
+
+.icono{
+    width: 15px;
+    margin-right: 4px;
+    margin-top: -3px;
+}
+
+.button-menu{
+  color: white !important;
+}
+
+@media (min-width: 1000px){
+    .button-menu{
+         display: none !important;
+       }
+}

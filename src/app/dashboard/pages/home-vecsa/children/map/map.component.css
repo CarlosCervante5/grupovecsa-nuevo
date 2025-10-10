@@ -1,0 +1,10 @@
+.maps{
+     height: 450px
+}
+
+
+@media (max-width: 480px) {
+    .maps{
+        height: 250px
+   }
+}

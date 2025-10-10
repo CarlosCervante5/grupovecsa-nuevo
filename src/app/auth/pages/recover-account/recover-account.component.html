@@ -1,0 +1,37 @@
+<div class="container">
+    <div class="row">
+        <div class="col-12 py-5 " style="margin-top: 70px; margin-bottom: 30%;">
+            <div class="row">
+                <h1 class="fs-3 fw-bold mb-4 text-center mx-auto bmw" style=" font-size: 25px !important; margin-top: 95px; ">Recupera tu Cuenta</h1>
+                <div class="col-12">
+                    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-4">
+                        <div class="row mb-2">
+                            <div class="col-12 col-md-4 mx-auto">
+                                <mat-form-field appearance="outline">
+                                    <mat-label>Correo Electrónico</mat-label>
+                                    <input matInput type="email" placeholder="a@b.c" formControlName="email" required>
+                                    <mat-hint class="text-danger" *ngIf="emailInvalid">Ingrese su correo electrónico.</mat-hint>
+                                </mat-form-field>
+
+                                <p class="  bmw " style="font-size: 14px;">¿Ya tienes cuenta? <a class="abcars-color-hover text-decoration-none" [routerLink]="['/auth/iniciar-sesion']">Inicia Sesión</a></p>
+
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-8 col-md-4 mx-auto text-center mt-5">
+ 
+                                <button mat-raised-button type="submit"
+                                class="btn abcars-background-color-blue  mx-2  bmw" 
+                                [disabled]="form.invalid || spinner">
+                                <span style="font-size: 16px !important;"  *ngIf="!spinner">Recuperar</span>
+                                <span style="font-size: 16px !important;" *ngIf="spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>        
+                            </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

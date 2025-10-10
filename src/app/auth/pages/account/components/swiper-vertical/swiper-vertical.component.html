@@ -1,0 +1,22 @@
+<div>
+    <div #myModal class="modal">
+        <div class="modal-container position-relative">
+            <img class="modal-content" #img01>
+            <span class="btnClose" (click)="closeModal('yes')">
+                <i class="fas fa-times-circle icon"></i>
+            </span>
+            <div class="texto"> 
+                <div #caption></div> 
+            </div> 
+        </div>
+    </div>
+    <div class="col-lg-12">
+        <swiper-container #swiperC slides-per-view="3" direction="vertical" loop="true" pagination="true" pagination-clickable="true" zoom="true">
+                <swiper-slide class="slider-c2" *ngFor="let image of dataImages">
+                    <div class="slide-small" (click)="showModal(image.url)">
+                            <img class="img-small" src="{{image.url}}" alt="">
+                    </div>
+                </swiper-slide>  
+        </swiper-container>
+    </div>
+</div>

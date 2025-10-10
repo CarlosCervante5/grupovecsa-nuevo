@@ -1,0 +1,380 @@
+.container{
+    padding-left: 0;
+    padding-right: 0;
+    /* display: block; */
+}
+
+.slide-custom{
+    width: 230px;
+    height: 230px;
+    display: flex;
+    justify-content: center;
+    justify-items: center;
+    color: #ffffff;
+    
+}
+.container-big {
+    width: 100%;
+    height: 100%;
+  }
+
+.slider-c{
+    display: flex;
+    justify-content: center;
+    justify-items: center;
+    height: 500px ;
+}
+.slider-c2{
+    display: flex;
+    justify-content: center;
+    justify-items: center;
+    height: 200px;
+}
+.slider-c3{
+    display: flex;
+    justify-content: center;
+    justify-items: center;
+    height: 100px;
+}
+
+/*Carrusel de imagenes grandes del auto*/
+.image_big{
+    width: 100%;
+    height: 100%;
+    object-fit: cover; 
+}
+.slide-big{
+    width: 95%;
+    height: auto;
+    display: flex;
+    justify-content: center;
+    justify-items: center;
+    color: #ffffff;
+}
+
+/*Carrusel de imagenes pequeño de autos*/
+
+  .slide-small{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    justify-items: center;
+    color: #ffffff;
+  }
+  
+  .img-small {
+    width: 95%;
+    height: 100%;
+    object-fit: cover; 
+  }
+
+/* Carrusel de tarjetas de posibles autos de interes*/
+.slider-vp{
+    display: flex;
+    justify-content: center;
+    justify-items: center;
+    height: 400px;
+}
+
+
+.card-info{
+    width: 95%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* The Modal (background) */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: none;
+    justify-items: center;
+    z-index: 2000;
+}
+
+.modal-container {
+    position: relative;
+    width: auto;
+    max-width: 90%;
+}
+
+.modal-content {
+    width: 100%;
+    max-height: 80vh;
+    object-fit: cover;
+}
+
+.btnClose {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    z-index: 10;
+    color: white;
+    font-size: 24px;
+    border-radius: 50%;
+    background-color: #fff;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+    padding: 3px;
+    height: 24px;
+    width: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btnClose:hover{
+    box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.7);
+    transform: scale(1.1);
+    transition: all 0.3s ease;
+}
+
+.texto {
+    color: white;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.icon{
+    color: #ffffff;
+    font-size: 35px;
+}
+
+.movil{
+    display: none;
+}
+
+.acordiontext{
+    padding: 5px;
+    font-size: 15px;
+}
+
+.details-bg {
+    align-items: center;
+    background: rgb(255, 253, 253);
+    border-radius: 8px;    
+    display: flex;  
+    padding: 15px;
+}
+
+.accordion-item a{
+    text-decoration: none;
+}
+
+.legal p{
+ 
+    font-size: 8px;
+    line-height: 10px;
+}
+
+.style-div{
+    margin-left: 3rem;
+}
+.detail-content {
+    margin-left: auto;
+}
+
+.img-swiper-thumbs-1 {
+    object-fit: cover !important;
+}
+
+/**Estilo para que los madales y los carruselos se adapten a la pantalla */
+@media screen and (max-width: 2560px) {
+    .slide-custom{
+        width: 200px !important;
+        height: 200px !important;
+    }
+    .slider-c{
+        width: 100%;
+    }
+    .slider-c3{
+        height: 120px !important;
+    }
+    .modal{
+        padding-top: 2% !important;
+    }
+    .slider-c2{
+        height: 250px !important;
+        width: 250px !important;
+    }
+}
+
+@media screen and (max-width: 1091px) {
+    .slide-custom{
+        width: 200px !important;
+        height: 200px !important;
+    }
+    /* .slider-c{
+        height: 380px !important;
+    } */
+    .slider-c3{
+        height: 120px !important;
+    }
+    .modal{
+        padding-top: 20% !important;
+    }
+    .slider-vp{
+        height: 350px !important;
+    }
+    .slider-c2{
+        height: 250px !important;
+        width: 250px !important;
+    }
+    .modal-content{
+        max-width: 100%;
+    }
+}
+
+@media screen and (max-width: 991px) {
+    .movil{
+        display: block;
+    }
+    .slide-custom{
+        width: 180px !important;
+        height: 180px !important;
+    }
+    /* .slider-c{
+        height: 380px !important;
+    } */
+    .slider-c3{
+        height: 100px !important;
+    }
+    .modal{
+        padding-top: 15% !important;
+    }
+    .slider-vp{
+        height: 300px !important;
+    }
+    .slider-c2{
+        height: 220px !important;
+        width: 220px !important;
+    }
+    .modal-content{
+        max-width: 100%;
+    }
+}
+
+@media screen and (max-width: 767px) {
+    .slide-custom{
+        width: 130px !important;
+        height: 130px !important;
+    }
+    .modal{
+        padding-top: 200px !important;
+    }
+    .slider-c{
+        height: 330px !important;
+    }
+    .container-big{
+        height: 330px !important;
+    }
+    .slider-c3{
+        height: 90px !important;
+    }
+    .slider-vp{
+        height: 250px !important;
+    }
+    .slider-c2{
+        height: 250px !important;
+        width: 250px !important;
+    }
+    .modal-content{
+        max-width: 100%;
+    }
+}
+
+@media screen and (max-width: 320px) {
+    .slide-custom{
+        width: 80px !important;
+        height: 80px !important;
+    }
+    .modal{
+        padding-top: 200px !important;
+    }
+    .slider-c{
+        height: 120px !important;
+    }
+    .container-big{
+        height: 120px !important;
+    }
+    .slider-c3{
+        height: 80px !important;
+    }
+    .slider-vp{
+        height: 150px !important;
+    }
+    .slider-c2{
+        height: 100px !important;
+        width: 100px !important;
+    }
+}
+
+@media screen and (max-width: 540px) {
+    .slide-custom{
+        width: 100px !important;
+        height:100px !important;
+    }
+    .modal{
+        padding-top: 80px !important;
+    }
+    button {
+        font-size: 12px;
+    }
+    /* .slider-c{
+        height: 300px !important;
+    } */
+    .container-big{
+        height: 300px !important;
+    }
+    .slider-c3{
+        height: 70px !important;
+    }
+    .slider-vp{
+        height: 200px !important;
+    }
+    .slider-vp{
+        height: 340px !important;
+    }
+    .slider-c2{
+        height: 220px !important;
+        width: 220px !important;
+    }
+}
+
+@media screen and (max-width: 450px){
+    .modal{
+        padding-top: 200px !important;
+    }
+    .slider-c{
+        height: 300px !important;
+    }
+    .container-big{
+        height: 300px !important;
+    }
+    .slider-c3{
+        height: 70px !important;
+    }
+    .slider-vp{
+        height: 320px !important;
+    }
+    .slider-c2{
+        height: 120px !important;
+        width: 120px !important;
+    }
+}
+
+.titles{
+    font-size: 1%;
+}
+.titleCar{
+    font-size: 32px;
+}
+
+.text-gray {
+    color: gray;
+}

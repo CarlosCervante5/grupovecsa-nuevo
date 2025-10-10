@@ -1,0 +1,70 @@
+* {      
+    margin: 0px;
+    padding: 0px;
+}
+
+.img-container {
+    width: 100%;
+  }
+  
+  .img2{
+    width: 100%;
+  }
+
+/* header */ 
+
+.header {    
+    position: relative;        
+}
+
+.mini {
+    background-color: rgb(53, 64, 69);
+}
+
+.bmw {
+    background-color: rgb(42,100,172);
+}
+ 
+.principal-message {
+    width: 100%;
+    text-align: center;
+    padding: 1%;
+ }
+
+ 
+
+.principal-message p {
+    color: #fff;
+    font-weight: bold;
+
+ 
+ }
+
+.mini .principal-message p {
+    font-family: 'mini-bold';
+    font-size: 40px;
+    line-height: 1;
+}
+
+.bmw .principal-message p {
+    font-family: 'BMW';
+    font-size: 40px;
+    line-height: 1;
+}
+
+@media (max-width: 860px) {
+
+    .mini .principal-message p {
+        font-family: 'mini-bold';
+        font-size: 40px;
+        line-height: 1;
+    }
+    
+    .bmw .principal-message p {
+        font-family: 'BMW';
+        font-size: 25px;
+        line-height: 1;
+    }
+}
+
+

@@ -1,0 +1,67 @@
+<div class="container">
+    <div class="row">
+        <div class="col-12 mt-5 mb-5">
+            <!-- Header -->
+            <div class="row">
+                <div class="col-12">
+                    <h4 class="fs-4 fw-bold text-truncate">Overview</h4>            
+                    <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item">Inicio</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Role Information -->
+            <div class="row">
+
+                <div class="row align-items-center">
+                    <div class="col-1"></div>
+            
+                    <div class="col-auto" >
+                        <h3 class="fw-bold mb-0" style="font-size: x-large;">VECSA Dashboard</h3>
+                        <br>
+                        <h6 class="fw-light" style="font-size: large; text-align: justify;"></h6>
+                    </div>
+            
+                    <div class="col-auto"></div>
+                </div>
+                
+                <hr>
+
+                <!-- Dashboard -->
+                <div class="col-12 col-sm-12 col-md-8 col-lg-9">
+                    <!-- Modules or Pages -->
+                    <div class="row mt-5">
+                        <div class="col-12">
+                            <h3 class="text-start fw-bold">Mis Modulos</h3>
+
+                            <!-- Modules -->
+                            <div class="row">                                
+                                <div class="col-6 col-sm-4 col-md-6 col-lg-3 mb-3" *ngFor="let page of overview?.pages">
+                                    <div class="card text-center card-module h-100" [routerLink]="[page.permalink]">
+                                        <div class="card-body m-3">
+                                           <!--
+                                            <mat-icon mat-list-icon>
+                                                <i class="{{ page.icon }}"></i>
+                                            </mat-icon>  
+                                            --> 
+
+                                            <h4 class="fw-bold mt-3">{{ page.title }}</h4>
+                                            
+                                            <a class="link-module text-muted" [routerLink]="[page.permalink]">
+                                                Ver más 
+                                                <i class="fas fa-chevron-right"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,33 @@
+a{
+    text-decoration: none;
+    color: #33373d;
+    white-space: nowrap;
+    font-size: 13px;
+    font-weight: bold;
+}
+a:hover{
+    color: rgb(95, 154, 226);
+}
+.tamaño{
+    width: 1140px;
+}
+@media screen and (min-width: 300px) and (max-width: 450px) {
+    .tamaño{
+        width: 90px;
+    }
+}
+@media screen and (min-width: 451px) and (max-width: 699px) {
+    .tamaño{
+        width: 400px;
+    }
+}
+@media screen and (min-width: 700px) and (max-width: 899px) {
+    .tamaño{
+        width: 600px;
+    }
+}
+@media screen and (min-width: 900px) and (max-width: 1050px) {
+    .tamaño{
+        width: 900px;
+    }
+}

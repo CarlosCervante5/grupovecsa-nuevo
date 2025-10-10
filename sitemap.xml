@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+
+    <!-- URLs a indexar -->
+    <url>
+        <loc>https://bmwvecsahidalgo.com/</loc>
+        <lastmod>2024-01-22</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>1.00</priority>
+        <name>Inicio</name>
+    </url>
+
+    <url>
+        <loc>https://bmwvecsahidalgo.com/compra-tu-auto</loc>
+        <lastmod>2024-01-13</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.80</priority>
+        <name>Compra tu auto</name>
+    </url>
+
+    <url>
+        <loc>https://bmwvecsahidalgo.com/compra-tu-auto/Bmw/sin-modelos/sin-anios/5000000/Hidalgo/sin-busqueda/sin-transmisiones/Nuevo/sin-colores/sin-colores/1</loc>
+        <lastmod>2024-01-13</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.80</priority>
+        <name>BMW</name>
+    </url>
+
+
+    <url>
+        <loc>https://bmwvecsahidalgo.com/compra-tu-auto/Mini/sin-modelos/sin-anios/5000000/Hidalgo/sin-busqueda/sin-transmisiones/Nuevo/sin-colores/sin-colores/1</loc>
+        <lastmod>2024-01-13</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.80</priority>
+        <name>Mini</name>
+    </url>
+
+
+
+    <url>
+        <loc>https://bmwvecsahidalgo.com/compra-tu-auto/Motorrad/sin-modelos/sin-anios/5000000/Hidalgo/sin-busqueda/sin-transmisiones/Nuevo/sin-colores/sin-colores/1</loc>
+        <lastmod>2024-01-13</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.80</priority>
+        <name>Motorrad</name>
+    </url>
+
+
+    <url>
+        <loc>https://bmwvecsahidalgo.com/compra-tu-auto/sin-marcas/sin-modelos/sin-anios/3120900/sin-estados/sin-busqueda/sin-transmisiones/Seminuevo/sin-colores/sin-colores/1</loc>
+        <lastmod>2024-01-13</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.80</priority>
+        <name>Seminuevo</name>
+    </url>
+
+    <url>
+        <loc>https://bmwvecsahidalgo.com/shop/</loc>
+        <lastmod>2024-01-13</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.80</priority>
+        <name>Shop</name>
+    </url>
+
+        <url>
+        <loc>https://bmwvecsahidalgo.com/promotions</loc>
+        <lastmod>2024-01-13</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.80</priority>
+        <name>Promociones</name>
+    </url>
+
+    <url>
+        <loc>https://bmwvecsahidalgo.com/community</loc>
+        <lastmod>2024-01-13</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.80</priority>
+        <name>Comunidad</name>
+    </url>
+
+
+    <!-- URLs a no indexar -->
+ 
+ 
+    
+    <url>
+        <loc>https://bmwvecsahidalgo.com/externals/terminos-y-condiciones</loc>
+        <changefreq>never</changefreq>
+    </url>
+
+
+    <url>
+        <loc>https://bmwvecsahidalgo.com/auth/recuperar-cuenta</loc>
+        <changefreq>never</changefreq>
+    </url>
+    
+    <url>
+        <loc>https://bmwvecsahidalgo.com/externals/privacidad-de-uso</loc>
+        <changefreq>never</changefreq>
+    </url>
+ 
+    
+    <url>
+        <loc>https://bmwvecsahidalgo.com/auth/registro</loc>
+        <changefreq>never</changefreq>
+    </url>
+    
+    <url>
+        <loc>https://bmwvecsahidalgo.com/compra-tu-auto/detail/3C4BDCAB5HT603216</loc>
+        <changefreq>never</changefreq>
+    </url>
+
+</urlset>

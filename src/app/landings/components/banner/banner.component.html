@@ -1,0 +1,17 @@
+<section [class]="'header ' + banner_data.image_class">
+<div class="img-container" >
+    <div class="col-12">
+        <picture>
+             <source media="(min-width: 1000px)" srcset="./assets/landings/{{banner_data.image_class}}/banners/BANNER_WEB.jpg" style="width: 100%;">
+             <source media="(min-width: 768px)" srcset="./assets/landings/{{banner_data.image_class}}/banners/BANER_TABLET.jpg" style="width: 100%;">
+             <img src="./assets/landings/{{banner_data.image_class}}/banners/BANNER_CELULAR.jpg" class="img2" alt="">
+         </picture>
+    </div>
+    <div class="col-12">
+        <div class="principal-message">
+            <p>{{ banner_data.title1 }}</p>
+            <p>{{ banner_data.title2 }}</p>
+        </div>  
+    </div>
+</div>
+</section> 

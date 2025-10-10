@@ -1,0 +1,270 @@
+.image-container {
+    position: relative; /* Posiciona el contenedor relativamente */
+    display: inline-block; /* Asegura que el tamaño se ajuste a la imagen */
+}
+.background-image {
+    width: 100%; /* O el tamaño deseado */
+    height: auto; /* Mantiene la proporción de la imagen */
+}
+
+.texto{
+    font-size: large;
+    text-align: justify;
+}
+
+.overlay-button {
+    position: absolute; /* Posiciona el botón absolutamente respecto al contenedor */
+    top: 90%; /* Centra verticalmente */
+    left: 75%; /* Centra horizontalmente */
+    transform: translate(-50%, -50%); /* Ajusta para centrar */
+    font-size: 14px;
+    font-weight: 500;
+    color: #fff;
+    background-color:#619cce; /* Color de fondo con opacidad */
+    border: none; /* Sin borde */
+    padding: 11px 50px 11px 50px; /* Espaciado interno */
+    cursor: pointer; /* Cambia el cursor al pasar por encima */
+    border-radius: 0px; /* Esquinas redondeadas */
+    text-decoration: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+
+}
+
+.overlay-button:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Aumenta el sombreado al pasar el ratón */
+}
+
+@media screen and (min-width: 300px) and (max-width: 450px) {
+    .overlay-button{
+        left: 70%;
+        font-size: 12px;
+        padding: 10px 20px 10px 20px !important;
+    }
+}
+
+/* swiper de promociones */
+.s-promos {
+    height: 100% !important; /* Ajusta según sea necesario */
+    width: auto  !important;   /* Asegúrate de que tenga un ancho */
+}
+
+.slider2 {
+    height: 100% !important;
+    width: 250px;
+}
+
+.sl2{
+    height: auto;
+    margin-top: 10px;
+}
+
+.imgS2 {
+    width: 90%;
+    height: 90%;
+}
+
+
+.btnClose {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+  z-index: 10;
+  color: #fff;
+  font-size: 24px;
+  border-radius: 50%;
+  background-color: #fff;
+  box-shadow: 0 4px #00000080;
+  padding: 3px;
+  height: 24px;
+  width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-log{
+    padding: 11px 90px 11px 90px;
+    font-size: 14px;
+    color: #fff !important;
+    background-color:#619cce;
+    border-radius: 0px;
+    width: 40%;
+}
+
+@media screen and (min-width: 300px) and (max-width: 349px){
+    .slider2 {
+        height: 300px !important;
+        width: 300px !important;
+    }
+    .s-promos{
+        display: flex;
+        justify-content: center;
+        width: auto !important;
+    }
+    .modal{
+        padding-top: 150px !important;
+    }
+    .texto{
+        font-size: small;
+        margin: 10px;
+    }
+}
+
+@media screen and (min-width: 350px) and (max-width: 450px){
+    .slider2 {
+        height: 300px !important;
+        width: 300px !important;
+    }
+    .s-promos{
+        display: flex;
+        justify-content: center;
+        width: auto !important;
+    }
+    .modal{
+        padding-top: 200px !important;
+    }
+    .texto{
+        font-size: small;
+        margin: 10px;
+    }
+}
+
+@media screen and (min-width: 451px) and (max-width: 540px){
+    .slider2 {
+        height: 150px !important;
+        width: 150px !important;
+    }
+    .s-promos{
+        display: flex;
+        justify-content: center;
+        width: auto !important;
+    }
+    .modal{
+        padding-top: 150px !important;
+    }
+    .texto{
+        font-size: small;
+        margin: 10px;
+    }
+}
+
+@media screen and (min-width: 541px) and (max-width: 767px){
+    .slider2 {
+        height: 175px !important;
+        width: 175px !important;
+    }
+    .s-promos{
+        display: flex;
+        justify-content: center;
+        width: auto !important;
+    }
+    .modal{
+        padding-top: 75px !important;
+    }
+}
+
+@media screen and (min-width: 768px) and (max-width: 991px){
+    .slider2 {
+        height: 200px !important;
+        width: 200px !important;
+    }
+    .s-promos{
+        display: flex;
+        justify-content: center;
+        width: 100% !important;
+    }
+    .modal{
+        padding-top: 150px !important;
+    }
+    
+}
+
+@media screen and (min-width: 992px) and (max-width: 1091px){
+    .slider2 {
+         height: 310px !important;
+         width: 310px !important;
+    }
+    .s-promos{
+        display: flex;
+        justify-content: center;
+        width: 100% !important;
+    }
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: none;
+    justify-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.modal-container {
+    position: relative;
+    width: auto;
+    max-width: 90%;
+}
+
+.modal-content {
+    width: 100%;
+    max-height: 80vh;
+    object-fit: cover;
+}
+
+.btnClose {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    z-index: 10;
+    color: white;
+    font-size: 24px;
+    border-radius: 50%;
+    background-color: #fff;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+    padding: 3px;
+    height: 24px;
+    width: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btnClose:hover{
+    /* background-color: rgba(0, 0, 0, 0.7); */
+    box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.7);
+    transform: scale(1.1);
+    transition: all 0.3s ease;
+}
+
+.btnEsp {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    cursor: pointer;
+    z-index: 10;
+    font-size: 24px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+    height: 30px;
+    width: 120px;
+    font-size: 12px;
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.btnEsp a{
+    color: #000;
+}
+.btnEsp:hover{
+    /* background-color: rgba(0, 0, 0, 0.7); */
+    box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.7);
+    transform: scale(1.1);
+    transition: all 0.3s ease;
+}

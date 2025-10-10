@@ -1,0 +1,32 @@
+<div cdkDropList class="list" (cdkDropListDropped)="drop($event)">
+    <div class="box" *ngFor="let image of imagesForSlider; let i = index" cdkDrag>
+        <div class="row">
+            <div class="col-2">
+                posición {{ i + 1 }}
+            </div>
+            <div class="col-7">
+                <div>
+                    <b>Es de un sitio externo:</b> {{ image.external_website }}
+                </div>
+                <div>
+                    <b>Url:</b> {{ image.path }}
+                </div>
+                <div class="trash-content" (click)="deleteimage(image.uuid, i)">
+                    <img src="assets/icons-fontawesome/trash-solid_negro.svg" alt="flecha" width="30px" height="30px">
+                </div>
+            </div>
+            <div class="col-3">
+                <!-- <img class="card-img-top img-fluid img-size-sm" [src]="image.path" alt="{{ image.id }}"> -->
+                <img class="card-img-top img-fluid" style="height: 280px; width: 280px;" [src]="image.path" alt="{{ image.id }}">
+            </div>
+        </div>
+
+    </div>        
+</div>
+<div class="row mt-2">
+    <div class="col-12 text-center">                       
+        <button type="button" aria-label="Borrar imagenes" class="marginButtons btn abcars-background-color-blue  mx-3 px-3" (click)="changeOrder()">
+            Actualizar orden  
+        </button> 
+    </div>
+</div>

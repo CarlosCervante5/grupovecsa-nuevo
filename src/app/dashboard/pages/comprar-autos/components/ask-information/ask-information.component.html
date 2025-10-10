@@ -1,0 +1,116 @@
+<div class="container">
+
+    <div class="row justify-content-end">
+        <button class="btn"  (click)="close()">
+            <mat-icon>close</mat-icon>
+        </button>   
+    </div>
+    <div class="row">
+        
+        <div class="col-12 mt-5 mb-5">
+            <!-- Title -->
+            <div class="row">
+                <div class="col-12">
+                    <h1 class="fw-bold fs-2 txt">Más información sobre este {{ vehicle.brand }}</h1>
+                    <p class="fw-light fs-6 txt">Responderemos a tu solicitud lo antes posible.</p>                    
+                </div>
+            </div>
+
+            <!-- Form  -->
+            <div class="row">
+                <div class="col-12 mt-3">
+                    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+                        <div class="row mb-2 txt">
+                            <!-- Name -->
+                            <div class="col-12 col-md-6">
+                                <mat-form-field appearance="outline" >
+                                    <mat-label>Nombre(s)</mat-label>
+                                    <input matInput type="text"  placeholder="Louis" formControlName="name" required>
+                                    <mat-hint *ngIf="nameInvalid">Complete su nombre(s).</mat-hint>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Father and Mother Lastname -->
+                            <div class="col-12 col-md-6">
+                                <mat-form-field appearance="outline">
+                                    <mat-label>Apellidos</mat-label>
+                                    <input matInput type="text" placeholder="Bale" formControlName="lastname" required>
+                                    <mat-hint *ngIf="lastnameInvalid">Complete sus apellidos.</mat-hint>
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+                        <!-- Email and Phone -->
+                        <div class="row">
+                            <!-- Email -->
+                            <div class="col-12 col-md-6">
+                                <mat-form-field appearance="outline">
+                                    <mat-label>Correo Electrónico</mat-label>
+                                    <input matInput type="email" placeholder="a@b.c" formControlName="email" required>
+                                    <mat-hint *ngIf="emailInvalid">Escriba un correo electrónico válido.</mat-hint>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Phone -->
+                            <div class="col-12 col-md-6">
+                                <mat-form-field appearance="outline">
+                                    <mat-label>Número de Teléfono</mat-label>
+                                    <input matInput type="tel" placeholder="1234567890" formControlName="phone_1" #phone (keyup)="maxLengthCheck(phone)" maxlength="10" required>
+                                    <mat-hint *ngIf="phoneInvalid">Su número debe ser de 10 dígitos, verifique.</mat-hint>
+                                </mat-form-field>
+                            </div>
+                        </div>                  
+
+                        <div class="row txt">
+                            <div class="col-12">
+                                <h1 class="fw-bold fs-2 txt">Tu pedido</h1>
+                                <mat-list>
+                                    <mat-list-item *ngFor="let vehicle of vehicles; let i = index">
+                                        <span matListItemTitle>{{ vehicle.name }} 
+                                            <span class="position-absolute end-0">
+                                                <mat-icon class="mt-5 cp" aria-hidden="false" aria-label="cancel" fontIcon="cancel" (click)="deleteElementToList(i)"></mat-icon>
+                                            </span>
+                                        </span>
+                                        <span matListItemLine>{{ (vehicle.offer_price ? vehicle.offer_price : vehicle.sale_price) | currency:'MXN' }}</span>
+                                    </mat-list-item>
+                                    <mat-list-item>
+                                        <span matListItemTitle>Total: {{ total | currency:'MXN' }}</span>
+                                    </mat-list-item>
+                                </mat-list>    
+                            </div>
+                            <div class="col-12 txt">
+                                <mat-checkbox formControlName="checkbox" required>
+                                    Acepto <a class="fw-bold abcars-color-hover text-decoration-none" [routerLink]="['/externals/privacidad-de-uso']" (click)="openLink()">Aviso</a>,
+                                    <a class="fw-bold abcars-color-hover text-decoration-none" [routerLink]="['/externals/terminos-y-condiciones']" (click)="openLink()">Términos y Condiciones</a>.
+                                </mat-checkbox>
+
+                                <div class="mt-3 text-center">
+                                    <button mat-button type="button" class="btn abcars-background-color-blue rounded-pill py-2" [ngStyle]="{'width': '100%'}" [disabled]="form.invalid || spinner" (click)="onSubmit()">                                
+                                        <span *ngIf="!spinner" [ngStyle]="{'color': '#ffffff'}">Enviar</span>
+                                        <span *ngIf="spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>                                    
+                                    </button>
+                                </div>
+                            </div>
+                        </div>                                                
+                    </form>
+                </div>       
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .txt{
+        font-family: BMW !important;
+    }
+ 
+    .btn {
+ 	color: rgb(0, 0, 0) !important;
+	border: 1px solid ;
+	background-color: rgba(255, 255, 255, 0) ;
+	border-color: rgb(0, 0, 0)  ;
+ 	text-align:center ;
+	width: 10% ;
+ }
+
+</style>

@@ -1,0 +1,110 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="col-12">
+        <div class="row mb-2">
+            <div class="col-12 col-md-6">
+                <mat-form-field appearance="outline">
+                    <mat-label>Nombre(s)</mat-label>
+                    <input matInput type="text" placeholder="Ingresa tu nombre" formControlName="name" required>
+                    <mat-hint *ngIf="nameInvalid">Complete su nombre(s).</mat-hint>
+                </mat-form-field>
+            </div>
+            <div class="col-12 col-md-6">
+                <mat-form-field appearance="outline">
+                    <mat-label>Apellidos</mat-label>
+                    <input matInput type="text" placeholder="Ingresa tus apellidos" formControlName="last_name" required>
+                    <mat-hint *ngIf="surnameInvalid">Complete sus apellidos</mat-hint>
+                </mat-form-field>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 col-md-6">
+                <mat-form-field appearance="outline">
+                    <mat-label>Correo Electrónico</mat-label>
+                    <input matInput type="email" placeholder="Ingresa tu email" formControlName="email" required>
+                    <mat-hint *ngIf="emailInvalid">Escriba un correo electrónico válido.</mat-hint>
+                </mat-form-field>
+            </div>
+            <div class="col-12 col-md-6">
+                <mat-form-field appearance="outline">
+                    <mat-label>Número de teléfono</mat-label>
+                    <input matInput type="tel" placeholder="Ingresa tu número telefónico" formControlName="phone_1" #phone (keyup)="maxLengthCheck(phone)" maxlength="10" required>
+                    <mat-hint *ngIf="phoneLength">Su número debe ser de 10 dígitos, verifique.</mat-hint>
+                </mat-form-field>
+            </div>
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="row mb-2">
+            <div class="col-12 col-md-3">
+                <mat-form-field appearance="outline">
+                    <mat-label>Marca</mat-label>
+                    <input matInput type="text" formControlName="brand_name" [matAutocomplete]="autoBrand">
+                    <mat-autocomplete #autoBrand="matAutocomplete" (optionSelected)="onBrandSelected($event)">
+                        <mat-option *ngFor="let brand of filteredBrands | async" [value]="brand.name">
+                            {{ brand.name}}
+                        </mat-option>
+                    </mat-autocomplete>
+                    <mat-hint *ngIf="brandInvalid">Escribe la marca del vehículo.</mat-hint>
+                </mat-form-field>
+            </div>
+            <div class="col-12 col-md-3">
+                <mat-form-field appearance="outline">
+                    <mat-label>Modelo</mat-label>
+                    <input type="text" matInput formControlName="model_name" [matAutocomplete]="autoModel">
+                    <mat-autocomplete #autoModel="matAutocomplete" (optionSelected)="onModelSelected($event)">
+                        <mat-option *ngFor="let model of filteredModels | async" [value]="model.name">
+                            {{ model.name }}
+                        </mat-option>
+                    </mat-autocomplete>
+                    <mat-hint *ngIf="modelInvalid">Escribe el modelo del vehículo.</mat-hint>
+                </mat-form-field>
+            </div>
+            <div class="col-12 col-md-3">
+                <mat-form-field appearance="outline">
+                    <mat-label>Año</mat-label>
+                    <mat-select placeholder="Seleccione el año del vehículo" formControlName="year" required>
+                        <mat-option *ngFor="let year of years" value="{{ year }}">{{ year }}</mat-option>
+                        
+                    </mat-select>
+                    <mat-hint *ngIf="yearInvalid">Seleccione un año.</mat-hint>
+                </mat-form-field>
+            </div>
+            <div class="col-12 col-sm-12 col-md-3 col-lg-3 col-xl-3">
+                <mat-form-field appearance="outline">
+                    <mat-label>Kilometraje</mat-label>
+                    <input matInput type="number" placeholder="000000" min="1" max="9999999999" formControlName="mileage" #mileage (keyup)="maxLengthCheck(mileage)" maxlength="10" required>
+                    <mat-hint *ngIf="mileageInvalid">Teclee el kilometraje de su vehículo.</mat-hint>
+                </mat-form-field>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 col-md-6 d-flex">
+                <mat-form-field appearance="outline" class="field-spacing">
+                    <mat-label>Fecha de cita</mat-label>
+                    <input matInput [matDatepickerFilter]="myFilter" [matDatepicker]="picker" [min]="minDate" [max]="maxDate" formControlName="scheduled_date" required>
+
+                    <mat-hint *ngIf="!dateInvalid">DD/MM/YYYY</mat-hint>
+                    <mat-hint *ngIf="dateInvalid">Asigne la fecha de su cita</mat-hint>
+
+                    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                    <mat-datepicker #picker></mat-datepicker>
+                </mat-form-field>
+            </div>
+            <div class="col-12 col-md-6">
+                <mat-form-field appearance="outline">
+                    <mat-label>Hora de cita</mat-label>
+                    <input matInput type="time" formControlName="hour" format="hh:mm" min="09:00" max="18:00" step="900" required>
+                    <mat-hint *ngIf="hourInvalid">Asigne la hora de su cita</mat-hint>
+                </mat-form-field>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 text-end">
+                <button mat-button type="submit" class="btn abcars-background-color-blue rounded-pill mx-2 px-3" [disabled]="form.invalid || spinner">
+                    <span *ngIf="!spinner">Enviar</span>
+                    <span *ngIf="spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</form>

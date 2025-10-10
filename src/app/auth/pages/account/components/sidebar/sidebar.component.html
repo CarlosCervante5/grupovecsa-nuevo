@@ -1,0 +1,25 @@
+<div class="sidebar">
+    <ul class="menu">
+        <li>
+            <img src="assets/icons-fontawesome/trophy-solid.svg" alt="flecha" width="30px" height="30px">
+        </li>
+        <li>
+            <a [routerLink]="['/auth/mi-cuenta']" style="text-decoration: none; color: #fff;">
+                <img src="assets/icons-fontawesome/house-chimney-solid.svg" alt="flecha" width="30px" height="30px">
+            </a>
+        </li>
+        <li>
+            <img src="assets/icons-fontawesome/comment-regular.svg" alt="flecha" width="30px" height="30px">
+        </li>
+        <li>
+            <a [routerLink]="['/promotions']" style="text-decoration: none; color: #fff;">
+                <img src="assets/icons-fontawesome/gem-regular.svg" alt="flecha" width="30px" height="30px">
+            </a>
+        </li>
+        <li>
+            <a (click)="logout()">
+                <img src="assets/icons-fontawesome/arrow-left-from-bracket.svg" alt="flecha" width="30px" height="30px">
+            </a>
+        </li>
+    </ul>
+</div>

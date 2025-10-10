@@ -1,0 +1,63 @@
+ <app-communityvideo [principalImages]="principalImage"></app-communityvideo>
+
+
+<div class="movil">
+    <div class=" ">
+        <div class="zoomIn">
+            <h1 class="titles text">CALENDARIO</h1>
+        </div>
+    </div>
+    <div class=" ">
+        <div class="zoomIn">
+            <app-calendary [images]="myCalendar"></app-calendary>
+        </div>
+    </div>
+    <div class="paused">
+        <div class="zoomIn">
+            <h1 class="titles text">COMUNIDAD</h1>
+        </div>
+    </div>
+    <div class="paused">
+        <div class="zoomIn">
+            <app-communitycard [albums]="community" ></app-communitycard>
+        </div>
+    </div>
+    <div class="paused">
+        <div class="zoomIn">
+            <app-communityevents [albums]="community" ></app-communityevents>
+        </div>
+    </div>
+</div>
+
+<div class="desktop">
+    <div class=" ">
+        <div class="zoomIn">
+            <h1 class="titles text">CALENDARIO DE EVENTOS</h1>
+        </div>
+    </div>
+    <div class=" ">
+        <div class="zoomIn">
+            <app-calendary [images]="myCalendar"></app-calendary>
+        </div>
+    </div>
+   
+   
+    <div class="paused">
+        <div class="zoomIn">
+            <h1 class="titles text">COMUNIDAD</h1>
+        </div>
+    </div>
+    <div class="paused">
+        <div class="zoomIn">
+            <app-communitycard [albums]="community" ></app-communitycard>
+        </div>
+    </div>
+    <div class="paused">
+        <div class="zoomIn">
+            <app-communityevents [albums]="community" ></app-communityevents>
+        </div>
+    </div>
+   
+    <!-- <app-form-leads></app-form-leads> -->
+ 
+</div>

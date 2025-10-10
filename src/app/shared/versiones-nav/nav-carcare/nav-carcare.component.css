@@ -1,0 +1,106 @@
+a{
+    color: black;
+    text-decoration: none;
+    font-size: 17px;
+    margin: 1rem;
+    font-family: 'Mulish';
+    font-weight: 700;
+}
+li{
+    list-style: none;
+}
+
+.navbar {
+    background-color: white;
+    height: 100px;
+    width: 1140px;
+    /* display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap; */
+}
+  
+.navbar-collapse{
+    background-color: #fff;
+    z-index: 5;
+}
+
+.navbar-nav .nav-link {
+    color: black; /* Cambia el color del texto a negro */
+    align-items: center;
+    white-space: nowrap;
+}
+
+  
+.dropdown-menu .dropdown-item:hover {
+    background-color: transparent;
+    box-shadow: none; /*Elimina el sombreado*/
+}
+
+.container{
+    background-color: white !important;
+}
+
+.nav-link:hover,
+.dropdown-item:hover {
+    color: rgb(88, 170, 237) !important; /* Cambia 'blue' por el tono que prefieras */
+    
+}
+
+.navbar-toggler{
+    border: none;
+}
+
+.nav-link{
+    display: flex;
+}
+
+.nav-link p {
+    margin: 0; /* Elimina el margen por defecto de <p> */
+}
+
+.nav-link i {
+    margin-right: 8px; /* Espacio entre el icono y el texto */
+}
+
+.img_nav{
+    max-width: 100%;
+    height: 50px;
+}
+
+.cont_edit{
+    display: flex;
+    flex-flow: row nowrap !important;
+    max-width: 100%;
+    align-items: center;
+}
+.navbar-toggler{
+    width: 5rem!important;
+    height: 5rem !important;
+    background: transparent;
+}
+.cont_edit a {
+    margin-right: auto; /* Empuja el botón hacia el borde derecho del contenedor */
+}
+
+
+/* @media screen and (max-width: 320px) {
+    .img_nav{
+        width: 100% ;
+        height: 50%;
+    }
+}
+@media screen and (max-width: 540px) {
+    .img_nav{
+        width: 100% ;
+        height: 60%;
+    }
+}
+@media screen and (max-width: 991px) {
+    .img_nav{
+        width: 100% ;
+        height: 70%;
+    }
+} */
+
+
+@import url('https://fonts.google.com/specimen/Mulish');

@@ -1,0 +1,34 @@
+<div cdkDropList class="list" (cdkDropListDropped)="drop($event)">
+    <div class="box" *ngFor="let image of imagesForSlider; let i = index" cdkDrag>
+        <div class="row">
+            <div class="col-1">
+                <input type="checkbox" [(ngModel)]="image.selected" />
+            </div>
+            <div class="col-2">
+                posición {{ i + 1 }}
+            </div>
+            <div class="col-6">
+                <div>
+                    <b>Es de un sitio externo:</b> {{ image.external_website }}
+                </div>
+                <div>
+                    <b>Url:</b> {{ image.path_public }}
+                </div>
+                <div class="trash-content">
+                    <i class="fas fa-solid fa-trash trash" (click)="deleteimage(image.id, i)"></i>
+                </div>
+            </div>
+            <div class="col-3">
+                <img class="card-img-top img-fluid img-size-sm" [src]="image.path" alt="{{ image.id }}">
+            </div>
+        </div>
+    </div>
+</div>
+  
+<div class="row mt-2">
+    <div class="col-12 text-center">                       
+        <button type="button" aria-label="Borrar imagenes" class="marginButtons btn abcars-background-color-blue  mx-3 px-3" (click)="changeOrder()">
+            Actualizar orden  
+        </button> 
+    </div>
+</div>

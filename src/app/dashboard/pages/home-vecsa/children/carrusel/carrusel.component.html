@@ -1,0 +1,20 @@
+<section id="container-slider">
+    <a (click)="fntExecuteSlide('prev')" class="arrowPrev"><i class="fas fa-chevron-circle-left"></i></a>
+    <a (click)="fntExecuteSlide('next')" class="arrowNext"><i class="fas fa-chevron-circle-right"></i></a>
+    <ul class="listslider">
+      <li *ngFor="let item of items; let i = index">
+        <a [attr.itlist]="'itList_' + i" href="#" [class.item-select-slid]="i === currentSlide"></a>
+      </li>
+    </ul>
+    <ul id="slider">
+      <li *ngFor="let slide of slides; let i = index" [style.background-image]="'url(' + slide.image + ')'" [style.z-index]="i === currentSlide ? 1 : 0" [style.opacity]="i === currentSlide ? 1 : 0" [class]="slide.image">
+        <div class="content_slider">
+          <div class="mar">
+
+            <a href="#" class="btnSlider ">Ver más</a>
+          </div>
+        </div>
+      </li>
+    </ul>
+  </section>
+  

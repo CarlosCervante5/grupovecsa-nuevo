@@ -1,0 +1,135 @@
+<div class="container">
+    <div class="row">
+        <div class="col-12 mt-5 mb-5">
+            <div class="row">
+                <div class="col-12">
+                    <div class="row">
+                        <div class="col-12 text-center">
+                            <h1 class=fw-bold>Nuevo Usuario</h1>
+                            <span>Por favor, ingrese los datos del usuario...</span>
+                            <hr />
+                        </div>
+                    </div>
+                    <ng-container *ngIf="spinner; else elseTemplate">
+                        <app-sk-cube></app-sk-cube>
+                    </ng-container>
+                    <ng-template #elseTemplate>
+                        <div class="row">
+                            <div class="col-12 mb-2">
+                                <form [formGroup]="form" (ngSubmit)="onSubmit()"> <!--(ngSubmit)="onSubmit()"-->
+                                        <div class="row">
+                                            <div class="col-6 col-md-6">
+                                                <mat-form-field appearance="outline">
+                                                    <mat-label>Nombre(s)</mat-label>
+                                                    <input matInput type="text" placeholder="Alfredo" formControlName="name">
+                                                    <mat-hint *ngIf="nameInvalid">Escribe el nuevo nombre del usuario. </mat-hint>
+                                                </mat-form-field>
+                                            </div>
+                                            <div class="col-6 col-md-6">
+                                                <mat-form-field appearance="outline">
+                                                    <mat-label>Apellidos(s)</mat-label>
+                                                    <input matInput type="text" placeholder="Ortega" formControlName="last_name">
+                                                    <mat-hint *ngIf="last_nameInvalid">Escribe los apellidos del usuario. </mat-hint>
+                                                </mat-form-field>
+                                            </div>
+                                            <div class="col-6 col-md-6">
+                                                <mat-form-field appearance="outline">
+                                                    <mat-label>Genero:</mat-label>
+                                                    <mat-select formControlName="gender">
+                                                        <mat-option value="M">Femenino</mat-option>
+                                                        <mat-option value="H">Masculino</mat-option>
+                                                    </mat-select>
+                                                    <mat-hint *ngIf="genderInvalid">Seleccione el genero del usuario. </mat-hint>
+                                                </mat-form-field>
+                                            </div>
+                                            <div class="col-6 col-md-6">
+                                                <mat-form-field appearance="outline">
+                                                    <mat-label>Email</mat-label>
+                                                    <input matInput type="email" placeholder="example@gmail.com" formControlName="email">
+                                                    <mat-hint *ngIf="emailInvalid">Escribe el email del usuario. </mat-hint>
+                                                </mat-form-field>
+                                            </div>
+                                            <div class="col-12 col-md-6">
+                                                <mat-form-field appearance="outline">
+                                                    <mat-label>Teléfono Principal</mat-label>
+                                                    <input matInput type="tel" placeholder="1234567890" formControlName="phone_1">
+                                                    <mat-hint *ngIf="phoneOneInvalid">Ingrese un número telefónico válido.</mat-hint>
+                                                </mat-form-field>
+                                            </div>
+                                            <div class="col-12 col-md-6">
+                                                <mat-form-field appearance="outline">
+                                                    <mat-label>Teléfono Secundario</mat-label>
+                                                    <input matInput type="tel" placeholder="1234567890" formControlName="phone_2">
+                                                    <mat-hint *ngIf="phoneTwoInvalid">Ingrese un número telefónico válido.</mat-hint>
+                                                </mat-form-field>
+                                            </div>
+                                            <div class="col-12 col-md-6 paddingInputs">
+                                                <mat-form-field appearance="outline" class="example-full-width">
+                                                    <mat-label>Sucursal:</mat-label>
+                                                    <mat-select formControlName="location">
+                                                        <mat-option *ngFor="let location of filteredLocation | async" [value]="location.name">
+                                                            {{ location.name }}
+                                                        </mat-option>
+                                                    </mat-select>
+                                                    <!-- <input type="text" matInput formControlName="location" [matAutocomplete]="autoLocation">
+                                                    <mat-autocomplete #autoLocation="matAutocomplete" (optionSelected)="onLocationSelected($event)">
+                                                        <mat-option *ngFor="let location of filteredLocation | async" [value]="location.name">
+                                                            {{ location.name }}
+                                                        </mat-option>
+                                                    </mat-autocomplete> -->
+                                                    <mat-hint *ngIf="locationInvalid">Escribe la sucursal del usuario. </mat-hint>
+                                                </mat-form-field>
+                                            </div>
+                                            <div class="col-12 col-md-6 paddingInputs">
+                                                <mat-form-field appearance="outline" class="example-full-width">
+                                                    <mat-label>Rol:</mat-label>
+                                                    <mat-select formControlName="role_name">
+                                                        <mat-option *ngFor="let rol of filteredRoles | async" [value]="rol.name">
+                                                            {{ rol.name }}
+                                                        </mat-option>
+                                                    </mat-select>
+                                                    <!-- <input type="text" matInput formControlName="role_name" [matAutocomplete]="autoRoles">
+                                                    <mat-hint *ngIf="role_nameInvalid">Seleccione el rol del usuario. </mat-hint>
+                                                    <mat-autocomplete #autoRoles="matAutocomplete" (optionSelected)="onRolesSelected($event)">
+                                                        <mat-option *ngFor="let rol of filteredRoles | async" [value]="rol.name">
+                                                            {{ rol.name }}
+                                                        </mat-option>
+                                                    </mat-autocomplete> -->
+                                                </mat-form-field>
+                                            </div>
+                                            <div class="col-6 col-md-6">
+                                                <mat-form-field appearance="outline">
+                                                    <mat-label>Password</mat-label>
+                                                    <input matInput type="text" placeholder="*****" formControlName="password">
+                                                    <mat-hint *ngIf="passwordInvalid">Escribe la contraseña del usuario. </mat-hint>
+                                                </mat-form-field>
+                                            </div>
+                                            <div class="col-6 col-md-6">
+                                                <label for=""><h3>Foto de perfil</h3></label>
+                                                <label for="picture" class="drop-container">
+                                                    <span class="drop-title">Drop files here</span>
+                                                    or
+                                                    <input type="file" id="picture" (change)="assignImagePromo($event)" accept=".png, .jpg, .jpeg, .webp" required> 
+                                                </label>
+                                            </div>
+                                            <div class="row mt-5">
+                                                <div class="col-12 text-end">
+                                                    <button mat-raised-button type="submit" class="marginButtons btn abcars-background-color-blue  mx-3 px-3" [disabled]="form.invalid || spinner">                                    
+                                                        <span >Guardar</span>
+                                                    </button>                                            
+            
+                                                    <button mat-raised-button type="button"class="marginButtons btn  mx-3 px-3" (click)="close()">                                    
+                                                        Cancelar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                </form>
+                            </div>
+                        </div>
+                    </ng-template>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

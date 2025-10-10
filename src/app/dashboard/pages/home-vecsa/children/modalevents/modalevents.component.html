@@ -1,0 +1,24 @@
+<div class="container-fluid">
+    <div class="row justify-content-end" style="padding: 5px !important;" >
+        <button class="btn"  (click)="close()">
+            <mat-icon >close</mat-icon>
+        </button>   
+    </div>
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-lg-12 margen1">
+            <h5 class="card-title" style="font-weight: bold;">{{data.date | date }}</h5>
+            <h2 class="card-text txt">{{data.title}}</h2>
+            <p class="card-text txt2" *ngFor="let description of descriptions">{{description}}</p> <!--{{data.description}}-->
+        </div>
+        <div class="col-md-12 col-sm-12 col-lg-12 d-flex justify-content-center align-items-center">
+            <div #scrollableContainer class="scrollable-container">
+                <div class="scrollable-content">
+                    <div target="_top" class="album-item" *ngFor="let item of data.images"
+                        [style.background-image]="'url(' + item + ')'">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

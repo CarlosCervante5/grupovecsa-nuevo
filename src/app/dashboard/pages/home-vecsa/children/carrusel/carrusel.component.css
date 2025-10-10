@@ -1,0 +1,284 @@
+  *{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+#container-slider
+{
+     position: relative;
+    display: block;
+    width: 100%;
+}
+#slider {
+    position: relative;
+     width: 100%;
+    min-height: 500px;
+}
+#slider li {
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100%;
+    height: 100%;
+ 
+    -webkit-transition: opacity 1s;
+    -moz-transition: opacity 1s;
+    -ms-transition: opacity 1s;
+    -o-transition: opacity 1s;
+    transition: opacity 1s;
+    opacity: 0;
+}
+#container-slider .arrowPrev, #container-slider .arrowNext{
+    font-size: 30pt;
+    color: rgba(204, 204, 204, 0.65);
+    cursor: pointer;
+    position: absolute;
+    top: 50%;
+    left: 50px;
+    z-index: 2; 
+}
+#container-slider .arrowNext {
+    left: initial;
+    right: 50px !important;
+}
+.content_slider{
+    padding: 15px 30px;
+    color: #FFF;
+    width: 100%;
+    height: 100%;
+}
+.content_slider div{
+    text-align: center;
+}
+.content_slider h2{
+    font-size: 30pt;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+}
+.content_slider p {
+    font-size: 15pt;
+    color: #FFF;
+    margin-bottom: 20px;
+}
+#slider li .content_slider{
+     padding: 10px 125px;
+}
+.content_slider{
+    display: -webkit-flex;
+    display: -moz-flex;
+    display: -ms-flex;
+    display: -o-flex;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.btnSlider{
+
+    /* QUITAR CUANDO EL BOTON FUNCIONE */
+    display: none;
+    /* QUITAR CUANDO EL BOTON FUNCIONE */
+    color: #FFF;
+    font-size: 15pt;
+    letter-spacing: 1px;
+    padding: 10px 50px;
+    border: 1px solid #CCC;
+    background: rgba(110,136,247);
+    border-radius: 31px;
+    text-decoration: none;
+    transition: .5s all;
+}
+.btnSlider:hover{
+    background: #fff;
+    color: black;
+    border: 1px solid #111;
+}
+.listslider {
+    position: absolute;
+    display: -webkit-flex;
+    display: -moz-flex;
+    display: -ms-flex;
+    display: -o-flex;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    left: 50%;
+    bottom: 5%;
+    list-style: none;
+    z-index: 2;
+    transform: translateX(-50%);
+}
+.listslider li {
+    border-radius: 50%;
+    width: 10px;
+    height: 10px;
+    cursor: pointer;
+    margin: 0 5px;
+}
+.listslider li a {
+    background: #CCC;
+    border-radius: 50%;
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+.item-select-slid {
+    background: #FFF  !important;
+}
+
+@media screen and (max-width: 460px){
+	.content_slider h2 {
+	    font-size: 15pt !important;
+	}
+	.content_slider p {
+	    font-size: 12pt !important;
+	}
+	#container-slider .arrowPrev, #container-slider .arrowNext{
+		font-size: 20pt;
+	}
+	#container-slider .arrowPrev{
+		left: 15px;
+	}
+	#container-slider .arrowNext{
+		right: 15px !important;
+	}
+	#slider{
+		height: 400px;
+		min-height: 400px;
+	}
+	#slider li .content_slider{
+		padding: 10px 35px;
+	}
+	.btnSlider{
+ 		padding: 10px 30px;
+    	font-size: 10pt;
+	}
+    
+
+}
+
+.image1 {
+    background-image: url(/assets/banner/BMW_1600X550.png) !important;
+ 
+}
+
+.image2 {
+    background-image: url(/assets/banner/MINI_1600X550.png) !important;
+}
+
+.image3 {
+    background-image: url(/assets/banner/MOTO_1600X550.png) !important;
+}
+
+@media (min-width: 1000px) {
+
+    #container-slider
+    {
+        margin-top: 60px !important;
+     
+    }
+}
+
+
+@media (max-width: 900px) {
+    .image1 {
+        background-image: url(/assets/banner/BMW_1720X472.png) !important;
+    }
+    
+    .image2 {
+        background-image: url(/assets/banner/MINI_1720X472.png) !important;
+    }
+    
+    .image3 {
+        background-image: url(/assets/banner/MOTO_1720X472.png) !important;
+    }
+
+    
+ 
+}
+
+
+@media (max-width: 480px) {
+    .image1 {
+        background-image: url(/assets/banner/BMW_820X820.png) !important;
+        background-size: cover !important;
+    }
+
+    .image2 {
+        background-image: url(/assets/banner/MINI_820X820.png) !important;
+        background-size: cover !important;
+
+    }
+
+    .image3 {
+        background-image: url(/assets/banner/MOTO_820X820.png) !important; 
+                background-size: cover !important;
+
+    }
+    #container-slider
+    {
+        margin-top: 70px !important;
+     
+    }
+}
+
+
+
+ 
+
+.image5 {
+    background-image: url(/assets/banner/moto-d.jpeg) !important;
+}
+
+.image6 {
+    background-image: url(/assets/banner/mini-d.jpeg) !important;
+}
+
+@media (min-width: 1000px) {
+
+    #container-slider
+    {
+        margin-top: 60px !important;
+     
+    }
+}
+
+
+@media (max-width: 900px) {
+ 
+    
+    .image5 {
+        background-image: url(/assets/banner/moto-t.jpeg) !important;
+    }
+    
+    .image6 {
+        background-image: url(/assets/banner/mini-t.jpeg) !important;
+    }
+
+    
+ 
+}
+
+
+@media (max-width: 480px) {
+ 
+    .image5 {
+        background-image: url(/assets/banner/mini-c.jpeg) !important;
+        background-size: cover !important;
+
+    }
+
+    .image6 {
+        background-image: url(/assets/banner/moto-c.jpeg) !important; 
+                background-size: cover !important;
+
+    }
+    #container-slider
+    {
+        margin-top: 70px !important;
+     
+    }
+}

@@ -1,0 +1,693 @@
+<app-new-nav></app-new-nav>
+<div id="top"></div>
+<div class="container">
+    <div>
+        <div class="row">
+            <ng-container *ngIf="activeC; else elseTemplate">
+                <app-sk-cube></app-sk-cube>
+            </ng-container>
+
+            <ng-template  #elseTemplate>
+                <div class="col-3">
+                    <a class="text-decoration-none text-dark" [routerLink]="[url_dashboard]" style="display: flex;">
+                        <img src="assets/icons-fontawesome/circle-left-regular.svg" alt="flecha" width="20px" height="20px" style="padding-right: 3px;"><span>Regresar</span>
+                    </a>
+                </div>
+
+                <div class="row mt-5 align-items-center">
+                    <div class="col-auto"></div>
+                
+                    <div class="col-auto">
+                        <h3 class="fw-bold mb-0" style="font-size: x-large;">Tu perfíl</h3>
+                        <br>
+                        <h6 class="fw-light texto" style="text-align: justify;">Los datos que componen tu perfíl nos ayudan a reconocerte y atenderte de manera más personalizada. Gracias por mantenerlos actualizados.</h6>
+                    </div>
+                    
+                    <div class="col-auto"></div>
+                </div>
+
+                <hr /> 
+                
+                <div class="row">
+
+                    <div class="col-12 col-md-3 mt-4">
+                        <div class="foto">
+                            <div class="row align-items-center" style="justify-self: center; text-align: center;">
+                                <div class="col-6 col-md-12 col-lg-12 col-img">
+                                    <img id="imagePreview" [src]="image_path" alt="User Picture Imagen" class="img-fluid-f">
+                                </div>
+
+                                <div class="col-6 col-md-12 col-lg-12 col-img mb-4">
+                                    <button mat-raised-button type="submit" class="btn abcars-background-color-blue mt-3 mx-2 px-3" (click)="avatar()">
+                                        <i class="fa-solid fa-pen-to-square"></i> Subir Imagen
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Information -->
+                    <div class="col-12 col-md-9 mt-4 mb-5">
+                        <h5 class="fs-6 fw-bold text-light text-dark">Tu información</h5>
+            
+                        <!-- Form Customer -->
+                        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+                            
+                            <div class="row">
+                                <div class="col-12 col-md-4">
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Nombre de perfil (Nickname)</mat-label>
+                                        <input matInput type="text" placeholder="Activitus99" formControlName="nickname">
+                                    </mat-form-field>
+
+                                    <mat-error *ngIf="form.get('nickname')?.hasError('maxlength')">
+                                        El nickname no puede tener más de 25 caracteres.
+                                    </mat-error>
+                                    <mat-error *ngIf="form.get('nickname')?.hasError('pattern')">
+                                        El nickname debe contener solo letras, números, guiones bajos y espacios.
+                                    </mat-error>
+                                </div>
+                            
+                                <div class="col-12 col-md-4">
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Nombre(s)</mat-label>
+                                        <input matInput type="text" placeholder="Louis" formControlName="name">
+                                        <mat-hint *ngIf="nameInvalid">Complete su nombre(s).</mat-hint>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="col-12 col-md-4">
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Apellidos</mat-label>
+                                        <input matInput type="text" placeholder="Chevrolet" formControlName="last_name">
+                                        <mat-hint *ngIf="lastnameInvalid">Complete sus apellidos.</mat-hint>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-12 col-md-4">
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Correo Principal</mat-label>
+                                        <input matInput type="email_1" placeholder="a@b.c" formControlName="email_1">
+                                        <mat-hint *ngIf="emailOneInvalid">Ingrese un correo electrónico válido.</mat-hint>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="col-12 col-md-4">
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Correo Alternativo</mat-label>
+                                        <input matInput type="email_2" placeholder="d@e.f" formControlName="email_2">
+                                        <mat-hint *ngIf="emailTwoInvalid">Ingrese un correo electrónico válido.</mat-hint>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="col-12 col-md-4">
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Fecha de nacimiento</mat-label>
+                                            <input matInput type="date" formControlName="birthday" required>
+                                            <mat-hint class="text-danger" *ngIf="dateInvalid">Seleccione la fecha de cumpleaños.</mat-hint>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+
+                            <div class="row">             
+                                <div class="col-12 col-md-4">
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Teléfono Principal</mat-label>
+                                        <input matInput type="tel" placeholder="1234567890" formControlName="phone_1">
+                                        <mat-hint *ngIf="phoneOneInvalid">Ingrese un número telefónico válido.</mat-hint>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="col-12 col-md-4">
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Teléfono Secundario</mat-label>
+                                        <input matInput type="tel" placeholder="1234567890" formControlName="phone_2">
+                                        <mat-hint *ngIf="phoneTwoInvalid">Ingrese un número telefónico válido.</mat-hint>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="col-12 col-md-4 mt-3 mx-auto text-center">
+                                    <div class="text-center mt-3">
+                                        <button mat-raised-button type="submit"
+                                            class="btn abcars-background-color-blue mt-3  mx-2 px-3"
+                                            [disabled]="form.invalid || spinner">                                
+                                            <span *ngIf="!spinner">Actualizar</span>
+                                            <span *ngIf="spinner" class="spinner-border spinner-border-sm" role="status"
+                                                aria-hidden="true"></span>                                    
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </form>
+
+                    </div>
+                </div>
+
+                <div class="row mt-5 align-items-center">
+                    <div class="col-auto"></div>
+                
+                    <div class="col-auto">
+                        <h3 class="fw-bold mb-0" style="font-size: x-large;">Gustos y afinidades</h3>
+                        <br>
+                        <h6 class="fw-light texto" style="text-align: justify;">Sé parte de nuestra comunidad, queremos conocerte un poco más sobre tus gustos. Así, podremos crear experiencias únicas y especiales solo para ti. ¡Descubre cómo podemos hacer que tu vida sea más divertida y emocionante!</h6>
+                    </div>
+                    
+                    <div class="col-auto"></div>
+                </div>
+
+                <div class="records row mb-5"> 
+                    <ng-container *ngIf="quiz_active; else quizzes_accesories">
+                        <app-sk-cube></app-sk-cube>
+                    </ng-container>
+        
+                    <ng-template  #quizzes_accesories>
+
+                        <div #myModal class="modal" (click)="closeModal('yes')">
+                            <div class="modal-container position-relative">
+                                <img class="modal-content" #img01>
+                                <span class="btnClose" (click)="closeModal('yes')">
+                                    <img src="assets/icons-fontawesome/x.png" alt="flecha" width="10px" height="10px">
+                                </span>
+                                <div class="texto"> 
+                                    <div #caption></div> 
+                                </div> 
+                            </div>
+                        </div>
+                        
+
+                        <div class="row mb-3">
+
+                            <div class="row mb-3"> 
+                                <div class="col-auto"></div> 
+                            
+                                <div class="col auto"></div>
+                                
+                                <div class="col-12 col-lg-8">
+                                    <div class="d-flex align-items-center justify-content-end" style="height: 100%;">
+                                        <h6 class="fw-light mb-0" style="font-size: medium; padding-right: 20px;">Tu marca actual:</h6>
+            
+                                        <mat-chip-listbox class="mat-chip-grid" aria-label="{{ brand_quiz?.name }}" (change)="onChipBrandChange($event, brand_quiz!.uuid)">
+                                            <div *ngFor="let value of brand_quiz?.values; let i = index">
+                                                <mat-chip-option 
+                                                    class="chip-option"
+                                                    [value]="value"
+                                                    [selected]="value === brand_quiz?.selected_value"
+                                                >
+                                                    <img
+                                                        style="width: 100%; height: 100%;"
+                                                        matChipAvatar
+                                                        src="assets/brands/{{ value }}.jpeg"
+                                                        alt="{{ value }}"
+                                                    />
+                                                    {{ value }}
+                                                </mat-chip-option>
+                                            </div>
+                                        </mat-chip-listbox>
+            
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3"> 
+
+                                <div class="col-auto"></div>
+                            
+                                <div class="col auto"></div>
+
+                                <div class="col-12 col-lg-4 p-2">
+                                    <div class="d-flex align-items-center justify-content-end" style="height: 100%;">
+                                        
+                                        <h6 class="fw-light me-2 mb-0" style="font-size: medium; padding-right: 10px;">Género:</h6>
+    
+                                        <mat-chip-listbox class="mat-chip-grid" aria-label="{{ clothes_gender!.name }}" (change)="onChipGenderChange($event, clothes_gender!.uuid)">
+                                            <div *ngFor="let value of clothes_gender?.values; let i = index">
+                                                <mat-chip-option 
+                                                    class="chip-option"
+                                                    [value]="value"
+                                                    [selected]="value === clothes_gender?.selected_value">
+                                                    {{ value }}
+                                                </mat-chip-option>
+                                            </div>
+                                        </mat-chip-listbox>
+    
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="row mb-3" *ngIf="chevroletBrandSelected">
+
+                            <hr />
+
+                            <ng-container *ngFor="let question of chevrolet_questions; let i = index">
+
+                                <div class="col-12 col-md-6">
+                                    <h4  style="align-content:center; min-height: 50px" >{{question.name}}</h4>
+                                    <mat-form-field appearance="outline">
+                                        <input 
+                                        matInput 
+                                        type="text" 
+                                        placeholder=""
+                                        [value]="question.selected_value != 'null' ? question.selected_value : ''"
+                                        (input)="onInputChange($event, question.uuid)" 
+                                        required>
+                                        <mat-hint *ngIf="chevrolet_validation[i].invalid" class="text-danger">
+                                            {{ chevrolet_validation[i].validation_message }}
+                                        </mat-hint>
+                                    </mat-form-field>
+                                </div>
+
+                            </ng-container>
+
+                        </div>
+
+                        <div class="row mb-3" *ngIf="defaultBrandSelected || motorradBrandSelected;">
+
+                            <hr />
+
+                            <ng-container *ngFor="let question of default_questions; let i = index">
+
+                                <div class="col-12 col-md-6">
+                                    <h4  style="align-content:center;  min-height: 50px" >{{question.name}}</h4>
+                                    <mat-form-field appearance="outline">
+                                        <input 
+                                        matInput 
+                                        type="text" 
+                                        placeholder=""
+                                        [value]="question.selected_value != 'null' ? question.selected_value : ''"
+                                        (input)="onInputChange($event, question.uuid)" 
+                                        required>
+                                        <mat-hint *ngIf="default_validation[i].invalid" class="text-danger">
+                                            {{ default_validation[i].validation_message }}
+                                        </mat-hint>
+                                    </mat-form-field>
+                                </div>
+
+                            </ng-container>
+
+                        </div>
+
+                        <div class="row mb-3" *ngIf="defaultBrandSelected || motorradBrandSelected;">
+                            
+                            <hr />
+
+                            <div class="row mb-3" >
+
+                                <div class="align-items-center">
+                                    <div class="col-auto"></div>
+                                
+                                    <div class="col-auto">
+                                        <h3 class="fw-bold mb-0" style="font-size: x-large;">Tallas de tu preferencia</h3>
+                                        <br>
+                                        <h6 class="fw-light texto" style="text-align: justify;">Queremos asegurarnos de contar en nuestro inventario con las prendas y accesorios especialmente elegidas para ti.</h6>
+                                    </div>
+                                    
+                                    <div class="col-auto"></div>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3" *ngIf="motorradBrandSelected;">
+                                <div class="col-12 col-lg-4 p-2">
+                                    <div class="d-flex align-items-center justify-content-end" style="height: 100%;">
+                                        <h6 class="fw-light me-2 mb-0 texto">¿Cómo saber mi talla?</h6>
+                                        <button mat-raised-button (click)="showModal('casco')" class="btn mt-3  mx-2 px-3" style="background-color: #008bcc; color: #fff;">                                
+                                            <span>Casco</span>                   
+                                        </button>
+                                        <button mat-raised-button (click)="showModal('guantes')" class="btn mt-3  mx-2 px-3" style="background-color: #2388b7; color: #fff;">                                
+                                            <span>Guantes</span>                   
+                                        </button>
+                                        <button mat-raised-button (click)="showModal('zapatos')" class="btn mt-3  mx-2 px-3" style="background-color: #429dc7; color: #fff;">                                
+                                            <span>Zapatos</span>                   
+                                        </button>
+                                    </div>
+                                </div>
+                            
+                                <div class="col auto p-2"></div>
+                                
+                                <div class="col auto p-2"></div>
+
+                            </div>
+                            <hr />
+                        </div>
+        
+                        <div class="row mb-3" *ngIf="defaultBrandSelected || motorradBrandSelected || chevroletBrandSelected;">
+
+                            <ng-container *ngIf="defaultBrandSelected;">
+                            
+                                <div class="col-12 col-lg-6 mt-3 mb-3" style="padding: 0;">
+                                    <div class="row align-items-center">
+                                        <div class="col-2 d-flex justify-content-center">
+                                            <div class="image_container">
+                                            <img class="image_quiz" src="{{ accesories[0].image_path }}" alt="{{ accesories[0].name }}">
+                                            </div>
+                                        </div>
+                                
+                                        <div class="col-10">
+                                            <div class="mb-2 mt-2">
+                                                <h6 class="fw-light mb-0" style="font-size: medium;">{{ accesories[0].name }}:</h6>
+                                            </div>
+                                            <div class="d-flex flex-wrap">
+                                                <mat-chip-listbox class="mat-chip-grid" aria-label="{{ accesories[0].name }}" 
+                                                                    (change)="onChipSelectionChange($event, accesories[0].uuid)">
+                                                    <div *ngFor="let value of accesories[0].values; let j = index">
+                                                    <mat-chip-option 
+                                                        class="chip-option"
+                                                        [value]="value"
+                                                        [selected]="value === accesories[0].selected_value">
+                                                        {{ value }}
+                                                    </mat-chip-option>
+                                                    </div>
+                                                </mat-chip-listbox>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+    
+                                <div class="col-12 col-lg-6 mt-3 mb-3" style="padding: 0;">
+                                    <div class="row align-items-center">
+                                        <div class="col-2 d-flex justify-content-center">
+                                            <div class="image_container">
+                                                <img class="image_quiz" src="{{ accesories[3].image_path }}" alt="{{ accesories[3].name }}">
+                                            </div>
+                                        </div>
+                                
+                                        <div class="col-10">
+                                            <div class="mb-2 mt-2">
+                                                <h6 class="fw-light mb-0" style="font-size: medium;">{{ accesories[3].name }}:</h6>
+                                            </div>
+                                            <div class="d-flex flex-wrap">
+                                                <mat-chip-listbox class="mat-chip-grid" aria-label="{{ accesories[3].name }}" 
+                                                                    (change)="onChipSelectionChange($event, accesories[3].uuid)">
+                                                    <div *ngFor="let value of accesories[3].values; let j = index">
+                                                    <mat-chip-option 
+                                                        class="chip-option"
+                                                        [value]="value"
+                                                        [selected]="value === accesories[3].selected_value">
+                                                        {{ value }}
+                                                    </mat-chip-option>
+                                                    </div>
+                                                </mat-chip-listbox>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+    
+                                <div class="col-12 col-lg-6 mt-3 mb-3" style="padding: 0;">
+                                    <div class="row align-items-center">
+                                        <div class="col-2 d-flex justify-content-center">
+                                            <div class="image_container">
+                                                <img class="image_quiz" src="{{ accesories[5].image_path }}" alt="{{ accesories[5].name }}">
+                                            </div>
+                                        </div>
+                                
+                                        <div class="col-10">
+                                            <div class="mb-2 mt-2">
+                                                <h6 class="fw-light mb-0" style="font-size: medium;">{{ accesories[5].name }}:</h6>
+                                            </div>
+                                            <div class="d-flex flex-wrap">
+                                                <mat-chip-listbox class="mat-chip-grid" aria-label="{{ accesories[5].name }}" 
+                                                                    (change)="onChipSelectionChange($event, accesories[5].uuid)">
+                                                    <div *ngFor="let value of accesories[5].values; let j = index">
+                                                    <mat-chip-option 
+                                                        class="chip-option"
+                                                        [value]="value"
+                                                        [selected]="value === accesories[5].selected_value">
+                                                        {{ value }}
+                                                    </mat-chip-option>
+                                                    </div>
+                                                </mat-chip-listbox>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+    
+                                <div class="col-12 col-lg-6 mt-3 mb-3" style="padding: 0;" *ngIf="!(((accesories[7].question_type == 'ropa femenina' && (gender != 'M'))  || (accesories[7].question_type == 'ropa masculina'  && (gender == 'M'))))">
+                                    <div class="row align-items-center">
+                                        <div class="col-2 d-flex justify-content-center">
+                                            <div class="image_container">
+                                            <img class="image_quiz" src="{{ accesories[7].image_path }}" alt="{{ accesories[7].name }}">
+                                            </div>
+                                        </div>
+                                
+                                        <div class="col-10">
+                                            <div class="mb-2 mt-2">
+                                                <h6 class="fw-light mb-0" style="font-size: medium;">{{ accesories[7].name }}:</h6>
+                                            </div>
+                                            <div class="d-flex flex-wrap">
+                                                <mat-chip-listbox class="mat-chip-grid" aria-label="{{ accesories[7].name }}" 
+                                                                    (change)="onChipSelectionChange($event, accesories[7].uuid)">
+                                                    <div *ngFor="let value of accesories[7].values; let j = index">
+                                                    <mat-chip-option 
+                                                        class="chip-option"
+                                                        [value]="value"
+                                                        [selected]="value === accesories[7].selected_value">
+                                                        {{ value }}
+                                                    </mat-chip-option>
+                                                    </div>
+                                                </mat-chip-listbox>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+    
+                                <div class="col-12 col-lg-6 mt-3 mb-3" style="padding: 0;" *ngIf="!(((accesories[8].question_type == 'ropa femenina' && (gender != 'M'))  || (accesories[8].question_type == 'ropa masculina'  && (gender == 'M'))))">
+                                    <div class="row align-items-center">
+                                        <div class="col-2 d-flex justify-content-center">
+                                            <div class="image_container">
+                                            <img class="image_quiz" src="{{ accesories[8].image_path }}" alt="{{ accesories[8].name }}">
+                                            </div>
+                                        </div>
+                                
+                                        <div class="col-10">
+                                            <div class="mb-2 mt-2">
+                                                <h6 class="fw-light mb-0" style="font-size: medium;">{{ accesories[8].name }}:</h6>
+                                            </div>
+                                            <div class="d-flex flex-wrap">
+                                                <mat-chip-listbox class="mat-chip-grid" aria-label="{{ accesories[8].name }}" 
+                                                                    (change)="onChipSelectionChange($event, accesories[8].uuid)">
+                                                    <div *ngFor="let value of accesories[8].values; let j = index">
+                                                    <mat-chip-option 
+                                                        class="chip-option"
+                                                        [value]="value"
+                                                        [selected]="value === accesories[8].selected_value">
+                                                        {{ value }}
+                                                    </mat-chip-option>
+                                                    </div>
+                                                </mat-chip-listbox>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+    
+                            </ng-container>
+    
+                            <ng-container *ngIf="motorradBrandSelected;">
+    
+                                <ng-container *ngFor="let quiz of accesories; let i = index">
+                                    <div class="col-12 col-lg-6 mt-3 mb-3" style="padding: 0;" *ngIf="!(((quiz.question_type == 'ropa femenina' && (gender != 'M'))  || ( quiz.question_type == 'ropa masculina'  && (gender == 'M'))))">
+                                        <div class="row align-items-center">
+                                            <div class="col-2 d-flex justify-content-center">
+                                                <div class="image_container">
+                                                    <img class="image_quiz" src="{{ quiz.image_path }}" alt="{{ quiz.name }}">
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="col-10">
+                                                <div class="mb-2 mt-2">
+                                                    <h6 class="fw-light mb-0" style="font-size: medium;">{{ quiz.name }}:</h6>
+                                                </div>
+                                                <div class="d-flex flex-wrap">
+                                                    <mat-chip-listbox class="mat-chip-grid" aria-label="{{ quiz.name }}" (change)="onChipSelectionChange($event, quiz.uuid)">
+                                                        <div *ngFor="let value of quiz.values; let i = index">
+                                                            <mat-chip-option 
+                                                                class="chip-option"
+                                                                [value]="value"
+                                                                [selected]="value === quiz.selected_value">
+                                                                {{ value }}
+                                                            </mat-chip-option>
+                                                        </div>
+                                                    </mat-chip-listbox>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ng-container>
+    
+                            </ng-container>
+    
+                            <div class="row mt-5 align-items-center">
+                                <div class="col-auto"></div>
+                            
+                                <div *ngIf="!isMobileView" class="col" style="text-align: justify;">
+                                    <h6 class="fw-light texto" style="font-size: large; text-align: justify;">Nuestras marcas te ofrecen experiencias únicas y queremos que las disfrutes al máximo. Ayúdanos a conocer cuales te resultan más afines ordenandolas de izqueda a derecha. Izquierda es menos afín, y derecha más afín.</h6>
+                                </div>
+            
+                                <div *ngIf="isMobileView" class="col" style="text-align: justify;">
+                                    <h6 class="fw-light texto" style="text-align: justify;">Nuestras marcas te ofrecen experiencias únicas y queremos que las disfrutes al máximo. Ayúdanos a conocer cuales te resultan más afines ordenandolas de arriba hacia abajo. Arriba es más afín, y abajo menos afín.</h6>
+                                </div>
+                                
+                                <div class="col-auto"></div>
+                            </div>
+            
+                            <hr />
+            
+                            <div *ngIf="!isMobileView" class="text-center mx-auto mb-3" style="max-width: 800px; height: 40px;">
+                                <div class="d-flex align-items-center justify-content-between h-100 w-100">
+                                    <!-- Menor Afinidad -->
+                                    <div class="d-flex align-items-center">
+                                        <span class="material-icons text-muted me-2">chevron_left</span>
+                                        <span class="text-muted">Menor Afinidad</span>
+                                    </div>
+                                    <!-- Barra -->
+                                    <div class="bar-line flex-grow-1 mx-3" style="height: 2px; background-color: #3e8bf0;"></div>
+                                    <!-- Mayor Afinidad -->
+                                    <div class="d-flex align-items-center">
+                                        <span class="text-muted">Mayor Afinidad</span>
+                                        <span class="material-icons text-muted ms-2">chevron_right</span>
+                                    </div>
+                                </div>
+                            </div>
+            
+                            <div
+                                cdkDropList 
+                                [cdkDropListData]="cards"
+                                (cdkDropListDropped)="drop($event)"
+                                [cdkDropListOrientation]="isMobileView ? 'vertical' : 'horizontal'"
+                                class="row d-flex justify-content-center"
+                                [ngClass]="isMobileView ? 'col-10' : 'col-12'"
+                                style="gap: 10px;"
+                            >
+            
+                                <div
+                                    *ngFor="let card of cards; index as i"
+                                    class="col-12 col-md-2"
+                                    cdkDrag
+                                    style="padding: 0; max-width: 100%;"
+                                >
+                                
+                                    <div *ngIf="!isMobileView" class="card text-center">
+                                        <div class="card-body">
+                                            <h3 class="circle-number card-title name-Events">{{ cards.length - i }}</h3>
+            
+                                            <h3 class="card-title name-Events">{{ card.name }}</h3>
+            
+                                        </div>
+                                        <img [src]="card.image_path" class="card-img-top" alt="{{ card.name }}" style="border-radius: 60px; height: 100%; padding: 5% ">
+                                    </div>
+            
+                
+                                    <div *ngIf="isMobileView" class="card special-card mb-1">
+                                        <div class="row g-0" style="height: 100px;">
+                                            <div class="col-2 d-flex align-items-center justify-content-center">
+                                                <h3 class="circle-number card-title name-Events" style="margin-bottom: 0;">{{ i + 1 }}</h3>
+                                            </div>
+                                            <div class="col-4 d-flex align-items-center justify-content-center">
+                                                <img [src]="card.image_path" class="image_card img-fluid rounded-start" alt="{{ card.name }}" style="border-radius: 60px !important; width: 80px; height: 80px; object-fit: cover; padding: 5%;">
+                                            </div>
+                                            <div class="col-6 d-flex align-items-center">
+                                                <div class="card-body d-flex flex-column justify-content-center">
+                                                    <h5 class="card-title mb-1 text-center">{{ card.name }}</h5>
+                                                    <p class="card-text text-center">{{ card.description }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+            
+                                </div>
+                            </div>
+            
+                            <div *ngIf="isMobileView" class="col-2 text-center mx-auto" style="max-height: 510px; width: 40px;">
+                                <div class="d-flex flex-column align-items-center justify-content-between h-100">
+                                  <!-- Mayor Afinidad -->
+                                  <div class="d-flex flex-column align-items-center">
+                                    <span class="material-icons text-muted mb-2">expand_less</span>
+                                    <span class="text-muted">Mayor Afinidad</span>
+                                  </div>
+                                  <!-- Barra -->
+                                  <div class="bar-line flex-grow-1 mx-3" style="width: 2px; background-color: #3e8bf0;"></div>
+                                  <!-- Menor Afinidad -->
+                                  <div class="d-flex flex-column align-items-center">
+                                    <span class="text-muted">Menor Afinidad</span>
+                                    <span class="material-icons text-muted mt-2">expand_more</span>
+                                  </div>
+                                </div>
+                            </div>
+            
+                            <!-- <div class="row">
+                                <div class="col-12 col-md-4 mt-3 mx-auto text-center">
+                                    <div class="text-center mt-3">
+                                        <button mat-raised-button type="submit"
+                                            (click)="onSubmit()"
+                                            class="btn abcars-background-color-blue mt-3  mx-2 px-3"
+                                            [disabled]="form.invalid || !isFormValid || !status || !statusCards || spinner || !questions_form_invalid">
+                                            <span *ngIf="!spinner">Registrarse</span>
+                                            <span *ngIf="spinner" class="spinner-border spinner-border-sm" role="status"
+                                                aria-hidden="true"></span>                                    
+                                        </button>
+                                    </div>
+                                </div>
+                            </div> -->
+
+                        </div>
+
+                    </ng-template>
+                </div>
+
+                <!-- <hr /> -->
+
+                <!-- <div
+                        cdkDropList 
+                        [cdkDropListData]="cards"
+                        (cdkDropListDropped)="drop($event)"
+                        [cdkDropListOrientation]="isMobileView ? 'vertical' : 'horizontal'"
+                        class="row d-flex justify-content-center"
+                        style="gap: 10px;"
+                    >
+                        <div
+                            *ngFor="let card of cards"
+                            class="col-12 col-md-2"
+                            cdkDrag
+                            style="padding: 0; max-width: 100%;"
+                        >
+                            <div *ngIf="!isMobileView" class="card text-center">
+                                <div class="card-body" style="height: 12rem;">
+                                    <h3  class="card-title name-Events">{{ card.name }}</h3>
+                                    <p style="font-size: small;" class="card-text">{{ card.description }}</p>
+                                </div>
+                                <img [src]="card.image_path" class="card-img-top" alt="{{ card.name }}" style="border-radius: 25px; height: 100%; padding: 5% ">
+                            </div>
+
+                        <div *ngIf="isMobileView" class="card special-card mb-4">
+                            <div class="row g-0" style="height: 100px;">
+                                <div class="col-4 d-flex align-items-center justify-content-center">
+                                  <img [src]="card.image_path" class="image_card img-fluid rounded-start" alt="{{ card.name }}" style="border-radius: 25px !important; width: 80px; height: 80px; object-fit: cover; padding: 5%;">
+                                </div>
+                              
+                                <div class="col-8 d-flex align-items-center">
+                                  <div class="card-body d-flex flex-column justify-content-center">
+                                    <h5 class="card-title mb-1 text-center">{{ card.name }}</h5>
+                                    <p class="card-text text-center">{{ card.description }}</p>
+                                  </div>
+                                </div>
+                              </div>
+                        </div>
+                    </div>
+                </div> -->
+
+            </ng-template>
+
+        </div>
+    </div>
+</div>
+
+<!-- <div class="return-container">
+    <a (click)="scrollToTop()" class="return-link">
+        <img src="assets/icons-fontawesome/circle-up-solid.svg" alt="flecha" width="35px" height="35px">
+    </a>
+</div> -->

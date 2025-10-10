@@ -1,0 +1,56 @@
+<mat-card class="example-card">
+    <mat-card-header>      
+      <mat-card-title>Crear evento tipo {{ data.type | titlecase }}</mat-card-title>      
+    </mat-card-header>    
+    <mat-card-content class="m-5">
+        <form [formGroup]="form" novalidate (ngSubmit)="onSubmit()">
+            <div class="row paddingInputs margin-b-5">
+                <div class="col-sm-12 col-md-6">
+                    <!-- Title -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Titulo del evento:</mat-label>
+                        <input matInput type="text" formControlName="title" placeholder="Nuevo titulo" minlength="1" maxlength="191" required>
+                        <mat-hint *ngIf="titleInvalid">Escribe el titulo del evento. </mat-hint>
+                    </mat-form-field>
+                </div>                                         
+
+                <div class="col-sm-12 col-md-6 mb-2">
+                    <!-- Title -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Fecha del evento:</mat-label>                        
+                        <input matInput type="date" formControlName="event_date" placeholder="Fecha del evento">
+                        <mat-hint *ngIf="event_dateInvalid">Selecciona la fecha del evento. </mat-hint>
+                    </mat-form-field>
+                </div> 
+            </div>
+            
+            <div class="row paddingInputs mb-5">                
+                <div class="col">
+                    <!-- Title -->
+                    <div>
+                        <input type="file" formControlName="picture" accept=".png, .jpg, .jpeg, .webp" multiple (change)="assignImage($event)" required>
+                        <mat-hint *ngIf="pictureInvalid">Selecciona una imagen para el evento. </mat-hint>
+                    </div>
+                </div>                
+            </div>
+
+            <div class="row paddingInputs margin-b-5">
+                <div class="col">
+                    <!-- Title -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Descripción:</mat-label>                        
+                        <textarea matInput formControlName="description" placeholder="Url del detalle del evento" required></textarea>
+                        <mat-hint *ngIf="descriptionInvalid">Escribe una descripción del evento. </mat-hint>
+                    </mat-form-field>
+                </div>                               
+            </div>
+            <mat-card-actions class="mx-auto">    
+                <button mat-button class="btn abcars-background-color-blue mx-2" [disabled]="form.invalid || loading">Subir</button>
+                <button mat-button class="btn abcars-background-color-black" (click)="close()">Cancelar</button>
+            </mat-card-actions>
+        </form>        
+    </mat-card-content>    
+    <mat-card-footer>
+      <mat-progress-bar mode="indeterminate" class="mt-5" *ngIf="loading"></mat-progress-bar>
+    </mat-card-footer>
+</mat-card>

@@ -1,0 +1,25 @@
+<div class="modal" [ngStyle]="imagen ? { 'display': 'block' } : { 'display': 'none' }" (click)="closeModal()">
+  <div class="modal-container position-relative">
+    <img style="background-color: transparent;"  class="modal-content" [src]="imagen">
+    
+    <span class="buttonClose" (click)="closeModal()">   
+      <img src="assets/icons-fontawesome/x.png" width="10px" height="10px" alt="Close Icon">
+    </span> 
+
+    <button class="buttonSpecs" mat-raised-button *ngIf="specsLinks">
+      <a [href]="specsLinks" target="_blank">{{ buttonLabel }}</a>
+    </button>
+
+    <div class="titleLegal" *ngIf="legal">
+      <p>{{ legal }}</p>
+    </div> 
+  </div>
+</div>
+
+<swiper-container [slidesPerView]="slidesPerView" speed="500" loop="true" navigation="true" zoom="true">
+  <swiper-slide class="swiper-slide" *ngFor="let imagen of images; let i = index">
+    <div class="swiper-content" (click)="showModal(imagen)">
+      <img class="swiper-image" [src]="imagen.image_path" [alt]="i.toString()">
+    </div>
+  </swiper-slide>
+</swiper-container>

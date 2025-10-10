@@ -1,0 +1,21 @@
+<section class="section-padding" id="portfolio">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-4 col-md-6 col-sm-12 contenedor" *ngFor="let image of images">
+                <div class="btn">
+                    <div (click)="open(image.uuid)" class="portfolio-thumb" data-aos="fade-up">
+                        <img src="{{image.image_path}}" class="img-fluid portfolio-image" alt="">
+                        <div class="portfolio-info">
+                            <br>
+                            <h1 class="portfolio-title mb-0">{{image.begin_date | date}}</h1>
+                            <hr>
+                            <br>
+                            <p class="portafolio-subtitle">{{ image.name }}</p>
+                            <br>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

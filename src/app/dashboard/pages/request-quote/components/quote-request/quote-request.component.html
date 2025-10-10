@@ -1,0 +1,157 @@
+<div class="container">
+    <div class="row spacetop">
+        <div class="col-12 mt-5 mb-5">
+            <div class="text-center">
+                <h1 class="fs-2 fw-bold">Formulario de prospección</h1>
+                <b class="fw-bold abcars-offer">Proporciona los datos que se solicitan.</b>
+            </div>
+            <!-- Form -->
+            <div class="row">
+                <!-- Request quote -->
+                <div class="col-12 mt-4">
+                    <h4 class="heading-4 horizontal_line mb-4"><span>Prospectador o vendedor</span></h4>
+                    <div class="row">
+                        <form [formGroup]="requestQuoteFormGroup" (ngSubmit)="onSubmit()">
+                            <div class="col-12">
+                                <div class="row">
+
+                                    <div class="col-12 col-md-4">
+                                        <mat-form-field appearance="outline">
+                                            <mat-label>Nombre(s)</mat-label>
+                                            <input matInput type="text" placeholder="Escriba el nombre del prospectador" formControlName="prospectorName" required>
+                                            <mat-hint *ngIf="prospectorNameInvalid">Complete su nombre(s).</mat-hint>
+                                        </mat-form-field>
+                                    </div>
+
+                                    <div class="col-12 col-md-4">
+                                        <mat-form-field appearance="outline">
+                                            <mat-label>Apellidos</mat-label>
+                                            <input matInput type="text" placeholder="Escriba el apellido del prospectador" formControlName="prospectorSurname" required>
+                                            <mat-hint *ngIf="prospectorSurnameInvalid">Complete sus apellidos.</mat-hint>
+                                        </mat-form-field>
+                                    </div>
+
+                                    <div class="col-12 col-md-4">
+                                        <mat-form-field appearance="outline">
+                                            <mat-label>Lugar de prospección</mat-label>
+                                            <input matInput type="text" placeholder="Lugar de prospección o evento" formControlName="placeProspection" required>
+                                            <mat-hint *ngIf="placeProspectionInvalid">Complete este campo por favor.</mat-hint>
+                                        </mat-form-field>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="col-12 mt-4">
+                                <h4 class="heading-4 horizontal_line mb-4"><span>Datos</span></h4>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="row">
+
+                                            <div class="col-12 col-md-4">
+                                                <mat-form-field appearance="outline">
+                                                    <mat-label>Nombre(s)</mat-label>
+                                                    <input matInput type="text" placeholder="Robert" formControlName="name" required>
+                                                    <mat-hint *ngIf="nameInvalid">Complete su nombre(s).</mat-hint>
+                                                </mat-form-field>
+                                            </div>
+
+                                            <div class="col-12 col-md-4">
+                                                <mat-form-field appearance="outline">
+                                                    <mat-label>Apellidos</mat-label>
+                                                    <input matInput type="text" placeholder="Downey" formControlName="surname" required>
+                                                    <mat-hint *ngIf="surnameInvalid">Complete sus apellidos.</mat-hint>
+                                                </mat-form-field>
+                                            </div>
+
+                                            <div class="col-12 col-md-4">                                        
+                                                <mat-form-field appearance="outline">
+                                                    <mat-label>Correo Electrónico</mat-label>
+                                                    <input matInput type="email" placeholder="a@b.c" formControlName="email" required>
+                                                    <mat-hint *ngIf="emailInvalid">Ingrese un correo electrónico válido.</mat-hint>
+                                                </mat-form-field>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="row">
+
+                                            <div class="col-12 col-md-6">
+                                                <mat-form-field appearance="outline">
+                                                    <mat-label>Número de Teléfono</mat-label>
+                                                    <input matInput type="tel" placeholder="1234567890" #phone (keyup)="maxLengthCheck(phone)" maxlength="10" formControlName="phone" required>     
+                                                    <mat-hint *ngIf="phoneInvalid">Ingrese un número telefónico válido.</mat-hint>                                                                 
+                                                </mat-form-field> 
+                                            </div>
+
+                                            <div class="col-12 col-md-6">
+                                                <mat-form-field appearance="outline">
+                                                    <mat-label>¿Cuál es la siguiente acción para ese prospecto?</mat-label>
+                                                    <input matInput type="text" placeholder="Llamar, Enviar cotización, Agendar cita en agencia, Visita a domicilio." formControlName="next" required>
+                                                    <mat-hint *ngIf="nextInvalid">Complete este campo por favor.</mat-hint>
+                                                </mat-form-field>
+                                            </div>
+
+                                            <div class="col-12 col-md-6 mb-2">
+                                                <mat-form-field appearance="outline">
+                                                    <mat-label>Tipo de Marca</mat-label>
+                                                    <mat-select placeholder="Seleccione el tipo de marca "  formControlName="brandType" required>
+                                                        <mat-option value="bmw">BMW</mat-option>
+                                                        <mat-option value="mini">Mini</mat-option>
+                                                        <mat-option value="motorrad">Motorrad</mat-option>
+                                                    </mat-select>
+                                                    <mat-hint *ngIf="brandTypeInvalid">Seleccione una opción de las que se muestran. (BMW, Mini, Motorrad)</mat-hint>
+                                                </mat-form-field>
+                                            </div>
+                                            
+                                            <div class="col-12 col-md-6 mb-2">
+                                                <mat-form-field appearance="outline">
+                                                    <mat-label>Nuevo/Seminuevo</mat-label>
+                                                    <mat-select placeholder="Seleccione si es Nuevo o Seminuevo "  formControlName="newpreowned" required>
+                                                        <mat-option value="nuevo">Nuevo</mat-option>
+                                                        <mat-option value="seminuevo">Seminuevo</mat-option>
+                                                    </mat-select>
+                                                    <mat-hint *ngIf="newpreownedInvalid">Seleccione una opción de las que se muestran. (Nuevo, Seminuevo)</mat-hint>
+                                                </mat-form-field>
+                                            </div>
+
+                                            <div class="col-12 col-md-6">
+                                                <div class="row">
+                                                    <!-- Commentary  -->
+                                                    <div class="col">
+                                                        <mat-form-field appearance="outline">
+                                                            <mat-label>Comentario del prospecto.</mat-label>
+                                                            <textarea matInput placeholder="Comentario del prospecto" formControlName="commentaryLead"></textarea>
+                                                        </mat-form-field>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- <div class="col-12 text-end">
+                                                <mat-checkbox formControlName="checkbox" required>
+                                                    Acepto <a class="fw-bold abcars-color-hover text-decoration-none" [routerLink]="['/externals/privacidad-de-uso']">Aviso</a>,  
+                                                    <a class="fw-bold abcars-color-hover text-decoration-none" [routerLink]="['/externals/terminos-y-condiciones']">Términos y Condiciones</a>.
+                                                </mat-checkbox>
+                                            </div> -->
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-3 text-end">
+                                <button mat-button type="submit" class="btn abcars-background-color-blue rounded-pill mx-2"
+                                    [disabled]="requestQuoteFormGroup.invalid" spinner> <!--  -->
+                                    <span *ngIf="!spinner">Enviar</span> <!--  -->
+                                    <span *ngIf="spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                </button>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

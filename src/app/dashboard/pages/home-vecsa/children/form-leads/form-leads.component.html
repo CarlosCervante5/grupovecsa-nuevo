@@ -1,0 +1,67 @@
+<!-- Contact Form-->
+<div class="container"> 
+  <section class="section section-sm section-last bg-default text-left" id="contacts">
+      <div class="container">
+        <h2   class="titles">CONTACTO</h2>
+        <div class="row">
+          <article class="title-classic">
+            <div class="title-classic-title">
+              <h3 class=" ">Queremos escucharte</h3>
+            </div>
+            <div class="title-classic-text">
+              <p class="titiles">Si tienes alguna pregunta, completa el formulario de contacto y te responderemos en breve.</p>
+            </div>
+          </article>
+        </div>
+
+        <form class="rd-form rd-form-variant-2 rd-mailform" [formGroup]="formLead" (ngSubmit)="onSubmit()">
+          <div class="row row-14 gutters-14">
+            <div class="col-md-4">
+              <div class="row paddingInputs">
+                <div class="col-12 ">
+                    <mat-form-field appearance="outline" class="example-full-width">
+                        <mat-label>Nombre:</mat-label>
+                        <input matInput type="text" formControlName="name" placeholder="Nombre" minlength="1" maxlength="191" required>
+                        <mat-hint >Escribe su nombre completo</mat-hint>
+                    </mat-form-field>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="row paddingInputs">
+                <div class="col-12 ">
+                    <mat-form-field appearance="outline" class="example-full-width">
+                        <mat-label>Correo:</mat-label>
+                        <input matInput type="email" formControlName="email" placeholder="Correo" minlength="1" maxlength="191" required>
+                        <mat-hint >Escriba un correo valido.</mat-hint>
+                    </mat-form-field>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="row paddingInputs">
+                <div class="col-12 ">
+                    <mat-form-field appearance="outline" class="example-full-width">
+                        <mat-label>Celular:</mat-label>
+                        <input matInput type="text" formControlName="celular" placeholder="Celular" minlength="1" maxlength="191" required>
+                        <mat-hint >Su número debe ser de 10 dígitos.</mat-hint>
+                    </mat-form-field>
+                </div>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="form-wrap" [ngClass]="{'has-error':messageInvalid}">
+                  <textarea class="form-input textarea-lg" id="message" name="message" formControlName="message" required></textarea>
+                  <label class="form-label" for="message">Mensaje</label>   
+                  <mat-hint *ngIf="messageInvalid">Escriba un mensaje</mat-hint>           
+              </div>
+            </div>
+          </div>
+          <div class="d-flex justify-content-end m-4">
+            <button class="btn btn-primary btn-lg btn-submit" type="submit"
+            [disabled]="formLead.invalid || disabled">Enviar</button>
+          </div>
+        </form>      
+      </div>
+  </section>
+</div>

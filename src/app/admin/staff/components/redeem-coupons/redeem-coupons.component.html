@@ -1,0 +1,57 @@
+<div class="container">
+    <div class="row">
+        <div class="col-12 mt-5 mb-5">
+            <div class="row">
+                <div class="col-12">
+                    <div class="row">
+                        <div class="col-12 text-center">
+                            <h1 class=fw-bold>Canjear cupón</h1>
+                            <hr />
+                        </div>
+                    </div>
+
+                    <ng-container *ngIf="spinner; else elseTemplate">
+                        <app-sk-cube></app-sk-cube>
+                    </ng-container>
+
+                    <ng-template #elseTemplate>
+                        
+                        <div class="row text-center" style="margin-bottom: 6rem;">
+
+                            <h2>Tu recompensa al canjear tus puntos será de:</h2>
+                            
+                            <h1> $ {{ (points/1000) | number }} </h1>
+
+                            <h2> ¿Deseas canjear tus puntos? </h2>
+
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12 text-center">
+                                <button 
+                                    mat-raised-button
+                                    type="submit"
+                                    class="marginButtons btn abcars-background-color-blue mx-3 px-3"
+                                    (click)="onSubmit()"
+                                    [disabled]="pointsInvalid"
+                                >                                    
+                                    <span>Canjear</span>
+                                </button>
+
+                                <button 
+                                    mat-raised-button
+                                    type="button"
+                                    class="marginButtons btn mx-3 px-3"
+                                    (click)="close()"
+                                >                                    
+                                    <span>Cancelar</span>
+                                </button>
+                            </div>
+                        </div>
+                    </ng-template>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

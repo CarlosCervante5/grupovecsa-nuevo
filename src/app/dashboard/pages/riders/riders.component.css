@@ -1,0 +1,630 @@
+@font-face {
+    font-family: 'BMW';
+    src: url('/assets/Fonts/BMWTypeNextTT-Light.ttf');
+}
+
+mat-form-field { 
+    width: 100%;
+}
+
+button {
+    width: 80%;
+}
+
+.btn-img{
+    color: white;
+    /* //padding: 8px 12px; */
+    padding-bottom: 8%;
+    /* //margin-right: 10px; Espaciado entre el botón y la etiqueta */
+    cursor: pointer;
+    border: none; /* Sin borde */
+    border-radius: 4px; /* Bordes redondeados */
+}
+
+.img-fluid-f {
+    width: 100%;               /* Hace que la imagen ocupe el 100% del ancho de su contenedor */
+    height: auto;              /* Mantiene la proporción de la imagen */
+    max-width: 200px;          /* El ancho máximo es 200px */
+    max-height: 250px;         /* El alto máximo es 250px */
+    border-radius: 50%;        /* Hace que la imagen sea redonda */
+    padding-top: 8%;           /* Padding superior */
+    padding-bottom: 8%;        /* Padding inferior */
+    object-fit: cover;         /* Asegura que la imagen cubra el contenedor y se recorte si es necesario */
+}
+
+.col-img{
+    display: flex;
+    justify-content: space-evenly;
+    justify-items: center;
+}
+.btn-i{
+    margin: 20px;
+}
+
+    .foto{
+        background: linear-gradient(to bottom, #5ba0ff, #94bcf4);
+        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+        border-radius: 10px;
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        padding-right: 10px;
+        position: relative;
+    }
+
+    input {
+        display: none;
+        + label {
+            display: inline-block;
+            width: 150px;
+            height: 34px;
+            margin-bottom: 0;
+            border-radius: 2%;
+            background: #f1f1f1;
+            border: 2px solid transparent;
+            box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.12);
+            cursor: pointer;
+            font-weight: normal;
+            padding-right: 15px;
+            transition: all .2s ease-in-out;
+        }
+    }
+
+.name-Events{
+    font-size: large;
+}
+
+@media screen and (min-width: 1230px){
+
+    .centered-img {
+        text-align: center;
+    }
+
+    .table-day {
+        font-size: medium;
+    }
+
+    .table-hour {
+        font-size: medium;
+    }
+
+    .table-description {
+        font-size: large;
+    }
+}
+
+@media screen and (min-width: 900px) and (max-width: 1230px){
+    .btn-img{
+        padding-top: 0% !important;
+        padding-top: 5% !important;
+        padding-left: 5% !important;
+    }
+    .btn-cambiar{
+        font-size: 15px !important;
+        padding: 3px !important;
+    }
+    .img-fluid-f{
+        margin-left: 10px;
+       width: 150px !important;
+       height: auto;
+    }
+
+    .centered-img {
+        width: 100%;
+        text-align: center;
+    }
+
+    .table-day {
+        font-size: medium;
+    }
+
+    .table-hour {
+        font-size: small;
+    }
+
+    .table-description {
+        font-size: medium;
+    }
+}
+
+@media screen and (min-width: 769px) and (max-width: 900px){
+    .btn-img{
+        padding: 0% !important;
+        padding-left: 5% !important;
+        padding-bottom: 10% !important;
+    }
+    .btn-cambiar{
+        font-size: 15px !important;
+        padding: 3px !important;
+    }
+    .img-fluid-f{
+        width: 150px !important;
+        height: auto;
+    }
+    .name-Events{
+        font-size: 12px !important;
+    }
+
+    .centered-img {
+        padding-top: 20px;
+        padding-bottom: 20px;
+    }
+
+    .table-day {
+        font-size: medium;
+    }
+
+    .table-hour {
+        font-size: x-small;
+    }
+
+    .table-description {
+        font-size: medium;
+    }
+}
+
+
+@media screen and (min-width: 513px) and (max-width: 768px){
+    .btn-img{
+        padding: 0% !important;
+        padding-top: 20% !important;
+    }
+    .btn-cambiar{
+        font-size: 16px !important;
+        padding: 8px !important;
+    }
+    .img-fluid-f{
+        width: 70px !important;
+        margin-left: -100px;
+        height: auto;
+     }
+
+    .centered-img {
+        width: 100%;
+        padding-top: 40px;
+        text-align: center;
+    }
+
+    .table-day {
+        font-size: medium;
+    }
+
+    .table-hour {
+        font-size: xx-small;
+    }
+
+    .table-description {
+        font-size: small;
+    }
+    
+}
+
+@media screen and (min-width: 441px) and (max-width: 512px){
+    .btn-img{
+        padding: 0% !important;
+        padding-top: 25% !important;
+    }
+    .btn-cambiar{
+        font-size: 16px !important;
+        padding: 8px !important;
+    }
+
+    .img-fluid-f{
+        width: 50px !important;
+        margin-left: -50px;
+        height: auto;
+     }
+
+     .return-container{
+        display: block !important;
+    }
+
+    .centered-img {
+        width: 100%;
+        text-align: center;
+    }
+
+    .table-day {
+        font-size: medium;
+    }
+
+    .table-hour {
+        font-size: xx-small;
+    }
+
+    .table-description {
+        font-size: x-small;
+    }
+    
+}
+
+@media screen and (min-width: 350px) and (max-width: 440px){
+    .btn-img{
+        padding: 0% !important;
+        padding-top: 25% !important;
+    }
+    .btn-cambiar{
+        font-size: 15px !important;
+        padding: 3px !important;
+    }
+    .img-fluid-f{
+        width: 50px !important;
+        margin-left: -60px;
+        height: auto;
+     }
+     .return-container{
+        display: block !important;
+    }
+
+    .centered-img {
+        width: 100%;
+        padding-top: 40px;
+        text-align: center;
+    }
+
+    .table-day {
+        font-size: medium;
+    }
+
+    .table-hour {
+        font-size: xx-small;
+    }
+
+    .table-description {
+        font-size: x-small;
+    }
+}
+
+@media screen and (max-width: 349px){
+    .btn-img{
+        padding: 0% !important;
+        padding-top: 25% !important;
+    }
+    .btn-cambiar{
+        font-size: 13px !important;
+        margin-left: -20px;
+        padding: 2px !important;
+    }
+    .img-fluid-f{
+        width: 50px !important;
+        margin-left: -50px;
+        height: auto;
+     }
+     .return-container{
+        display: block !important;
+    }
+    
+    .centered-img {
+        width: 100%;
+        padding-top: 40px;
+        padding-bottom: 20px;
+    }
+
+    .table-day {
+        font-size: medium;
+    }
+
+    .table-hour {
+        font-size: xx-small;
+    }
+
+    .table-description {
+        font-size: x-small;
+    }
+}
+
+
+.btn-cambiar{
+    font-size: 15px;
+    white-space: nowrap; 
+    border: 2px solid #f1f1f1; 
+    padding: 3px; 
+    background-color: #afafaf;
+}
+
+
+.percentage-box {
+    display: inline-block; 
+    border: 2px solid #007bff;
+    border-radius: 5px;
+    padding: 10px 15px;
+    background-color: #e9f7fe;
+    margin-left: 10px;
+    font-weight: bold;
+}
+
+.brand-box {
+    display: inline-block; 
+    border: 2px solid #007bff;
+    border-radius: 5px;
+    background-color: #e9f7fe;
+    margin-left: 1%;
+    font-weight: bold;
+}
+
+.value-box {
+    display: inline-block; 
+    border: 2px solid #007bff;
+    border-radius: 5px;
+    background-color: #e9f7fe;
+    margin-left: 1%;
+    font-weight: bold;
+    width: 20px;
+    height: 20px;
+}
+
+.tarjeta{
+    padding: 1.5rem;
+    color: #fff;
+    margin: 2rem;
+    width: 95%;
+    display: flex;
+    justify-content: center;
+    justify-items: center;
+}
+
+.card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+  
+.card {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #ffffff;
+    cursor: move;
+}
+
+.special-card {
+    max-height: 100px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+}
+  
+.special-card .card-body {
+    padding: 10px;
+}
+
+.image_card {
+    object-fit: cover;
+    height: 65%;
+    width: 65%;
+    align-self: center;
+}
+
+.chip-option {
+    min-width: 50px; /* Ancho mínimo */
+    min-height: 50px; /* Altura mínima */
+    display: flex; /* Habilita el flexbox */
+    justify-content: center; /* Centra el contenido horizontalmente */
+    align-items: center; /* Centra el contenido verticalmente */
+    flex-direction: column; /* Organiza el contenido en columna */
+    margin: 2px !important; /* Espaciado entre chips */
+    position: relative; /* Para posicionar la flecha */
+    text-align: center !important; /* Asegúrate de que el texto esté centrado */
+    padding-left: 5px;
+}
+
+.mdc-evolution-chip-set__chips {
+    display: flex;
+    flex-flow: wrap;
+    justify-content: center;
+}
+
+.image_container {
+    width: 60px;  /* Define el ancho del contenedor */
+    height: 60px; /* Define la altura del contenedor */
+    overflow: hidden; /* Oculta cualquier parte de la imagen que sobresalga */
+    display: flex; /* Permite centrar la imagen si es necesario */
+    justify-content: center; /* Centra la imagen horizontalmente */
+    align-items: center; /* Centra la imagen verticalmente */
+}
+
+.image_quiz {
+    max-width: 100%; /* Asegura que la imagen no sobrepase el ancho del contenedor */
+    max-height: 100%; /* Asegura que la imagen no sobrepase la altura del contenedor */
+    width: auto; /* Permite que la imagen mantenga su ancho original */
+    height: auto; /* Permite que la imagen mantenga su altura original */
+    object-fit: contain; /* Asegura que la imagen se ajuste dentro del contenedor */
+}
+
+.return-container {
+    display: none;
+    position: fixed;
+    bottom: 50px; 
+    left: 80%;
+    z-index: 1000;
+  }
+  
+  .return-link {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    cursor: pointer;
+    background-color: rgba(255, 252, 252, 0.5);
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+
+  }
+
+  .return-link:hover{
+    background-color: rgba(0, 0, 0, 0.7);
+    box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.7);
+    transform: scale(1.1);
+    transition: all 0.3s ease;
+}
+  
+  .return-link i {
+    font-size: 35px;
+    color: #5ba0ff;
+  }
+
+.event-info {
+    line-height: 1.6;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    font-size: large;
+}
+
+.event-info p {
+    margin: 10px 0;
+}
+
+.event-info strong {
+    font-weight: bold;
+}
+
+.day-separator td {
+    border-top: 3px solid #333;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+/* Estilos para el contenedor de la fila */
+.custom-row {
+    min-height: 300px;        /* Altura mínima ajustable del contenedor */
+    overflow: hidden;         /* Asegura que los lados de la imagen se recorten si son mayores */
+    display: flex;
+    justify-content: center;  /* Centra horizontalmente */
+    align-items: left;      /* Centra verticalmente */
+}
+
+/* Estilos para la columna que contiene la imagen */
+.custom-col {
+    text-align: center;      /* Centra el contenido dentro de la columna */
+    display: flex;           /* Hace que el contenido de la columna use Flexbox */
+    justify-content: center;
+    align-items: center;     /* Centra verticalmente la imagen */
+}
+
+/* Estilos para la imagen */
+.centered-img {
+    display: block;
+    margin: 0 auto;  /* Centra la imagen horizontalmente */
+    max-width: 100%; /* Asegura que la imagen sea responsiva */
+    height: auto;    /* Mantiene la proporción de la imagen */
+}
+
+/* Quitar flechas en navegadores basados en WebKit (Chrome, Safari, Edge) */
+.no-spinner::-webkit-outer-spin-button,
+.no-spinner::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Quitar flechas en Firefox */
+.no-spinner[type="number"] {
+    -moz-appearance: textfield;
+}
+
+.center-text-icon {
+    display: inline-flex;
+    align-items: center; /* Centra verticalmente el ícono y el texto */
+}
+
+.center-text-icon img {
+    margin-left: 3px; /* Añade espacio entre el número y el ícono */
+}
+
+.espacios{
+    padding-right: calc(var(--bs-gutter-x)* .0) !important;
+    padding-left: calc(var(--bs-gutter-x)* .9) !important;
+}
+
+
+/* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+}
+
+.modal-container {
+    background-color: white; /* Card background */
+    padding: 20px;
+    border-radius: 10px; /* Rounded corners */
+    max-width: 500px; /* Max width of the modal */
+    text-align: center; /* Center the text */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Card shadow */
+    width: 90%; /* Responsive width */
+    position: relative;
+}
+
+.modal-content {
+    width: 100%;
+    max-height: 80vh;
+    object-fit: cover;
+}
+
+.texto {
+    color: black;
+    font-size: 1.2rem;
+}
+
+.btnClose {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    z-index: 10;
+    color: white;
+    font-size: 24px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.5);
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+    padding: 3px;
+}
+
+.btnClose:hover{
+    background-color: rgba(0, 0, 0, 0.7);
+    box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.7);
+    transform: scale(1.1);
+    transition: all 0.3s ease;
+}
+
+.modal ul {
+    text-align: left; 
+    padding-left: 20px;
+    list-style-position: inside;
+}
+
+.modal h3 {
+    text-align: center;
+}
+
+
+.table-container {
+    max-height: 1000px; /* Un valor lo suficientemente grande para que la tabla quepa cuando está expandida */
+    overflow: hidden;
+    transition: max-height 0.5s ease-in-out; /* Suave transición */
+}
+
+.table-container.collapsed {
+    max-height: 0; /* Colapsa la altura */
+    transition: max-height 0.5s ease-in-out;
+}

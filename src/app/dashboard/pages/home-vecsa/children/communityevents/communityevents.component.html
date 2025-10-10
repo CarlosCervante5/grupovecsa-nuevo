@@ -1,0 +1,17 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <div class="scrollable-container">
+        <div class="scrollable-content">
+          <div (click)="open(album.uuid)" *ngFor="let album of albums" class="album-item  btn"
+            [style.background-image]="'url(' + album.image_path + ')'">
+            <div class="text-container">
+              <h3>{{ album.name }}</h3>
+              <p>{{ album.begin_date| date }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

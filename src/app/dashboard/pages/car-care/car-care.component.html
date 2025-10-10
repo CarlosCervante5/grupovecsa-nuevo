@@ -1,0 +1,176 @@
+<nav-carcare></nav-carcare>
+<div class="container" style="max-width: 1140px;">
+    <div class="col-3">
+        <a class="text-decoration-none text-dark flecha" href="https://grupovecsa.com/" style="display: flex;">
+            <img src="assets/icons-fontawesome/circle-left-regular.svg" alt="flecha" width="20px" height="20px" style="padding-right: 3px;"><span>Regresar</span>
+        </a>
+    </div>
+    <div class="col-12 mt-3">
+        <div class="col-2"></div>
+
+        <div class="col-auto ">
+            <h3 class="fw-bold titulo">Car Care</h3>
+            <br>
+            <h6 class="fw-light texto">Manten tu vehiculo como el primer día con nuestros servicios de estética premium.
+                Dale una protección extra contra las inclemencias del camino con un wrap automotriz de alta gama, o agenda la cita para su próximo mantenimiento
+                o reparación mecánica  o estética en la agencia de <b>GRUPO VECSA</b> más cercana a tu domicilio. </h6>
+            <hr>
+            <h6 class="fw-light texto" >Para agendar una cita por favor introduce los siguientes <b>datos:</b> </h6>
+                <div class="col-12 mb-5">
+                    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+                        <div class="row">
+                            <!-- Fila 1: Nombre y Teléfono -->
+                            <div class="col-12 col-md-6">
+                                <mat-form-field appearance="outline">
+                                    <mat-label>Nombre Completo</mat-label>
+                                    <input matInput type="text" placeholder="Nombre Completo" formControlName="name">
+                                </mat-form-field>
+                                <mat-error *ngIf="nameInvalid">Ingrese nombre completo</mat-error>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <mat-form-field appearance="outline">
+                                    <mat-label>Teléfono de contacto</mat-label>
+                                    <input matInput type="tel" placeholder="123456789" formControlName="phone" required maxlength="10" required pattern="[0-9]*" required (keypress)="onlyNumbers($event)">
+                                </mat-form-field>
+                                <mat-error *ngIf="phoneLength">Ingrese un teléfono válido.</mat-error>
+                            </div>
+
+                            <!-- Fila 2: Correo y Agencia -->
+                            <div class="col-12 col-md-6">
+                                <mat-form-field appearance="outline">
+                                    <mat-label>Correo Electrónico</mat-label>
+                                    <input matInput type="email" placeholder="a@b.c" formControlName="email" required>
+                                </mat-form-field>
+                                <mat-error *ngIf="emailInvalid">Ingrese un correo electrónico.</mat-error>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <mat-form-field appearance="outline">
+                                    <mat-label>Agencia más cercana a tu domicilio:</mat-label>
+                                    <mat-select formControlName="origin_agency">
+                                        <mat-option value="VECSA Puebla (Angelópolis)">VECSA Puebla (Angelópolis)</mat-option>
+                                        <mat-option value="HUB Puebla (Blvrd Antuñano)">HUB Puebla (Blvrd Antuñano)</mat-option>
+                                        <mat-option value="VECSA Pachuca">VECSA Pachuca</mat-option>
+                                        <mat-option value="VECSA Veracruz">VECSA Veracruz</mat-option>
+                                        <mat-option value="Chevrolet Puebla (Blvrd Serdán)">Chevrolet Puebla (Blvrd Serdán)</mat-option>
+                                        <mat-option value="Chevrolet Cholula">Chevrolet Cholula</mat-option>
+                                        <mat-option value="Chevrolet Tlaxcala (Zacatelco)">Chevrolet Tlaxcala (Zacatelco)</mat-option>
+                                        <mat-option value="ABCars Servicio multimarca (Puebla, 31 pte)">ABCars Servicio multimarca (Puebla, 31 pte)</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                                <mat-error *ngIf="agencyInvalid">Seleccione una agencia.</mat-error>
+                            </div>
+
+                            <!-- Fila 3: Servicio y Comentarios -->
+                            <div class="col-12 col-md-6">
+                                <mat-form-field appearance="outline">
+                                    <mat-label>Servicio Requerido:</mat-label>
+                                    <mat-select formControlName="service">
+                                        <mat-option value="Servicio Mecánico">Servicio Mecánico</mat-option>
+                                        <mat-option value="Hojalateria y Pintura">Hojalateria y Pintura</mat-option>
+                                        <mat-option value="Estética Premium">Estética Premium</mat-option>
+                                        <mat-option value="Car Wrap (Carrocería o cristales)">Car Wrap (Carrocería o cristales)</mat-option>
+                                        <mat-option value="Renovación de seguro">Renovación de seguro</mat-option>
+                                        <mat-option value="Garantía Extendida">Garantía Extendida</mat-option>
+                                        <mat-option value="Extensión de Service Inclusive">Extensión de Service Inclusive</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                                <mat-error *ngIf="serviceInvalid">Seleccione el servicio deseado.</mat-error>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <mat-form-field appearance="outline">
+                                    <mat-label>Comentarios u Observaciones</mat-label>
+                                    <input matInput type="text" formControlName="comentario">
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Fila 4: Marca y Otra Marca -->
+                            <div class="col-12 col-md-6">
+                                <mat-form-field appearance="outline">
+                                    <mat-label>Marca de tu Vehículo:</mat-label>
+                                    <mat-select formControlName="brand" (selectionChange)="onBrandSelected($event)">
+                                        <mat-option value="BMW">BMW</mat-option>
+                                        <mat-option value="CHEVROLET">CHEVROLET</mat-option>
+                                        <mat-option value="MINI">MINI</mat-option>
+                                        <mat-option value="MOTORRAD">MOTORRAD</mat-option>
+                                        <mat-option value="OTRA MARCA">OTRA MARCA</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                                <mat-error *ngIf="brandInvalid">Seleccione la marca de su vehículo.</mat-error>
+                            </div>
+                            <div class="col-12 col-md-6" *ngIf="otherB">
+                                <mat-form-field appearance="outline">
+                                    <mat-label>¿Otra marca? Por favor especifica:</mat-label>
+                                    <input matInput type="text" formControlName="other_brand" required>
+                                </mat-form-field>
+                                <mat-error *ngIf="otherBrandInvalid">Especifique la otra marca.</mat-error>
+                            </div>
+
+                            <!-- Fila 5: Modelo y Año -->
+                            <div class="col-12 col-md-6">
+                                <mat-form-field appearance="outline">
+                                    <mat-label>Modelo:</mat-label>
+                                    <input matInput type="text" placeholder="xxxxx" formControlName="model" required>
+                                </mat-form-field>
+                                <mat-error *ngIf="modelInvalid">Ingrese el modelo de su vehículo.</mat-error>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <mat-form-field appearance="outline">
+                                    <mat-label>Año Modelo:</mat-label>
+                                    <input matInput type="text" placeholder="2024" formControlName="year" required>
+                                </mat-form-field>
+                                <mat-error *ngIf="yearInvalid">Ingrese el año modelo de su vehículo.</mat-error>
+                            </div>
+                        
+                            <!-- Fila 6: Fecha y Hora -->
+                            <div class="col-12 col-md-6">
+                                <mat-form-field appearance="outline">
+                                    <mat-label>Fecha:</mat-label>
+                                    <input matInput type="date" formControlName="MM/DD/YYYY" required placeholder="MM/DD/YYYY">
+                                </mat-form-field>
+                                <mat-error *ngIf="dateInvalid">Seleccione la fecha.</mat-error>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <mat-form-field appearance="outline">
+                                    <mat-label>Hora:</mat-label>
+                                    <input matInput type="time" formControlName="hour" min="09:00" max="18:00" step="900" required>
+                                </mat-form-field>
+                                <mat-error *ngIf="hourInvalid">Seleccione la hora.</mat-error>
+                            </div>
+                        </div>
+                    
+                        <!-- Botón de envío -->
+                        <div class="row mt-3">
+                            <div class="col-12 text-end">
+                                <button mat-button type="submit" class="btn btn-log mx-2 px-3" [disabled]="form.invalid">
+                                    <span>Agendar Cita</span>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            <h6 class="fw-light mt-5 texto">Todo lo que necesites para mantener tu vehículo en perfectas condiciones lo encuentrasen <b class="texto_negrita">VECSA BOUTIQUE</b>.
+                 <br> Dale clic al enlace y compra sin salir de casa.</h6>
+        </div>
+        <div class="col-auto"></div>
+    </div>
+
+    <div class="mb-3">
+        <div class="image-container">
+            <img class="background-image" src="assets/img/servicios.jpeg" alt="">
+            <a href="https://vecsaboutique.com/">
+                <button class="overlay-button btn"><span>Ir a la tienda</span></button>
+            </a>
+        </div>
+    </div>
+
+    <div>
+        <h6 class="fw-light texto">Conoce las <b>Promociones</b> que aftersales tiene exclusiva para ti.</h6>
+
+        <div class="row promos" id="promosN">
+            <h1 class="titulo">Promociones</h1>
+            <div class="col-12">
+                <app-swiper [images]="prom" [slidesPerView]="1"></app-swiper>
+            </div>
+        </div>
+    </div>
+</div>

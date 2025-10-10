@@ -1,0 +1,31 @@
+
+
+.mat-title {
+    height: 60px;
+    text-align: start;
+}
+
+.mat-subtitle{
+    height: 30px;
+    font-size: 18px;
+}
+
+.card-image {
+    object-fit: scale-down;
+    height: 23rem;        
+    width:auto;
+}
+
+@media screen and (max-width: 990px) and (min-width: 770px)  {
+    .mat-title {
+        height: 90px;
+    }
+}
+
+@media screen and (max-width: 767px) and (min-width: 0px)  {
+    .card-image {
+        object-fit: scale-down;
+        height: 35rem;        
+        width:auto;
+    }
+}

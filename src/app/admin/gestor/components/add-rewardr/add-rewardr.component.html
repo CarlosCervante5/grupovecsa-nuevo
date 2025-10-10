@@ -1,0 +1,68 @@
+<div class="container">
+   <div class="row">
+        <div class="col-12 mt-5 mb-5">
+            <mat-card class="example-card">
+                <mat-card-header>      
+                  <mat-card-title>Crear reward</mat-card-title>      
+                </mat-card-header>    
+                <mat-card-content class="m-5">
+                    <form [formGroup]="form" novalidate (ngSubmit)="onSubmit()">
+                        <div class="row paddingInputs margin-b-5">
+            
+                            <div class="col-12 col-lg-4">
+                                <!-- Title -->
+                                <mat-form-field appearance="outline">
+                                    <mat-label>Titulo del reward:</mat-label>
+                                    <input matInput type="text" formControlName="name" placeholder="Nuevo titulo" minlength="1" maxlength="191" required>
+                                    <!-- <mat-hint *ngIf="nameInvalid">Escribe el titulo del evento. </mat-hint> -->
+                                </mat-form-field>
+                            </div>   
+            
+                            <div class="col-12 col-lg-4">
+                                <mat-form-field appearance="outline">
+                                    <mat-label>Descripción:</mat-label>                        
+                                    <input matInput type="text" formControlName="description" placeholder="Descripcion">
+                                    <!-- <mat-hint *ngIf="descInvalid">Escribe la descripción del reward. </mat-hint> -->
+                                </mat-form-field>
+                            </div>                                      
+            
+                            <div class="col-12 col-lg-4">
+                                <!-- Title -->
+                                <mat-form-field appearance="outline">
+                                    <mat-label>Fecha del inicio:</mat-label>                        
+                                    <input matInput type="date" formControlName="begin_date" placeholder="Fecha del evento">
+                                    <!-- <mat-hint *ngIf="fecha_iInvalid">Selecciona la fecha del evento. </mat-hint> -->
+                                </mat-form-field>
+                            </div> 
+            
+                            <div class="col-12 col-lg-4">
+                                <!-- Title -->
+                                <mat-form-field appearance="outline">
+                                    <mat-label>Fecha de fin:</mat-label>                        
+                                    <input matInput type="date" formControlName="end_date" placeholder="Fecha del evento">
+                                    <!-- <mat-hint *ngIf="fecha_fInvalid">Selecciona la fecha del evento. </mat-hint> -->
+                                </mat-form-field>
+                            </div> 
+            
+                            <!-- <div class="col-12 col-lg-4">
+                                <mat-form-field appearance="outline">
+                                    <mat-label>Tipo:</mat-label>                        
+                                    <input matInput type="text" formControlName="type" placeholder="Tipo de reward">
+                                </mat-form-field>
+                            </div>  -->
+                        </div>
+                        
+                        <mat-card-actions class="mx-auto d-flex justify-content-end">    
+                            <button mat-button class="btn abcars-background-color-blue mx-2"  >Subir</button>
+                            <button mat-button class="btn abcars-background-color-black" type="button" (click)="close()">Cancelar</button>
+                        </mat-card-actions>
+                    </form>        
+                </mat-card-content>    
+                <!-- <mat-card-footer>
+                  <mat-progress-bar mode="indeterminate" class="mt-5"></mat-progress-bar>
+                </mat-card-footer> -->
+            </mat-card>
+        </div>
+   </div>
+</div>
+

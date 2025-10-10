@@ -1,0 +1,75 @@
+.container {
+    margin-top: 80px;
+}
+
+.card-image {
+    object-fit: scale-down;
+    height: 23rem;        
+    width:auto;
+}
+
+@media screen and (max-width: 767px) and (min-width: 0px)  {
+    .card-image {
+        object-fit: scale-down;
+        height: 35rem;        
+        width:auto;
+    }
+}
+
+input[type="file"] {
+    display: none;
+}
+
+.custom-file-upload {
+    border: 1px solid #ccc;
+    display: inline-block;
+    padding: 7px 12px;
+    cursor: pointer;
+}
+
+::ng-deep .margintop {
+    margin-top: 20% !important;
+}
+
+mat-checkbox {
+    bottom: 10px;
+}
+
+mat-card-actions {
+    height: 6.5rem;
+}
+
+.custom-button {
+    background-color: rgb(230 244 255);
+    color: black;
+    transition: background-color 0.3s ease;
+    font-size: clamp(1.3rem, 2.5vw, 1.25rem);
+    margin: 0.2rem;
+    padding: 2.0rem;
+    border-radius: 1.5rem;
+}
+
+.title-row {
+    height: 5.5rem;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    width: 100%;
+}
+
+.subtitle-row {
+    height: 3rem;
+    justify-content: space-between;
+    text-align: center;
+    width: -webkit-fill-available;
+}
+
+.green {
+    font-size: x-large;
+    color: green;
+}
+
+.red {
+    font-size: x-large;
+    color: red;
+}

@@ -1,0 +1,6 @@
+<div *ngIf="albums != undefined && albums.length > 0" target="_top" class="album-item"     [style.background-image]="'url(' + albums[0].image_path + ')'">
+    <div class="text-container">
+        <h3>{{ albums[0].name }}</h3>
+        <p>{{ albums[0].begin_date| date }}</p>
+    </div>
+</div>
