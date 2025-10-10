@@ -1,0 +1,50 @@
+# Node modules
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Laravel
+/vecsa-backend/vendor/
+/vecsa-backend/.env
+/vecsa-backend/storage/*.key
+/vecsa-backend/storage/logs/*
+/vecsa-backend/storage/framework/cache/*
+/vecsa-backend/storage/framework/sessions/*
+/vecsa-backend/storage/framework/views/*
+/vecsa-backend/storage/app/public/*
+/vecsa-backend/bootstrap/cache/*
+/vecsa-backend/database/database.sqlite
+
+# Angular
+/vecsa-frontend/dist/
+/vecsa-frontend/.angular/
+/vecsa-frontend/tmp/
+/vecsa-frontend/out-tsc/
+/vecsa-frontend/bazel-out/
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# OS
+Thumbs.db
+.Spotlight-V100
+.Trashes
+
+# Logs
+*.log
+logs/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Build files
+*.cache
+*.temp
+

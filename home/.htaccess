@@ -1,0 +1,10 @@
+RewriteEngine On
+
+# Redirect all requests to router.php unless the file exists
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ router.php [QSA,L]
+
+# Optional: Force redirect from router.php to clean URLs
+RewriteCond %{THE_REQUEST} \s/+router\.php[\s?] [NC]
+RewriteRule ^router\.php$ / [R=301,L] 

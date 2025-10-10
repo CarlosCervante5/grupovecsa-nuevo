@@ -1,0 +1,19 @@
+{
+  "name": "grupovecsa-design",
+  "version": "1.0.0",
+  "description": "Rediseño del sitio de Grupo VECSA con PHP y Tailwind CSS.",
+  "main": "index.php",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:css": "tailwindcss -i ./assets/css/input.css -o ./assets/css/style.css --watch"
+  },
+  "keywords": [
+    "php",
+    "tailwindcss"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "tailwindcss": "^3.4.4"
+  }
+}
