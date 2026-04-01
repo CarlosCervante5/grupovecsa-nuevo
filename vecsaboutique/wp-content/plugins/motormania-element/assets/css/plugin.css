@@ -1,0 +1,997 @@
+/*--------------------------------------------------------------
+# Custom Select
+--------------------------------------------------------------*/
+/*the container must be positioned relative:*/
+.motormania-custom-select {
+    position: relative;
+    width: 220px;
+}
+
+.motormania-custom-select select {
+    display: none;
+    /*hide original SELECT element:*/
+}
+
+.select-selected {
+    background-color: #fff;
+}
+
+/*style the arrow inside the select element:*/
+.select-selected:after {
+    position: absolute;
+    content: "";
+    top: 20px;
+    right: 15px;
+    width: 0;
+    height: 0;
+    border: 6px solid transparent;
+    border-color: #333 transparent transparent transparent;
+}
+
+/*point the arrow upwards when the select box is open (active):*/
+.select-selected.select-arrow-active:after {
+    border-color: transparent transparent #333 transparent;
+    top: 7px;
+}
+
+/*style the items (options), including the selected item:*/
+.select-items div,
+.select-selected {
+    padding: 10px 16px;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    text-align: left;
+}
+
+/*style items (options):*/
+.select-items {
+    position: absolute;
+    background-color: #fff;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 99;
+    border: 1px solid #ddd;
+}
+
+.select-items div {
+    border-top: 1px solid #fafafa;
+}
+
+/*hide the items when the select box is closed:*/
+.select-hide {
+    display: none;
+}
+
+.select-items div:hover,
+.same-as-selected {
+    color: #fff;
+}
+
+.float-r {
+    float: right;
+}
+
+.float-l {
+    float: left;
+}
+
+/*--------------------------------------------------------------
+## Loader
+--------------------------------------------------------------*/
+
+.loader-rel {
+    position: relative;
+}
+
+.loader {
+    position: absolute;
+    right: 47.7%;
+    border: 5px solid;
+    border-radius: 50%;
+    border-top: 5px solid #f3f3f3 !important;
+    width: 50px;
+    height: 50px;
+    -webkit-animation: spin 0.8s linear infinite;
+    /* Safari */
+    animation: spin 0.8s linear infinite;
+    display: none;
+    margin: 20px 0;
+}
+
+/* Safari */
+@-webkit-keyframes spin {
+    0% {
+        -webkit-transform: rotate(0deg);
+    }
+
+    100% {
+        -webkit-transform: rotate(360deg);
+    }
+}
+
+@keyframes spin {
+    0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+
+    100% {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
+}
+
+/*--------------------------------------------------------------
+## Banner
+--------------------------------------------------------------*/
+.banner-extra-pad {
+    padding-top: 250px;
+}
+
+.breadcrumb-extra-pad {
+    padding-top: 180px !important;
+}
+
+.banner {
+    position: relative;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    background-size: cover !important;
+    padding: 200px 0 200px;
+    text-align: center;
+    z-index: 1;
+}
+
+.banner:after {
+    position: absolute;
+    content: '';
+    background: rgba(0, 0, 0, 0.6);
+    right: 0;
+    left: 0;
+    top: 0;
+    height: 100%;
+    z-index: -1;
+}
+
+.banner-content h1 {
+    font-size: 56px;
+    font-weight: bold;
+    margin-bottom: 40px;
+}
+
+.banner-content #search {
+    position: relative;
+}
+
+.banner-content {
+    margin-bottom: 100px;
+}
+
+.banner-content p {
+    font-size: 24px;
+    line-height: 34px;
+    margin-bottom: 0;
+    font-weight: 300;
+}
+
+.banner .motormania-product-search-form {
+    margin-top: 70px;
+    width: 70%;
+    float: left;
+}
+
+.brands_form {
+    text-align: center;
+}
+
+.brands_form ul {
+    margin-bottom: 0;
+}
+
+.brands_form select {
+    width: 220px;
+    height: 55px;
+    border-radius: 50px;
+}
+
+.brands_form input[type="submit"] {
+    width: 150px;
+    height: 55px;
+}
+
+.white-text-color .banner-content h1,
+.white-text-color .banner-content p,
+.white-text-color .banner-content h6 {
+    color: #fff;
+}
+
+.motormania-product-search-form {
+    margin: 0 auto;
+    border-radius: 50px;
+    z-index: 0;
+    border: 1px solid #ccc;
+}
+
+.motormania-search-btn {
+    position: absolute;
+    height: 60px;
+    right: 0;
+    top: 0;
+    z-index: 1000;
+    -webkit-transition: 0.3s;
+    -o-transition: 0.3s;
+    transition: 0.3s;
+    border-radius: 50px;
+    width: 140px;
+    text-align: center;
+    border: 3px solid #fff;
+}
+
+
+.motormania-search-btn input[type="submit"] {
+    border: none;
+    background: transparent;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    z-index: 100;
+    padding: 0;
+}
+
+.motormania-search-fields {
+    position: relative;
+    display: inline-block;
+    width: 70%;
+    vertical-align: top;
+    color: #fff;
+}
+
+.motormania-download-cat-filter {
+    background: transparent !important;
+    float: left;
+    width: 30%;
+    border-right: 1px solid #fff;
+}
+
+/*--------------------------------------------------------------
+## Banner 2
+--------------------------------------------------------------*/
+.banner.style-2 {
+    text-align: unset;
+}
+
+.style-2.banner:after {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.banner.style-2 .brands_form {
+    padding: 65px 25px;
+    border-radius: 15px;
+    background: rgb(0 0 0 / 45%);
+}
+
+.banner.style-2 .brands_form select {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.banner.style-2 .brands_form input[type="submit"] {
+    width: 100%;
+}
+
+.banner.style-2 .banner-content h1 {
+    font-size: 65px;
+}
+
+.banner.style-2 .banner-content .motormania-btn {
+    padding: 15px 60px;
+}
+
+/*--------------------------------------------------------------
+## Banner 3
+--------------------------------------------------------------*/
+.banner-slider {}
+
+.banner.style-3 {
+    padding: 100px 0;
+}
+
+.banner.style-3:after {
+    position: absolute;
+    content: '';
+    background: rgb(0 0 0 / 80%);
+    width: 100%;
+    height: 100%;
+}
+
+.banner.style-3 .banner-content {
+    text-align: left;
+    margin-bottom: 0;
+}
+
+.banner.style-3 .banner-content h1 {
+    font-size: 70px;
+}
+
+/*--------------------------------------------------------------
+## Blog
+--------------------------------------------------------------*/
+.blog-item {
+    margin-bottom: 30px;
+}
+
+.blog-thumb {
+    overflow: hidden;
+    border-radius: 10px;
+    position: relative;
+}
+
+.blog-thumb .date {
+    font-family: Oswald;
+    padding: 7px 15px;
+    position: absolute;
+    top: 36px;
+    left: -36px;
+    color: #fff;
+    -webkit-transform: rotate(-90deg);
+        -ms-transform: rotate(-90deg);
+            transform: rotate(-90deg);
+}
+
+.blog-thumb img {
+    overflow: hidden;
+    width: 100%;
+    -webkit-transform: scale(1);
+    -ms-transform: scale(1);
+    transform: scale(1);
+    -webkit-transition: 1s linear;
+    -o-transition: 1s linear;
+    transition: 1s linear;
+}
+
+.blog-item:hover .blog-thumb img {
+    -webkit-transform: scale(1.1);
+    -ms-transform: scale(1.1);
+    transform: scale(1.1);
+}
+
+.blog-meta {
+    font-family: Oswald;
+}
+
+.blog-meta img {
+    width: 40px;
+    border-radius: 50% !important;
+}
+
+
+.blog-meta span {
+    text-transform: capitalize;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.blog-content {
+    margin-top: 20px;
+}
+
+.blog-content a {
+    text-transform: capitalize;
+    color: #333;
+}
+
+.blog-content h4 {
+    font-weight: 500;
+    font-size: 20px;
+    margin-top: 15px;
+    line-height: 32px;
+    margin-bottom: 0;
+}
+
+.blog-content p {
+    margin-bottom: 0;
+}
+
+/*--------------------------------------------------------------
+## Counter
+--------------------------------------------------------------*/
+.counter-item .counter-icon i {
+    border-radius: 50%;
+    font-size: 36px;
+    padding: 15px;
+    height: 80px;
+    width: 80px;
+    text-align: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    display: -webkit-inline-box;
+    display: -ms-inline-flexbox;
+    display: inline-flex;
+    margin-bottom: 25px;
+}
+
+.counter-item h2 {
+    font-size: 52px;
+}
+
+/*--------------------------------------------------------------
+## Countdown
+--------------------------------------------------------------*/
+.countdown-date b {
+    font-size: 30px;
+    margin: 0 2px;
+    color: #f1f1f1
+}
+
+.countdown-date span {
+    text-align: center;
+    vertical-align: middle;
+    display: inline-block;
+    overflow: hidden;
+    font-size: 26px;
+    font-weight: bold;
+    border-radius: 50px;
+    line-height: 60px;
+    width: 60px;
+    height: 60px;
+    color: #fff;
+}
+
+/*--------------------------------------------------------------
+## IconBox
+--------------------------------------------------------------*/
+.iconbox-item {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+}
+
+.iconbox-item div:first-child {
+    width: 25%;
+    margin-right: 15px;
+}
+
+.iconbox-item div:last-child {
+    width: 75%;
+}
+
+.iconbox-item i {
+    font-size: 45px;
+    -webkit-transition: 0.7s;
+    -o-transition: 0.7s;
+    transition: 0.7s;
+}
+
+.iconbox-item:hover i {
+    font-size: 48px;
+}
+
+.iconbox-item h5 {
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 20px;
+    margin-bottom: 5px;
+}
+
+.iconbox-item p {
+    font-size: 14px;
+    margin-bottom: 0;
+}
+
+/*--------------------------------------------------------------
+## Partner
+--------------------------------------------------------------*/
+
+.partner img {
+    padding: 0 15px;
+    -webkit-transition: 0.6s;
+    -o-transition: 0.6s;
+    transition: 0.6s;
+}
+
+.partner img:hover {
+    -webkit-transform: scale(1.2);
+    -ms-transform: scale(1.2);
+    transform: scale(1.2);
+}
+
+/*--------------------------------------------------------------
+## Category item
+--------------------------------------------------------------*/
+.category-item {
+    overflow: hidden;
+    border-radius: 10px;
+    display: block;
+    background: #fff;
+}
+
+.category-item-img {
+    display: inline-block;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    margin: 0 auto;
+}
+
+.category-item h5 {
+    border-top: 2px solid;
+    padding: 20px 0;
+    margin-bottom: 0;
+}
+
+.category-item-2 {
+    border-radius: 10px;
+    border: 1px solid #f1f1f1;
+    background: #fff;
+    padding: 30px;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-wrap: nowrap;
+    flex-wrap: nowrap;
+}
+
+.category-item-2>a {
+    width: 40%;
+}
+
+.category-item-2>a>img {
+    padding-right: 25px;
+}
+
+.category-item-2>div {
+    width: 60%;
+}
+
+.category-item-2>div h5 {
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 10px;
+}
+
+.category-item-2>div h5 a {
+    color: #333;
+}
+
+.category-item-2>div ul li a {
+    color: #808080;
+    font-size: 14px;
+}
+
+.category-item-2>div>a {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/*--------------------------------------------------------------
+## Accordion
+--------------------------------------------------------------*/
+.motormania-accordion-item {
+    padding: 20px 30px;
+    border-radius: 6px;
+    border: 1px solid #ececec;
+    background: #fff;
+}
+
+.motormania-accordion-item:not(:last-child) {
+    margin-bottom: 20px;
+}
+
+.motormania-accordion-item h5 {
+    margin: 0 !important;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.motormania-accordion-item.active h5 span:nth-child(1) {
+    display: none;
+}
+
+.motormania-accordion-item h5 span:nth-child(2) {
+    display: none;
+}
+
+.motormania-accordion-item.active h5 span:nth-child(2) {
+    display: block;
+}
+
+.motormania-accordion-item h5 span {
+    float: right;
+}
+
+.motormania-accordion-item .collapse.show {
+    margin-top: 20px;
+    padding-top: 20px;
+    -webkit-transition: .2s;
+    -o-transition: .2s;
+    transition: .2s;
+    border-top: 1px solid #ddd;
+}
+
+/*--------------------------------------------------------------
+## Product Filter
+--------------------------------------------------------------*/
+.product-filter {
+    display: block;
+    overflow: hidden;
+    margin-bottom: 45px;
+}
+
+.product-filter>h4 {
+    font-weight: 700;
+    float: left;
+    margin-bottom: 0;
+    font-size: 32px;
+}
+
+.product-filter ul {
+    margin-bottom: 0;
+    margin-right: 120px;
+}
+
+.product-filter ul li a {
+    color: #808080;
+    border-radius: 20px;
+    text-transform: uppercase;
+}
+
+.product-filter ul li.list-inline-item:not(:last-child) {
+    margin-right: 0;
+}
+
+.product-filter ul li:hover {
+    background: #fafafa;
+}
+
+.slick-arrow {
+    position: absolute;
+    color: #fff;
+    width: 45px !important;
+    height: 45px;
+    padding: 15px 18px;
+    top: 50%;
+    text-align: center;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 1
+}
+
+.slick-arrow.fa-chevron-left {
+    left: 30px;
+}
+
+.slick-arrow.fa-chevron-right {
+    right: 30px;
+}
+
+.testimonials>.slick-arrow.fa-chevron-left {
+    left: -10px;
+}
+
+.testimonials>.slick-arrow.fa-chevron-right {
+    right: -10px;
+}
+
+.product-items>.slick-arrow.fa-chevron-right {
+    right: 15px;
+    top: -90px;
+}
+
+.product-items>.slick-arrow.fa-chevron-left {
+    left: unset;
+    right: 70px;
+    top: -90px;
+}
+
+.product-items .product-item {
+    margin: 2px 15px;
+}
+
+/*--------------------------------------------------------------
+## Product item style 2
+--------------------------------------------------------------*/
+.product-item.style-2 {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    border-radius: 10px;
+    overflow-y: hidden;
+}
+
+.style-2 .product-item-image {
+    border-bottom: none;
+}
+
+.style-2 .product-item-image img {
+    height: 100%;
+    max-width: 110px;
+}
+
+.style-2 .product-item-content {
+    padding: 15px 20px;
+    width: 100%;
+    margin: auto;
+}
+
+.style-2 .product-item-content a h5 {
+    font-size: 17px;
+    font-weight: 400;
+}
+
+.style-2 .product-item-content .price {
+    font-size: 16px;
+    font-weight: 500;
+    bottom: 15px;
+}
+
+.style-2 .product-item-image .onsale {
+    font-size: 12px;
+    padding: 0 10px;
+    top: 4px;
+}
+
+
+.style-2 .star-rating {
+    font-size: 13px;
+}
+
+.style-2 .woocommerce-product-rating {
+    right: 15px;
+    position: absolute;
+}
+
+
+.style-2 .woocommerce-review-link {
+    display: none;
+}
+
+/*--------------------------------------------------------------
+## Testimonial
+--------------------------------------------------------------*/
+.testimonials {
+    text-align: center;
+}
+
+.testimonial-img {
+    margin-bottom: 30px;
+}
+
+.testimonial-img img {
+    width: 100px;
+    border-radius: 50% !important;
+    border: 2px solid !important;
+    margin: 0 auto;
+}
+
+.testimonial {
+    position: relative;
+    background: #fff;
+    margin: 0 15px;
+    padding: 70px 50px;
+    border-radius: 10px;
+}
+.testimonials i.fa-quote-right {
+    font-size: 40px;
+    position: absolute;
+    bottom: 30px;
+    right: 30px;
+    opacity: 0.2;
+}
+.testimonial-content>i {
+    margin-bottom: 15px;
+    display: inline-block;
+    font-size: 50px;
+    opacity: 0.2;
+}
+
+.testimonial-content p {
+    font-family: Oswald;
+    font-weight: 300;
+    font-size: 18px;
+    line-height: 28px;
+    margin-bottom: 20px;
+}
+
+.client-info h4 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 0;
+}
+
+.client-info span {
+    font-size: 14px;
+    display: block;
+    margin-top: 10px;
+}
+
+.testimonial-wrap {
+    border-bottom: 1px solid #e3e3e3;
+    padding-bottom: 50px;
+}
+
+.testimonial-wrap:last-child {
+    border-bottom: none;
+}
+
+.testimonial-revers-loop>.row:nth-child(2n)>.col-lg-4:first-child {
+    -webkit-box-ordinal-group: 13;
+    -ms-flex-order: 12;
+    order: 12;
+}
+
+.testi-bottom ul li.list-inline-item:not(:last-child) {
+    margin-right: 0;
+}
+
+.testi-bottom ul li i {
+    color: #f2b01e;
+}
+
+/*--------------------------------------------------------------
+## Ad Banner
+--------------------------------------------------------------*/
+.adbanner {
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    position: relative;
+    padding: 50px;
+    color: #fff;
+    z-index: 1;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.adbanner.vertical ul li {
+    line-height: 35px;
+}
+
+.adbanner h2 {
+    line-height: 50px;
+}
+
+.adbanner h2,
+.adbanner h3 {
+    font-weight: bold;
+}
+
+.adbanner h2,
+.adbanner h3,
+.adbanner p,
+.adbanner a {
+    color: #fff;
+}
+
+/*--------------------------------------------------------------
+# Contact form
+--------------------------------------------------------------*/
+.wpcf7 p {
+    margin-bottom: 0
+}
+
+.wpcf7 input {
+    margin-bottom: 20px
+}
+
+.wpcf7 textarea {
+    height: 160px;
+}
+
+.wpcf7 input[type=submit] {
+    margin-top: 20px;
+    margin-bottom: 0;
+    padding: 0 60px;
+}
+
+/*--------------------------------------------------------------
+# Responsive
+--------------------------------------------------------------*/
+@media (max-width: 1200px) {
+    .banner h1 {
+        font-size: 52px;
+    }
+
+    .partner {
+        margin-bottom: 50px;
+    }
+
+    .partner {
+        text-align: center;
+    }
+    .testimonials>.slick-arrow.fa-chevron-left {
+        left: 30px;
+    }
+
+    .testimonials>.slick-arrow.fa-chevron-right {
+        right: 30px;
+    }
+}
+
+@media (max-width: 1024px) {}
+
+
+@media (max-width: 991px) {
+
+    .select-items div,
+    .select-selected {
+        margin-bottom: 15px;
+    }
+
+    .category-item-2 {
+        display: block;
+    }
+
+    .category-item-2>a {
+        width: 100%;
+    }
+
+    .category-item-2>a>img {
+        padding-right: 0;
+        margin-bottom: 20px;
+
+    }
+
+    .category-item-2>div {
+        width: 100%;
+    }
+
+}
+
+@media (max-width: 768px) {
+    .banner {
+        text-align: center;
+    }
+
+    .banner h1 {
+        font-size: 42px;
+    }
+
+
+    .banner.style-2 .banner-content h1,
+    .banner.style-3 .banner-content h1 {
+        font-size: 42px;
+    }
+
+
+    .banner.style-3 .slick-slide img {
+        display: none;
+    }
+
+    .banner .motormania-product-search-form {
+        width: 100%;
+        float: none;
+    }
+
+    .brands_form ul li {
+        margin-bottom: 15px;
+    }
+
+    .products-filter-area .woocommerce-ordering {
+        margin-top: 20px;
+    }
+
+    .products-filter-area .woocommerce-ordering,
+    .products-filter-area p {
+        text-align: center !important;
+    }
+
+}
+
+
+@media (max-width: 540px) {
+    .partner img {
+        width: 200px;
+    }
+}

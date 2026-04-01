@@ -1,0 +1,89 @@
+.bench-layout { max-width: 1200px; margin: 0 auto; padding: 32px; font-family: inherit; background: #f8fafc; min-height: 100vh; }
+
+.bench-header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+.bench-back { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; cursor: pointer; color: #475569; transition: all 0.15s; }
+.bench-back:hover { border-color: #1c69d4; color: #1c69d4; }
+.bench-title { font-size: 1.6rem; font-weight: 800; color: #0f172a; margin: 0; letter-spacing: -0.5px; }
+.bench-subtitle { font-size: 0.85rem; color: #94a3b8; margin: 4px 0 0; }
+
+.bench-tabs { display: flex; gap: 4px; margin-bottom: 20px; background: #f1f5f9; border-radius: 8px; padding: 4px; }
+.bench-tab { display: flex; align-items: center; gap: 6px; padding: 8px 16px; border: none; background: transparent; color: #64748b; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s; }
+.bench-tab:hover { color: #1e293b; background: #e2e8f0; }
+.bench-tab.active { background: #fff; color: #1c69d4; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.bench-tab .material-icons { font-size: 18px; }
+
+.bench-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+.bench-select { padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: #fff; color: #1e293b; font-size: 13px; }
+.bench-input { width: 100%; padding: 9px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.85rem; color: #0f172a; background: #fff; outline: none; box-sizing: border-box; }
+.bench-input:focus { border-color: #1c69d4; }
+
+.bench-btn-primary { display: flex; align-items: center; gap: 6px; padding: 8px 18px; background: #1c69d4; color: #fff; border: none; border-radius: 8px; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+.bench-btn-primary:hover { background: #1554b0; }
+.bench-btn-primary:disabled { opacity: 0.6; cursor: default; }
+.bench-btn-primary .material-icons { font-size: 18px; }
+
+.bench-btn-secondary { display: flex; align-items: center; gap: 6px; padding: 8px 14px; border: 1px solid #e2e8f0; border-radius: 6px; background: #fff; color: #475569; cursor: pointer; font-size: 13px; transition: all 0.2s; }
+.bench-btn-secondary:hover { border-color: #1c69d4; color: #1c69d4; }
+
+.bench-btn-icon-delete { display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; border: none; border-radius: 6px; cursor: pointer; background: #fef2f2; color: #ef4444; transition: background 0.15s; }
+.bench-btn-icon-delete:hover { background: #fee2e2; }
+.bench-btn-icon-delete .material-icons { font-size: 16px; }
+
+.bench-error { display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; color: #dc2626; font-size: 13px; margin-bottom: 16px; }
+
+.bench-competitors-panel { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+.bench-comp-add { display: flex; gap: 8px; margin-bottom: 12px; }
+.bench-comp-add .bench-input { flex: 1; }
+.bench-comp-list { display: flex; flex-direction: column; gap: 6px; }
+.bench-comp-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 13px; }
+.bench-empty-msg { color: #94a3b8; font-size: 13px; text-align: center; padding: 12px; }
+
+.bench-loading { display: flex; align-items: center; gap: 12px; padding: 40px 0; color: #64748b; font-size: 0.85rem; }
+.bench-spinner { width: 22px; height: 22px; border: 3px solid #e2e8f0; border-top-color: #1c69d4; border-radius: 50%; animation: benchSpin 0.6s linear infinite; }
+.bench-spinner-sm { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: benchSpin 0.6s linear infinite; }
+@keyframes benchSpin { to { transform: rotate(360deg); } }
+
+.bench-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 60px 0; color: #94a3b8; }
+.bench-empty .material-icons { font-size: 40px; }
+.bench-empty p { margin: 0; font-size: 0.85rem; }
+
+.bench-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+.bench-stat-card { display: flex; align-items: center; gap: 14px; background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+.bench-stat-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.bench-stat-icon .material-icons { font-size: 22px; }
+.bench-stat-info { display: flex; flex-direction: column; gap: 2px; }
+.bench-stat-value { font-size: 1.4rem; font-weight: 800; color: #0f172a; letter-spacing: -0.5px; line-height: 1; }
+.bench-stat-label { font-size: 0.75rem; color: #64748b; font-weight: 500; }
+
+.bench-table-wrap { overflow-x: auto; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); margin-top: 16px; }
+.bench-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+.bench-table th { text-align: left; padding: 10px 14px; background: #f8fafc; color: #475569; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid #e2e8f0; }
+.bench-table td { padding: 10px 14px; color: #334155; border-bottom: 1px solid #f1f5f9; }
+.bench-table tbody tr:hover { background: #f8fafc; }
+.bench-status-error { color: #dc2626; font-size: 12px; }
+.bench-status-ok { color: #059669; font-size: 13px; }
+.bench-status-none { color: #94a3b8; font-size: 13px; }
+
+.bench-section-title { font-size: 1rem; font-weight: 700; color: #0f172a; margin: 24px 0 10px; }
+.bench-competitor-title { color: #1c69d4; font-size: 15px; font-weight: 600; margin: 12px 0 8px; }
+.bench-ads-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin-bottom: 20px; }
+.bench-ad-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; transition: box-shadow 0.2s; }
+.bench-ad-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.bench-ad-header { font-weight: 600; color: #1c69d4; font-size: 13px; margin-bottom: 8px; }
+.bench-ad-text { color: #475569; font-size: 13px; line-height: 1.5; margin-bottom: 8px; }
+.bench-ad-meta { display: flex; gap: 10px; font-size: 12px; color: #94a3b8; }
+.bench-ad-meta span { background: #f1f5f9; padding: 2px 8px; border-radius: 4px; }
+.bench-thumb-grid { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.bench-thumb { width: 70px; height: 70px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0; cursor: pointer; transition: transform 0.2s; }
+.bench-thumb:hover { transform: scale(1.05); border-color: #1c69d4; }
+.bench-thumb-more { width: 70px; height: 70px; background: #f1f5f9; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #1c69d4; font-weight: 600; font-size: 13px; }
+
+.bench-list { display: flex; flex-direction: column; gap: 8px; }
+.bench-list-item { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+.bench-list-item:hover { border-color: #1c69d4; background: #f8fafc; }
+.bench-list-item .material-icons { color: #94a3b8; font-size: 20px; }
+.bench-list-date { font-weight: 500; color: #1e293b; font-size: 13px; }
+.bench-list-file { color: #94a3b8; font-size: 12px; flex: 1; }
+.bench-list-arrow { color: #cbd5e1; margin-left: auto; }
+.bench-list-link { text-decoration: none; color: #1e293b; font-size: 13px; }
+.bench-list-link .bench-list-arrow { color: #1c69d4; }

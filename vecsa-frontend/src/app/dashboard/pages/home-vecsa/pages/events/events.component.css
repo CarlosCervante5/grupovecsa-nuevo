@@ -1,102 +1,136 @@
- 
-*{
-    font-family: 'Mulish' ;
+/* Hero */
+.promo-hero {
+  height: 420px;
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 40%, #2d2d2d 70%, #1c69d4 100%);
+  position: relative;
+  overflow: hidden;
 }
-.zoomIn {
-    animation: zoom-in 1s ease;
+.promo-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 70% 40%, rgba(28,105,212,0.35) 0%, transparent 55%);
 }
-
-/* todas las animaciones pausadas */
-.paused * { 
-	animation-play-state: paused;
+.promo-hero-overlay {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 1rem;
 }
- 
-.container {    
-    background-color: white;
+.promo-hero-content { color: #fff; }
+.promo-badge {
+  display: inline-block;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 20px;
+  padding: 5px 16px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
 }
-
-.flecha{
-
+.promo-hero-title {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 900;
+  margin: 0 0 1rem;
+  letter-spacing: -2px;
+  line-height: 1;
 }
-
-.btn-flecha{
-    border-radius: 50% !important; 
-    border-color: black !important; 
-    height: 20px !important;
-    width: 20px !important; 
-    display: grid !important; 
-    justify-content: center !important; 
-    align-content: center !important; 
-    margin-right: 5px !important; 
-    box-sizing: border-box !important;
-}
-
-
-.campañas{
-    font-size: x-large;
-    text-transform: uppercase;
-}
-.textos{
-    font-size: large;
-    text-align: justify;
-    margin-left: 0px;
-    margin-right: 0px;
-}
-.titulo{
-    font-size: x-large;
-    margin-left: 0px;
-    margin-right: 0px;
-}
-.flecha{
-    margin-left: 0px;
-    margin-right: 0px;
+.promo-hero-title span { color: #1c69d4; }
+.promo-hero-sub {
+  font-size: 1rem;
+  opacity: 0.75;
+  max-width: 520px;
+  margin: 0 auto;
+  line-height: 1.6;
 }
 
-body {
-    margin: 0;
-    padding: 0;
+/* Container */
+.promo-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 4rem 1.5rem 5rem;
 }
 
-@media (max-width: 500px){
-    .flecha{
-        margin-left: 10px;
-        margin-right: 10px;
-    }
-    .titulo{
-        margin-left: 10px;
-        margin-right: 10px;
-    }
+/* Empty state */
+.promo-empty {
+  text-align: center;
+  padding: 5rem 1rem;
+  color: #6b7280;
+}
+.promo-empty-icon { font-size: 3.5rem; margin-bottom: 1rem; }
+.promo-empty h3 { font-size: 1.4rem; font-weight: 700; color: #111; margin: 0 0 0.5rem; }
+.promo-empty p { font-size: 0.95rem; margin: 0; }
+
+/* Campaign block */
+.promo-campaign {
+  margin-bottom: 4rem;
+}
+.promo-campaign-header {
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 3px solid #1c69d4;
+  display: inline-block;
+  width: 100%;
+}
+.promo-campaign-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #111;
+  margin: 0 0 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: -0.5px;
+}
+.promo-campaign-desc {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin: 0;
 }
 
- 
-
- 
-@media (max-width: 768px) 
-{
-
-    .hero{
-        background-image: url('/assets/cards/BANNER_820X410.jpg');
-        background-size: cover;
-        background-position: center;
-        height: 410px; /* Toma toda la altura de la ventana gráfica */
-        color: white;
-        text-align: center;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-    .mg{
-        margin-top: 20px;
-     }
-     .campañas{
-        font-size: medium;
-     }
-     .textos{
-        font-size: medium;
-        margin-left: 10px;
-        margin-right: 10px;
-     }
+/* Swiper wrapper */
+.promo-swiper-wrapper {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
 }
-.mg{
-    margin-top: 30px;
- }
+
+@media (max-width: 640px) {
+  .promo-container { padding: 2.5rem 1rem 3rem; }
+  .promo-campaign-title { font-size: 1.2rem; }
+}
+
+/* Legal notice */
+.promo-legal {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 2rem 2.5rem;
+  margin-top: 1rem;
+}
+.promo-legal-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #111;
+  margin: 0 0 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+.promo-legal-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+.promo-legal-list li {
+  font-size: 0.875rem;
+  color: #4b5563;
+  line-height: 1.65;
+}
+.promo-legal-list li strong {
+  color: #111;
+}

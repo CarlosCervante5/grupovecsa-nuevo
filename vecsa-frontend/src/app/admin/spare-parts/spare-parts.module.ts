@@ -3,10 +3,11 @@ import { CommonModule } from '@angular/common';
 
 import { SparePartsRoutingModule } from './spare-parts-routing.module';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
+import { SparePartsLayoutComponent } from './pages/layout/spare-parts-layout.component';
 import { NewNavComponent } from 'src/app/shared/versiones-nav/new-nav/new-nav.component';
 import { AdminModule } from '../admin.module';
 import { SparePartsAdministrationComponent } from './pages/spare-parts-administration/spare-parts-administration.component';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AngularMaterialModule } from 'src/app/angular-material/angular-material.module';
 import { SparePartsViewComponent } from './pages/spare-parts-view/spare-parts-view.component';
 import { SparePartsEditComponent } from './components/spare-parts-edit/spare-parts-edit.component';
@@ -15,6 +16,7 @@ import { SparePartsEditComponent } from './components/spare-parts-edit/spare-par
 @NgModule({
   declarations: [
     DashboardComponent,
+    SparePartsLayoutComponent,
     SparePartsAdministrationComponent,
     SparePartsEditComponent,
     SparePartsViewComponent
@@ -23,6 +25,7 @@ import { SparePartsEditComponent } from './components/spare-parts-edit/spare-par
     AdminModule,
     AngularMaterialModule,
     CommonModule,
+    FormsModule,
     NewNavComponent,
     ReactiveFormsModule,
     SparePartsRoutingModule

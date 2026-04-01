@@ -1,0 +1,154 @@
+# Documento de Accesos — Grupo VECSA
+
+## Usuarios de Prueba
+
+| Email | Contraseña | Rol | Panel |
+|-------|-----------|-----|-------|
+| dev@vecsa.com | Developer%2024%% | developer | /admin/developer |
+| admin@vecsa.com | TestUser%2024%% | adminristrato | /admin/administrator |
+| marketing@vecsa.com | TestUser%2024%% | marketing | /admin/marketing |
+| staff@vecsa.com | TestUser%2024%% | staff | /admin/staff |
+| gestor@vecsa.com | TestUser%2024%% | gestor | /admin/gestor |
+| receptionist@vecsa.com | TestUser%2024%% | receptionist | /admin/receptionist |
+| valuator@vecsa.com | TestUser%2024%% | valuator | /admin/valuator |
+| appointments@vecsa.com | TestUser%2024%% | appointment_manager | /admin/appointment_manager |
+| bodywork@vecsa.com | TestUser%2024%% | bodywork_paint_technician | /admin/bodywork_paint_technician |
+| parts@vecsa.com | TestUser%2024%% | spare_parts | /admin/spare_parts |
+| gerente@vecsa.com | TestUser%2024%% | gerente | /admin/gerente |
+| client@vecsa.com | TestUser%2024%% | client | /auth/mi-cuenta ||
+| client@vecsa.com | TestUser%2024%% | client | /auth/mi-cuenta |
+
+## Roles y Permisos
+
+| developer | list users, create users, update users, delete users, access benchmark, access store_management, access marketing, access administrator, access developer, access staff, access gestor, access valuator, access receptionist, access appointment_manager, access bodywork_paint_technician, access spare_parts, access gerente |
+| administrator | list users, create users, update users, delete users, access benchmark, access store_management, access marketing, access administrator, access developer, access staff, access gestor, access valuator, access receptionist, access appointment_manager, access bodywork_paint_technician, access spare_parts, access gerente |ss gerente |
+| administrator | list users, create users, update users, delete users, access benchmark, access store_management, access marketing, access administrator, access developer, access staff, access gestor, access valuator, access receptionist, access appointment_manager, access bodywork_paint_technician, access spare_parts, access gerente |
+| administrator | list users, create users, update users, delete users, access benchmark, access store_management, access marketing, access administrator, access developer, access staff, access gestor, access valuator, access receptionist, access appointment_manager, access bodywork_paint_technician, access spare_parts |
+| staff | — |
+| marketing | access benchmark |
+| gestor | access store_management, access benchmark |
+| receptionist | — |
+| valuator | — |
+| spare_parts | — |
+| gerente | access gerente, access gestor, access receptionist, access valuator, access appointment_manager, access staff, access bodywork_paint_technician, access spare_parts, access store_management, access benchmark, access marketing |
+| client | — || — |
+| gerente | access gerente, access gestor, access receptionist, access valuator, access appointment_manager, access staff, access bodywork_paint_technician, access spare_parts, access store_management, access benchmark, access marketing |
+| client | — || — |
+| client | — |
+
+## Vistas Administrativas
+
+| Ruta | Nombre | Guard | Permiso requerido |
+|------|--------|-------|-------------------|
+| /admin/developer | Panel Developer | DeveloperGuard | Rol: developer |
+| /admin/administrator | Panel Administrador | AdministradorGuard | Rol: administrator |
+| /admin/marketing | Panel Marketing | MarketingGuard | Rol: marketing |
+| /admin/staff | Panel Staff | StaffGuard | Rol: staff |
+| /admin/gestor | Panel Gestor | GestorGuard | Rol: gestor |
+| /admin/spare_parts | Panel Refacciones | — | Rol: spare_parts |
+| /admin/gerente | Panel Gerente | GerenteGuard | Rol: gerente |
+| /admin/benchmark | Benchmark ADS | BenchmarkGuard | Permiso: access benchmark |
+| /admin/spare_parts | Panel Refacciones | — | Rol: spare_parts |
+| /admin/gerente | Panel Gerente | GerenteGuard | Rol: gerente |
+| /admin/benchmark | Benchmark ADS | BenchmarkGuard | Permiso: access benchmark |technician |
+| /admin/spare_parts | Panel Refacciones | — | Rol: spare_parts |
+| /admin/benchmark | Benchmark ADS | BenchmarkGuard | Permiso: access benchmark |
+| /admin/store | Panel Tienda | StoreManagementGuard | Permiso: access store_management |
+
+## Vistas Públicas
+
+| Ruta | Nombre |
+|------|--------|
+| / | Home |
+| /compra-tu-auto | Vehículos |
+| /boutique | Boutique (catálogo) |
+| /boutique/shop | Boutique (tienda con filtros) |
+| /boutique/product/:uuid | Detalle de producto |
+| /boutique/cart | Carrito |
+| /boutique/checkout | Checkout |
+| /rewards | Rewards |
+| /experience | Experience |
+| /carcare | Car Care |
+| /promociones | Promociones |
+| /auth/login | Login (boutique) |
+| /auth/iniciar-sesion | Login (general) |
+| /auth/registro | Registro |
+| /auth/mi-cuenta | Perfil cliente |
+
+## Vistas del Panel Developer
+
+El panel developer (/admin/developer) incluye CRUDs para:
+- Usuarios (con filtro por rol y sucursal)
+- Productos Boutique
+- Categorías Boutique
+- Pedidos Boutique
+- Marcas de vehículos
+- Vehículos
+- Roles
+- Permisos
+- Sucursales
+- Clientes
+- Rewards
+- Home Slides
+- Testimonios
+- Valuaciones
+- Citas
+- Refacciones (Valuación)
+
+Herramientas:
+- Matriz Rol-Permisos (asignar permisos a roles)
+- Benchmark ADS (enlace a /admin/benchmark)
+
+## Vistas del Panel Tienda
+
+El panel tienda (/admin/store) incluye:
+- Dashboard (métricas, gráficas de pedidos)
+- Pedidos (lista, detalle, cambio de estado, guía de envío)
+- Envíos (tracking, carriers)
+- Clientes (perfil, historial, puntos, cupones)
+- Puntos (balance, ajuste manual)
+- Cupones (CRUD completo)
+- Redenciones (aprobar/rechazar)
+
+## API Endpoints
+
+### Autenticación
+- POST /api/auth/login
+- POST /api/auth/register
+- POST /api/auth/logout
+
+### Store Management (requiere: auth + access store_management)
+- POST /api/store-management/metrics
+- POST /api/store-management/orders/search
+- POST /api/store-management/orders/detail
+- POST /api/store-management/orders/update_status
+- POST /api/store-management/orders/generate_label
+- POST /api/store-management/shipments/search
+- POST /api/store-management/customers/search
+- POST /api/store-management/customers/detail
+- POST /api/store-management/customers/orders
+- POST /api/store-management/points/search
+- POST /api/store-management/points/adjust
+- POST /api/store-management/points/customer_balance
+- POST /api/store-management/coupons/search
+- POST /api/store-management/coupons/store
+- POST /api/store-management/coupons/update
+- POST /api/store-management/coupons/delete
+- POST /api/store-management/redemptions/search
+- POST /api/store-management/redemptions/update_status
+
+### Benchmark ADS (requiere: auth + access benchmark)
+- POST /api/benchmark/scan
+- GET /api/benchmark/competitors
+- GET /api/benchmark/history
+- GET /api/benchmark/reports
+
+### Asistente Virtual (público)
+- POST /api/assistant/chat
+
+## Notas
+
+- Los permisos se gestionan desde la Matriz Rol-Permisos en el panel developer
+- Los usuarios necesitan re-loguearse después de cambiar permisos para que se actualicen en localStorage
+- El panel developer y el panel tienda ocultan el nav global (hideChrome)
+- El asistente virtual (chat flotante) aparece en todas las vistas públicas

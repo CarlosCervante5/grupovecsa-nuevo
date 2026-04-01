@@ -1,97 +1,68 @@
-<app-new-nav></app-new-nav>
-<div class="container">
-    <div class="row">
-        <div class="col-12 py-5" style="margin-top: 95px; margin-bottom: 200px;">
-            <div class="row">
-                <h1 class="fs-3 fw-bold mb-4 text-center mx-auto" style="font-size: 25px !important;">Iniciar Sesión
-                </h1>
+<div class="login-page">
+  <div class="login-card">
 
-                <div class="col-12">
-                    <form [formGroup]="form" (ngSubmit)="onSubmit()">
-                        <div class="row mb-2">
-                            <div class="col-10 col-md-7 col-lg-4 mx-auto">
-                                <mat-form-field appearance="outline">
-                                    <mat-label>Correo Electrónico</mat-label>
-                                    <input matInput type="email" placeholder="a@b.c" formControlName="email" required>
-                                    <mat-hint class="text-danger" *ngIf="emailInvalid">Ingrese un correo electrónico.
-                                    </mat-hint>
-                                </mat-form-field>
-                            </div>
-                        </div>
+    <h1 class="login-title">Iniciar sesión</h1>
 
-                        <div class="row">
-                            <div class="col-10 col-md-7 col-lg-4 mx-auto">
-                                <mat-form-field appearance="outline">
-                                    <mat-label>Contraseña</mat-label>
-                                    <input matInput [type]="hide ? 'password' : 'text'" placeholder="********"
-                                        formControlName="password" required>
-                                    <button mat-icon-button type="button" matSuffix (click)="hide = !hide">
-                                        <img [src]="hide ? 'assets/img/login/icono-ojo-abierto.png' : 'assets/img/login/icono-ojo-cerrado.png'"
-                                            alt="Icono de imagen" width="24" height="24">
-                                    </button>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="login-form">
 
-                                </mat-form-field>
-                                <mat-hint class="text-danger">
-                                    <div class="row">
-                                        <div class="col-12">
-                                            <p *ngIf="passwordInvalid">La contraseña debe contener al menos una letra mayúscula [A-Z], una letra minúscula [a-z], un dígito [0-9], 
-                                                y un carácter especial permitido: &#64; $ ! % * ? &.</p>
-                                        </div>
-                                        <div class="col-12">
-                                            <p *ngIf="passwordLength">La contraseña debe ser de minímo 8 a 32
-                                                caracteres.</p>
-                                        </div>
-                                    </div>
-                                </mat-hint>
-                                <p>¿No te has registrado? <a class="abcars-color-hover text-decoration-none"
-                                    [routerLink]="['/auth/registro']">Registrarse</a></p>
-                                <p>¿Olvidaste tu contraseña? <a class="abcars-color-hover text-decoration-none"
-                                        [routerLink]="['/auth/recuperar']">Recuperar</a></p>
+      <div class="field-group">
+        <label class="field-label">Correo electrónico</label>
+        <input
+          class="field-input"
+          [class.invalid]="emailInvalid"
+          type="email"
+          placeholder="tu@correo.com"
+          formControlName="email"
+        />
+        @if (emailInvalid) {
+          <span class="field-error">Ingresa un correo electrónico válido</span>
+        }
+      </div>
 
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-8 col-md-4 mx-auto text-center mt-5">
-                                <button mat-raised-button type="submit"
-                                    class="btn abcars-background-color-blue mt-3  mx-2 px-3"
-                                    [disabled]="form.invalid || spinner">
-                                    <span *ngIf="!spinner">Iniciar</span>
-                                    <span *ngIf="spinner" class="spinner-border spinner-border-sm" role="status"
-                                        aria-hidden="true"></span>
-                                </button>
-                                <!-- <p class="form-text mt-3">¿No tienes cuenta? <a class="abcars-color-hover text-decoration-none" [routerLink]="['/auth/registro']">Regístrate</a></p>        -->
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
+      <div class="field-group">
+        <label class="field-label">Contraseña</label>
+        <div class="input-wrapper">
+          <input
+            class="field-input"
+            [class.invalid]="passwordInvalid || passwordLength"
+            [type]="hide ? 'password' : 'text'"
+            placeholder="••••••••"
+            formControlName="password"
+          />
+          <button type="button" class="toggle-password" (click)="hide = !hide">
+            <img
+              [src]="hide ? 'assets/img/login/icono-ojo-abierto.png' : 'assets/img/login/icono-ojo-cerrado.png'"
+              alt="Mostrar/ocultar contraseña"
+              width="20" height="20"
+            />
+          </button>
         </div>
+        @if (passwordInvalid) {
+          <span class="field-error">La contraseña debe tener mayúscula, minúscula, número y carácter especial (&#64; $ ! % * ? &amp;)</span>
+        }
+        @if (passwordLength) {
+          <span class="field-error">La contraseña debe tener entre 8 y 32 caracteres</span>
+        }
+      </div>
+
+      <div class="login-links">
+        <a [routerLink]="['/auth/recuperar']" class="login-link">¿Olvidaste tu contraseña?</a>
+      </div>
+
+      <button type="submit" class="login-btn" [disabled]="form.invalid || spinner">
+        @if (spinner) {
+          <div class="spinner spinner-sm spinner-white"></div>
+        } @else {
+          Iniciar sesión
+        }
+      </button>
+
+    </form>
+
+    <div class="login-footer">
+      <span class="login-footer-text">¿No tienes cuenta?</span>
+      <a [routerLink]="['/auth/registro']" class="login-link login-link-bold">Regístrate</a>
     </div>
+
+  </div>
 </div>
-
-
-<style>
-    html,
-    body {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-    }
-
-    * {
-        font-family: BMW !important;
-    }
-
-    body {
-        display: flex;
-        justify-content: center;
-        /* Centrar horizontalmente */
-        align-items: center;
-        /* Centrar verticalmente */
-    }
-
-    span {
-        font-size: 20px;
-    }
-</style>

@@ -253,10 +253,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $result = processSlideForm();
     
     if ($result) {
-        header('Location: index.php?success=1');
+        header('Location: ../index.php?tab=slides&success=1');
         exit;
     } else {
-        header('Location: index.php?error=1');
+        header('Location: ../index.php?tab=slides&error=1');
         exit;
     }
 }

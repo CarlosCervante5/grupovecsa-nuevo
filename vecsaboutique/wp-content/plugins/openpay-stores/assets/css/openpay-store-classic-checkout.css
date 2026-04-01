@@ -1,0 +1,434 @@
+/*Clean View*/
+.payment_box,
+.payment_method_openpay-stores {
+    padding: 0.3em !important;
+}
+
+@font-face {
+    font-family: 'BentonBBVA';
+    src: url('../Fonts/BentonBBVA/BentonSansBBVA-Book.ttf');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+.openpay-logos {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 0 0 0px;
+    justify-content: center;
+    align-items: center;
+}
+
+.openpay-logos img {
+    width: -webkit-fill-available;
+}
+
+.openpay-store-checkout-style {
+    font-family: 'BentonBBVA', sans-serif;
+    background-color: #ffffff;
+    margin: 10px 0 0 0;
+    padding: 10px;
+}
+
+.step-guide {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 5px;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    background-color: #fff;
+}
+
+.step-guide__header {
+    display: flex;
+    flex-direction: row;
+    /* Cambiado de column a row */
+    justify-content: space-between;
+    /* Empuja los elementos a los extremos */
+    align-items: center;
+    /* Alineación vertical perfecta */
+    margin-bottom: 30px;
+    /* Reducido de 40px para mejor balance */
+    width: 100%;
+}
+
+.step-guide__logo-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.step-guide__logo-right {
+    display: flex;
+    align-items: center;
+    align-self: center;
+    /* Asegura que el logo de la derecha esté centrado verticalmente */
+    margin-bottom: 0;
+    /* Eliminamos el margen de 20px que causaba el desalineamiento */
+}
+
+.step-guide__logo-img {
+    height: 15px;
+    margin-right: 8px;
+}
+
+.step-guide__logo-img-right {
+    width: 7em;
+}
+
+.step-guide__security-text {
+    color: #003366;
+    font-weight: bolder;
+    font-size: 12px;
+}
+
+.step-guide__step {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 30px;
+    position: relative;
+}
+
+.step-guide__icon {
+    width: 60px;
+    height: 60px;
+    min-width: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 20px;
+    position: relative;
+}
+
+.step-guide__icon img {
+    width: 70px;
+    height: 70px;
+}
+
+.step-guide__content {
+    flex: 1;
+}
+
+.step-guide__title {
+    font-size: 18px;
+    font-weight: bold;
+    margin: 0 0 5px;
+}
+
+.step-guide__description {
+    margin: 0;
+    font-size: 15px;
+    color: #333;
+}
+
+.step-guide__footer {
+    margin-top: 20px;
+}
+
+.step-guide__link {
+    color: #3366BB;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 15px;
+}
+
+.step-guide__link:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.step-guide__vertical-line::before {
+    content: "";
+    position: absolute;
+    top: 60px;
+    left: 29px;
+    width: 2px;
+    height: calc(100% - 35px);
+    background-image: linear-gradient(#ccc 43%, rgba(255, 255, 255, 0) 0%);
+    background-position: right;
+    background-size: 2px 6px;
+    background-repeat: repeat-y;
+    z-index: 0;
+}
+
+.step-guide__modal-title {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.step-guide__modal-text {
+    font-size: 15px;
+}
+
+.step-guide__modal-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.step-guide__modal-icon {
+    width: 24px;
+    height: 24px;
+}
+
+.step-guide__modal-link {
+    color: #3366BB;
+    text-decoration: underline;
+    font-weight: bold;
+}
+
+.step-guide__modal-link:hover {
+    text-decoration: none;
+}
+
+/* Mostrar modal */
+.step-guide__modal--active {
+    display: flex;
+}
+
+.openpay-tabs {
+    display: flex;
+    margin-bottom: 0;
+    border-bottom: 2px solid #e0e0e0;
+
+    .openpay-tab-button {
+        flex: 1;
+        background: #f9f9f9;
+        border: none;
+        padding: 12px 10px;
+        cursor: pointer;
+        font-size: 14px;
+        color: #888;
+        transition: all 0.2s ease;
+        border-bottom: 3px solid transparent;
+        outline: none !important;
+
+        &.active {
+            background: #ffffff;
+            color: #004481;
+            font-weight: bold;
+            border-bottom: 3px solid #004481;
+        }
+
+        &:hover:not(.active) {
+            background: #eeeeee;
+        }
+    }
+}
+
+.openpay-tabs+.openpay-store-checkout-style {
+    border-top: none;
+    padding-top: 20px;
+}
+
+/* --- AJUSTES RESPONSIVOS PARA CHECKOUT CLÁSICO --- */
+
+@media (max-width: 600px) {
+
+    /* 1. Encabezado en dos líneas: Paynet arriba, Seguridad abajo */
+    .step-guide__header {
+        flex-direction: column-reverse;
+        /* Invierte el orden: logo de red arriba */
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .step-guide__logo-right {
+        width: 100%;
+        justify-content: center;
+        margin-bottom: 5px;
+    }
+
+    .step-guide__logo-right img {
+        max-height: 30px;
+        /* Logo de Paynet un poco más pequeño en móvil */
+    }
+
+    .step-guide__logo-left {
+        width: 100%;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    .step-guide__security-text {
+        font-size: 10px;
+        /* Letra de descripción más pequeña */
+    }
+
+    /* 2. Ajuste de los Pasos (Iconos y Textos) */
+    .step-guide__step {
+        margin-bottom: 20px;
+    }
+
+    .step-guide__icon {
+        width: 45px;
+        /* Reducción del contenedor del icono */
+        height: 45px;
+        min-width: 45px;
+        margin-right: 15px;
+    }
+
+    .step-guide__icon img {
+        width: 50px;
+        /* Reducción del icono SVG */
+        height: 50px;
+    }
+
+    .step-guide__title {
+        font-size: 15px;
+        /* Título más compacto */
+        margin-bottom: 3px;
+    }
+
+    .step-guide__description {
+        font-size: 13px;
+        /* Descripción más pequeña para lectura cómoda */
+        line-height: 1.3;
+    }
+
+    /* 3. Ajuste de la línea vertical punteada */
+    .step-guide__vertical-line::before {
+        left: 21px;
+        /* Alineación con el nuevo centro del icono pequeño */
+        top: 45px;
+        height: calc(100% - 25px);
+    }
+
+    /* 4. Modal responsivo */
+    .step-guide__modal-content {
+        width: 90%;
+        margin: 50px auto;
+        padding: 20px;
+    }
+
+    .step-guide__modal-columns {
+        gap: 20px;
+        flex-direction: column;
+        /* Una sola columna de tiendas en móvil */
+    }
+}
+
+/* --- MODAL CORREGIDO --- */
+.step-guide__modal {
+    display: none;
+    position: fixed;
+    z-index: 999999 !important;
+    top: 0;
+    left: 0;
+    width: 100%;
+    /* Cambiado de 100vw a 100% para evitar scroll */
+    height: 100%;
+    /* Cambiado de 100vh a 100% */
+    align-items: center;
+    justify-content: center;
+}
+
+.step-guide__modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    /* Oscurece el fondo pero permite verlo */
+    cursor: pointer;
+}
+
+.step-guide__modal-content {
+    position: relative;
+    width: 90%;
+    /* Ajustado para dar margen en móviles */
+    max-width: 453px;
+    max-height: 90vh;
+    background: #ffffff;
+    padding: 40px 25px 30px;
+    /* Reducido un poco el padding lateral */
+    border-radius: 8px;
+    z-index: 1000000;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    overflow-y: auto;
+    overflow-x: hidden;
+    /* EVITA EL SCROLL HORIZONTAL INTERNO */
+    box-sizing: border-box;
+}
+
+.step-guide__modal-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 28px;
+    line-height: 1;
+    color: #333;
+    background: none;
+    border: none;
+    cursor: pointer;
+    z-index: 1000001;
+    padding: 5px;
+    transition: color 0.2s;
+}
+
+.step-guide__modal-close:hover {
+    color: #004481;
+}
+
+/* Mostrar modal */
+.step-guide__modal--active {
+    display: flex !important;
+}
+
+/* Bloquear scroll del body cuando el modal está abierto */
+body.openpay-modal-open {
+    overflow: hidden !important;
+}
+
+
+/* --- AJUSTES DE ALINEACIÓN Y COLUMNAS EN MODAL --- */
+
+.step-guide__modal-columns {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    /* Asegura 2 columnas iguales */
+    gap: 15px !important;
+    margin-top: 20px;
+    margin-left: 0 !important;
+    /* ELIMINADO EL MARGEN QUE CAUSABA EL DESBORDE */
+    width: 100% !important;
+    box-sizing: border-box;
+}
+
+.store-list {
+    list-style: none !important;
+    /* Quitamos el bullet default para controlarlo manualmente */
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.store-list li {
+    position: relative;
+    padding-left: 18px !important;
+    /* Espacio para el bullet manual */
+    margin-bottom: 6px !important;
+    font-size: 12px !important;
+    /* Achicamos un poco la letra para asegurar las 2 columnas */
+    line-height: 1.2;
+    color: #333;
+    word-break: break-word;
+}
+
+@media (max-width: 480px) {
+    .step-guide__modal-content {
+        padding: 30px 15px 20px !important;
+    }
+
+    .step-guide__modal-columns {
+        gap: 10px !important;
+        /* Gap mínimo para ganar espacio */
+    }
+
+    .store-list li {
+        font-size: 11px !important;
+        /* Letra aún más pequeña en móviles muy angostos */
+    }
+}

@@ -387,4 +387,105 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Mobile sidebar functionality initialized');
     console.log('Location selection functionality initialized');
     console.log('Map functionality initialized');
+
+    // Success Day Carousel
+    const sdTrack = document.getElementById('sd-track');
+    const sdPrev = document.getElementById('sd-prev');
+    const sdNext = document.getElementById('sd-next');
+    const sdDotsContainer = document.getElementById('sd-dots');
+
+    if (sdTrack) {
+        const sdCards = sdTrack.querySelectorAll('.sd-card');
+        let sdIndex = 0;
+        let sdAutoInterval;
+
+        function getVisibleCards() {
+            return window.innerWidth >= 768 ? 3 : 1;
+        }
+
+        function getMaxIndex() {
+            return Math.max(0, sdCards.length - getVisibleCards());
+        }
+
+        function updateCarousel() {
+            if (sdCards.length === 0) return;
+            const card = sdCards[0];
+            const gap = 24; // gap-6 = 1.5rem = 24px
+            const cardWidth = card.offsetWidth + gap;
+            sdTrack.style.transform = `translateX(-${sdIndex * cardWidth}px)`;
+            updateDots();
+        }
+
+        function buildDots() {
+            if (!sdDotsContainer) return;
+            sdDotsContainer.innerHTML = '';
+            const max = getMaxIndex();
+            for (let i = 0; i <= max; i++) {
+                const dot = document.createElement('button');
+                dot.className = 'w-2 h-2 rounded-full transition-all duration-300 ' + (i === sdIndex ? 'bg-blue-500 w-6' : 'bg-gray-600');
+                dot.setAttribute('aria-label', `Ir a slide ${i + 1}`);
+                dot.addEventListener('click', () => {
+                    sdIndex = i;
+                    updateCarousel();
+                    restartAuto();
+                });
+                sdDotsContainer.appendChild(dot);
+            }
+        }
+
+        function updateDots() {
+            if (!sdDotsContainer) return;
+            const dots = sdDotsContainer.querySelectorAll('button');
+            dots.forEach((dot, i) => {
+                if (i === sdIndex) {
+                    dot.className = 'w-6 h-2 rounded-full bg-blue-500 transition-all duration-300';
+                } else {
+                    dot.className = 'w-2 h-2 rounded-full bg-gray-600 transition-all duration-300';
+                }
+            });
+        }
+
+        function nextSD() {
+            sdIndex = sdIndex >= getMaxIndex() ? 0 : sdIndex + 1;
+            updateCarousel();
+        }
+
+        function prevSD() {
+            sdIndex = sdIndex <= 0 ? getMaxIndex() : sdIndex - 1;
+            updateCarousel();
+        }
+
+        function restartAuto() {
+            clearInterval(sdAutoInterval);
+            sdAutoInterval = setInterval(nextSD, 5000);
+        }
+
+        if (sdNext) sdNext.addEventListener('click', () => { nextSD(); restartAuto(); });
+        if (sdPrev) sdPrev.addEventListener('click', () => { prevSD(); restartAuto(); });
+
+        // Touch/swipe support
+        let sdTouchStartX = 0;
+        let sdTouchEndX = 0;
+        sdTrack.addEventListener('touchstart', (e) => { sdTouchStartX = e.changedTouches[0].screenX; }, { passive: true });
+        sdTrack.addEventListener('touchend', (e) => {
+            sdTouchEndX = e.changedTouches[0].screenX;
+            const diff = sdTouchStartX - sdTouchEndX;
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) nextSD(); else prevSD();
+                restartAuto();
+            }
+        });
+
+        // Init
+        buildDots();
+        updateCarousel();
+        sdAutoInterval = setInterval(nextSD, 5000);
+
+        // Rebuild on resize
+        window.addEventListener('resize', () => {
+            sdIndex = Math.min(sdIndex, getMaxIndex());
+            buildDots();
+            updateCarousel();
+        });
+    }
 }); 

@@ -7,13 +7,15 @@ import { Subscription } from 'rxjs';
 import { ChangeDetectorRef } from '@angular/core';
 import { ShowData } from 'src/app/auth/interfaces/login.interface';
 import { MatMenuModule } from '@angular/material/menu';
+import { BoutiqueCartService } from 'src/app/boutique/services/boutique-cart.service';
+import { CartDrawerComponent } from 'src/app/boutique/components/cart-drawer/cart-drawer.component';
 
 @Component({
     selector: 'app-new-nav',
     templateUrl: './new-nav.component.html',
     styleUrls: ['./new-nav.component.css'],
     standalone: true,
-    imports: [CommonModule, RouterModule, MatMenuModule]
+    imports: [CommonModule, RouterModule, MatMenuModule, CartDrawerComponent]
 })
 export class NewNavComponent implements OnInit, OnDestroy {
 
@@ -33,9 +35,13 @@ export class NewNavComponent implements OnInit, OnDestroy {
 
   isLoggedIn = false;
   user: ShowData | null = null;
+  cartCount = 0;
+  cartDrawerOpen = false;
   private authSubscription!: Subscription;
+  private cartSubscription!: Subscription;
 
   isDropdownOpen = false;
+  mobileOpen = false;
 
   vehicleMenuItems = [
     { label: 'Motos', link: '/compra-tu-auto' },
@@ -47,18 +53,33 @@ export class NewNavComponent implements OnInit, OnDestroy {
     private router: Router,
     private authService: AuthService,
     private cdr: ChangeDetectorRef,
-    private elementRef: ElementRef
+    private elementRef: ElementRef,
+    private cartService: BoutiqueCartService
   ) { 
   }
 
   ngOnInit(): void {
     this.authSubscription = this.authService.authStatus$.subscribe((status: boolean) => {
+      const wasLoggedIn = this.isLoggedIn;
       this.isLoggedIn = status;
       if (status) {
         this.user = this.authService.getUserFromStorage();
+        // Fetch server cart to seed the shared count
+        this.cartService.get().subscribe({ error: () => {} });
       } else {
         this.user = null;
+        // Only reset count if we were previously logged in (actual logout),
+        // not on initial load as a guest — guest count comes from localStorage
+        if (wasLoggedIn) {
+          this.cartService.updateCount(null);
+        }
       }
+      this.cdr.detectChanges();
+    });
+
+    // Subscribe to reactive cart count (updates whenever add/remove/update is called anywhere)
+    this.cartSubscription = this.cartService.cartCount$.subscribe(count => {
+      this.cartCount = count;
       this.cdr.detectChanges();
     });
   }
@@ -66,6 +87,9 @@ export class NewNavComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     if (this.authSubscription) {
       this.authSubscription.unsubscribe();
+    }
+    if (this.cartSubscription) {
+      this.cartSubscription.unsubscribe();
     }
   }
 
@@ -81,16 +105,23 @@ export class NewNavComponent implements OnInit, OnDestroy {
     }
   }
 
+  toggleCartDrawer(): void {
+    this.cartDrawerOpen = !this.cartDrawerOpen;
+  }
+
+  closeCartDrawer(): void {
+    this.cartDrawerOpen = false;
+  }
+
   logout(): void {
-    this.authService.logout().subscribe(() => {
-      localStorage.removeItem('user_token');
-      localStorage.removeItem('user_data');
-      this.isLoggedIn = false;
-      this.user = null;
-      this.router.navigate(['/auth/login']).then(() => {
-        window.location.reload();
-      });
-    });
+    // Fire-and-forget the backend logout
+    this.authService.logout().subscribe({ error: () => {} });
+    // Clear local state immediately
+    localStorage.clear();
+    this.isLoggedIn = false;
+    this.user = null;
+    this.cartService.updateCount(null);
+    this.router.navigateByUrl('/auth/login');
   }
 
   public get_url_dashboard() {

@@ -1,27 +1,51 @@
-<nav-promotions></nav-promotions>
-
-<div class="container" style="max-width: 1140px;">  
-    <div class="col-3">
-        <a class="text-decoration-none text-dark flecha" href="https://grupovecsa.com/" style="display: flex;">
-            <img src="assets/icons-fontawesome/circle-left-regular.svg" width="20px" height="20px" style="padding-right: 3px;" alt="Arrow Back">
-            <span>Regresar</span>
-        </a>
+<!-- Hero -->
+<section class="promo-hero">
+  <div class="promo-hero-overlay">
+    <div class="promo-hero-content">
+      <div class="promo-badge">GRUPO VECSA</div>
+      <h1 class="promo-hero-title">Promo<span>ciones</span></h1>
+      <p class="promo-hero-sub">Descubre las mejores ofertas y promociones exclusivas para ti y tu vehículo.</p>
     </div>
+  </div>
+</section>
 
-    <div class="row align-items-center mt-3">
-        <div class="col-auto">
-            <h3 class="fw-bold titulo" >VECSA Promotions</h3>
-            <br>
-            <h6 class="fw-light textos">Aquí podrás consultar las promociones.</h6>
-        </div>
+<div class="promo-container">
 
-        <div class="col-auto"></div>
+  <!-- Empty state -->
+  <div class="promo-empty" *ngIf="campaigns.length === 0">
+    <div class="promo-empty-icon">🎁</div>
+    <h3>Próximamente nuevas promociones</h3>
+    <p>Estamos preparando ofertas exclusivas para ti. ¡Vuelve pronto!</p>
+  </div>
+
+  <!-- Campaigns -->
+  <section class="promo-campaign" *ngFor="let campaign of campaigns">
+    <div class="promo-campaign-header">
+      <h2 class="promo-campaign-title">{{ campaign.name }}</h2>
+      <p class="promo-campaign-desc" *ngIf="campaign.description">{{ campaign.description }}</p>
     </div>
-
-    <div class="container">
-        <div class="mg titles" *ngFor="let campaigns of campaigns">
-            <h3 class="fw-bold campañas" id="{{ campaigns.uuid }}">{{ campaigns.name }} {{ currentMonth }}</h3>
-            <app-swiper [images]="campaigns.promotions" [slidesPerView]="1"></app-swiper>
-        </div>
+    <div class="promo-swiper-wrapper">
+      <app-swiper [images]="campaign.promotions" [slidesPerView]="1"></app-swiper>
     </div>
+  </section>
+
+  <!-- Aviso Legal -->
+  <section class="promo-legal" *ngIf="campaigns.length > 0">
+    <h3 class="promo-legal-title">Aviso Importante</h3>
+    <ol class="promo-legal-list">
+      <li>
+        <strong>Ofertas y Promociones:</strong> Las ofertas incluyen descuentos especiales válidos únicamente durante el período promocional indicado. Aplican restricciones y condiciones específicas. Los precios mostrados no incluyen impuestos, gastos de escrituración, placas, verificación ni seguros. Las ofertas de financiamiento están sujetas a aprobación crediticia.
+      </li>
+      <li>
+        <strong>Disponibilidad:</strong> Los vehículos mostrados están sujetos a disponibilidad. Las imágenes pueden no corresponder exactamente al modelo disponible. Los colores, equipamiento y características pueden variar según el modelo y año.
+      </li>
+      <li>
+        <strong>Garantías:</strong> Todos los vehículos BMW y MINI incluyen garantía de fábrica. Los términos específicos de garantía varían según el modelo. Los vehículos seminuevos incluyen garantía limitada sujeta a términos y condiciones específicas.
+      </li>
+      <li>
+        <strong>Información Legal:</strong> Grupo VECSA es distribuidor autorizado BMW, MINI, Motorrad, Chevrolet y ABCars en México. Todos los servicios están regulados por las leyes mexicanas aplicables. Para más información sobre términos, condiciones y políticas, contacte a nuestro equipo de ventas.
+      </li>
+    </ol>
+  </section>
+
 </div>

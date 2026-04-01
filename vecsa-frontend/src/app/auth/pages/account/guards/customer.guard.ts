@@ -29,12 +29,13 @@ export class CustomerGuard  {
   }
 
   canLoad(): Observable<boolean> {
-    return this._accountService.validateRole('client').pipe(
-      map(() => true),
-      catchError(() => {
-        this._router.navigateByUrl('/auth/iniciar-sesion');
-        return of(false);
-      })
-    );
+    // Skip API call for canLoad — canActivate already validates
+    const token = localStorage.getItem('user_token');
+    const role = localStorage.getItem('role');
+    if (token && role === 'client') {
+      return of(true);
+    }
+    this._router.navigateByUrl('/auth/iniciar-sesion');
+    return of(false);
   }
 }

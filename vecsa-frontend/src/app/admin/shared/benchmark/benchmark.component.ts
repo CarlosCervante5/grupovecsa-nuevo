@@ -1,0 +1,125 @@
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { DevCrudService } from '../../developer/services/dev-crud.service';
+
+@Component({
+  selector: 'app-benchmark',
+  templateUrl: './benchmark.component.html',
+  styleUrls: ['./benchmark.component.css'],
+  standalone: false,
+})
+export class BenchmarkComponent implements OnInit {
+  competitors: string[] = [];
+  history: any[] = [];
+  reports: string[] = [];
+  scanResults: any = null;
+  scanDetail: any[] = [];
+  loading = false;
+  scanning = false;
+  error = '';
+  method: 'scraper' | 'api' = 'scraper';
+  newCompetitor = '';
+  showCompetitors = false;
+  tab: 'scan' | 'history' | 'reports' = 'scan';
+
+  get totalAds(): number {
+    if (!this.scanResults?.summary) return 0;
+    return this.scanResults.summary.reduce((s: number, r: any) => s + (r.adsCount || 0), 0);
+  }
+
+  constructor(private router: Router, private crud: DevCrudService) {}
+
+  ngOnInit(): void {
+    this.loadCompetitors();
+  }
+
+  loadCompetitors(): void {
+    this.loading = true;
+    this.error = '';
+    this.crud.fetch('benchmark/competitors', 'GET', {}).subscribe({
+      next: (res: any) => { this.competitors = Array.isArray(res) ? res : []; this.loading = false; },
+      error: (err: any) => {
+        this.error = err?.error?.error || 'No se pudo conectar al servicio de benchmark. Asegúrate de que el servidor reportADS esté corriendo.';
+        this.loading = false;
+      },
+    });
+  }
+
+  startScan(): void {
+    this.scanning = true;
+    this.error = '';
+    this.scanResults = null;
+    this.scanDetail = [];
+    this.crud.store('benchmark/scan', { method: this.method }).subscribe({
+      next: (res: any) => {
+        this.scanResults = res;
+        this.scanning = false;
+        this.crud.fetch('benchmark/history', 'GET', {}).subscribe({
+          next: (hist: any) => {
+            const list = Array.isArray(hist) ? hist : [];
+            if (list.length > 0) {
+              this.crud.fetch('benchmark/history/' + list[0].file, 'GET', {}).subscribe({
+                next: (detail: any) => { this.scanDetail = Array.isArray(detail) ? detail : []; },
+              });
+            }
+          },
+        });
+      },
+      error: (err: any) => { this.error = err?.error?.error || 'Error al escanear'; this.scanning = false; },
+    });
+  }
+
+  loadHistory(): void {
+    this.tab = 'history';
+    this.loading = true;
+    this.crud.fetch('benchmark/history', 'GET', {}).subscribe({
+      next: (res: any) => { this.history = Array.isArray(res) ? res : []; this.loading = false; },
+      error: () => { this.history = []; this.loading = false; },
+    });
+  }
+
+  loadReports(): void {
+    this.tab = 'reports';
+    this.loading = true;
+    this.crud.fetch('benchmark/reports', 'GET', {}).subscribe({
+      next: (res: any) => { this.reports = Array.isArray(res) ? res : []; this.loading = false; },
+      error: () => { this.reports = []; this.loading = false; },
+    });
+  }
+
+  addCompetitor(): void {
+    const name = this.newCompetitor.trim();
+    if (!name) return;
+    this.crud.store('benchmark/competitors', { name }).subscribe({
+      next: (res: any) => {
+        this.competitors = res?.competitors || [...this.competitors, name];
+        this.newCompetitor = '';
+      },
+      error: (err: any) => { this.error = err?.error?.error || 'Error al agregar'; },
+    });
+  }
+
+  removeCompetitor(name: string): void {
+    this.crud.deleteById('benchmark/competitors', encodeURIComponent(name)).subscribe({
+      next: (res: any) => { this.competitors = res?.competitors || this.competitors.filter(c => c !== name); },
+      error: () => {},
+    });
+  }
+
+  viewHistoryDetail(file: string): void {
+    this.loading = true;
+    this.crud.fetch('benchmark/history/' + file, 'GET', {}).subscribe({
+      next: (detail: any) => {
+        this.scanDetail = Array.isArray(detail) ? detail : [];
+        this.tab = 'scan';
+        this.loading = false;
+      },
+      error: () => { this.loading = false; },
+    });
+  }
+
+  goBack(): void {
+    const role = localStorage.getItem('role') || '';
+    this.router.navigate(['/admin', role]);
+  }
+}

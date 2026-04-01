@@ -1,0 +1,230 @@
+/**
+ * Estilos frontend para los badges de descuento
+ */
+
+.woo-auto-discount-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: inline-block;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    line-height: 1.4;
+    z-index: 10;
+    animation: fadeInScale 0.3s ease-in-out;
+}
+
+/* Modern Style */
+.woo-auto-discount-badge-modern {
+    border-radius: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+/* Classic Style */
+.woo-auto-discount-badge-classic {
+    border-radius: 0;
+    border: 2px solid currentColor;
+}
+
+/* Minimal Style */
+.woo-auto-discount-badge-minimal {
+    border-radius: 2px;
+    font-weight: normal;
+    letter-spacing: 1px;
+}
+
+/* Animation */
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Posicionamiento en lista de productos */
+.woocommerce ul.products li.product .woo-auto-discount-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+}
+
+/* Posicionamiento en página de producto individual */
+.woocommerce div.product .woo-auto-discount-badge {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+}
+
+/* Ajustes para productos en grid */
+.woocommerce ul.products li.product {
+    position: relative;
+}
+
+/* Asegurar que la imagen tenga posición relativa */
+.woocommerce ul.products li.product .attachment-woocommerce_thumbnail,
+.woocommerce div.product .woocommerce-product-gallery__wrapper {
+    position: relative;
+}
+
+/* Estilos para precio tachado */
+.woocommerce .price del {
+    opacity: 0.5;
+    font-size: 0.9em;
+}
+
+.woocommerce .price ins {
+    text-decoration: none;
+    color: #77a464;
+    font-weight: bold;
+}
+
+/* ===== SOPORTE PARA PRODUCTOS VARIABLES ===== */
+
+/* Precios de variaciones con descuento */
+.woocommerce div.product .woocommerce-variation-price .price {
+    font-size: 1.25em;
+    line-height: 1.5;
+    margin: 15px 0;
+    transition: all 0.3s ease;
+}
+
+.woocommerce div.product .woocommerce-variation-price .price del {
+    opacity: 0.5;
+    text-decoration: line-through;
+    margin-right: 10px;
+    font-size: 0.9em;
+}
+
+.woocommerce div.product .woocommerce-variation-price .price ins {
+    background: none;
+    font-weight: bold;
+    text-decoration: none;
+    color: #77a464;
+    font-size: 1.1em;
+}
+
+/* Contenedor de precio de variación */
+.woocommerce div.product .woocommerce-variation-price {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 4px;
+    border-left: 4px solid #77a464;
+}
+
+/* Animación cuando cambia el precio de la variación */
+.woocommerce div.product .woocommerce-variation-price.price-changed {
+    animation: priceHighlight 0.5s ease;
+}
+
+@keyframes priceHighlight {
+    0% {
+        background: #f0f6fc;
+    }
+    50% {
+        background: #e3f2fd;
+    }
+    100% {
+        background: #f9f9f9;
+    }
+}
+
+/* Selector de variaciones mejorado */
+.woocommerce div.product form.cart .variations select {
+    min-width: 200px;
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    transition: border-color 0.3s ease;
+}
+
+.woocommerce div.product form.cart .variations select:focus {
+    border-color: #2271b1;
+    outline: none;
+    box-shadow: 0 0 0 1px #2271b1;
+}
+
+/* Mensaje de descuento en variaciones */
+.woo-auto-discount-variation-message {
+    background: #f0f6fc;
+    border-left: 4px solid #2271b1;
+    padding: 12px 15px;
+    margin: 15px 0;
+    font-size: 14px;
+    border-radius: 4px;
+    animation: fadeIn 0.3s ease;
+}
+
+.woo-auto-discount-variation-message strong {
+    color: #2271b1;
+    font-weight: 600;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Tabla de variaciones */
+.woocommerce div.product form.cart .variations {
+    margin-bottom: 20px;
+}
+
+.woocommerce div.product form.cart .variations td {
+    padding: 10px 0;
+}
+
+/* Badge en productos variables */
+.woocommerce div.product.product-type-variable .woo-auto-discount-badge {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+/* Responsive para variaciones */
+@media (max-width: 768px) {
+    .woocommerce div.product .woocommerce-variation-price {
+        padding: 10px;
+    }
+    
+    .woocommerce div.product .woocommerce-variation-price .price {
+        font-size: 1.1em;
+    }
+    
+    .woocommerce div.product form.cart .variations select {
+        min-width: 100%;
+        width: 100%;
+    }
+}
+
+/* Responsive general */
+@media (max-width: 768px) {
+    .woo-auto-discount-badge {
+        font-size: 10px;
+        padding: 4px 8px;
+        top: 5px;
+        left: 5px;
+    }
+}
+
+

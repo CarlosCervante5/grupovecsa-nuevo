@@ -1,0 +1,66 @@
+[
+  {
+    "competitor": "BMW Puebla",
+    "country": "MX",
+    "error": "page.waitForTimeout is not a function",
+    "adsFound": 0,
+    "ads": [],
+    "scrapedAt": "2026-03-20T23:50:48.428Z"
+  },
+  {
+    "competitor": "BMW Querétaro",
+    "country": "MX",
+    "error": "page.waitForTimeout is not a function",
+    "adsFound": 0,
+    "ads": [],
+    "scrapedAt": "2026-03-20T23:50:53.660Z"
+  },
+  {
+    "competitor": "BMW Mérida",
+    "country": "MX",
+    "error": "page.waitForTimeout is not a function",
+    "adsFound": 0,
+    "ads": [],
+    "scrapedAt": "2026-03-20T23:50:58.191Z"
+  },
+  {
+    "competitor": "BMW Guadalajara",
+    "country": "MX",
+    "error": "page.waitForTimeout is not a function",
+    "adsFound": 0,
+    "ads": [],
+    "scrapedAt": "2026-03-20T23:51:03.874Z"
+  },
+  {
+    "competitor": "BMW Monterrey",
+    "country": "MX",
+    "error": "page.waitForTimeout is not a function",
+    "adsFound": 0,
+    "ads": [],
+    "scrapedAt": "2026-03-20T23:51:09.594Z"
+  },
+  {
+    "competitor": "BMW CDMX",
+    "country": "MX",
+    "error": "page.waitForTimeout is not a function",
+    "adsFound": 0,
+    "ads": [],
+    "scrapedAt": "2026-03-20T23:51:15.145Z"
+  },
+  {
+    "competitor": "BMW León",
+    "country": "MX",
+    "error": "page.waitForTimeout is not a function",
+    "adsFound": 0,
+    "ads": [],
+    "scrapedAt": "2026-03-20T23:51:19.502Z"
+  },
+  {
+    "competitor": "BMW Aguascalientes",
+    "country": "MX",
+    "error": "page.waitForTimeout is not a function",
+    "adsFound": 0,
+    "ads": [],
+    "scrapedAt": "2026-03-20T23:51:23.663Z"
+  }
+]

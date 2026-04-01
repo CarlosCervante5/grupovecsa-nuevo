@@ -1,0 +1,85 @@
+
+---Downloaded files---
+The import files for: Default were successfully downloaded!
+Initial max execution time = 30
+Files info:
+Site URL = https://vecsaboutique.com
+Data file = /home/vecsaboutique/public_html/wp-content/themes/motormania/inc/demo/default/content.xml
+Widget file = /home/vecsaboutique/public_html/wp-content/themes/motormania/inc/demo/default/widgets.wie
+Customizer file = /home/vecsaboutique/public_html/wp-content/themes/motormania/inc/demo/default/customizer.dat
+Redux files:
+not defined!
+
+------
+New AJAX call!
+[WARNING] Failed to import product_search Bike
+[WARNING] Failed to import product_search Boots
+[WARNING] Failed to import product_search Casual and Urban Boots
+[WARNING] Failed to import product_search Cruiser
+[WARNING] Failed to import product_search Dirt Bike
+[WARNING] Failed to import product_search Enduro and Off-Road Boots
+[WARNING] Failed to import product_search Gloves
+[WARNING] Failed to import product_search Gore-Tex Gloves
+[WARNING] Failed to import product_search Heated Gloves
+[WARNING] Failed to import product_search Helmet
+[WARNING] Failed to import product_search Jacket
+[WARNING] Failed to import product_search Modular
+[WARNING] Failed to import product_search Protective Shirts and Hoodies
+[WARNING] Failed to import product_search Sports
+[WARNING] Failed to import product_search 2019
+[WARNING] Failed to import product_search 2020
+[WARNING] Failed to import product_search 2020
+[WARNING] Failed to import product_search 2020
+[WARNING] Failed to import product_search 2021
+[WARNING] Failed to import product_search 2021
+[WARNING] Failed to import product_search 2021
+[WARNING] Failed to import product_search 2021
+[WARNING] Failed to import product_search 2021
+[WARNING] Failed to import product_search Adventure
+[WARNING] Failed to import product_search ARMR Moto
+[WARNING] Failed to import product_search ATV
+[WARNING] Failed to import product_search Belstaff
+[WARNING] Failed to import product_search BMW
+[WARNING] Failed to import product_search Dainese
+[WARNING] Failed to import product_search Daytona
+[WARNING] Failed to import product_search Fog-Off
+[WARNING] Failed to import product_search Full Face
+[WARNING] Failed to import product_search Glove Accessories
+[WARNING] Failed to import product_search Gore-Tex Jackets
+[WARNING] Failed to import product_search Kawasaki
+[WARNING] Failed to import product_search Knox
+[WARNING] Failed to import product_search Yamaha
+[WARNING] Failed to import product_search 2020
+[WARNING] Failed to import product_search 2020
+[WARNING] Failed to import product_search 2020
+[WARNING] Failed to import product_search 2021
+[WARNING] Failed to import product_search 2021
+[WARNING] Failed to import product_search Airoh
+[WARNING] Failed to import product_search Alpinestars
+[WARNING] Failed to import product_search Caberg
+[WARNING] Failed to import product_search Held
+[WARNING] Failed to import product_search Suzuki
+
+
+---Importing widgets---
+Sidebar : 
+
+motormania : Recent Post - No Title - Imported
+Categories - No Title - Imported
+Tag Cloud - No Title - Imported
+
+WooCommerce Store Sidebar : 
+
+Product Categories - Product categories - Imported
+Filter Products by Price - Filter by price - Imported
+Products list - Recent products - Imported
+Filter Products by Rating - Average rating - Imported
+Product Tag Cloud - Product tags - Imported
+
+
+
+---Importing customizer settings---
+Customizer settings import finished!
+
+---ocdi/after_import---
+

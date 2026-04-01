@@ -1,0 +1,43 @@
+<div class="stripe-payment-container">
+  <h3 class="stripe-title">
+    <mat-icon class="stripe-icon">credit_card</mat-icon>
+    Pago con tarjeta
+  </h3>
+
+  @if (isLoadingStripe) {
+    <div class="stripe-loading">
+      <mat-spinner diameter="32"></mat-spinner>
+      <span>Cargando formulario de pago...</span>
+    </div>
+  }
+
+  <div
+    id="stripe-card-element"
+    class="card-element-container"
+    [class.hidden]="isLoadingStripe && !stripeReady"
+  ></div>
+
+  @if (errorMessage) {
+    <div class="stripe-error">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ errorMessage }}</span>
+    </div>
+  }
+
+  @if (stripeReady) {
+    <button
+      mat-flat-button
+      color="primary"
+      class="pay-btn"
+      [disabled]="isProcessing"
+      (click)="confirmPayment()"
+    >
+      @if (isProcessing) {
+        <mat-spinner diameter="20" class="btn-spinner"></mat-spinner>
+        Procesando...
+      } @else {
+        Pagar
+      }
+    </button>
+  }
+</div>

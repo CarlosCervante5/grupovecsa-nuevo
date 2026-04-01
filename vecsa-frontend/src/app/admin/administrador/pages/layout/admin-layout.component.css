@@ -1,0 +1,31 @@
+.panel-layout { display: flex; min-height: 100vh; background: #f8fafc; }
+.panel-sidebar { width: 250px; background: #0f172a; display: flex; flex-direction: column; padding: 24px 12px; position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto; z-index: 10; }
+.panel-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding: 0 4px; }
+.panel-brand-icon { color: #1c69d4; font-size: 28px; }
+.panel-brand-name { font-size: 1.1rem; font-weight: 700; color: #fff; }
+.panel-user { display: flex; align-items: center; gap: 10px; background: #1e293b; border-radius: 10px; padding: 10px 12px; margin-bottom: 20px; }
+.panel-user-avatar { width: 34px; height: 34px; border-radius: 50%; background: #1c69d4; color: #fff; font-size: 0.95rem; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.panel-user-info { display: flex; flex-direction: column; gap: 2px; }
+.panel-user-name { font-size: 0.8rem; font-weight: 600; color: #f1f5f9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.panel-user-role { font-size: 0.7rem; color: #64748b; }
+.panel-nav { flex: 1; overflow-y: auto; }
+.panel-nav-label { font-size: 0.65rem; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.08em; margin: 16px 0 6px 8px; }
+.panel-nav-item { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; color: #94a3b8; font-size: 0.8rem; border-radius: 8px; cursor: pointer; text-decoration: none; transition: all 0.15s; margin-bottom: 1px; }
+.panel-nav-item .material-icons { font-size: 18px; }
+.panel-nav-item:hover { background: #1e293b; color: #f1f5f9; }
+.panel-nav-item.active { background: #1c69d4; color: #fff; }
+.panel-nav-back { display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 12px; color: #1c69d4; font-size: 0.8rem; font-weight: 600; border-radius: 8px; text-decoration: none; transition: all 0.15s; margin-top: 4px; }
+.panel-nav-back:hover { background: #1e293b; color: #60a5fa; }
+.panel-nav-back .material-icons { font-size: 18px; }
+.panel-nav-home { display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 12px; color: #94a3b8; font-size: 0.8rem; border-radius: 8px; text-decoration: none; transition: all 0.15s; margin-top: 4px; }
+.panel-nav-home:hover { background: #1e293b; color: #f1f5f9; }
+.panel-nav-home .material-icons { font-size: 18px; }
+.panel-logout { display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 12px; border: none; background: none; color: #ef4444; font-size: 0.8rem; border-radius: 8px; cursor: pointer; text-align: left; margin-top: 4px; }
+.panel-logout:hover { background: rgba(239,68,68,0.1); }
+.panel-logout .material-icons { font-size: 18px; }
+.panel-main { flex: 1; margin-left: 250px; min-height: 100vh; overflow-x: hidden; padding: 24px 0 0 24px; }
+@media (max-width: 768px) {
+  .panel-sidebar { width: 100%; height: auto; position: static; flex-direction: row; flex-wrap: wrap; padding: 12px; }
+  .panel-nav { display: none; }
+  .panel-main { margin-left: 0; padding: 16px; }
+}

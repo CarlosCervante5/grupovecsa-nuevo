@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reporte ADS BMW México - 20 de marzo de 2026</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0a; color: #e0e0e0; padding: 20px; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    h1 { color: #1877f2; margin-bottom: 5px; font-size: 28px; }
+    h2 { color: #ccc; margin: 30px 0 15px; font-size: 20px; border-bottom: 1px solid #333; padding-bottom: 8px; }
+    h3 { color: #1877f2; margin-bottom: 10px; }
+    .subtitle { color: #888; margin-bottom: 30px; }
+    .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
+    .stat-card { background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 20px; text-align: center; }
+    .stat-card .number { font-size: 36px; font-weight: bold; color: #1877f2; }
+    .stat-card .label { color: #888; margin-top: 5px; }
+    table { width: 100%; border-collapse: collapse; background: #1a1a1a; border-radius: 8px; overflow: hidden; }
+    th { background: #1877f2; color: white; padding: 12px 15px; text-align: left; }
+    td { padding: 12px 15px; border-bottom: 1px solid #333; }
+    tr:hover { background: #222; }
+    .error { color: #ff4444; }
+    .ads-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; margin-bottom: 30px; }
+    .ad-card { background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 15px; }
+    .ad-header { font-weight: bold; color: #1877f2; margin-bottom: 8px; }
+    .ad-body { color: #ccc; font-size: 14px; margin-bottom: 10px; line-height: 1.4; }
+    .ad-meta { display: flex; flex-wrap: wrap; gap: 10px; font-size: 12px; color: #888; }
+    .ad-meta span { background: #222; padding: 3px 8px; border-radius: 4px; }
+    .competitor-detail { margin-bottom: 30px; }
+    .footer { text-align: center; color: #555; margin-top: 40px; padding-top: 20px; border-top: 1px solid #333; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Reporte de Anuncios - Competencia BMW México</h1>
+    <p class="subtitle">Generado: 20 de marzo de 2026 | Fuente: Web Scraping</p>
+    
+    <div class="summary">
+      <div class="stat-card">
+        <div class="number">9</div>
+        <div class="label">Competidores monitoreados</div>
+      </div>
+      <div class="stat-card">
+        <div class="number">9</div>
+        <div class="label">Anuncios encontrados</div>
+      </div>
+      <div class="stat-card">
+        <div class="number">9</div>
+        <div class="label">Búsquedas exitosas</div>
+      </div>
+    </div>
+
+    <h2>Resumen por Competidor</h2>
+    <table>
+      <thead>
+        <tr><th>Competidor</th><th>Anuncios Activos</th><th>Estado</th><th>Última consulta</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>BMW Puebla</td>
+          <td>1</td>
+          <td>Activo</td>
+          <td>2026-03-21T00:05:20.178Z</td>
+        </tr>
+        <tr>
+          <td>BMW Querétaro</td>
+          <td>1</td>
+          <td>Activo</td>
+          <td>2026-03-21T00:05:27.765Z</td>
+        </tr>
+        <tr>
+          <td>BMW Mérida</td>
+          <td>1</td>
+          <td>Activo</td>
+          <td>2026-03-21T00:05:34.548Z</td>
+        </tr>
+        <tr>
+          <td>BMW Guadalajara</td>
+          <td>1</td>
+          <td>Activo</td>
+          <td>2026-03-21T00:05:41.393Z</td>
+        </tr>
+        <tr>
+          <td>BMW Monterrey</td>
+          <td>1</td>
+          <td>Activo</td>
+          <td>2026-03-21T00:05:49.236Z</td>
+        </tr>
+        <tr>
+          <td>BMW CDMX</td>
+          <td>1</td>
+          <td>Activo</td>
+          <td>2026-03-21T00:05:56.776Z</td>
+        </tr>
+        <tr>
+          <td>BMW León</td>
+          <td>1</td>
+          <td>Activo</td>
+          <td>2026-03-21T00:06:04.410Z</td>
+        </tr>
+        <tr>
+          <td>BMW Aguascalientes</td>
+          <td>1</td>
+          <td>Activo</td>
+          <td>2026-03-21T00:06:10.862Z</td>
+        </tr>
+        <tr>
+          <td>BMWVanguardiaMotors</td>
+          <td>1</td>
+          <td>Activo</td>
+          <td>2026-03-21T00:06:17.558Z</td>
+        </tr></tbody>
+    </table>
+
+    <h2>Detalle de Anuncios</h2>
+    
+          <div class="competitor-detail">
+            <h3>BMW Puebla (1 anuncios)</h3>
+            <div class="ads-grid">
+              
+                    <div class="ad-card">
+                      <div class="ad-header">Anuncio #1</div>
+                      <img src="https://scontent.fmex23-1.fna.fbcdn.net/v/t39.35426-6/629576693_25674062385598465_9010675790314149082_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=101&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=Nv7HyNU6k-8Q7kNvwFmq0M3&_nc_oc=Adpu9jGWhKPA5oz-_mRr5Gs3ztc0FSp7uki2UvjeHFi3EYzn9Kh4bvrE4OLALkXBFl0&_nc_zt=14&_nc_ht=scontent.fmex23-1.fna&_nc_gid=Quoo_bhAlwkvNVuK8Z9aaw&_nc_ss=7a30f&oh=00_Afz-4YmGx6kB6hoIsFUuuHohrJ734pyLPyMZnU-hKUXxMA&oe=69C3AD82" style="max-width:100%;border-radius:6px;margin-bottom:8px" loading="lazy" onerror="this.style.display='none'"><img src="https://scontent.fmex23-1.fna.fbcdn.net/v/t39.35426-6/628368929_879367731672810_7684483692592450405_n.jpg?stp=dst-jpg_s600x600_tt6&_nc_cat=101&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=K1LM0RaXePgQ7kNvwGk7KZ0&_nc_oc=AdoNqtUb66mn9gWomEYMAwiZPKR3UsH4SVPr3dQqzN-9EB1LMeiKO5wFrNSQKSe589U&_nc_zt=14&_nc_ht=scontent.fmex23-1.fna&_nc_gid=Quoo_bhAlwkvNVuK8Z9aaw&_nc_ss=7a30f&oh=00_Afy3tzkfHGjB6aBOAd4CuOiFxWD7GE5Xt-U_OFLX05s5Dw&oe=69C3B183" style="max-width:100%;border-radius:6px;margin-bottom:8px" loading="lazy" onerror="this.style.display='none'"><img src="https://scontent.fmex36-1.fna.fbcdn.net/v/t39.35426-6/633795561_846862355068787_622794477247640667_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=110&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=CFffr9YqZUsQ7kNvwFHuaAb&_nc_oc=AdqslTUpVd4aHw_OCL2-Db3kY_UIMyr8tRZWjg1KZKbGkuGQ7ed2GfpLKcJiige9KgA&_nc_zt=14&_nc_ht=scontent.fmex36-1.fna&_nc_gid=Quoo_bhAlwkvNVuK8Z9aaw&_nc_ss=7a30f&oh=00_AfypFvj9AGciMOhQ_PpR-XlhdibX-4YlaEWmSRkMiIPctg&oe=69C3B38D" style="max-width:100%;border-radius:6px;margin-bottom:8px" loading="lazy" onerror="this.style.display='none'">
+                      <div class="ad-body">​
+Activo
+Identificador de la biblioteca: 2395995927528720
+En circulación desde el 4 feb 2026Plataformas
+​
+​
+Abrir menú desplegable
+​
+Ver detalles del anuncio
+Auto Partes de Puebla
+Publicidad
+¡𝐓𝐎𝐃𝐎</div>
+                      <div class="ad-meta">
+                        <span>Imágenes: 72</span>
+                        <span>Videos: 4</span>
+                      </div>
+                    </div>
+            </div>
+          </div>
+          <div class="competitor-detail">
+            <h3>BMW Querétaro (1 anuncios)</h3>
+            <div class="ads-grid">
+              
+                    <div class="ad-card">
+                      <div class="ad-header">Anuncio #1</div>
+                      <img src="https://scontent.fmex31-1.fna.fbcdn.net/v/t39.35426-6/518399183_717868987806799_4639743062115888777_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=103&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=HGm8-PnzTaMQ7kNvwG8NrEP&_nc_oc=AdpYtmlpCVExcFGdwxWrJd5AkPzxb0wSYs09zEZw50txS4-iVRpxvWkJBITrYARL98M&_nc_zt=14&_nc_ht=scontent.fmex31-1.fna&_nc_gid=LDOzsUEKpW8eQ7YCnZYo9g&_nc_ss=7a30f&oh=00_Afyh2sDvUwyR5hBQHZQbRxWZdeXdPevBM-1c5bdJSX0sag&oe=69C3C068" style="max-width:100%;border-radius:6px;margin-bottom:8px" loading="lazy" onerror="this.style.display='none'"><img src="https://scontent.fmex27-1.fna.fbcdn.net/v/t39.35426-6/474801347_922047840121221_5783554554799166734_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=111&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=Wph8ghqPfqUQ7kNvwEqWpfu&_nc_oc=AdrljGn1XqZpObXoqVJRDLGaeo2Pg2PbVmmxfTXwqeYBQegM89oxI3HHiFMaEZ7Ld0o&_nc_zt=14&_nc_ht=scontent.fmex27-1.fna&_nc_gid=LDOzsUEKpW8eQ7YCnZYo9g&_nc_ss=7a30f&oh=00_Afy93GxJVb2OtgKLIzopPfx7yw6-soCxW_O4rqUaeVXvKQ&oe=69C3BD8B" style="max-width:100%;border-radius:6px;margin-bottom:8px" loading="lazy" onerror="this.style.display='none'"><img src="https://scontent.fmex27-1.fna.fbcdn.net/v/t39.35426-6/474555775_937572551840560_78926580521458262_n.jpg?stp=dst-jpg_s600x600_tt6&_nc_cat=111&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=qP5DNyK0vVAQ7kNvwFOGvxv&_nc_oc=Adoa4j5KaEXPUYT_-xonbZ_kQDVXLkWbIDsjeM5-0Y2_OnkrDax_5cbOa2ZWP3ig8bA&_nc_zt=14&_nc_ht=scontent.fmex27-1.fna&_nc_gid=LDOzsUEKpW8eQ7YCnZYo9g&_nc_ss=7a30f&oh=00_AfxdcuAe8va12eWo5XkMVqjaAkoEa7oZUIGApAF_tJjc4w&oe=69C3BB0A" style="max-width:100%;border-radius:6px;margin-bottom:8px" loading="lazy" onerror="this.style.display='none'">
+                      <div class="ad-body">​
+Activo
+Identificador de la biblioteca: 772890305213885
+En circulación desde el 4 ago 2025Plataformas
+​
+​
+​
+​
+Abrir menú desplegable
+​
+Ver detalles del anuncio
+Taller Automotriz Bosch Los Arcos Qro
+P</div>
+                      <div class="ad-meta">
+                        <span>Imágenes: 132</span>
+                        <span>Videos: 6</span>
+                      </div>
+                    </div>
+            </div>
+          </div>
+          <div class="competitor-detail">
+            <h3>BMW Mérida (1 anuncios)</h3>
+            <div class="ads-grid">
+              
+                    <div class="ad-card">
+                      <div class="ad-header">Anuncio #1</div>
+                      <img src="https://scontent.fmex36-1.fna.fbcdn.net/v/t39.35426-6/451016424_1166447661077068_7638557788538842979_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=106&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=gv3h45p40JMQ7kNvwGOlIYM&_nc_oc=AdqARSD4BIdwd4ozscL69-0TUmfYbiLDbBGz-i-a4GmjHMHTj4wGliT01BQER-5GhiE&_nc_zt=14&_nc_ht=scontent.fmex36-1.fna&_nc_gid=puBeXoAjl_Cn-3f4HCBshw&_nc_ss=7a30f&oh=00_Afxisi2RqnXNr93iuwIth9zGWUXAbL5m7tCDCE5fbfncQg&oe=69C39BE3" style="max-width:100%;border-radius:6px;margin-bottom:8px" loading="lazy" onerror="this.style.display='none'"><img src="https://scontent.fmex28-1.fna.fbcdn.net/v/t39.35426-6/454438097_1164716988079132_5191781674793854950_n.jpg?stp=dst-jpg_s600x600_tt6&_nc_cat=107&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=Xb07yHcLOpkQ7kNvwGMLlaT&_nc_oc=AdostVoMLT18TSbRKw5eNcao0WV_Iwl8fhKNtocS0gB54B-xGvjvK0_ECuZO0UvN1oE&_nc_zt=14&_nc_ht=scontent.fmex28-1.fna&_nc_gid=puBeXoAjl_Cn-3f4HCBshw&_nc_ss=7a30f&oh=00_AfwTuNpd44qowi6hnciyKA3AxvYVpcgD4TVyBe01HFH7cg&oe=69C3BFF1" style="max-width:100%;border-radius:6px;margin-bottom:8px" loading="lazy" onerror="this.style.display='none'"><img src="https://scontent.fmex27-1.fna.fbcdn.net/v/t39.35426-6/618589763_894065300238706_897312640726106706_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=111&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=g5v9gmZgXKgQ7kNvwF2Zck2&_nc_oc=Adp5N6tq6J2Dl86lLuv1xCrwJeoLU6MVbqELe4IV6hX9ORGr4edUZUz1gIWu_qe1bnE&_nc_zt=14&_nc_ht=scontent.fmex27-1.fna&_nc_gid=puBeXoAjl_Cn-3f4HCBshw&_nc_ss=7a30f&oh=00_Afyfh19OySu_kvuJrTndoLrzs4dPdX5EW1yMc7xAaNwo-g&oe=69C3C80B" style="max-width:100%;border-radius:6px;margin-bottom:8px" loading="lazy" onerror="this.style.display='none'">
+                      <div class="ad-body">​
+Activo
+Identificador de la biblioteca: 399443606581159
+En circulación desde el 7 ago 2024Plataformas
+​
+​
+Abrir menú desplegable
+​
+Ver detalles del anuncio
+BMW Mérida
+Publicidad
+Maneja tu próximo BMW</div>
+                      <div class="ad-meta">
+                        <span>Imágenes: 90</span>
+                        <span>Videos: 0</span>
+                      </div>
+                    </div>
+            </div>
+          </div>
+          <div class="competitor-detail">
+            <h3>BMW Guadalajara (1 anuncios)</h3>
+            <div class="ads-grid">
+              
+                    <div class="ad-card">
+                      <div class="ad-header">Anuncio #1</div>
+                      <img src="https://scontent.fmex28-1.fna.fbcdn.net/v/t39.35426-6/516895909_1456055582418579_2033383960990591706_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=105&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=6QT_KfcM1PIQ7kNvwGLRYGz&_nc_oc=Adpm1S1SujZnG8RP-Xhn2ncPPTFAzQaSJEvz_H4IZ4DFvQc7KxasEZM-cTKvEN5Gpak&_nc_zt=14&_nc_ht=scontent.fmex28-1.fna&_nc_gid=jP8CzbGwaINhb6aMxpYhrQ&_nc_ss=7a30f&oh=00_AfyJjf2Vnarlxmnzsnxt-F0e2_1REqOa79X4A-lsK8Gz0Q&oe=69C3B562" style="max-width:100%;border-radius:6px;margin-bottom:8px" loading="lazy" onerror="this.style.display='none'"><img src="https://scontent.fmex5-1.fna.fbcdn.net/v/t39.35426-6/541473098_1873417316545198_6161755914392596320_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=108&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=pHbLvqY68pYQ7kNvwFYtTNY&_nc_oc=AdqlN3GfJlpxQ4ePaqv3nS-tqRJ7ay7Yws8Dk8IWqOcHOA4r3Cq3wOUWJ81yyjp3Om8&_nc_zt=14&_nc_ht=scontent.fmex5-1.fna&_nc_gid=jP8CzbGwaINhb6aMxpYhrQ&_nc_ss=7a30f&oh=00_AfyeyrWlrTitRCn3erqpU7Yj-yKOwYsLcBxTgS-JvMrv5Q&oe=69C3A93E" style="max-width:100%;border-radius:6px;margin-bottom:8px" loading="lazy" onerror="this.style.display='none'"><img src="https://scontent.fmex27-1.fna.fbcdn.net/v/t39.35426-6/560459734_1341935887604139_8818142551004529891_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=111&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=mESGog4VrekQ7kNvwHn11FS&_nc_oc=Adomb9ACMymLqOQzYcfDht_azm0h0qmvNEY-NEkK-L4jUjfYn-_aik7AEO3Auqriu34&_nc_zt=14&_nc_ht=scontent.fmex27-1.fna&_nc_gid=jP8CzbGwaINhb6aMxpYhrQ&_nc_ss=7a30f&oh=00_AfzsAS0KekuCTszhgmLZpzhmLV82iLLGNteFwCTatsuYVQ&oe=69C3AFD8" style="max-width:100%;border-radius:6px;margin-bottom:8px" loading="lazy" onerror="this.style.display='none'">
+                      <div class="ad-body">​
+Activo
+Identificador de la biblioteca: 1120787409927914
+En circulación desde el 7 jul 2025Plataformas
+​
+​
+​
+​
+Abrir menú desplegable
+​
+Ver detalles del anuncio
+TES
+Publicidad
+🚗 Desde un Spark hasta</div>
+                      <div class="ad-meta">
+                        <span>Imágenes: 61</span>
+                        <span>Videos: 19</span>
+                      </div>
+                    </div>
+            </div>
+          </div>
+          <div class="competitor-detail">
+            <h3>BMW Monterrey (1 anuncios)</h3>
+            <div class="ads-grid">
+              
+                    <div class="ad-card">
+                      <div class="ad-header">Anuncio #1</div>
+                      <img src="https://scontent.fmex28-1.fna.fbcdn.net/v/t39.35426-6/516895909_1456055582418579_2033383960990591706_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=105&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=6QT_KfcM1PIQ7kNvwGLRYGz&_nc_oc=Adpm1S1SujZnG8RP-Xhn2ncPPTFAzQaSJEvz_H4IZ4DFvQc7KxasEZM-cTKvEN5Gpak&_nc_zt=14&_nc_ht=scontent.fmex28-1.fna&_nc_gid=Ob_dEZqdOdWKlZA5jcqIJw&_nc_ss=7a30f&oh=00_AfzxerWcVE9wAMPT2nGrYQdPtBYxf_bk82ywM9WvZ4j90Q&oe=69C3B562" style="max-width:100%;border-radius:6px;margin-bottom:8px" loading="lazy" onerror="this.style.display='none'"><img src="https://scontent.fmex28-1.fna.fbcdn.net/v/t39.35426-6/564588503_1505105487357725_2305551700779771002_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=105&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=kqTRpMe4g7oQ7kNvwE6TVRH&_nc_oc=AdrK9zmUPlM8eEo60Vbk4bivkXt9Ol6Hy4JuyURG_pOsI9mhsq3jG2iCj-QgWaJxHW0&_nc_zt=14&_nc_ht=scontent.fmex28-1.fna&_nc_gid=Ob_dEZqdOdWKlZA5jcqIJw&_nc_ss=7a30f&oh=00_AfzDp2jAyoKgqQW3jnU-DSFkEJWZJ46UR-V2Wb25GqzwlA&oe=69C3CA60" style="max-width:100%;border-radius:6px;margin-bottom:8px" loading="lazy" onerror="this.style.display='none'"><img src="https://scontent.fmex5-1.fna.fbcdn.net/v/t39.35426-6/541473098_1873417316545198_6161755914392596320_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=108&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=pHbLvqY68pYQ7kNvwFYtTNY&_nc_oc=AdqlN3GfJlpxQ4ePaqv3nS-tqRJ7ay7Yws8Dk8IWqOcHOA4r3Cq3wOUWJ81yyjp3Om8&_nc_zt=14&_nc_ht=scontent.fmex5-1.fna&_nc_gid=Ob_dEZqdOdWKlZA5jcqIJw&_nc_ss=7a30f&oh=00_AfydtPbDTVs-iuGwI2Z-WhRmTNtnE_iwQ3jnTPhXacQWrA&oe=69C3A93E" style="max-width:100%;border-radius:6px;margin-bottom:8px" loading="lazy" onerror="this.style.display='none'">
+                      <div class="ad-body">​
+Activo
+Identificador de la biblioteca: 1120787409927914
+En circulación desde el 7 jul 2025Plataformas
+​
+​
+​
+​
+Abrir menú desplegable
+​
+Ver detalles del anuncio
+TES
+Publicidad
+🚗 Desde un Spark hasta</div>
+                      <div class="ad-meta">
+                        <span>Imágenes: 113</span>
+                        <span>Videos: 16</span>
+                      </div>
+                    </div>
+            </div>
+          </div>
+          <div class="competitor-detail">
+            <h3>BMW CDMX (1 anuncios)</h3>
+            <div class="ads-grid">
+              
+                    <div class="ad-card">
+                      <div class="ad-header">Anuncio #1</div>
+                      <img src="https://scontent.fmex28-1.fna.fbcdn.net/v/t39.35426-6/516895909_1456055582418579_2033383960990591706_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=105&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=6QT_KfcM1PIQ7kNvwGLRYGz&_nc_oc=Adpm1S1SujZnG8RP-Xhn2ncPPTFAzQaSJEvz_H4IZ4DFvQc7KxasEZM-cTKvEN5Gpak&_nc_zt=14&_nc_ht=scontent.fmex28-1.fna&_nc_gid=rgKM5DqTuVi0VFchvHFrdg&_nc_ss=7a30f&oh=00_Afyev6rBweo8MvHws5aSplpyN9qJrJ7g0d77IBA4rJi3JA&oe=69C3B562" style="max-width:100%;border-radius:6px;margin-bottom:8px" loading="lazy" onerror="this.style.display='none'"><img src="https://scontent.fmex36-1.fna.fbcdn.net/v/t39.35426-6/652296155_789244110921165_1862866142077653918_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=110&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=Zdpv7Y394_cQ7kNvwFjmSFc&_nc_oc=AdpFdgHPVOyzPSpBuBc1dc6vZwbxDRZXyIhHHtcfZEhRiVwSymyKdo_aSppz7BVaua4&_nc_zt=14&_nc_ht=scontent.fmex36-1.fna&_nc_gid=rgKM5DqTuVi0VFchvHFrdg&_nc_ss=7a30f&oh=00_Afy802ODLmEaKCY9QpHpd15mWaTao_cUUibkdNQoQnIbrA&oe=69C3C282" style="max-width:100%;border-radius:6px;margin-bottom:8px" loading="lazy" onerror="this.style.display='none'"><img src="https://scontent.fmex31-1.fna.fbcdn.net/v/t39.35426-6/651775703_942343008178255_851749116023019818_n.jpg?stp=dst-jpg_s600x600_tt6&_nc_cat=109&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=PWZdrIfaJMoQ7kNvwHjRL0w&_nc_oc=AdqFXz5cEEAZeTgdNvslzVKJhETZydlLwRRb2IxHzoFMkUG6SPhR7pHTSMvnSukgZOE&_nc_zt=14&_nc_ht=scontent.fmex31-1.fna&_nc_gid=rgKM5DqTuVi0VFchvHFrdg&_nc_ss=7a30f&oh=00_Afz0vZ4D5K2Dv4RQvMz_GuhYCQ1MbU87RykF227Yo4BIYA&oe=69C3CBAA" style="max-width:100%;border-radius:6px;margin-bottom:8px" loading="lazy" onerror="this.style.display='none'">
+                      <div class="ad-body">​
+Activo
+Identificador de la biblioteca: 1120787409927914
+En circulación desde el 7 jul 2025Plataformas
+​
+​
+​
+​
+Abrir menú desplegable
+​
+Ver detalles del anuncio
+TES
+Publicidad
+🚗 Desde un Spark hasta</div>
+                      <div class="ad-meta">
+                        <span>Imágenes: 54</span>
+                        <span>Videos: 8</span>
+                      </div>
+                    </div>
+            </div>
+          </div>
+          <div class="competitor-detail">
+            <h3>BMW León (1 anuncios)</h3>
+            <div class="ads-grid">
+              
+                    <div class="ad-card">
+                      <div class="ad-header">Anuncio #1</div>
+                      <img src="https://scontent.fmex36-1.fna.fbcdn.net/v/t39.35426-6/605640402_4267738396815982_6924200355303677200_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=110&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=Ie9Fx0oTXhoQ7kNvwHWRCOa&_nc_oc=Ado5MMJQFWEZSB9WkuCSGZ-nsZfNqBbFDxn96319c4qBnh060940xaGmh2UpHsLgnHQ&_nc_zt=14&_nc_ht=scontent.fmex36-1.fna&_nc_gid=PFod_xlFlQe4jxrVeU5o2w&_nc_ss=7a30f&oh=00_AfyNVEujRVzWfaEz-ihXTRdkbhtjCQcYc2pQTuK0GmK3cA&oe=69C3BF54" style="max-width:100%;border-radius:6px;margin-bottom:8px" loading="lazy" onerror="this.style.display='none'"><img src="https://scontent.fmex26-1.fna.fbcdn.net/v/t39.35426-6/636905303_873140572258228_2352597608997368554_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=100&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=fwwhEiBgV5MQ7kNvwG1PKz3&_nc_oc=Adpn3nHcsFG9zlEtjzw9hxy-rRBJXEM2fBF1z-K3RWqs0AACoaoHD3C_0I1xjdH8re8&_nc_zt=14&_nc_ht=scontent.fmex26-1.fna&_nc_gid=PFod_xlFlQe4jxrVeU5o2w&_nc_ss=7a30f&oh=00_AfzNMiwyDD7OOUA6xcaJ4Jm2eKRJZuauVavjlFBL9e9NiQ&oe=69C39E22" style="max-width:100%;border-radius:6px;margin-bottom:8px" loading="lazy" onerror="this.style.display='none'"><img src="https://scontent.fmex22-1.fna.fbcdn.net/v/t39.35426-6/636760488_1560836075220263_8329225005606445504_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=104&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=VK_r_nbhB8YQ7kNvwFFWAo7&_nc_oc=AdrYTk-7C2u45b4nEjsmwfNB6Ii7ZjsKp05DsdpL0lJYGikeJTyoh8xIIW9KWv2iovg&_nc_zt=14&_nc_ht=scontent.fmex22-1.fna&_nc_gid=PFod_xlFlQe4jxrVeU5o2w&_nc_ss=7a30f&oh=00_Afx_JaNpogbdP1YK-WwDMEVplZNhugSkBkCEtfM7gjzyMA&oe=69C3CE09" style="max-width:100%;border-radius:6px;margin-bottom:8px" loading="lazy" onerror="this.style.display='none'">
+                      <div class="ad-body">​
+Activo
+Identificador de la biblioteca: 3763282870642753
+En circulación desde el 29 dic 2025Plataformas
+​
+​
+​
+​
+​
+Abrir menú desplegable
+​
+Ver detalles del anuncio
+Dienstmotor
+Publicidad
+🚨 Actualiza</div>
+                      <div class="ad-meta">
+                        <span>Imágenes: 107</span>
+                        <span>Videos: 9</span>
+                      </div>
+                    </div>
+            </div>
+          </div>
+          <div class="competitor-detail">
+            <h3>BMW Aguascalientes (1 anuncios)</h3>
+            <div class="ads-grid">
+              
+                    <div class="ad-card">
+                      <div class="ad-header">Anuncio #1</div>
+                      <img src="https://scontent.fmex36-1.fna.fbcdn.net/v/t39.35426-6/640058698_1238227101766653_9033716199094407356_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=106&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=cYEnnmzfZJwQ7kNvwGqgLuf&_nc_oc=Adr9TkSwbiz1yFaVqDDAbJ97Ct8D2WB9VU_zoXu7pnsnpUWqh2TI1cHxanDpfG3lOnE&_nc_zt=14&_nc_ht=scontent.fmex36-1.fna&_nc_gid=JxABqrDA93kYrglIKv_kvA&_nc_ss=7a30f&oh=00_Afzi4Un4rLivgBINeJ1Ctz99Sv-hAycGJlsj7Kx3azxl-g&oe=69C3A3E3" style="max-width:100%;border-radius:6px;margin-bottom:8px" loading="lazy" onerror="this.style.display='none'"><img src="https://scontent.fmex5-1.fna.fbcdn.net/v/t39.35426-6/653703399_1462222155252889_2242242210465515082_n.jpg?stp=dst-jpg_s600x600_tt6&_nc_cat=108&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=WBJl1y1ZRtoQ7kNvwFs7ffV&_nc_oc=AdqTFMb5vOj8o66qnZOcQrFxBpJ5VP5vRN-EXc-Q0PdHBZpFBmQ6j7hqY2sq0pCKZz0&_nc_zt=14&_nc_ht=scontent.fmex5-1.fna&_nc_gid=JxABqrDA93kYrglIKv_kvA&_nc_ss=7a30f&oh=00_AfyfSpwxJGYvAOjZ_3N6v6uCrd4ODKndyQ1YxI3E5LLqrQ&oe=69C3BFB3" style="max-width:100%;border-radius:6px;margin-bottom:8px" loading="lazy" onerror="this.style.display='none'"><img src="https://scontent.fmex5-1.fna.fbcdn.net/v/t39.35426-6/653445391_906054082316470_7724198320105736456_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=PiJ2uNJgE9MQ7kNvwF2bK23&_nc_oc=AdoiFaHOUi5_P4IFotNIZN5MoIjZ2sguZdz8fUIZI5Il--5gObOfPX2v7JED2M7OpoI&_nc_zt=14&_nc_ht=scontent.fmex5-1.fna&_nc_gid=JxABqrDA93kYrglIKv_kvA&_nc_ss=7a30f&oh=00_AfyL4rQUYv99HDJxyv3XR0vcPn14HgnTG4qIzEvdqy8Zug&oe=69C3BE5F" style="max-width:100%;border-radius:6px;margin-bottom:8px" loading="lazy" onerror="this.style.display='none'">
+                      <div class="ad-body">​
+Activo
+Identificador de la biblioteca: 4496435593909467
+En circulación desde el 24 feb 2026Plataformas
+​
+​
+​
+​
+Abrir menú desplegable
+​
+Ver detalles del anuncio
+Radikal Brakes
+Publicidad
+⚠️¡Libera t</div>
+                      <div class="ad-meta">
+                        <span>Imágenes: 33</span>
+                        <span>Videos: 3</span>
+                      </div>
+                    </div>
+            </div>
+          </div>
+          <div class="competitor-detail">
+            <h3>BMWVanguardiaMotors (1 anuncios)</h3>
+            <div class="ads-grid">
+              
+                    <div class="ad-card">
+                      <div class="ad-header">Anuncio #1</div>
+                      <img src="https://scontent.fmex31-1.fna.fbcdn.net/v/t39.35426-6/655253862_975695632303021_1060101360182723989_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=103&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=tU9qmhIyH50Q7kNvwG4UrtY&_nc_oc=Ado9kXMpEY0PTxZ3-94hXiE9jVaKYK8my1uJy_hsSh8rkF-mE5QEi5R2djDvZLrJlt4&_nc_zt=14&_nc_ht=scontent.fmex31-1.fna&_nc_gid=TmgMSTBD63_svTmGydtTNw&_nc_ss=7a30f&oh=00_Afw82c9ZqYbX9j4lyEq5Dy16N1fEKLKhIPqNL8glfvIVUQ&oe=69C3A240" style="max-width:100%;border-radius:6px;margin-bottom:8px" loading="lazy" onerror="this.style.display='none'"><img src="https://scontent.fmex28-1.fna.fbcdn.net/v/t39.35426-6/653876757_2165586770867980_6219300788743260402_n.jpg?stp=dst-jpg_s600x600_tt6&_nc_cat=107&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=WlBikql23SwQ7kNvwEUJdCR&_nc_oc=AdpMXWpSxFkcrF7dudCHffCpCGqSTedjxkistDDuCOmxcP7U0Tnki3rBGBKY410_xxI&_nc_zt=14&_nc_ht=scontent.fmex28-1.fna&_nc_gid=TmgMSTBD63_svTmGydtTNw&_nc_ss=7a30f&oh=00_Afzd5eliezhlclKFhkOto-BtfmI2NBFvB7HMu6ILudNjCA&oe=69C3CF96" style="max-width:100%;border-radius:6px;margin-bottom:8px" loading="lazy" onerror="this.style.display='none'"><img src="https://scontent.fmex31-1.fna.fbcdn.net/v/t39.35426-6/646812612_1248582773390898_5729256441451517636_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=103&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=vFYUvkgCm8MQ7kNvwEpfog5&_nc_oc=AdpPuK4woMbPtmvBjvVdGHVpPmEtDCBOEvnPtVmuDE1VkKQZKA5u7E1qqHVoDnES0Gw&_nc_zt=14&_nc_ht=scontent.fmex31-1.fna&_nc_gid=TmgMSTBD63_svTmGydtTNw&_nc_ss=7a30f&oh=00_AfySaZLCm_AjCMLmKRrKJKqcapC5UDFTtidzO_MSxjMGog&oe=69C3CB0E" style="max-width:100%;border-radius:6px;margin-bottom:8px" loading="lazy" onerror="this.style.display='none'">
+                      <div class="ad-body">​
+Activo
+Identificador de la biblioteca: 1492558729250213
+En circulación desde el 19 mar 2026Plataformas
+​
+​
+​
+Este anuncio tiene varias versiones
+​
+2 anuncios usan este contenido y texto
+Abrir menú d</div>
+                      <div class="ad-meta">
+                        <span>Imágenes: 14</span>
+                        <span>Videos: 0</span>
+                      </div>
+                    </div>
+            </div>
+          </div>
+
+    <div class="footer">
+      <p>Report ADS - Monitor de Competencia BMW México</p>
+    </div>
+  </div>
+</body>
+</html>

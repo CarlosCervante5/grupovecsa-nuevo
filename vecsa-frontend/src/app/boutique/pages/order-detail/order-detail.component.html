@@ -1,0 +1,226 @@
+<div class="detail-container">
+  <!-- Back link -->
+  <a class="back-link" routerLink="/boutique/orders">
+    <mat-icon>arrow_back</mat-icon>
+    <span>Mis Pedidos</span>
+  </a>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="48"></mat-spinner>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="!isLoading && errorMessage && !order" class="error-state">
+    <mat-icon class="error-icon">error_outline</mat-icon>
+    <p>{{ errorMessage }}</p>
+    <a mat-flat-button color="primary" routerLink="/boutique/orders">Volver a pedidos</a>
+  </div>
+
+  <!-- Order detail -->
+  <div *ngIf="!isLoading && order" class="order-content">
+
+    <!-- Header -->
+    <div class="order-header-card">
+      <div class="header-top">
+        <div>
+          <h1 class="order-number">{{ order.order_number }}</h1>
+          <p class="order-date">{{ order.created_at | date:'d MMMM yyyy, HH:mm' }}</p>
+        </div>
+        <span class="status-badge" [ngClass]="getStatusClass(order.status)">
+          {{ getStatusLabel(order.status) }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Status Progress Tracker -->
+    <div class="section-card" *ngIf="!isCancelled">
+      <h2 class="section-title">
+        <mat-icon class="section-icon">timeline</mat-icon>
+        Progreso del pedido
+      </h2>
+      <div class="progress-tracker">
+        <div *ngFor="let step of statusSteps; let i = index; let last = last"
+             class="progress-step"
+             [class.completed]="isStepCompleted(i)"
+             [class.active]="isStepActive(i)">
+          <div class="step-circle">
+            <mat-icon *ngIf="isStepCompleted(i) && !isStepActive(i)">check</mat-icon>
+            <mat-icon *ngIf="isStepActive(i) || !isStepCompleted(i)">{{ step.icon }}</mat-icon>
+          </div>
+          <span class="step-label">{{ step.label }}</span>
+          <div *ngIf="!last" class="step-connector" [class.completed]="isStepCompleted(i + 1)"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cancelled banner -->
+    <div class="cancelled-banner" *ngIf="isCancelled">
+      <mat-icon>cancel</mat-icon>
+      <span>Este pedido ha sido cancelado</span>
+    </div>
+
+    <!-- Order Items -->
+    <div class="section-card">
+      <h2 class="section-title">
+        <mat-icon class="section-icon">shopping_bag</mat-icon>
+        Artículos del pedido
+      </h2>
+      <div class="items-table-wrapper">
+        <table class="items-table">
+          <thead>
+            <tr>
+              <th class="th-product">Producto</th>
+              <th class="th-sku">SKU</th>
+              <th class="th-qty">Cant.</th>
+              <th class="th-price">Precio unit.</th>
+              <th class="th-subtotal">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of order.items">
+              <td class="td-product">{{ item.product_name }}</td>
+              <td class="td-sku">{{ item.product_sku }}</td>
+              <td class="td-qty">{{ item.quantity }}</td>
+              <td class="td-price">{{ item.unit_price | currency:'MXN':'symbol-narrow' }}</td>
+              <td class="td-subtotal">{{ item.subtotal | currency:'MXN':'symbol-narrow' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Payment Info -->
+    <div class="section-card" *ngIf="order.payment">
+      <h2 class="section-title">
+        <mat-icon class="section-icon">payment</mat-icon>
+        Información de pago
+      </h2>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Método</span>
+          <span class="info-value">{{ getPaymentMethodLabel(order.payment.method) }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Estado</span>
+          <span class="info-value">
+            <span class="status-badge small" [ngClass]="order.payment.status === 'completado' ? 'status-entregado' : order.payment.status === 'fallido' ? 'status-cancelado' : 'status-pendiente'">
+              {{ getPaymentStatusLabel(order.payment.status) }}
+            </span>
+          </span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Monto</span>
+          <span class="info-value">{{ order.payment.amount | currency:'MXN':'symbol-narrow' }}</span>
+        </div>
+        <div class="info-item" *ngIf="order.payment.confirmed_at">
+          <span class="info-label">Confirmado</span>
+          <span class="info-value">{{ order.payment.confirmed_at | date:'d MMM yyyy, HH:mm' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Shipping Info -->
+    <div class="section-card">
+      <h2 class="section-title">
+        <mat-icon class="section-icon">local_shipping</mat-icon>
+        Información de envío
+      </h2>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Método de entrega</span>
+          <span class="info-value">{{ getDeliveryMethodLabel(order.delivery_method) }}</span>
+        </div>
+
+        <!-- Home delivery address -->
+        <ng-container *ngIf="order.delivery_method === 'envio_domicilio'">
+          <div class="info-item" *ngIf="order.shipping_name">
+            <span class="info-label">Destinatario</span>
+            <span class="info-value">{{ order.shipping_name }}</span>
+          </div>
+          <div class="info-item" *ngIf="order.shipping_address">
+            <span class="info-label">Dirección</span>
+            <span class="info-value">{{ order.shipping_address }}, {{ order.shipping_city }}, {{ order.shipping_state }} {{ order.shipping_zip }}</span>
+          </div>
+          <div class="info-item" *ngIf="order.shipping_phone">
+            <span class="info-label">Teléfono</span>
+            <span class="info-value">{{ order.shipping_phone }}</span>
+          </div>
+        </ng-container>
+
+        <!-- Pickup dealership -->
+        <div class="info-item" *ngIf="order.delivery_method === 'recoleccion_sucursal' && order.shipment?.dealership">
+          <span class="info-label">Sucursal</span>
+          <span class="info-value">{{ order.shipment!.dealership.name }}</span>
+        </div>
+
+        <!-- Carrier & tracking -->
+        <ng-container *ngIf="order.shipment">
+          <div class="info-item" *ngIf="order.shipment.carrier_name">
+            <span class="info-label">Paquetería</span>
+            <span class="info-value">{{ order.shipment.carrier_name }}</span>
+          </div>
+          <div class="info-item" *ngIf="order.shipment.tracking_number">
+            <span class="info-label">Número de rastreo</span>
+            <span class="info-value tracking-number">{{ order.shipment.tracking_number }}</span>
+          </div>
+          <div class="info-item" *ngIf="order.shipment.estimated_delivery">
+            <span class="info-label">Entrega estimada</span>
+            <span class="info-value">{{ order.shipment.estimated_delivery | date:'d MMM yyyy' }}</span>
+          </div>
+        </ng-container>
+      </div>
+
+      <!-- Track button -->
+      <div class="track-section" *ngIf="canTrack">
+        <button mat-flat-button color="primary" class="track-btn" (click)="trackShipment()" [disabled]="loadingTracking">
+          <mat-spinner *ngIf="loadingTracking" diameter="20" class="btn-spinner"></mat-spinner>
+          <mat-icon *ngIf="!loadingTracking">gps_fixed</mat-icon>
+          <span>{{ loadingTracking ? 'Consultando...' : 'Rastrear envío' }}</span>
+        </button>
+      </div>
+
+      <!-- Tracking error -->
+      <div class="tracking-error" *ngIf="trackingError">
+        <mat-icon>warning</mat-icon>
+        <span>{{ trackingError }}</span>
+      </div>
+
+      <!-- Tracking timeline -->
+      <div class="tracking-timeline" *ngIf="trackingInfo">
+        <h3 class="timeline-title">
+          <mat-icon class="timeline-icon">schedule</mat-icon>
+          Historial de rastreo — {{ trackingInfo.carrier }}
+        </h3>
+        <div class="timeline">
+          <div *ngFor="let event of trackingInfo.events; let first = first" class="timeline-event" [class.first]="first">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <span class="event-date">{{ event.date | date:'d MMM yyyy, HH:mm' }}</span>
+              <span class="event-description">{{ event.description }}</span>
+              <span class="event-location" *ngIf="event.location">{{ event.location }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Totals -->
+    <div class="section-card totals-card">
+      <div class="totals-row">
+        <span>Subtotal</span>
+        <span>{{ order.subtotal | currency:'MXN':'symbol-narrow' }}</span>
+      </div>
+      <div class="totals-row">
+        <span>Envío</span>
+        <span>{{ order.shipping_cost | currency:'MXN':'symbol-narrow' }}</span>
+      </div>
+      <div class="totals-divider"></div>
+      <div class="totals-row total-final">
+        <span>Total</span>
+        <span>{{ order.total | currency:'MXN':'symbol-narrow' }}</span>
+      </div>
+    </div>
+
+  </div>
+</div>

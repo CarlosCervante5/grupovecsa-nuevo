@@ -1,0 +1,220 @@
+/**
+ * Estilos para el panel de administración
+ */
+
+.woo-auto-discount-wrap {
+    max-width: 1200px;
+    margin: 20px 0;
+}
+
+.woo-auto-discount-container {
+    display: grid;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.woo-auto-discount-card {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    padding: 20px;
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+}
+
+.woo-auto-discount-card h2 {
+    margin-top: 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    font-size: 18px;
+}
+
+.woo-auto-discount-multiselect {
+    width: 100%;
+    min-height: 200px;
+    max-width: 600px;
+    padding: 8px;
+    border: 1px solid #8c8f94;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.woo-auto-discount-multiselect option {
+    padding: 8px;
+    border-bottom: 1px solid #f0f0f1;
+}
+
+.woo-auto-discount-multiselect option:hover {
+    background-color: #f0f6fc;
+}
+
+/* Toggle Switch */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #2196F3;
+}
+
+input:focus + .slider {
+    box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+/* Badge Preview */
+.badge-preview {
+    margin-top: 20px;
+    padding: 20px;
+    background: #f7f7f7;
+    border-radius: 4px;
+}
+
+.badge-preview h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+.preview-container {
+    position: relative;
+    display: inline-block;
+    padding: 40px;
+    background: #fff;
+    border: 2px dashed #ddd;
+    border-radius: 4px;
+}
+
+/* Badge Styles Base */
+.woo-auto-discount-badge {
+    display: inline-block;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    line-height: 1;
+    z-index: 10;
+}
+
+/* Modern Style */
+.woo-auto-discount-badge-modern {
+    border-radius: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+/* Classic Style */
+.woo-auto-discount-badge-classic {
+    border-radius: 0;
+    border: 2px solid currentColor;
+}
+
+/* Minimal Style */
+.woo-auto-discount-badge-minimal {
+    border-radius: 2px;
+    font-weight: normal;
+    letter-spacing: 1px;
+}
+
+/* Submit Button */
+.woo-auto-discount-wrap .button-primary {
+    background: #2271b1;
+    border-color: #2271b1;
+    color: #fff;
+    padding: 10px 30px;
+    height: auto;
+    font-size: 16px;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.woo-auto-discount-wrap .button-primary:hover {
+    background: #135e96;
+    border-color: #135e96;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    transform: translateY(-1px);
+}
+
+.woo-auto-discount-wrap .button-primary:active {
+    transform: translateY(0);
+}
+
+/* Info boxes */
+.info-box {
+    background: #f0f6fc;
+    border-left: 4px solid #2271b1;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 4px;
+}
+
+.info-box strong {
+    color: #2271b1;
+}
+
+.warning-box {
+    background: #fcf9e8;
+    border-left: 4px solid #dba617;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 4px;
+}
+
+.success-box {
+    background: #edfaef;
+    border-left: 4px solid #00a32a;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 4px;
+}
+
+/* Responsive */
+@media (max-width: 782px) {
+    .woo-auto-discount-wrap {
+        margin: 10px 0;
+    }
+    
+    .woo-auto-discount-card {
+        padding: 15px;
+    }
+    
+    .woo-auto-discount-wrap .button-primary {
+        width: 100%;
+        text-align: center;
+    }
+}
+

@@ -12,7 +12,7 @@ import { SkCubeComponent } from "@components/sk-cube/sk-cube.component";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
 import { UpdateUserComponent } from './components/update-user/update-user.component';
-import { NewNavComponent } from "src/app/shared/versiones-nav/new-nav/new-nav.component";
+import { AdminLayoutComponent } from './pages/layout/admin-layout.component';
 
 @NgModule({
     declarations: [
@@ -20,7 +20,8 @@ import { NewNavComponent } from "src/app/shared/versiones-nav/new-nav/new-nav.co
         AdminUsersComponent,
         AdminPermisosComponent,
         AddUserComponent,
-        UpdateUserComponent
+        UpdateUserComponent,
+        AdminLayoutComponent
     ],
     imports: [
         CommonModule,
@@ -31,9 +32,7 @@ import { NewNavComponent } from "src/app/shared/versiones-nav/new-nav/new-nav.co
         SkCubeComponent,
         MatFormFieldModule,
         MatInputModule,
-        FormsModule,
-        NewNavComponent
+        FormsModule
     ]
   })
   export class AdministradorModule { }
-  

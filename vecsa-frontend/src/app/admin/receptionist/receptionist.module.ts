@@ -5,16 +5,17 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { ReceptionistRoutingModule } from './receptionist-routing.module';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { ReceptionFormComponent } from './pages/reception-form/reception-form.component';
+import { ReceptionistLayoutComponent } from './pages/layout/receptionist-layout.component';
 import { AdminModule } from '../admin.module';
 import { AngularMaterialModule } from '../../angular-material/angular-material.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { SkCubeComponent } from '@components/sk-cube/sk-cube.component'
-import { NewNavComponent } from 'src/app/shared/versiones-nav/new-nav/new-nav.component';
+import { SkCubeComponent } from '@components/sk-cube/sk-cube.component';
 
 @NgModule({
   declarations: [
     DashboardComponent,
-    ReceptionFormComponent
+    ReceptionFormComponent,
+    ReceptionistLayoutComponent
   ],
   imports: [
     CommonModule,
@@ -24,8 +25,7 @@ import { NewNavComponent } from 'src/app/shared/versiones-nav/new-nav/new-nav.co
     AdminModule,
     DragDropModule,
     ReactiveFormsModule,
-    SkCubeComponent,
-    NewNavComponent
+    SkCubeComponent
   ]
 })
 export class ReceptionistModule { }

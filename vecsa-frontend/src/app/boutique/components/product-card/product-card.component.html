@@ -1,0 +1,15 @@
+<a [routerLink]="['/boutique/product', product.uuid]" class="product-card-link">
+  <mat-card class="product-card">
+    <div class="image-container">
+      <img [src]="mainImage" [alt]="product.name" class="product-image" />
+      @if (isOutOfStock) {
+        <span class="out-of-stock-badge">Agotado</span>
+      }
+    </div>
+    <mat-card-content class="card-content">
+      <span class="category-name">{{ product.category?.name }}</span>
+      <h3 class="product-name">{{ product.name }}</h3>
+      <p class="product-price">{{ product.price | currency:'MXN':'symbol-narrow' }}</p>
+    </mat-card-content>
+  </mat-card>
+</a>

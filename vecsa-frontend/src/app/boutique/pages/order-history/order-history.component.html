@@ -1,0 +1,63 @@
+<div class="orders-container">
+  <h1 class="orders-title">Mis Pedidos</h1>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="48"></mat-spinner>
+  </div>
+
+  <!-- Empty state -->
+  <div *ngIf="!isLoading && orders.length === 0" class="empty-state">
+    <mat-icon class="empty-icon">receipt_long</mat-icon>
+    <p class="empty-text">No tienes pedidos aún</p>
+    <a mat-flat-button color="primary" routerLink="/boutique">Explorar Boutique</a>
+  </div>
+
+  <!-- Orders list -->
+  <div *ngIf="!isLoading && orders.length > 0" class="orders-list">
+    <div *ngFor="let order of orders" class="order-card" [routerLink]="['/boutique/orders', order.uuid]">
+      <div class="order-header">
+        <div class="order-number">{{ order.order_number }}</div>
+        <span class="status-badge" [ngClass]="getStatusClass(order.status)">
+          {{ getStatusLabel(order.status) }}
+        </span>
+      </div>
+
+      <div class="order-body">
+        <div class="order-info">
+          <div class="info-row">
+            <mat-icon class="info-icon">calendar_today</mat-icon>
+            <span>{{ order.created_at | date:'d MMM yyyy, HH:mm' }}</span>
+          </div>
+          <div class="info-row">
+            <mat-icon class="info-icon">shopping_bag</mat-icon>
+            <span>{{ order.items.length }} artículo{{ order.items.length !== 1 ? 's' : '' }}</span>
+          </div>
+          <div class="info-row">
+            <mat-icon class="info-icon">local_shipping</mat-icon>
+            <span>{{ order.delivery_method === 'envio_domicilio' ? 'Envío a domicilio' : 'Recolección en sucursal' }}</span>
+          </div>
+        </div>
+
+        <div class="order-total">
+          <span class="total-label">Total</span>
+          <span class="total-amount">{{ order.total | currency:'MXN':'symbol-narrow' }}</span>
+        </div>
+      </div>
+
+      <div class="order-footer">
+        <span class="view-detail">Ver detalle <mat-icon class="arrow-icon">chevron_right</mat-icon></span>
+      </div>
+    </div>
+
+    <!-- Paginator -->
+    <mat-paginator
+      [length]="totalOrders"
+      [pageSize]="pageSize"
+      [pageIndex]="currentPage - 1"
+      [pageSizeOptions]="[5, 10, 20]"
+      (page)="onPageChange($event)"
+      class="orders-paginator">
+    </mat-paginator>
+  </div>
+</div>

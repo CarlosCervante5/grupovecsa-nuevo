@@ -2,32 +2,15 @@ import { Component } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
-
-// Animations
 import Swal from 'sweetalert2';
-
-// Services
 import { AuthService } from '../../services/auth.service';
-
-// Interfaces
 import { LoginResponse } from '@interfaces/auth.interface';
+import { BoutiqueCartService } from 'src/app/boutique/services/boutique-cart.service';
 
 @Component({
     selector: 'app-login',
     templateUrl: './login.component.html',
-    styles: [`
-    .container{
-      margin-top:73px;
-    }
-
-    mat-form-field { 
-      width: 100%;
-    }
-
-    button {
-      width: 80%;
-    }
-  `],
+    styleUrls: ['./login.component.css'],
     standalone: false
 })
 
@@ -44,7 +27,8 @@ export class LoginComponent {
         private _authService: AuthService,
         private _formBuilder: UntypedFormBuilder, 
         private _router: Router,
-        private titleService: Title
+        private titleService: Title,
+        private _cartService: BoutiqueCartService
     ) { 
         // Set Title View
         this.titleService.setTitle('BMW VECSA HIDALGO');
@@ -101,12 +85,27 @@ export class LoginComponent {
                 localStorage.setItem('user', JSON.stringify( loginResponse.data.user));
                 localStorage.setItem('role', loginResponse.data.role);
                 localStorage.setItem('profile', JSON.stringify( loginResponse.data.profile));
-
-                if( loginResponse.data.role === 'client'){
-                    this._router.navigate(['/auth/mi-cuenta'])
-                } else {
-                    this._router.navigate(['/admin', loginResponse.data.role])
+                if (loginResponse.data.permissions) {
+                  localStorage.setItem('permissions', JSON.stringify(loginResponse.data.permissions));
                 }
+
+                // Sync guest cart to server, then navigate
+                this._cartService.syncLocalCartToServer().subscribe({
+                  next: () => {
+                    if( loginResponse.data.role === 'client'){
+                        this._router.navigate(['/auth/mi-cuenta'])
+                    } else {
+                        this._router.navigate(['/admin', loginResponse.data.role])
+                    }
+                  },
+                  error: () => {
+                    if( loginResponse.data.role === 'client'){
+                        this._router.navigate(['/auth/mi-cuenta'])
+                    } else {
+                        this._router.navigate(['/admin', loginResponse.data.role])
+                    }
+                  }
+                });
 
             },
             error: ( errorResponse ) => {

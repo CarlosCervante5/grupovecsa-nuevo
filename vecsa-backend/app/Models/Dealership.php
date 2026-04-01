@@ -86,4 +86,9 @@ class Dealership extends Model
     {
         return $this->hasMany(Vehicle::class, 'dealership_id');
     }
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class, env('DB_TABLE_PREFIX', '') . 'dealership_user', 'dealership_id', 'user_id');
+    }
 }

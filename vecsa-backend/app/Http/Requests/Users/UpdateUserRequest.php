@@ -26,7 +26,6 @@ class UpdateUserRequest extends FormRequest
             'user_uuid' => [
                 'required',
                 'string',
-                'uuid',
                 'exists:users,uuid',
             ],
             'name' => 'sometimes|required|string|max:255',
@@ -41,8 +40,8 @@ class UpdateUserRequest extends FormRequest
             'phone_1' => 'nullable|string|max:20',
             'phone_2' => 'nullable|string|max:20',
             'gender' => 'nullable|in:male,female,H,M',
-            'location' => 'required|string|max:20',
-            'role_name' => 'required|string|max:255',
+            'location' => 'nullable|string|max:20',
+            'role_name' => 'sometimes|required|string|max:255',
             'password' => [
                 'nullable',
                 'string',

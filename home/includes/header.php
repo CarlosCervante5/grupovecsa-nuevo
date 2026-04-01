@@ -8,6 +8,13 @@
 if (!isset($page_title)) $page_title = "Grupo VECSA";
 if (!isset($breadcrumb_title)) $breadcrumb_title = "";
 if (!isset($meta_description)) $meta_description = "Grupo VECSA - Distribuidor autorizado BMW y MINI en México";
+
+// Frontend base URL - local Angular dev vs production
+if (!isset($frontend_base)) {
+    $is_local = in_array($_SERVER['SERVER_NAME'], ['localhost', '127.0.0.1']);
+    $frontend_base = $is_local ? 'http://localhost:4200' : '';
+    $frontend_login = $frontend_base . ($is_local ? '/auth/iniciar-sesion' : '/inventory/auth/iniciar-sesion');
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -83,7 +90,7 @@ if (!isset($meta_description)) $meta_description = "Grupo VECSA - Distribuidor a
             
             <!-- Right Side Actions -->
             <div class="flex items-center space-x-4">
-                <a href="https://grupovecsa.com/inventory/auth/iniciar-sesion" target="_blank" class="hidden lg:block text-gray-700 hover:text-gray-900 text-sm font-medium">
+                <a href="<?php echo $frontend_login; ?>" class="hidden lg:block text-gray-700 hover:text-gray-900 text-sm font-medium">
                     Iniciar Sesión
                 </a>
                 
@@ -138,7 +145,7 @@ if (!isset($meta_description)) $meta_description = "Grupo VECSA - Distribuidor a
               <a href="#carcare" class="block text-white text-lg font-medium">Car Care</a>
               <a href="#promociones" class="block text-white text-lg font-medium">Promociones</a>
               <div class="pt-6 border-t border-white/10">
-                  <a href="https://grupovecsa.com/inventory/auth/iniciar-sesion" target="_blank" class="block w-full text-white border border-white/20 px-6 py-3 rounded-full font-medium transition-colors text-center">
+                  <a href="<?php echo $frontend_login; ?>" class="block w-full text-white border border-white/20 px-6 py-3 rounded-full font-medium transition-colors text-center">
                       Iniciar Sesión
                   </a>
               </div>

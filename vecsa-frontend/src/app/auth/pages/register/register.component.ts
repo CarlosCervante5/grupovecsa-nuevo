@@ -30,6 +30,11 @@ import { GralResponse } from '@interfaces/vehicle_data.interface';
 
 export class RegisterComponent {
 
+    // Step wizard
+    currentStep = 1;
+    totalSteps = 5;
+    stepLabels = ['Datos', 'Marca', 'Gustos', 'Tallas', 'Confirmar'];
+
     // References of Help
     public hide: boolean = true;
     public spinner: boolean = false;
@@ -576,6 +581,22 @@ export class RegisterComponent {
             
             next: ( quizzes: QuizzesData) => {
 
+                if (!quizzes.data || quizzes.data.length === 0) {
+                    this.tallas = false;
+                    this.quiz_active = false;
+                    this.affinities_active = false;
+                    this.clothes_gender = null as any;
+                    this.brand_quiz = null as any;
+                    this.accesories = [];
+                    this.motorrad_cards = [];
+                    this.bmw_cards = [];
+                    this.mini_cards = [];
+                    this.chevrolet_cards = [];
+                    this.chevrolet_questions = [];
+                    this.default_questions = [];
+                    return;
+                }
+
                 this.clothes_gender = quizzes.data[0];
 
                 this.gender =  (quizzes.data[0].selected_value == "undefined")? 'null':  quizzes.data[0].selected_value;
@@ -703,6 +724,38 @@ export class RegisterComponent {
         if( this.execute == 'yes' ){
           this.modal.nativeElement.style.display = "none";
         }    
+    }
+
+    // ── Step Navigation ──
+    nextStep(): void {
+      if (this.currentStep < this.totalSteps) {
+        this.currentStep++;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    prevStep(): void {
+      if (this.currentStep > 1) {
+        this.currentStep--;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    goToStep(step: number): void {
+      if (step >= 1 && step <= this.totalSteps) {
+        this.currentStep = step;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    get canGoNext(): boolean {
+      switch (this.currentStep) {
+        case 1: return this.form.valid && this.image_path !== 'assets/img/user.jpeg';
+        case 2: return this.statusBrand && !!this.gender;
+        case 3: return true;
+        case 4: return true;
+        default: return true;
+      }
     }
 
 }

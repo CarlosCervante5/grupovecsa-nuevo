@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef, ViewChild, HostListener, OnChanges, SimpleChanges, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild, HostListener, AfterViewInit, OnDestroy } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { FormControl } from '@angular/forms';
@@ -25,7 +25,7 @@ register();
     standalone: false
 })
 
-export class CompraTuAutoComponent implements OnInit, AfterViewInit{
+export class CompraTuAutoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   public dataImages:linksImage[] = [
     {
@@ -57,6 +57,7 @@ export class CompraTuAutoComponent implements OnInit, AfterViewInit{
   public ancho!: number;
   public anchoW!: number;
   public status: boolean = true;
+  public isMobile: boolean = false;
   @HostListener('window:resize', ['$event'])
     onResize(event: Event) {
       this.anchoW = window.innerWidth;
@@ -71,8 +72,10 @@ export class CompraTuAutoComponent implements OnInit, AfterViewInit{
       }
       if(this.anchoW <= 768){
         this.status = false;
+        this.isMobile = true;
       }else{
         this.status = true;
+        this.isMobile = false;
       }
     }
   
@@ -267,8 +270,10 @@ export class CompraTuAutoComponent implements OnInit, AfterViewInit{
     this.anchoW = window.innerWidth;
       if(this.anchoW <= 768){
         this.status = false;
+        this.isMobile = true;
       }else{
         this.status = true;
+        this.isMobile = false;
       }
     this._activatedRoute.params.subscribe(
       params => {
@@ -379,6 +384,8 @@ export class CompraTuAutoComponent implements OnInit, AfterViewInit{
     }
   }
 
+  ngOnDestroy(): void {}
+
   capitalizeFirstLetter(string:string):string {
     return string.charAt(0).toUpperCase() + string.slice(1);
   }
@@ -388,8 +395,12 @@ export class CompraTuAutoComponent implements OnInit, AfterViewInit{
   }
 
   scrollTop() {
-    var scrollElem = document.querySelector('#top');
-    scrollElem!.scrollIntoView();  
+    const drawerContent = document.querySelector('.mat-drawer-content') as HTMLElement;
+    if (drawerContent) {
+      drawerContent.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
 
   titleCase(str: string) {

@@ -1,0 +1,395 @@
+<div class="checkout-container">
+  <h1 class="checkout-title">Checkout</h1>
+
+  <!-- Loading -->
+  @if (isLoading) {
+    <div class="loading-container">
+      <div class="spinner"></div>
+    </div>
+  }
+
+  @if (!isLoading && cart) {
+
+    <!-- Guest identity step (only for non-logged-in users) -->
+    @if (!isLoggedIn && !guestConfirmed) {
+      <div class="guest-step">
+        <div class="guest-card">
+          <div class="guest-card-header">
+            <mat-icon class="guest-icon">person_outline</mat-icon>
+            <h2>¿Cómo quieres continuar?</h2>
+          </div>
+
+          <div class="guest-options">
+            <!-- Login option -->
+            <div class="guest-option-login">
+              <p class="guest-option-label">¿Ya tienes una cuenta?</p>
+              <a mat-flat-button color="primary" routerLink="/auth/login" [queryParams]="{ returnUrl: '/boutique/checkout' }" class="guest-login-btn">
+                <mat-icon>login</mat-icon>
+                Iniciar sesión
+              </a>
+              <p class="guest-option-hint">Tus pedidos quedarán guardados en tu historial.</p>
+            </div>
+
+            <div class="guest-divider">
+              <span>o</span>
+            </div>
+
+            <!-- Guest form -->
+            <div class="guest-option-form">
+              <p class="guest-option-label">Continuar como invitado</p>
+              <form [formGroup]="guestForm" class="guest-form">
+                <div class="field-group">
+                  <label class="field-label">Nombre completo</label>
+                  <input
+                    class="field-input"
+                    [class.invalid]="guestForm.get('guest_name')?.invalid && guestForm.get('guest_name')?.touched"
+                    formControlName="guest_name"
+                    type="text"
+                    placeholder="Tu nombre"
+                  />
+                  @if (guestForm.get('guest_name')?.hasError('required') && guestForm.get('guest_name')?.touched) {
+                    <span class="field-error">El nombre es requerido</span>
+                  }
+                </div>
+                <div class="field-group">
+                  <label class="field-label">Correo electrónico</label>
+                  <input
+                    class="field-input"
+                    [class.invalid]="guestForm.get('guest_email')?.invalid && guestForm.get('guest_email')?.touched"
+                    formControlName="guest_email"
+                    type="email"
+                    placeholder="tu@correo.com"
+                  />
+                  @if (guestForm.get('guest_email')?.hasError('required') && guestForm.get('guest_email')?.touched) {
+                    <span class="field-error">El correo es requerido</span>
+                  }
+                  @if (guestForm.get('guest_email')?.hasError('email') && guestForm.get('guest_email')?.touched) {
+                    <span class="field-error">Ingresa un correo válido</span>
+                  }
+                </div>
+                <button mat-flat-button color="primary" class="guest-continue-btn" (click)="confirmGuestIdentity()">
+                  Continuar como invitado
+                  <mat-icon>arrow_forward</mat-icon>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Main checkout layout (shown after identity confirmed) -->
+    @if (guestConfirmed) {
+      <div class="checkout-layout">
+      <!-- Left column: Steps -->
+      <div class="checkout-steps">
+
+        <!-- Step 1: Delivery Method -->
+        <section class="checkout-section">
+          <h2 class="section-title">
+            <mat-icon class="section-icon">local_shipping</mat-icon>
+            Método de entrega
+          </h2>
+
+          <mat-radio-group
+            [(ngModel)]="deliveryMethod"
+            (ngModelChange)="onDeliveryMethodChange()"
+            class="delivery-radio-group"
+          >
+            <mat-radio-button value="envio_domicilio" class="delivery-radio">
+              <span class="radio-label">Envío a domicilio</span>
+            </mat-radio-button>
+            <mat-radio-button value="recoleccion_sucursal" class="delivery-radio">
+              <span class="radio-label">Recolección en sucursal</span>
+            </mat-radio-button>
+          </mat-radio-group>
+
+          <!-- Shipping form (envío a domicilio) -->
+          @if (deliveryMethod === 'envio_domicilio') {
+            <div class="shipping-form-wrapper">
+              <form [formGroup]="shippingForm" class="shipping-form">
+                <div class="field-group">
+                  <label class="field-label">Nombre completo</label>
+                  <input
+                    class="field-input"
+                    [class.invalid]="shippingForm.get('shipping_name')?.invalid && shippingForm.get('shipping_name')?.touched"
+                    formControlName="shipping_name"
+                    type="text"
+                    placeholder="Nombre del destinatario"
+                  />
+                  @if (shippingForm.get('shipping_name')?.hasError('required') && shippingForm.get('shipping_name')?.touched) {
+                    <span class="field-error">El nombre es requerido</span>
+                  }
+                </div>
+
+                <div class="field-group">
+                  <label class="field-label">Dirección</label>
+                  <input
+                    class="field-input"
+                    [class.invalid]="shippingForm.get('shipping_address')?.invalid && shippingForm.get('shipping_address')?.touched"
+                    formControlName="shipping_address"
+                    type="text"
+                    placeholder="Calle, número, colonia"
+                  />
+                  @if (shippingForm.get('shipping_address')?.hasError('required') && shippingForm.get('shipping_address')?.touched) {
+                    <span class="field-error">La dirección es requerida</span>
+                  }
+                </div>
+
+                <div class="form-row">
+                  <div class="field-group">
+                    <label class="field-label">Ciudad</label>
+                    <input
+                      class="field-input"
+                      [class.invalid]="shippingForm.get('shipping_city')?.invalid && shippingForm.get('shipping_city')?.touched"
+                      formControlName="shipping_city"
+                      type="text"
+                      placeholder="Ciudad"
+                    />
+                    @if (shippingForm.get('shipping_city')?.hasError('required') && shippingForm.get('shipping_city')?.touched) {
+                      <span class="field-error">La ciudad es requerida</span>
+                    }
+                  </div>
+
+                  <div class="field-group">
+                    <label class="field-label">Estado</label>
+                    <input
+                      class="field-input"
+                      [class.invalid]="shippingForm.get('shipping_state')?.invalid && shippingForm.get('shipping_state')?.touched"
+                      formControlName="shipping_state"
+                      type="text"
+                      placeholder="Estado"
+                    />
+                    @if (shippingForm.get('shipping_state')?.hasError('required') && shippingForm.get('shipping_state')?.touched) {
+                      <span class="field-error">El estado es requerido</span>
+                    }
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="field-group">
+                    <label class="field-label">Código Postal</label>
+                    <input
+                      class="field-input"
+                      [class.invalid]="shippingForm.get('shipping_zip')?.invalid && shippingForm.get('shipping_zip')?.touched"
+                      formControlName="shipping_zip"
+                      type="text"
+                      maxlength="5"
+                      placeholder="00000"
+                    />
+                    @if (shippingForm.get('shipping_zip')?.hasError('required') && shippingForm.get('shipping_zip')?.touched) {
+                      <span class="field-error">El CP es requerido</span>
+                    }
+                    @if (shippingForm.get('shipping_zip')?.hasError('pattern') && shippingForm.get('shipping_zip')?.touched) {
+                      <span class="field-error">Ingresa 5 dígitos</span>
+                    }
+                  </div>
+
+                  <div class="field-group">
+                    <label class="field-label">Teléfono</label>
+                    <input
+                      class="field-input"
+                      [class.invalid]="shippingForm.get('shipping_phone')?.invalid && shippingForm.get('shipping_phone')?.touched"
+                      formControlName="shipping_phone"
+                      type="tel"
+                      maxlength="10"
+                      placeholder="10 dígitos"
+                    />
+                    @if (shippingForm.get('shipping_phone')?.hasError('required') && shippingForm.get('shipping_phone')?.touched) {
+                      <span class="field-error">El teléfono es requerido</span>
+                    }
+                    @if (shippingForm.get('shipping_phone')?.hasError('pattern') && shippingForm.get('shipping_phone')?.touched) {
+                      <span class="field-error">Ingresa 10 dígitos</span>
+                    }
+                  </div>
+                </div>
+              </form>
+
+              <button
+                mat-flat-button
+                color="primary"
+                class="quote-btn"
+                (click)="getShippingQuotes()"
+                [disabled]="shippingForm.invalid || loadingQuotes"
+              >
+                @if (loadingQuotes) {
+                  <div class="spinner spinner-sm spinner-white"></div>
+                } @else {
+                  Cotizar envío
+                }
+              </button>
+
+              <!-- Shipping options -->
+              @if (quotesLoaded) {
+                @if (shippingQuotes.length === 0) {
+                  <p class="no-quotes">No se encontraron opciones de envío para esta dirección.</p>
+                } @else {
+                  <div class="shipping-options">
+                    <h3 class="options-title">Opciones de envío</h3>
+                    @for (quote of shippingQuotes; track quote.carrier + quote.service) {
+                      <div
+                        class="shipping-option"
+                        [class.selected]="selectedQuote === quote"
+                        (click)="selectQuote(quote)"
+                      >
+                        <div class="option-info">
+                          <span class="option-carrier">{{ quote.carrier }}</span>
+                          <span class="option-service">{{ quote.service }}</span>
+                          <span class="option-days">{{ quote.estimated_days }} días hábiles</span>
+                        </div>
+                        <span class="option-price">{{ quote.price | currency:'MXN':'symbol-narrow' }}</span>
+                      </div>
+                    }
+                  </div>
+                }
+              }
+            </div>
+          }
+
+          <!-- Dealership selection (recolección en sucursal) -->
+          @if (deliveryMethod === 'recoleccion_sucursal') {
+            <div class="dealership-wrapper">
+              @if (loadingDealerships) {
+                <div class="loading-inline">
+                  <div class="spinner spinner-sm"></div>
+                  <span>Cargando sucursales...</span>
+                </div>
+              } @else {
+                <h3 class="options-title">Selecciona una sucursal</h3>
+                @for (d of dealerships; track d.name) {
+                  <div
+                    class="dealership-option"
+                    [class.selected]="selectedDealership === d"
+                    (click)="selectDealership(d)"
+                  >
+                    <mat-icon class="dealership-icon">store</mat-icon>
+                    <div class="dealership-info">
+                      <span class="dealership-name">{{ d.name }}</span>
+                      <span class="dealership-location">{{ d.location }}</span>
+                    </div>
+                  </div>
+                }
+                @if (dealerships.length === 0) {
+                  <p class="no-quotes">No hay sucursales disponibles.</p>
+                }
+              }
+            </div>
+          }
+        </section>
+
+        <!-- Step 2: Payment Method -->
+        <section class="checkout-section">
+          <h2 class="section-title">
+            <mat-icon class="section-icon">payment</mat-icon>
+            Método de pago
+          </h2>
+
+          <mat-radio-group [(ngModel)]="paymentMethod" class="payment-radio-group">
+            <mat-radio-button value="stripe" class="payment-radio">
+              <div class="radio-content">
+                <mat-icon class="payment-icon">credit_card</mat-icon>
+                <span class="radio-label">Tarjeta de crédito / débito</span>
+              </div>
+            </mat-radio-button>
+            <mat-radio-button value="transferencia" class="payment-radio">
+              <div class="radio-content">
+                <mat-icon class="payment-icon">account_balance</mat-icon>
+                <span class="radio-label">Transferencia bancaria</span>
+              </div>
+            </mat-radio-button>
+            <mat-radio-button value="sucursal" class="payment-radio">
+              <div class="radio-content">
+                <mat-icon class="payment-icon">storefront</mat-icon>
+                <span class="radio-label">Pago en sucursal</span>
+              </div>
+            </mat-radio-button>
+          </mat-radio-group>
+
+          @if (paymentMethod === 'transferencia') {
+            <div class="payment-note">
+              <mat-icon>info</mat-icon>
+              <span>Recibirás los datos bancarios para realizar la transferencia después de confirmar tu pedido.</span>
+            </div>
+          }
+          @if (paymentMethod === 'sucursal') {
+            <div class="payment-note">
+              <mat-icon>info</mat-icon>
+              <span>Podrás realizar el pago en cualquiera de nuestras sucursales. Tu pedido se reservará por 72 horas.</span>
+            </div>
+          }
+        </section>
+      </div>
+
+      <!-- Right column: Order Summary -->
+      <aside class="order-summary">
+        <h2 class="summary-title">Resumen del pedido</h2>
+
+        <div class="summary-items">
+          @for (item of cart.items; track item.uuid) {
+            <div class="summary-item">
+              <img [src]="getItemImage(item)" [alt]="item.product.name" class="summary-item-img" />
+              <div class="summary-item-info">
+                <span class="summary-item-name">{{ item.product.name }}</span>
+                <span class="summary-item-qty">Cant: {{ item.quantity }}</span>
+              </div>
+              <span class="summary-item-price">{{ item.subtotal | currency:'MXN':'symbol-narrow' }}</span>
+            </div>
+          }
+        </div>
+
+        <div class="summary-divider"></div>
+
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <span>{{ subtotal | currency:'MXN':'symbol-narrow' }}</span>
+        </div>
+        <div class="summary-row">
+          <span>Envío</span>
+          <span>
+            @if (deliveryMethod === 'recoleccion_sucursal') {
+              Gratis
+            } @else if (selectedQuote) {
+              {{ shippingCost | currency:'MXN':'symbol-narrow' }}
+            } @else {
+              Por calcular
+            }
+          </span>
+        </div>
+
+        <div class="summary-divider"></div>
+
+        <div class="summary-row summary-total">
+          <span>Total</span>
+          <span>{{ total | currency:'MXN':'symbol-narrow' }}</span>
+        </div>
+
+        <button
+          mat-flat-button
+          color="primary"
+          class="confirm-btn"
+          [disabled]="!canConfirm || creatingOrder"
+          (click)="confirmOrder()"
+        >
+          @if (creatingOrder) {
+            <div class="spinner spinner-sm spinner-white"></div>
+          } @else {
+            Confirmar pedido
+          }
+        </button>
+
+        <a mat-button routerLink="/boutique/cart" class="back-btn">
+          <mat-icon>arrow_back</mat-icon>
+          Volver al carrito
+        </a>
+      </aside>
+    </div>
+
+    @if (showStripePayment && createdOrderUuid) {
+      <app-stripe-payment
+        [order_uuid]="createdOrderUuid"
+        (paymentSuccess)="onPaymentSuccess($event)"
+      ></app-stripe-payment>
+    }
+    } <!-- end guestConfirmed -->
+  }
+</div>

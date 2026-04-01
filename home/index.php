@@ -1,5 +1,36 @@
 <?php
-// Lógica de PHP podría ir aquí en el futuro (ej. manejo de sesiones, rutas, etc.)
+// API base URL - configurable per environment
+$api_base_url = 'http://localhost:8000';
+
+// Frontend base URL - local Angular dev vs production
+$is_local = in_array($_SERVER['SERVER_NAME'], ['localhost', '127.0.0.1']);
+$frontend_base = $is_local ? 'http://localhost:4200' : '';
+$frontend_login = $frontend_base . ($is_local ? '/auth/iniciar-sesion' : '/inventory/auth/iniciar-sesion');
+
+/**
+ * Helper: fetch data from the Laravel API via POST
+ * Returns decoded response data or empty array on failure
+ */
+function fetchFromApi($endpoint, $api_base_url) {
+    $url = rtrim($api_base_url, '/') . $endpoint;
+    $context = stream_context_create([
+        'http' => [
+            'method' => 'POST',
+            'header' => "Content-Type: application/json\r\n",
+            'timeout' => 5,
+            'ignore_errors' => true,
+        ],
+    ]);
+    $response = @file_get_contents($url, false, $context);
+    if ($response === false) {
+        return [];
+    }
+    $data = json_decode($response, true);
+    if (!is_array($data) || !isset($data['data'])) {
+        return [];
+    }
+    return $data['data'];
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -75,7 +106,7 @@
               
               <!-- Right Side Actions -->
               <div class="flex items-center space-x-4">
-                  <a href="https://grupovecsa.com/inventory/auth/iniciar-sesion" target="_blank" class="hidden lg:block text-white/80 hover:text-white text-sm font-medium">
+                  <a href="<?php echo $frontend_login; ?>" class="hidden lg:block text-white/80 hover:text-white text-sm font-medium">
                       Iniciar Sesión
                   </a>
                   
@@ -130,7 +161,7 @@
               <a href="#carcare" class="block text-white text-lg font-medium">Car Care</a>
               <a href="#promociones" class="block text-white text-lg font-medium">Promociones</a>
               <div class="pt-6 border-t border-white/10">
-                  <a href="https://grupovecsa.com/inventory/auth/iniciar-sesion" target="_blank" class="block w-full text-white border border-white/20 px-6 py-3 rounded-full font-medium transition-colors text-center">
+                  <a href="<?php echo $frontend_login; ?>" class="block w-full text-white border border-white/20 px-6 py-3 rounded-full font-medium transition-colors text-center">
                       Iniciar Sesión
                   </a>
               </div>
@@ -278,6 +309,49 @@
             </div>
         </div>
     </section>
+
+    <!-- Success Day Section -->
+    <?php
+    $testimonialsData = fetchFromApi('/api/home/testimonials', $api_base_url);
+    $activeTestimonials = $testimonialsData['testimonials'] ?? [];
+    // Map Angular asset paths to PHP asset paths
+    foreach ($activeTestimonials as &$t) {
+        if (isset($t['image_path'])) {
+            $t['image_path'] = str_replace('assets/images/home/', 'assets/images/', $t['image_path']);
+        }
+    }
+    unset($t);
+    ?>
+    <?php if (!empty($activeTestimonials)): ?>
+    <section id="success-day" class="py-20 bg-gray-900 overflow-hidden scroll-mt-20">
+      <div class="container mx-auto px-4 md:px-6 lg:px-8">
+        <div class="text-center mb-12">
+          <span class="inline-block bg-blue-600/20 text-blue-400 text-sm font-semibold px-4 py-1.5 rounded-full mb-4 tracking-wide uppercase">Success Day</span>
+          <h2 class="text-4xl font-bold text-white mb-4 font-condensed">Momentos que nos llenan de orgullo</h2>
+          <p class="text-xl text-gray-400 max-w-3xl mx-auto">Cada entrega es una historia de éxito. Conoce a nuestros clientes y sus nuevos compañeros de viaje.</p>
+        </div>
+
+        <div class="relative">
+          <button id="sd-prev" class="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white w-10 h-10 rounded-full flex items-center justify-center transition-colors -ml-2 md:ml-0" aria-label="Anterior">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+          </button>
+          <button id="sd-next" class="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white w-10 h-10 rounded-full flex items-center justify-center transition-colors -mr-2 md:mr-0" aria-label="Siguiente">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </button>
+
+          <div id="sd-track" class="flex gap-6 transition-transform duration-500 ease-out px-6 md:px-12">
+            <?php foreach ($activeTestimonials as $t): ?>
+            <div class="sd-card flex-shrink-0 w-72 md:w-80 rounded-2xl overflow-hidden group">
+              <img src="<?php echo htmlspecialchars($t['image_path'] ?? ''); ?>" alt="<?php echo htmlspecialchars($t['alt'] ?? ''); ?>" class="w-full aspect-[4/3] object-cover rounded-2xl group-hover:scale-105 transition-transform duration-500">
+            </div>
+            <?php endforeach; ?>
+          </div>
+        </div>
+
+        <div class="flex justify-center mt-12 gap-2" id="sd-dots"></div>
+      </div>
+    </section>
+    <?php endif; ?>
 
     <!-- Locations Section -->
     <section id="sucursales" class="py-20 bg-white scroll-mt-20">

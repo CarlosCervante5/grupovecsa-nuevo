@@ -39,6 +39,7 @@ export interface Data {
   user:  User;
   role: string;
   profile: CustomerProfile;
+  permissions?: string[];
 }
 
 export interface User {

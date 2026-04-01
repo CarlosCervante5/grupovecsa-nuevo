@@ -1,0 +1,10 @@
+{
+  "testimonials": [
+    { "id": 1, "image": "BMW_st.jpg", "alt": "Entrega BMW", "active": true, "order": 1 },
+    { "id": 2, "image": "MINI_st.jpg", "alt": "Entrega MINI", "active": true, "order": 2 },
+    { "id": 3, "image": "MOTO_st.jpg", "alt": "Entrega Motorrad", "active": true, "order": 3 },
+    { "id": 4, "image": "Bmw3.jpg", "alt": "Entrega BMW", "active": true, "order": 4 },
+    { "id": 5, "image": "Mini1.jpg", "alt": "Entrega MINI", "active": true, "order": 5 },
+    { "id": 6, "image": "Moto2.jpg", "alt": "Entrega Motorrad", "active": true, "order": 6 }
+  ]
+}

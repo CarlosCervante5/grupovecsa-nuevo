@@ -1,0 +1,39 @@
+<!-- Loading -->
+<div class="tab-loading" *ngIf="loading">
+  <div class="tab-spinner"></div>
+  <span>Cargando citas...</span>
+</div>
+
+<!-- Error -->
+<div class="tab-error" *ngIf="!loading && error">
+  <span class="material-icons tab-error-icon">error_outline</span>
+  <p>Error al cargar las citas. Intenta de nuevo.</p>
+  <button class="tab-retry-btn" (click)="retry()">Reintentar</button>
+</div>
+
+<!-- Empty -->
+<div class="tab-empty" *ngIf="!loading && !error && appointments.length === 0 && loaded">
+  <span class="material-icons tab-empty-icon">event_busy</span>
+  <p class="tab-empty-title">No tienes citas agendadas</p>
+  <p class="tab-empty-sub">Agenda una cita para tu próximo servicio</p>
+</div>
+
+<!-- Appointments List -->
+<div class="appointments-list" *ngIf="!loading && !error && appointments.length > 0">
+  <div class="appointment-card" *ngFor="let apt of appointments">
+    <div class="apt-icon-wrap">
+      <span class="material-icons apt-icon">{{ getTypeIcon(apt.appointment_type) }}</span>
+    </div>
+    <div class="apt-info">
+      <div class="apt-header">
+        <span class="apt-type">{{ getTypeLabel(apt.appointment_type) }}</span>
+        <span class="apt-date">{{ apt.appointment_scheduled_date | date:'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+      <p class="apt-dealership">{{ apt.dealership_name }}</p>
+      <p class="apt-vehicle" *ngIf="apt.vehicle_brandname || apt.vehicle_modelname">
+        {{ apt.vehicle_brandname }} {{ apt.vehicle_modelname }}
+        <span *ngIf="apt.vehicle_year"> · {{ apt.vehicle_year }}</span>
+      </p>
+    </div>
+  </div>
+</div>

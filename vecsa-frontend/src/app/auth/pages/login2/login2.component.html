@@ -1,120 +1,66 @@
-<nav-rewards></nav-rewards>
-<div class="container" style="max-width: 1140px;">
-    <div class="col-3">
-        <a class="text-decoration-none text-dark flecha" href="https://grupovecsa.com/" style="display: flex;">
-            <img src="assets/icons-fontawesome/circle-left-regular.svg" alt="flecha" width="20px" height="20px" style="padding-right: 3px;"><span>Regresar</span>
-        </a>
-    </div>
-    <div class="row align-items-center mt-3">
-        <div class="col-auto"></div>
-    
-        <div class="col-auto">
-            <h3 class="fw-bold titulo" >VECSA Rewards</h3>
-            <br>
-            <h6 class="fw-light texto" >Cada compra en nuestras tiendas y kilómetros recorridos en nuestras experiencias te generan puntos acumulables, los cuales podrás canjear en tu próxima compra, o en nuestras ventas especiales donde se multiplica su valor.</h6>
-            <hr>
-        </div>
-    
-        <div class="col-auto"></div>
+<div class="login-page">
+  <div class="login-card">
 
-    </div>
-    <div class="row align-items-center mt-3">
-        <div class="col-auto"></div>
-    
-        <div class="col-auto">
-            <br>
-            <h6 class="fw-light texto">Si ya te encuentras registrado ingresa tu usuario y contraseña para iniciar sesión, o regístrate y ¡comienza a ganar!</h6>
-            <div class="row mt-5 mb-5">
-                <div class="col-12 col-md-6 col-lg-6">
-                    <div class="col-12">
-                        <form [formGroup]="form" (ngSubmit)="onSubmit()">
-                            <div class="row mb-2">
-                                <div class="col-11 col-md-9 col-lg-10 mx-auto">
-                                    <mat-form-field appearance="outline">
-                                        <mat-label>Correo Electrónico</mat-label>
-                                        <input matInput type="email" placeholder="a@b.c" formControlName="email" required>
-                                        <mat-hint class="text-danger" *ngIf="emailInvalid">Ingrese un correo electrónico.
-                                        </mat-hint>
-                                    </mat-form-field>
-                                </div>
-                            </div>
-    
-                            <div class="row">
-                                <div class="col-11 col-md-9 col-lg-10 mx-auto">
-                                    <mat-form-field appearance="outline">
-                                        <mat-label>Contraseña</mat-label>
-                                        <input matInput [type]="hide ? 'password' : 'text'" placeholder="********"
-                                            formControlName="password" required>
-                                        <button mat-icon-button type="button" matSuffix (click)="hide = !hide">
-                                            <img [src]="hide ? 'assets/img/login/icono-ojo-abierto.png' : 'assets/img/login/icono-ojo-cerrado.png'"
-                                                alt="Icono de imagen" width="24" height="24">
-                                        </button>
-    
-                                    </mat-form-field>
-                                    <mat-hint class="text-danger">
-                                        <div class="row">
-                                            <div class="col-12">
-                                                <p *ngIf="passwordInvalid">La contraseña debe contener al menos una letra mayúscula [A-Z], una letra minúscula [a-z], un dígito [0-9], 
-                                                    y un carácter especial permitido: &#64; $ ! % * ? &.</p>
-                                            </div>
-                                            <div class="col-12">
-                                                <p *ngIf="passwordLength">La contraseña debe ser de minímo 8 a 32
-                                                    caracteres.</p>
-                                            </div>
-                                        </div>
-                                    </mat-hint>
-                                    <p>¿Olvidaste tu contraseña? <a class="abcars-color-hover text-decoration-none"
-                                            [routerLink]="['/auth/recuperar']">Recuperar</a></p>
-    
-                                </div>
-                            </div>
-    
-                            <div class="row">
-                                <div class="col-8 col-md-10 mx-auto  mt-3">
-                                    <button type="submit" [disabled]="form.invalid || spinner"
-                                        class="btn mt-3  mx-2 px-3 btn-log" > <!--[disabled]="form.invalid || spinner"-->
-                                        <span *ngIf="!spinner" >Iniciar</span> <!--*ngIf="!spinner"-->
-                                        <span *ngIf="spinner" class="spinner-border spinner-border-sm" role="status"
-                                            aria-hidden="true"></span> <!--*ngIf="spinner"-->
-                                    </button>
-                                    <!-- <p class="form-text mt-3">¿No tienes cuenta? <a class="abcars-color-hover text-decoration-none" [routerLink]="['/auth/registro']">Regístrate</a></p>        -->
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-                <div class="col-12 col-md-6 col-lg-6 registro">
-                    <div class="d-flex justify-content-start">
-                        <p  style="text-align: justify;">¿Aun no tienes usuario? </p>
-                        <br>
-                    </div>
-                    <button  [routerLink]="['/auth/registro']" class="btn mt-3  mx-2 px-3 btn-log">
-                        <span >Regístrate ahora</span>
-                    </button>
-                </div>
-            </div>
-            
-        </div>
-    
-        <div class="col-auto"></div>
+    <h1 class="login-title">Iniciar sesión</h1>
+    <p class="login-subtitle">VECSA Rewards</p>
 
-    </div>
-    <div class="mt-5">
-        <h6 class="fw-light texto">Encuentra en <b class="texto_negrita">VECSA BOUTIQUE</b> el accesorio perfecto para ti o para tu vehículo y obtén puntos recompensa por cada compra.</h6>
-        <div class="image-container">
-            <img class="background-image" src="assets/img/BOUTIQUE.webp" alt="">
-                <button class="overlay-button btn"><a href="https://vecsaboutique.com/"><span>Ir a la tienda</span></a></button>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="login-form">
+
+      <div class="field-group">
+        <label class="field-label">Correo electrónico</label>
+        <input
+          class="field-input"
+          [class.invalid]="emailInvalid"
+          type="email"
+          placeholder="tu@correo.com"
+          formControlName="email"
+        />
+        @if (emailInvalid) {
+          <span class="field-error">Ingresa un correo electrónico válido</span>
+        }
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Contraseña</label>
+        <div class="input-wrapper">
+          <input
+            class="field-input"
+            [class.invalid]="passwordInvalid || passwordLength"
+            [type]="hide ? 'password' : 'text'"
+            placeholder="••••••••"
+            formControlName="password"
+          />
+          <button type="button" class="toggle-password" (click)="hide = !hide">
+            <img [src]="hide ? 'assets/img/login/icono-ojo-abierto.png' : 'assets/img/login/icono-ojo-cerrado.png'"
+              alt="Mostrar/ocultar contraseña" width="20" height="20" />
+          </button>
         </div>
+        @if (passwordInvalid) {
+          <span class="field-error">La contraseña debe tener mayúscula, minúscula, número y carácter especial (&#64; $ ! % * ? &amp;)</span>
+        }
+        @if (passwordLength) {
+          <span class="field-error">La contraseña debe tener entre 8 y 32 caracteres</span>
+        }
+      </div>
+
+      <div class="login-links">
+        <a [routerLink]="['/auth/recuperar']" class="login-link">¿Olvidaste tu contraseña?</a>
+      </div>
+
+      <button type="submit" class="login-btn" [disabled]="form.invalid || spinner">
+        @if (spinner) {
+          <div class="spinner spinner-sm spinner-white"></div>
+        } @else {
+          Iniciar sesión
+        }
+      </button>
+
+    </form>
+
+    <div class="login-footer">
+      <span class="login-footer-text">¿No tienes cuenta?</span>
+      <a [routerLink]="['/auth/registro']" class="login-link login-link-bold">Regístrate</a>
     </div>
-    <div class="mt-5 mb-4">
-        <h6 class="fw-light texto">Vive una <b class="texto_negrita">VECSA EXPERIENCE</b> siendo parte de nuestros próximos eventos y acumula puntos por cada kilómetro recorrido con nosotros. </h6>
-        <div class="image-container">
-            <img class="background-image" src="assets/img/banner_login2.jpeg" alt="" style="transform: scaleX(-1);">
-                <button class="overlay-button btn"><a href="https://vecsaexperience.com/"><span>Más información</span></a></button>
-        </div>
-    </div>
+
+  </div>
 </div>
-
-<!--Cada compra en nuestras tiendas y kilómetros recorridos en nuestras experiencias te generan puntos acumulables, los cuales podrás canjear en tu próxima compra, o en nuestras ventas especiales donde se multiplica su valor.-->
-<!--Si ya te encuentras registrado ingresa tu usuario y contraseña para iniciar sesión, o regístrate y ¡comeinza a ganar!-->
-

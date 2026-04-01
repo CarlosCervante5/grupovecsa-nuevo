@@ -1,0 +1,113 @@
+<div class="testimonials-page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Testimonios</h1>
+      <p class="page-subtitle">{{ testimonials.length }} testimonios registrados</p>
+    </div>
+    <div class="header-actions">
+      <label class="action-btn primary-btn">
+        <input type="file" accept="image/jpeg,image/png,image/jpg,image/gif,image/webp"
+               (change)="onImageSelected($event)" style="display:none;" #fileInput />
+        <span class="material-icons">add_photo_alternate</span>
+        Agregar testimonio
+      </label>
+    </div>
+  </div>
+
+  <!-- Upload Form (inline card) -->
+  <div class="upload-card" *ngIf="showForm || imageFile">
+    <div class="upload-card-header">
+      <h3>Nuevo testimonio</h3>
+      <button class="action-btn" (click)="cancelForm()">
+        <span class="material-icons">close</span> Cancelar
+      </button>
+    </div>
+    <div class="upload-card-body">
+      <div class="upload-preview" *ngIf="imagePreview">
+        <img [src]="imagePreview" alt="Preview" class="preview-img" />
+      </div>
+      <div class="upload-fields">
+        <label class="field-label">Texto alternativo (opcional)</label>
+        <input type="text" class="field-input" [(ngModel)]="alt" placeholder="Descripción de la imagen" />
+      </div>
+      <button class="action-btn primary-btn save-btn" (click)="saveTestimonial()" [disabled]="saving || !imageFile">
+        <span class="material-icons">cloud_upload</span>
+        {{ saving ? 'Guardando...' : 'Guardar testimonio' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Cargando testimonios...</p>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap" *ngIf="!loading && testimonials.length > 0">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th class="th-num">#</th>
+          <th>Imagen</th>
+          <th>Descripción</th>
+          <th>Orden</th>
+          <th>Activo</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody cdkDropList (cdkDropListDropped)="drop($event)">
+        <tr *ngFor="let testimonial of testimonials; let i = index" cdkDrag>
+          <!-- Drag placeholder -->
+          <td *cdkDragPlaceholder colspan="6" class="drag-placeholder-row"></td>
+
+          <td class="cell-num">{{ i + 1 }}</td>
+          <td>
+            <img *ngIf="testimonial.image_path"
+                 [src]="testimonial.image_path"
+                 [alt]="testimonial.alt || 'Testimonio'"
+                 class="testimonial-thumb"
+                 cdkDragHandle />
+            <span *ngIf="!testimonial.image_path"
+                  class="material-icons thumb-placeholder">image</span>
+          </td>
+          <td class="cell-desc">{{ testimonial.alt || 'Sin descripción' }}</td>
+          <td class="cell-order">
+            <span class="order-badge">{{ testimonial.sort_id || i + 1 }}</span>
+          </td>
+          <td>
+            <span class="badge" [ngClass]="testimonial.active ? 'badge-active' : 'badge-inactive'">
+              {{ testimonial.active ? 'Activo' : 'Inactivo' }}
+            </span>
+          </td>
+          <td>
+            <div class="row-actions">
+              <button class="act-btn toggle"
+                      [class.active]="testimonial.active"
+                      (click)="toggleActive(testimonial)"
+                      [title]="testimonial.active ? 'Desactivar' : 'Activar'">
+                <span class="material-icons">{{ testimonial.active ? 'visibility' : 'visibility_off' }}</span>
+              </button>
+              <button class="act-btn drag-handle" cdkDragHandle title="Arrastrar para reordenar">
+                <span class="material-icons">drag_indicator</span>
+              </button>
+              <button class="act-btn delete" (click)="deleteTestimonial(testimonial)" title="Eliminar">
+                <span class="material-icons">delete</span>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Empty state -->
+  <div class="empty-state" *ngIf="!loading && testimonials.length === 0 && !showForm && !imageFile">
+    <span class="material-icons">photo_library</span>
+    <p>No hay testimonios registrados</p>
+    <span class="empty-hint">Agrega el primer testimonio usando el botón de arriba</span>
+  </div>
+
+</div>

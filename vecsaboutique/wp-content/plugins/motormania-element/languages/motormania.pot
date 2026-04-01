@@ -1,0 +1,634 @@
+#, fuzzy
+msgid ""
+msgstr ""
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+"Project-Id-Version: MotorMania Element\n"
+"POT-Creation-Date: 2023-10-26 10:37+0600\n"
+"PO-Revision-Date: 2023-10-26 10:37+0600\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.2\n"
+"X-Poedit-Basepath: ..\n"
+"X-Poedit-Flags-xgettext: --add-comments=translators:\n"
+"X-Poedit-WPHeader: motormania-element.php\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
+"esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;_n_noop:1,2;"
+"_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPathExcluded-0: *.js\n"
+
+#: inc/ajax-woo-products-select-search.php:5
+#: inc/ajax-woo-products-select-search.php:31
+msgid "Select"
+msgstr ""
+
+#: inc/elementor/elementor.php:57
+msgid "MotorMania Elements"
+msgstr ""
+
+#: inc/elementor/widgets/widget-accordion.php:14
+#: inc/elementor/widgets/widget-accordion.php:30
+msgid "Accordion"
+msgstr ""
+
+#: inc/elementor/widgets/widget-accordion.php:38
+msgid "Accordion Style"
+msgstr ""
+
+#: inc/elementor/widgets/widget-accordion.php:42
+#: inc/elementor/widgets/widget-banner.php:42
+#: inc/elementor/widgets/widget-product-categories.php:41
+#: inc/elementor/widgets/widget-products.php:42
+msgid "Style 1"
+msgstr ""
+
+#: inc/elementor/widgets/widget-accordion.php:43
+#: inc/elementor/widgets/widget-banner.php:43
+#: inc/elementor/widgets/widget-product-categories.php:42
+#: inc/elementor/widgets/widget-products.php:43
+msgid "Style 2"
+msgstr ""
+
+#: inc/elementor/widgets/widget-accordion.php:44
+msgid "Style 3"
+msgstr ""
+
+#: inc/elementor/widgets/widget-accordion.php:45
+#: inc/mega-menu/mega-menu-walker.php:33
+msgid "None"
+msgstr ""
+
+#: inc/elementor/widgets/widget-accordion.php:53
+msgid "Collapsed Icon"
+msgstr ""
+
+#: inc/elementor/widgets/widget-accordion.php:65
+msgid "Expanded Icon"
+msgstr ""
+
+#: inc/elementor/widgets/widget-accordion.php:78
+#: inc/elementor/widgets/widget-ad.php:98
+#: inc/elementor/widgets/widget-banner.php:62
+#: inc/elementor/widgets/widget-counter.php:78
+#: inc/elementor/widgets/widget-iconbox.php:44
+#: inc/elementor/widgets/widget-products-carousel.php:50
+#: inc/elementor/widgets/widget-slider-banner.php:63
+msgid "Title"
+msgstr ""
+
+#: inc/elementor/widgets/widget-accordion.php:85
+#: inc/elementor/widgets/widget-iconbox.php:52
+msgid "Text"
+msgstr ""
+
+#: inc/elementor/widgets/widget-accordion.php:94
+msgid "Accordion list"
+msgstr ""
+
+#: inc/elementor/widgets/widget-accordion.php:99
+msgid "How can i get help by motormania?"
+msgstr ""
+
+#: inc/elementor/widgets/widget-accordion.php:100
+#: inc/elementor/widgets/widget-accordion.php:104
+#: inc/elementor/widgets/widget-accordion.php:108
+msgid ""
+"Lorem ipsum dolor sit amet, vix an natum labitur eleifd, mel am laoreet "
+"menandri. Ei justo complectitur duo. Ei mundi solet utos soletu possit quo. "
+"Sea cu justo laudem."
+msgstr ""
+
+#: inc/elementor/widgets/widget-accordion.php:103
+msgid "What about loan programs & after bank loan advantage?"
+msgstr ""
+
+#: inc/elementor/widgets/widget-accordion.php:107
+msgid "How can i opent new account?"
+msgstr ""
+
+#: inc/elementor/widgets/widget-ad.php:14
+#: inc/elementor/widgets/widget-ad.php:30
+msgid "Ad Banner"
+msgstr ""
+
+#: inc/elementor/widgets/widget-ad.php:38
+msgid "Layout"
+msgstr ""
+
+#: inc/elementor/widgets/widget-ad.php:42
+msgid "Horizontal"
+msgstr ""
+
+#: inc/elementor/widgets/widget-ad.php:43
+msgid "Vertical"
+msgstr ""
+
+#: inc/elementor/widgets/widget-ad.php:51
+msgid "Alignment"
+msgstr ""
+
+#: inc/elementor/widgets/widget-ad.php:55
+#: inc/elementor/widgets/widget-button.php:59
+msgid "Left"
+msgstr ""
+
+#: inc/elementor/widgets/widget-ad.php:59
+#: inc/elementor/widgets/widget-button.php:58
+msgid "Center"
+msgstr ""
+
+#: inc/elementor/widgets/widget-ad.php:63
+#: inc/elementor/widgets/widget-button.php:60
+msgid "Right"
+msgstr ""
+
+#: inc/elementor/widgets/widget-ad.php:75
+msgid "Padding"
+msgstr ""
+
+#: inc/elementor/widgets/widget-ad.php:87
+#: inc/elementor/widgets/widget-slider-banner.php:40
+msgid "Choose Image"
+msgstr ""
+
+#: inc/elementor/widgets/widget-ad.php:100
+msgid "Body Parts"
+msgstr ""
+
+#: inc/elementor/widgets/widget-ad.php:107
+#: inc/elementor/widgets/widget-banner.php:83
+#: inc/elementor/widgets/widget-slider-banner.php:73
+msgid "Description"
+msgstr ""
+
+#: inc/elementor/widgets/widget-ad.php:109
+msgid "For Any Vehicle"
+msgstr ""
+
+#: inc/elementor/widgets/widget-ad.php:116
+#: inc/elementor/widgets/widget-banner.php:92
+#: inc/elementor/widgets/widget-iconbox.php:61
+#: inc/elementor/widgets/widget-slider-banner.php:111
+#: inc/elementor/widgets/widget-testimonials.php:38
+msgid "Text Color"
+msgstr ""
+
+#: inc/elementor/widgets/widget-ad.php:128
+msgid "Link Text"
+msgstr ""
+
+#: inc/elementor/widgets/widget-ad.php:130
+#: inc/elementor/widgets/widget-ad.php:154
+msgid "Accessories"
+msgstr ""
+
+#: inc/elementor/widgets/widget-ad.php:136
+msgid "Link URL"
+msgstr ""
+
+#: inc/elementor/widgets/widget-ad.php:145
+msgid "Links"
+msgstr ""
+
+#: inc/elementor/widgets/widget-ad.php:158
+msgid "Timing Belts"
+msgstr ""
+
+#: inc/elementor/widgets/widget-ad.php:162
+msgid "Engine Mounts"
+msgstr ""
+
+#: inc/elementor/widgets/widget-ad.php:173
+#: inc/elementor/widgets/widget-button.php:14
+#: inc/elementor/widgets/widget-button.php:30
+msgid "Button"
+msgstr ""
+
+#: inc/elementor/widgets/widget-ad.php:175
+#: inc/elementor/widgets/widget-banner.php:162
+msgid "Shop Now"
+msgstr ""
+
+#: inc/elementor/widgets/widget-ad.php:182
+#: inc/elementor/widgets/widget-banner.php:172
+#: inc/elementor/widgets/widget-button.php:45
+msgid "Button URL"
+msgstr ""
+
+#: inc/elementor/widgets/widget-ajax-search.php:14
+#: inc/elementor/widgets/widget-ajax-search.php:30
+#: inc/elementor/widgets/widget-ajax-search.php:44
+#: inc/elementor/widgets/widget-banner.php:100
+#: inc/elementor/widgets/widget-banner.php:241
+#: inc/elementor/widgets/widget-banner.php:307
+msgid "Search"
+msgstr ""
+
+#: inc/elementor/widgets/widget-banner.php:14
+#: inc/elementor/widgets/widget-banner.php:30
+msgid "Search Banner"
+msgstr ""
+
+#: inc/elementor/widgets/widget-banner.php:38
+#: inc/elementor/widgets/widget-product-categories.php:37
+#: inc/elementor/widgets/widget-products.php:38
+msgid "Style"
+msgstr ""
+
+#: inc/elementor/widgets/widget-banner.php:51
+msgid "Banner image"
+msgstr ""
+
+#: inc/elementor/widgets/widget-banner.php:64
+msgid "Find Parts For Your Vehicle"
+msgstr ""
+
+#: inc/elementor/widgets/widget-banner.php:71
+msgid "Colored Title"
+msgstr ""
+
+#: inc/elementor/widgets/widget-banner.php:73
+msgid "Your Vehicle"
+msgstr ""
+
+#: inc/elementor/widgets/widget-banner.php:85
+msgid "Over hundreds of brands and tens of thousands of parts"
+msgstr ""
+
+#: inc/elementor/widgets/widget-banner.php:102
+#: inc/elementor/widgets/widget-button.php:70
+msgid "On"
+msgstr ""
+
+#: inc/elementor/widgets/widget-banner.php:103
+#: inc/elementor/widgets/widget-button.php:71
+msgid "Off"
+msgstr ""
+
+#: inc/elementor/widgets/widget-banner.php:112
+msgid "Select One"
+msgstr ""
+
+#: inc/elementor/widgets/widget-banner.php:114
+msgid "Riding Style"
+msgstr ""
+
+#: inc/elementor/widgets/widget-banner.php:124
+msgid "Select Two"
+msgstr ""
+
+#: inc/elementor/widgets/widget-banner.php:126
+msgid "Model"
+msgstr ""
+
+#: inc/elementor/widgets/widget-banner.php:136
+msgid "Select Three"
+msgstr ""
+
+#: inc/elementor/widgets/widget-banner.php:138
+msgid "Year"
+msgstr ""
+
+#: inc/elementor/widgets/widget-banner.php:148
+msgid "Select Four"
+msgstr ""
+
+#: inc/elementor/widgets/widget-banner.php:150
+msgid "Brand"
+msgstr ""
+
+#: inc/elementor/widgets/widget-banner.php:160
+#: inc/elementor/widgets/widget-button.php:37
+msgid "Button Text"
+msgstr ""
+
+#: inc/elementor/widgets/widget-blog.php:13
+msgid "Latest Blog"
+msgstr ""
+
+#: inc/elementor/widgets/widget-blog.php:28
+msgid "Blog"
+msgstr ""
+
+#: inc/elementor/widgets/widget-blog.php:36
+#: inc/elementor/widgets/widget-products.php:64
+msgid "Columns"
+msgstr ""
+
+#: inc/elementor/widgets/widget-blog.php:40
+#: inc/elementor/widgets/widget-products.php:68
+msgid "Column 1"
+msgstr ""
+
+#: inc/elementor/widgets/widget-blog.php:41
+#: inc/elementor/widgets/widget-products.php:69
+msgid "Column 2"
+msgstr ""
+
+#: inc/elementor/widgets/widget-blog.php:42
+#: inc/elementor/widgets/widget-products.php:70
+msgid "Column 3"
+msgstr ""
+
+#: inc/elementor/widgets/widget-blog.php:43
+#: inc/elementor/widgets/widget-products.php:71
+msgid "Column 4"
+msgstr ""
+
+#: inc/elementor/widgets/widget-blog.php:44
+#: inc/elementor/widgets/widget-products.php:72
+msgid "Column 6"
+msgstr ""
+
+#: inc/elementor/widgets/widget-blog.php:45
+#: inc/elementor/widgets/widget-products.php:73
+msgid "Column 12"
+msgstr ""
+
+#: inc/elementor/widgets/widget-blog.php:53
+#: inc/elementor/widgets/widget-products-carousel.php:89
+#: inc/elementor/widgets/widget-products.php:96
+msgid "Number of Items"
+msgstr ""
+
+#: inc/elementor/widgets/widget-blog.php:71
+msgid "Order"
+msgstr ""
+
+#: inc/elementor/widgets/widget-blog.php:75
+#: inc/elementor/widgets/widget-products-carousel.php:135
+#: inc/elementor/widgets/widget-products.php:118
+msgid "Ascending"
+msgstr ""
+
+#: inc/elementor/widgets/widget-blog.php:76
+#: inc/elementor/widgets/widget-products-carousel.php:136
+#: inc/elementor/widgets/widget-products.php:119
+msgid "Descending"
+msgstr ""
+
+#: inc/elementor/widgets/widget-button.php:39
+msgid "Learn More"
+msgstr ""
+
+#: inc/elementor/widgets/widget-button.php:54
+msgid "Align"
+msgstr ""
+
+#: inc/elementor/widgets/widget-button.php:68
+msgid "border"
+msgstr ""
+
+#: inc/elementor/widgets/widget-countdown.php:14
+#: inc/elementor/widgets/widget-countdown.php:30
+msgid "Countdown"
+msgstr ""
+
+#: inc/elementor/widgets/widget-countdown.php:38
+msgid "Date"
+msgstr ""
+
+#: inc/elementor/widgets/widget-counter.php:14
+#: inc/elementor/widgets/widget-counter.php:30
+msgid "Counter"
+msgstr ""
+
+#: inc/elementor/widgets/widget-counter.php:38
+msgid "Icon"
+msgstr ""
+
+#: inc/elementor/widgets/widget-counter.php:51
+msgid "Icon Background"
+msgstr ""
+
+#: inc/elementor/widgets/widget-counter.php:60
+msgid "Icon Color"
+msgstr ""
+
+#: inc/elementor/widgets/widget-counter.php:69
+msgid "Count"
+msgstr ""
+
+#: inc/elementor/widgets/widget-counter.php:80
+msgid "Total Customers"
+msgstr ""
+
+#: inc/elementor/widgets/widget-iconbox.php:13
+#: inc/elementor/widgets/widget-iconbox.php:27
+msgid "Icon Box"
+msgstr ""
+
+#: inc/elementor/widgets/widget-iconbox.php:35
+msgid "Choose icon"
+msgstr ""
+
+#: inc/elementor/widgets/widget-iconbox.php:46
+msgid "Support 24/7"
+msgstr ""
+
+#: inc/elementor/widgets/widget-iconbox.php:54
+msgid "Call us anytime"
+msgstr ""
+
+#: inc/elementor/widgets/widget-product-categories.php:13
+#: inc/elementor/widgets/widget-product-categories.php:28
+msgid "Product categories"
+msgstr ""
+
+#: inc/elementor/widgets/widget-product-categories.php:50
+#: inc/elementor/widgets/widget-products-carousel.php:62
+#: inc/elementor/widgets/widget-products.php:81
+msgid "Category"
+msgstr ""
+
+#: inc/elementor/widgets/widget-product-categories.php:52
+#: inc/elementor/widgets/widget-products-carousel.php:64
+#: inc/elementor/widgets/widget-products.php:83
+msgid "Select a category"
+msgstr ""
+
+#: inc/elementor/widgets/widget-product-categories.php:65
+msgid "Number of Sub Categories"
+msgstr ""
+
+#: inc/elementor/widgets/widget-product-categories.php:131
+msgid "Show All"
+msgstr ""
+
+#: inc/elementor/widgets/widget-products-carousel.php:14
+msgid "Products Carousel"
+msgstr ""
+
+#: inc/elementor/widgets/widget-products-carousel.php:30
+msgid "product"
+msgstr ""
+
+#: inc/elementor/widgets/widget-products-carousel.php:38
+msgid "Title Show"
+msgstr ""
+
+#: inc/elementor/widgets/widget-products-carousel.php:40
+#: inc/elementor/widgets/widget-products-carousel.php:79
+msgid "Yes"
+msgstr ""
+
+#: inc/elementor/widgets/widget-products-carousel.php:41
+#: inc/elementor/widgets/widget-products-carousel.php:80
+msgid "No"
+msgstr ""
+
+#: inc/elementor/widgets/widget-products-carousel.php:52
+msgid "Featured Products"
+msgstr ""
+
+#: inc/elementor/widgets/widget-products-carousel.php:77
+msgid "Filter"
+msgstr ""
+
+#: inc/elementor/widgets/widget-products-carousel.php:107
+msgid "Slides To Show"
+msgstr ""
+
+#: inc/elementor/widgets/widget-products-carousel.php:119
+msgid "Slides To Scroll"
+msgstr ""
+
+#: inc/elementor/widgets/widget-products-carousel.php:131
+#: inc/elementor/widgets/widget-products.php:114
+msgid "order"
+msgstr ""
+
+#: inc/elementor/widgets/widget-products.php:14
+#: inc/elementor/widgets/widget-products.php:30
+msgid "Products"
+msgstr ""
+
+#: inc/elementor/widgets/widget-products.php:51
+msgid "Product By"
+msgstr ""
+
+#: inc/elementor/widgets/widget-products.php:54
+msgid "Top Rated"
+msgstr ""
+
+#: inc/elementor/widgets/widget-products.php:55
+msgid "On Sale"
+msgstr ""
+
+#: inc/elementor/widgets/widget-products.php:56
+msgid "Best Selling"
+msgstr ""
+
+#: inc/elementor/widgets/widget-slider-banner.php:14
+#: inc/elementor/widgets/widget-slider-banner.php:30
+msgid "Slider Banner"
+msgstr ""
+
+#: inc/elementor/widgets/widget-slider-banner.php:52
+msgid "Product Image"
+msgstr ""
+
+#: inc/elementor/widgets/widget-slider-banner.php:65
+msgid "Driving a motorcycle is like flying"
+msgstr ""
+
+#: inc/elementor/widgets/widget-slider-banner.php:75
+msgid ""
+"I really love to ride my motorcycle. When I want to just get away and be by "
+"myself and clear my head, that's what I do."
+msgstr ""
+
+#: inc/elementor/widgets/widget-slider-banner.php:82
+msgid "Button url"
+msgstr ""
+
+#: inc/elementor/widgets/widget-slider-banner.php:91
+msgid "Button text"
+msgstr ""
+
+#: inc/elementor/widgets/widget-slider-banner.php:93
+msgid "Watch Video"
+msgstr ""
+
+#: inc/elementor/widgets/widget-slider-banner.php:100
+msgid "Banners"
+msgstr ""
+
+#: inc/elementor/widgets/widget-testimonials.php:14
+#: inc/elementor/widgets/widget-testimonials.php:30
+msgid "Testimonials"
+msgstr ""
+
+#: inc/elementor/widgets/widget-testimonials.php:51
+msgid "Choose Photo"
+msgstr ""
+
+#: inc/elementor/widgets/widget-testimonials.php:62
+msgid "Name"
+msgstr ""
+
+#: inc/elementor/widgets/widget-testimonials.php:71
+msgid "Designation"
+msgstr ""
+
+#: inc/elementor/widgets/widget-testimonials.php:79
+msgid "Testimonial"
+msgstr ""
+
+#: inc/elementor/widgets/widget-testimonials.php:88
+msgid "Rating"
+msgstr ""
+
+#: inc/elementor/widgets/widget-testimonials.php:108
+msgid "Testimonial List"
+msgstr ""
+
+#: inc/mega-menu/mega-menu-walker.php:31
+msgid "Select Mega Menu"
+msgstr ""
+
+#: inc/widgets/widget-recent-posts.php:14
+msgid "motormania Blog Recent Post Here"
+msgstr ""
+
+#: inc/widgets/widget-recent-posts.php:18
+msgid "motormania : Recent Post"
+msgstr ""
+
+#: inc/widgets/widget-recent-posts.php:37
+msgid "Recent Posts"
+msgstr ""
+
+#: inc/widgets/widget-recent-posts.php:119
+msgid "Title:"
+msgstr ""
+
+#: inc/widgets/widget-recent-posts.php:124
+msgid "No. of Item of posts to show:"
+msgstr ""
+
+#. Plugin Name of the plugin/theme
+msgid "MotorMania Element"
+msgstr ""
+
+#. Plugin URI of the plugin/theme
+msgid "https://github.com/ThemeBing/motormania-element"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid ""
+"After install the motormania WordPress Theme, you must need to install this "
+"\"motormania Element\" first to get all functions of motormania WP Theme."
+msgstr ""
+
+#. Author of the plugin/theme
+msgid "ThemeBing"
+msgstr ""
+
+#. Author URI of the plugin/theme
+msgid "http://themeforest.net/user/ThemeBing"
+msgstr ""

@@ -28,7 +28,7 @@ class StoreEventRequest extends FormRequest
             'name' => 'required|max:255|string',
             'description' => 'nullable|max:1000|string',
             'segment_name' => 'nullable|max:255|string',
-            'type' => 'nullable|in:video,schedule,community,principal',
+            'type' => 'nullable|in:video,schedule,community,principal,experience',
             'page_status' => 'nullable|in:public,clients,exclusive,unique,primary,offer,time_limit,other',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,pdf|max:5128',
 

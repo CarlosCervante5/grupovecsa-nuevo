@@ -12,8 +12,8 @@ import { CustomerGuard } from './pages/account/guards/customer.guard';
 import { Login2Component } from './pages/login2/login2.component';
 
 const routes: Routes = [  
-    { path: 'iniciar-sesion', component: LoginComponent },
-    { path: 'login', component: Login2Component },
+    { path: 'iniciar-sesion', component: Login2Component },
+    { path: 'login', component: LoginComponent },
     { path: 'registro', component: RegisterComponent },
     { path: 'recuperar', component: RecoverAccountComponent },
     { path: 'restablecer/:token_user/:token_validate', component: PasswordResetComponent },

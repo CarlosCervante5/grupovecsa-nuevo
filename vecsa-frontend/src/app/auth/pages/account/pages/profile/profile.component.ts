@@ -33,6 +33,8 @@ export class ProfileComponent implements AfterViewInit, OnInit{
 
     @Output() reload = new EventEmitter<Boolean>();
 
+    activeTab: string = 'perfil';
+
     execute!:string;
     // Information User
     public name: string = '';
@@ -75,8 +77,6 @@ export class ProfileComponent implements AfterViewInit, OnInit{
         this.titleService.setTitle('Grupo Vecsa | Mi Cuenta');
         this.getPhotoUser ();
         register();
-        this.imagenes();
-        this.pointsRewards();
     }
 
 
@@ -85,14 +85,19 @@ export class ProfileComponent implements AfterViewInit, OnInit{
       this.cubetime();
       setTimeout(() => {
         this.initChart();
-      }, 1000);
+      }, 500);
 
     }
 
     ngOnInit(): void {
       this.userSessionStorage();
-      this. getPromotions();
+      this.pointsRewards();
       this.customerPosition();
+      // Load non-critical data after a short delay
+      setTimeout(() => {
+        this.getPromotions();
+        this.imagenes();
+      }, 300);
     }
 
     private userSessionStorage() {
@@ -311,6 +316,10 @@ export class ProfileComponent implements AfterViewInit, OnInit{
 
     floorArray(arr: number[]): number[] {
         return arr.map(num => Math.floor(num));
+    }
+
+    selectTab(tab: string): void {
+        this.activeTab = tab;
     }
 
     redeemPoints(): void {
