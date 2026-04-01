@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (Schema::hasTable(env('DB_TABLE_PREFIX')) { return; }
+        if (Schema::hasTable(env('DB_TABLE_PREFIX', '') . 'boutique_inventory_movements')) { return; }
         Schema::create(env('DB_TABLE_PREFIX', '') . 'boutique_inventory_movements', function (Blueprint $table) {
             $table->id();
             $table->uuid()->unique();
