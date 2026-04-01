@@ -11,7 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create(env('DB_TABLE_PREFIX', '') . 'request_logs', function (Blueprint $table) {
+        $table = env('DB_TABLE_PREFIX', '') . 'request_logs';
+        if (Schema::hasTable($table)) {
+            return;
+        }
+        Schema::create($table, function (Blueprint $table) {
             $table->id();
             $table->string('ip_address');
             $table->string('user_agent')->nullable();
