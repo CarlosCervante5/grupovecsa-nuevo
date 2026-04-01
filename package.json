@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "npm start",
-    "build": "ng build",
+    "build": "ng build --configuration=sandbox",
     "postbuild": "node ./src/assets/scripts/rename-build-files.js",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
