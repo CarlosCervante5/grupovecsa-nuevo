@@ -24,13 +24,13 @@ class VehicleInventorySeeder extends Seeder
             return;
         }
 
-        $x3Line = BrandLine::where('name', 'X3')->first();
-        $cooperLine = BrandLine::where('name', 'Cooper')->first();
-        if (!$x3Line || !$cooperLine) { $this->command->warn('Líneas no encontradas.'); return; }
+        $x3Line = BrandLine::whereRaw('LOWER(name) = ?', ['x3'])->first();
+        $cooperLine = BrandLine::whereRaw('LOWER(name) = ?', ['cooper'])->first();
+        if (!$x3Line || !$cooperLine) { $this->command->warn('Líneas no encontradas: x3=' . ($x3Line ? 'OK' : 'NULL') . ' cooper=' . ($cooperLine ? 'OK' : 'NULL')); return; }
 
         $x3Model = LineModel::whereRaw('LOWER(name) LIKE ?', ['%x3 30e%'])->first();
         $cooperModel = LineModel::whereRaw('LOWER(name) LIKE ?', ['%cooper c%'])->first();
-        if (!$x3Model || !$cooperModel) { $this->command->warn('Modelos no encontrados.'); return; }
+        if (!$x3Model || !$cooperModel) { $this->command->warn('Modelos no encontrados: x3Model=' . ($x3Model ? 'OK' : 'NULL') . ' cooperModel=' . ($cooperModel ? 'OK' : 'NULL')); return; }
 
         $suv = VehicleBody::where('name', 'SUV')->first();
         $hatchback = VehicleBody::where('name', 'Hatchback')->first();
@@ -83,10 +83,11 @@ class VehicleInventorySeeder extends Seeder
         ];
 
         foreach ($vehicles as $v) {
-            Vehicle::firstOrCreate(
+            $created = Vehicle::firstOrCreate(
                 ['vin' => $v['vin']],
                 array_merge($v, ['uuid' => Uuid::uuid4()->toString()])
             );
+            $this->command->info('Vehicle: ' . $v['name'] . ' - ' . ($created->wasRecentlyCreated ? 'CREATED' : 'EXISTS'));
         }
 
         $this->command->info('Inventario de vehículos creado exitosamente!');
