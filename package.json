@@ -3,7 +3,7 @@
   "version": "1.1.1",
   "scripts": {
     "ng": "ng",
-    "start": "npm start",
+    "start": "npx serve dist/vecsa-frontend/browser -s -l 3000",
     "build": "ng build --configuration=sandbox",
     "postbuild": "node ./src/assets/scripts/rename-build-files.js",
     "watch": "ng build --watch --configuration development",
@@ -38,6 +38,7 @@
     "postcss": "^8.5.6",
     "rxjs": "~7.6.0",
     "sweetalert2": "^11.4.8",
+    "serve": "^14.2.0",
     "swiper": "^9.4.1",
     "tailwindcss": "^3.4.17",
     "tslib": "^2.4.1",
