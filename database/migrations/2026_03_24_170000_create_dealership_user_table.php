@@ -10,6 +10,7 @@ return new class extends Migration
     {
         $prefix = env('DB_TABLE_PREFIX', '');
 
+        if (Schema::hasTable($prefix . 'dealership_user')) { return; }
         Schema::create($prefix . 'dealership_user', function (Blueprint $table) use ($prefix) {
             $table->id();
             $table->unsignedBigInteger('user_id');

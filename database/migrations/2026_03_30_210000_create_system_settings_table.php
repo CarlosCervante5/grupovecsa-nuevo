@@ -8,6 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable(env('DB_TABLE_PREFIX')) { return; }
         Schema::create(env('DB_TABLE_PREFIX', '') . 'system_settings', function (Blueprint $table) {
             $table->id();
             $table->string('key', 255)->unique();

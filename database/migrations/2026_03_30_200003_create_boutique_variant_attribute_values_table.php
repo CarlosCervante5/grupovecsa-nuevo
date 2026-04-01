@@ -8,6 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable(env('DB_TABLE_PREFIX')) { return; }
         Schema::create(env('DB_TABLE_PREFIX', '') . 'boutique_variant_attribute_values', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('variant_id');
