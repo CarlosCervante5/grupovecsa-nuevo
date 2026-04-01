@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (Schema::hasTable(env('DB_TABLE_PREFIX')) { return; }
+        if (Schema::hasTable(env('DB_TABLE_PREFIX', '') . 'boutique_product_variants')) { return; }
         Schema::create(env('DB_TABLE_PREFIX', '') . 'boutique_product_variants', function (Blueprint $table) {
             $table->id();
             $table->uuid()->unique();
