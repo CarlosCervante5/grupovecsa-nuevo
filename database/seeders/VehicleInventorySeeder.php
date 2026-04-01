@@ -30,7 +30,7 @@ class VehicleInventorySeeder extends Seeder
 
         $x3Model = LineModel::whereRaw('LOWER(name) LIKE ?', ['%x3 30e%'])->first();
         $cooperModel = LineModel::whereRaw('LOWER(name) LIKE ?', ['%cooper c%'])->first();
-        if (!$x3Model || !$cooperModel) { $this->command->warn('Modelos no encontrados: x3Model=' . ($x3Model ? 'OK' : 'NULL') . ' cooperModel=' . ($cooperModel ? 'OK' : 'NULL')); return; }
+        if (!$x3Model || !$cooperModel) { $this->command->warn('Modelos no encontrados: x3Model=' . ($x3Model ? $x3Model->id : 'NULL') . ' cooperModel=' . ($cooperModel ? $cooperModel->id : 'NULL')); return; }
 
         $suv = VehicleBody::where('name', 'SUV')->first();
         $hatchback = VehicleBody::where('name', 'Hatchback')->first();
