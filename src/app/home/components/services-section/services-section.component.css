@@ -1,0 +1,8 @@
+.service-card {
+  min-height: 200px;
+}
+
+/* Match PHP site's card gradient overlay */
+.card-gradient-overlay {
+  background: linear-gradient(to top, #111827 0%, rgb(17 24 39 / 77%) 50%, rgb(17 24 39 / 11%) 100%) !important;
+}

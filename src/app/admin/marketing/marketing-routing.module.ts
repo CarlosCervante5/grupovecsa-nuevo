@@ -2,10 +2,23 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { VehiclesComponent } from './pages/vehicles/vehicles.component';
+import { HomeSlidesComponent } from './pages/home-slides/home-slides.component';
+import { HomeTestimonialsComponent } from './pages/home-testimonials/home-testimonials.component';
+import { BoutiqueBannersComponent } from './pages/boutique-banners/boutique-banners.component';
+import { MarketingLayoutComponent } from './pages/layout/marketing-layout.component';
 
 const routes: Routes = [
-  { path: '', component: DashboardComponent },
-  { path: 'vehicles', component: VehiclesComponent },
+  {
+    path: '',
+    component: MarketingLayoutComponent,
+    children: [
+      { path: '', component: DashboardComponent },
+      { path: 'vehicles', component: VehiclesComponent },
+      { path: 'home-slides', component: HomeSlidesComponent },
+      { path: 'home-testimonials', component: HomeTestimonialsComponent },
+      { path: 'boutique-banners', component: BoutiqueBannersComponent },
+    ]
+  },
 ];
 
 @NgModule({

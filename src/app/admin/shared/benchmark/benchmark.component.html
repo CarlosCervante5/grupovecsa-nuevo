@@ -1,0 +1,195 @@
+<div class="bench-layout">
+  <div class="bench-header">
+    <button class="bench-back" (click)="goBack()">
+      <span class="material-icons">arrow_back</span>
+    </button>
+    <div>
+      <h1 class="bench-title">Benchmark ADS</h1>
+      <p class="bench-subtitle">Monitor de anuncios de competencia — BMW México</p>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="bench-tabs">
+    <button class="bench-tab" [class.active]="tab === 'scan'" (click)="tab = 'scan'">
+      <span class="material-icons">search</span> Escaneo
+    </button>
+    <button class="bench-tab" [class.active]="tab === 'history'" (click)="loadHistory()">
+      <span class="material-icons">history</span> Historial
+    </button>
+    <button class="bench-tab" [class.active]="tab === 'reports'" (click)="loadReports()">
+      <span class="material-icons">description</span> Reportes
+    </button>
+  </div>
+
+  @if (error) {
+    <div class="bench-error">
+      <span class="material-icons">error</span>
+      {{ error }}
+    </div>
+  }
+
+  <!-- SCAN TAB -->
+  @if (tab === 'scan') {
+    <div class="bench-controls">
+      <select class="bench-select" [(ngModel)]="method">
+        <option value="scraper">🌐 Web Scraper (sin API key)</option>
+        <option value="api">🔑 Meta API (requiere token)</option>
+      </select>
+      <button class="bench-btn-primary" (click)="startScan()" [disabled]="scanning">
+        @if (scanning) { <div class="bench-spinner-sm"></div> Escaneando... } @else {
+          <span class="material-icons">radar</span> Escanear Competidores
+        }
+      </button>
+      <button class="bench-btn-secondary" (click)="showCompetitors = !showCompetitors">
+        <span class="material-icons">group</span> Competidores ({{ competitors.length }})
+      </button>
+    </div>
+
+    @if (showCompetitors) {
+      <div class="bench-competitors-panel">
+        <div class="bench-comp-add">
+          <input type="text" class="bench-input" placeholder="Nombre del nuevo competidor..."
+            [(ngModel)]="newCompetitor" (keyup.enter)="addCompetitor()" />
+          <button class="bench-btn-primary" (click)="addCompetitor()">
+            <span class="material-icons">add</span> Agregar
+          </button>
+        </div>
+        <div class="bench-comp-list">
+          @for (c of competitors; track c) {
+            <div class="bench-comp-item">
+              <span>{{ c }}</span>
+              <button class="bench-btn-icon-delete" (click)="removeCompetitor(c)" title="Eliminar">
+                <span class="material-icons">close</span>
+              </button>
+            </div>
+          }
+          @if (competitors.length === 0) {
+            <p class="bench-empty-msg">No hay competidores configurados</p>
+          }
+        </div>
+      </div>
+    }
+
+    @if (loading) {
+      <div class="bench-loading"><div class="bench-spinner"></div><span>Cargando...</span></div>
+    }
+
+    <!-- Scan results summary -->
+    @if (scanResults?.summary) {
+      <div class="bench-stats">
+        <div class="bench-stat-card">
+          <div class="bench-stat-icon" style="background: #1877f215; color: #1877f2;">
+            <span class="material-icons">group</span>
+          </div>
+          <div class="bench-stat-info">
+            <span class="bench-stat-value">{{ scanResults.summary.length }}</span>
+            <span class="bench-stat-label">Competidores</span>
+          </div>
+        </div>
+        <div class="bench-stat-card">
+          <div class="bench-stat-icon" style="background: #05966915; color: #059669;">
+            <span class="material-icons">campaign</span>
+          </div>
+          <div class="bench-stat-info">
+            <span class="bench-stat-value">{{ totalAds }}</span>
+            <span class="bench-stat-label">Anuncios encontrados</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="bench-table-wrap">
+        <table class="bench-table">
+          <thead>
+            <tr><th>Competidor</th><th>Anuncios</th><th>Estado</th></tr>
+          </thead>
+          <tbody>
+            @for (r of scanResults.summary; track r.competitor) {
+              <tr>
+                <td>{{ r.competitor }}</td>
+                <td>{{ r.adsCount }}</td>
+                <td>
+                  @if (r.error) { <span class="bench-status-error">{{ r.error }}</span> }
+                  @else if (r.adsCount > 0) { <span class="bench-status-ok">✅ Activo</span> }
+                  @else { <span class="bench-status-none">Sin anuncios</span> }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    <!-- Ad detail cards -->
+    @if (scanDetail.length > 0) {
+      <h3 class="bench-section-title">Detalle de Anuncios</h3>
+      @for (result of scanDetail; track result.competitor) {
+        @if (result.ads?.length > 0) {
+          <h4 class="bench-competitor-title">{{ result.competitor }} ({{ result.adsFound || result.ads.length }} anuncios)</h4>
+          <div class="bench-ads-grid">
+            @for (ad of result.ads.slice(0, 10); track $index) {
+              <div class="bench-ad-card">
+                <div class="bench-ad-header">Anuncio #{{ $index + 1 }}</div>
+                @if (ad.images?.length > 0) {
+                  <div class="bench-thumb-grid">
+                    @for (img of ad.images.slice(0, 4); track img) {
+                      <img class="bench-thumb" [src]="img" loading="lazy" alt="Ad image"
+                        (error)="$any($event.target).style.display='none'" />
+                    }
+                    @if (ad.images.length > 4) {
+                      <div class="bench-thumb-more">+{{ ad.images.length - 4 }}</div>
+                    }
+                  </div>
+                }
+                <div class="bench-ad-text">{{ (ad.text || '').substring(0, 200) }}</div>
+                <div class="bench-ad-meta">
+                  <span>📷 {{ ad.imageCount || 0 }}</span>
+                  <span>🎥 {{ ad.videoCount || 0 }}</span>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      }
+    }
+  }
+
+  <!-- HISTORY TAB -->
+  @if (tab === 'history') {
+    @if (loading) { <div class="bench-loading"><div class="bench-spinner"></div><span>Cargando historial...</span></div> }
+    @if (!loading && history.length === 0) {
+      <div class="bench-empty"><span class="material-icons">inbox</span><p>No hay escaneos previos</p></div>
+    }
+    @if (!loading && history.length > 0) {
+      <div class="bench-list">
+        @for (h of history; track h.file) {
+          <div class="bench-list-item" (click)="viewHistoryDetail(h.file)">
+            <span class="material-icons">schedule</span>
+            <span class="bench-list-date">{{ h.date }}</span>
+            <span class="bench-list-file">{{ h.file }}</span>
+            <span class="material-icons bench-list-arrow">chevron_right</span>
+          </div>
+        }
+      </div>
+    }
+  }
+
+  <!-- REPORTS TAB -->
+  @if (tab === 'reports') {
+    @if (loading) { <div class="bench-loading"><div class="bench-spinner"></div><span>Cargando reportes...</span></div> }
+    @if (!loading && reports.length === 0) {
+      <div class="bench-empty"><span class="material-icons">inbox</span><p>No hay reportes generados</p></div>
+    }
+    @if (!loading && reports.length > 0) {
+      <div class="bench-list">
+        @for (r of reports; track r) {
+          <a class="bench-list-item bench-list-link" [href]="'http://localhost:3000/reports/' + r" target="_blank">
+            <span class="material-icons">{{ r.endsWith('.html') ? 'article' : 'table_chart' }}</span>
+            <span>{{ r }}</span>
+            <span class="material-icons bench-list-arrow">open_in_new</span>
+          </a>
+        }
+      </div>
+    }
+  }
+</div>

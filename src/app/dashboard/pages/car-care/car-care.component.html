@@ -1,176 +1,208 @@
-<nav-carcare></nav-carcare>
-<div class="container" style="max-width: 1140px;">
-    <div class="col-3">
-        <a class="text-decoration-none text-dark flecha" href="https://grupovecsa.com/" style="display: flex;">
-            <img src="assets/icons-fontawesome/circle-left-regular.svg" alt="flecha" width="20px" height="20px" style="padding-right: 3px;"><span>Regresar</span>
-        </a>
+<!-- Hero -->
+<section class="cc-hero">
+  <div class="cc-hero-overlay">
+    <div class="cc-hero-content">
+      <div class="cc-badge">GRUPO VECSA</div>
+      <h1 class="cc-hero-title">Car <span>Care</span></h1>
+      <p class="cc-hero-sub">Mantén tu vehículo como el primer día con nuestros servicios de estética premium, mecánica y protección.</p>
     </div>
-    <div class="col-12 mt-3">
-        <div class="col-2"></div>
+  </div>
+</section>
 
-        <div class="col-auto ">
-            <h3 class="fw-bold titulo">Car Care</h3>
-            <br>
-            <h6 class="fw-light texto">Manten tu vehiculo como el primer día con nuestros servicios de estética premium.
-                Dale una protección extra contra las inclemencias del camino con un wrap automotriz de alta gama, o agenda la cita para su próximo mantenimiento
-                o reparación mecánica  o estética en la agencia de <b>GRUPO VECSA</b> más cercana a tu domicilio. </h6>
-            <hr>
-            <h6 class="fw-light texto" >Para agendar una cita por favor introduce los siguientes <b>datos:</b> </h6>
-                <div class="col-12 mb-5">
-                    <form [formGroup]="form" (ngSubmit)="onSubmit()">
-                        <div class="row">
-                            <!-- Fila 1: Nombre y Teléfono -->
-                            <div class="col-12 col-md-6">
-                                <mat-form-field appearance="outline">
-                                    <mat-label>Nombre Completo</mat-label>
-                                    <input matInput type="text" placeholder="Nombre Completo" formControlName="name">
-                                </mat-form-field>
-                                <mat-error *ngIf="nameInvalid">Ingrese nombre completo</mat-error>
-                            </div>
-                            <div class="col-12 col-md-6">
-                                <mat-form-field appearance="outline">
-                                    <mat-label>Teléfono de contacto</mat-label>
-                                    <input matInput type="tel" placeholder="123456789" formControlName="phone" required maxlength="10" required pattern="[0-9]*" required (keypress)="onlyNumbers($event)">
-                                </mat-form-field>
-                                <mat-error *ngIf="phoneLength">Ingrese un teléfono válido.</mat-error>
-                            </div>
+<div class="cc-container">
 
-                            <!-- Fila 2: Correo y Agencia -->
-                            <div class="col-12 col-md-6">
-                                <mat-form-field appearance="outline">
-                                    <mat-label>Correo Electrónico</mat-label>
-                                    <input matInput type="email" placeholder="a@b.c" formControlName="email" required>
-                                </mat-form-field>
-                                <mat-error *ngIf="emailInvalid">Ingrese un correo electrónico.</mat-error>
-                            </div>
-                            <div class="col-12 col-md-6">
-                                <mat-form-field appearance="outline">
-                                    <mat-label>Agencia más cercana a tu domicilio:</mat-label>
-                                    <mat-select formControlName="origin_agency">
-                                        <mat-option value="VECSA Puebla (Angelópolis)">VECSA Puebla (Angelópolis)</mat-option>
-                                        <mat-option value="HUB Puebla (Blvrd Antuñano)">HUB Puebla (Blvrd Antuñano)</mat-option>
-                                        <mat-option value="VECSA Pachuca">VECSA Pachuca</mat-option>
-                                        <mat-option value="VECSA Veracruz">VECSA Veracruz</mat-option>
-                                        <mat-option value="Chevrolet Puebla (Blvrd Serdán)">Chevrolet Puebla (Blvrd Serdán)</mat-option>
-                                        <mat-option value="Chevrolet Cholula">Chevrolet Cholula</mat-option>
-                                        <mat-option value="Chevrolet Tlaxcala (Zacatelco)">Chevrolet Tlaxcala (Zacatelco)</mat-option>
-                                        <mat-option value="ABCars Servicio multimarca (Puebla, 31 pte)">ABCars Servicio multimarca (Puebla, 31 pte)</mat-option>
-                                    </mat-select>
-                                </mat-form-field>
-                                <mat-error *ngIf="agencyInvalid">Seleccione una agencia.</mat-error>
-                            </div>
+  <!-- Intro + Form -->
+  <section class="cc-section">
+    <div class="cc-intro-grid">
 
-                            <!-- Fila 3: Servicio y Comentarios -->
-                            <div class="col-12 col-md-6">
-                                <mat-form-field appearance="outline">
-                                    <mat-label>Servicio Requerido:</mat-label>
-                                    <mat-select formControlName="service">
-                                        <mat-option value="Servicio Mecánico">Servicio Mecánico</mat-option>
-                                        <mat-option value="Hojalateria y Pintura">Hojalateria y Pintura</mat-option>
-                                        <mat-option value="Estética Premium">Estética Premium</mat-option>
-                                        <mat-option value="Car Wrap (Carrocería o cristales)">Car Wrap (Carrocería o cristales)</mat-option>
-                                        <mat-option value="Renovación de seguro">Renovación de seguro</mat-option>
-                                        <mat-option value="Garantía Extendida">Garantía Extendida</mat-option>
-                                        <mat-option value="Extensión de Service Inclusive">Extensión de Service Inclusive</mat-option>
-                                    </mat-select>
-                                </mat-form-field>
-                                <mat-error *ngIf="serviceInvalid">Seleccione el servicio deseado.</mat-error>
-                            </div>
-                            <div class="col-12 col-md-6">
-                                <mat-form-field appearance="outline">
-                                    <mat-label>Comentarios u Observaciones</mat-label>
-                                    <input matInput type="text" formControlName="comentario">
-                                </mat-form-field>
-                            </div>
+      <!-- Left: description -->
+      <div class="cc-intro-text">
+        <h2>Agenda tu cita</h2>
+        <p>Mantén tu vehículo en perfectas condiciones con nuestros servicios de estética premium. Dale una protección extra contra las inclemencias del camino con un wrap automotriz de alta gama, o agenda la cita para su próximo mantenimiento o reparación mecánica o estética en la agencia de <strong>GRUPO VECSA</strong> más cercana a tu domicilio.</p>
 
-                            <!-- Fila 4: Marca y Otra Marca -->
-                            <div class="col-12 col-md-6">
-                                <mat-form-field appearance="outline">
-                                    <mat-label>Marca de tu Vehículo:</mat-label>
-                                    <mat-select formControlName="brand" (selectionChange)="onBrandSelected($event)">
-                                        <mat-option value="BMW">BMW</mat-option>
-                                        <mat-option value="CHEVROLET">CHEVROLET</mat-option>
-                                        <mat-option value="MINI">MINI</mat-option>
-                                        <mat-option value="MOTORRAD">MOTORRAD</mat-option>
-                                        <mat-option value="OTRA MARCA">OTRA MARCA</mat-option>
-                                    </mat-select>
-                                </mat-form-field>
-                                <mat-error *ngIf="brandInvalid">Seleccione la marca de su vehículo.</mat-error>
-                            </div>
-                            <div class="col-12 col-md-6" *ngIf="otherB">
-                                <mat-form-field appearance="outline">
-                                    <mat-label>¿Otra marca? Por favor especifica:</mat-label>
-                                    <input matInput type="text" formControlName="other_brand" required>
-                                </mat-form-field>
-                                <mat-error *ngIf="otherBrandInvalid">Especifique la otra marca.</mat-error>
-                            </div>
-
-                            <!-- Fila 5: Modelo y Año -->
-                            <div class="col-12 col-md-6">
-                                <mat-form-field appearance="outline">
-                                    <mat-label>Modelo:</mat-label>
-                                    <input matInput type="text" placeholder="xxxxx" formControlName="model" required>
-                                </mat-form-field>
-                                <mat-error *ngIf="modelInvalid">Ingrese el modelo de su vehículo.</mat-error>
-                            </div>
-                            <div class="col-12 col-md-6">
-                                <mat-form-field appearance="outline">
-                                    <mat-label>Año Modelo:</mat-label>
-                                    <input matInput type="text" placeholder="2024" formControlName="year" required>
-                                </mat-form-field>
-                                <mat-error *ngIf="yearInvalid">Ingrese el año modelo de su vehículo.</mat-error>
-                            </div>
-                        
-                            <!-- Fila 6: Fecha y Hora -->
-                            <div class="col-12 col-md-6">
-                                <mat-form-field appearance="outline">
-                                    <mat-label>Fecha:</mat-label>
-                                    <input matInput type="date" formControlName="MM/DD/YYYY" required placeholder="MM/DD/YYYY">
-                                </mat-form-field>
-                                <mat-error *ngIf="dateInvalid">Seleccione la fecha.</mat-error>
-                            </div>
-                            <div class="col-12 col-md-6">
-                                <mat-form-field appearance="outline">
-                                    <mat-label>Hora:</mat-label>
-                                    <input matInput type="time" formControlName="hour" min="09:00" max="18:00" step="900" required>
-                                </mat-form-field>
-                                <mat-error *ngIf="hourInvalid">Seleccione la hora.</mat-error>
-                            </div>
-                        </div>
-                    
-                        <!-- Botón de envío -->
-                        <div class="row mt-3">
-                            <div class="col-12 text-end">
-                                <button mat-button type="submit" class="btn btn-log mx-2 px-3" [disabled]="form.invalid">
-                                    <span>Agendar Cita</span>
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            <h6 class="fw-light mt-5 texto">Todo lo que necesites para mantener tu vehículo en perfectas condiciones lo encuentrasen <b class="texto_negrita">VECSA BOUTIQUE</b>.
-                 <br> Dale clic al enlace y compra sin salir de casa.</h6>
+        <div class="cc-services-list">
+          <div class="cc-service-item">
+            <span class="cc-service-icon">🔧</span>
+            <span>Servicio Mecánico</span>
+          </div>
+          <div class="cc-service-item">
+            <span class="cc-service-icon">🎨</span>
+            <span>Hojalatería y Pintura</span>
+          </div>
+          <div class="cc-service-item">
+            <span class="cc-service-icon">✨</span>
+            <span>Estética Premium</span>
+          </div>
+          <div class="cc-service-item">
+            <span class="cc-service-icon">🛡️</span>
+            <span>Car Wrap</span>
+          </div>
+          <div class="cc-service-item">
+            <span class="cc-service-icon">📋</span>
+            <span>Garantía Extendida</span>
+          </div>
+          <div class="cc-service-item">
+            <span class="cc-service-icon">🔄</span>
+            <span>Renovación de Seguro</span>
+          </div>
         </div>
-        <div class="col-auto"></div>
-    </div>
+      </div>
 
-    <div class="mb-3">
-        <div class="image-container">
-            <img class="background-image" src="assets/img/servicios.jpeg" alt="">
-            <a href="https://vecsaboutique.com/">
-                <button class="overlay-button btn"><span>Ir a la tienda</span></button>
-            </a>
+      <!-- Right: form card -->
+      <div class="cc-form-card">
+        <div class="cc-form-header">
+          <h3>Datos de contacto</h3>
+          <p>Completa el formulario y nos pondremos en contacto contigo</p>
         </div>
-    </div>
 
-    <div>
-        <h6 class="fw-light texto">Conoce las <b>Promociones</b> que aftersales tiene exclusiva para ti.</h6>
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="cc-form">
 
-        <div class="row promos" id="promosN">
-            <h1 class="titulo">Promociones</h1>
-            <div class="col-12">
-                <app-swiper [images]="prom" [slidesPerView]="1"></app-swiper>
+          <div class="cc-form-row">
+            <div class="cc-field-group">
+              <label>Nombre Completo</label>
+              <input type="text" formControlName="name" placeholder="Tu nombre completo">
+              <span class="cc-error" *ngIf="nameInvalid">Ingrese nombre completo</span>
             </div>
-        </div>
+            <div class="cc-field-group">
+              <label>Teléfono de contacto</label>
+              <input type="tel" formControlName="phone" placeholder="10 dígitos" maxlength="10" (keypress)="onlyNumbers($event)">
+              <span class="cc-error" *ngIf="phoneLength">Ingrese un teléfono válido</span>
+            </div>
+          </div>
+
+          <div class="cc-form-row">
+            <div class="cc-field-group">
+              <label>Correo Electrónico</label>
+              <input type="email" formControlName="email" placeholder="tu@correo.com">
+              <span class="cc-error" *ngIf="emailInvalid">Ingrese un correo válido</span>
+            </div>
+            <div class="cc-field-group">
+              <label>Agencia más cercana</label>
+              <select formControlName="origin_agency">
+                <option value="" disabled selected>Selecciona una agencia</option>
+                <option value="VECSA Puebla (Angelópolis)">VECSA Puebla (Angelópolis)</option>
+                <option value="HUB Puebla (Blvrd Antuñano)">HUB Puebla (Blvrd Antuñano)</option>
+                <option value="VECSA Pachuca">VECSA Pachuca</option>
+                <option value="VECSA Veracruz">VECSA Veracruz</option>
+                <option value="Chevrolet Puebla (Blvrd Serdán)">Chevrolet Puebla (Blvrd Serdán)</option>
+                <option value="Chevrolet Cholula">Chevrolet Cholula</option>
+                <option value="Chevrolet Tlaxcala (Zacatelco)">Chevrolet Tlaxcala (Zacatelco)</option>
+                <option value="ABCars Servicio multimarca (Puebla, 31 pte)">ABCars Servicio multimarca (Puebla, 31 pte)</option>
+              </select>
+              <span class="cc-error" *ngIf="agencyInvalid">Seleccione una agencia</span>
+            </div>
+          </div>
+
+          <div class="cc-form-row">
+            <div class="cc-field-group">
+              <label>Servicio Requerido</label>
+              <select formControlName="service">
+                <option value="" disabled selected>Selecciona un servicio</option>
+                <option value="Servicio Mecánico">Servicio Mecánico</option>
+                <option value="Hojalateria y Pintura">Hojalatería y Pintura</option>
+                <option value="Estética Premium">Estética Premium</option>
+                <option value="Car Wrap (Carrocería o cristales)">Car Wrap (Carrocería o cristales)</option>
+                <option value="Renovación de seguro">Renovación de seguro</option>
+                <option value="Garantía Extendida">Garantía Extendida</option>
+                <option value="Extensión de Service Inclusive">Extensión de Service Inclusive</option>
+              </select>
+              <span class="cc-error" *ngIf="serviceInvalid">Seleccione el servicio deseado</span>
+            </div>
+            <div class="cc-field-group">
+              <label>Marca de tu Vehículo</label>
+              <select formControlName="brand" (change)="onBrandChange($event)">
+                <option value="" disabled selected>Selecciona una marca</option>
+                <option value="BMW">BMW</option>
+                <option value="CHEVROLET">CHEVROLET</option>
+                <option value="MINI">MINI</option>
+                <option value="MOTORRAD">MOTORRAD</option>
+                <option value="OTRA MARCA">OTRA MARCA</option>
+              </select>
+              <span class="cc-error" *ngIf="brandInvalid">Seleccione la marca</span>
+            </div>
+          </div>
+
+          <div class="cc-form-row" *ngIf="otherB">
+            <div class="cc-field-group cc-field-full">
+              <label>¿Otra marca? Especifica:</label>
+              <input type="text" formControlName="other_brand" placeholder="Nombre de la marca">
+              <span class="cc-error" *ngIf="otherBrandInvalid">Especifique la marca</span>
+            </div>
+          </div>
+
+          <div class="cc-form-row">
+            <div class="cc-field-group">
+              <label>Modelo</label>
+              <input type="text" formControlName="model" placeholder="Ej. Serie 3">
+              <span class="cc-error" *ngIf="modelInvalid">Ingrese el modelo</span>
+            </div>
+            <div class="cc-field-group">
+              <label>Año Modelo</label>
+              <input type="text" formControlName="year" placeholder="2024">
+              <span class="cc-error" *ngIf="yearInvalid">Ingrese el año</span>
+            </div>
+          </div>
+
+          <div class="cc-form-row">
+            <div class="cc-field-group">
+              <label>Fecha preferida</label>
+              <input type="date" formControlName="fecha">
+              <span class="cc-error" *ngIf="dateInvalid">Seleccione la fecha</span>
+            </div>
+            <div class="cc-field-group">
+              <label>Hora preferida</label>
+              <input type="time" formControlName="hour" min="09:00" max="18:00" step="900">
+              <span class="cc-error" *ngIf="hourInvalid">Seleccione la hora</span>
+            </div>
+          </div>
+
+          <div class="cc-field-group">
+            <label>Comentarios u Observaciones</label>
+            <textarea formControlName="comentario" rows="3" placeholder="Describe brevemente lo que necesitas..."></textarea>
+          </div>
+
+          <div class="cc-form-actions">
+            <button type="submit" class="cc-btn-submit" [disabled]="form.invalid">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+              Agendar Cita
+            </button>
+          </div>
+
+        </form>
+      </div>
     </div>
+  </section>
+
+  <!-- Boutique CTA -->
+  <section class="cc-boutique-cta">
+    <div class="cc-boutique-text">
+      <h2>Todo lo que necesitas en <span>VECSA Boutique</span></h2>
+      <p>Encuentra productos premium para mantener tu vehículo en perfectas condiciones. Compra sin salir de casa.</p>
+      <a routerLink="/boutique" class="cc-btn-boutique">Ir a la Boutique</a>
+    </div>
+    <div class="cc-boutique-img">
+      <img src="assets/images/CARCARE.jpg" alt="Car Care" onerror="this.style.display='none'">
+    </div>
+  </section>
+
+  <!-- Promotions -->
+  <section class="cc-section" *ngIf="prom.length > 0">
+    <h2 class="cc-section-title">Promociones exclusivas</h2>
+    <div class="cc-promos-wrapper">
+      <app-swiper [images]="prom" [slidesPerView]="1"></app-swiper>
+    </div>
+  </section>
+
+</div>
+
+<!-- Modal -->
+<div class="cc-modal" #myModal>
+  <div class="cc-modal-container">
+    <button class="cc-modal-close" (click)="closeModal('yes')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <img #img01 class="cc-modal-img" src="" alt="">
+    <div #caption class="cc-modal-caption"></div>
+    <a *ngIf="specificationsLink" [href]="specificationsLink" target="_blank" class="cc-modal-spec-btn">Ver ficha técnica</a>
+  </div>
 </div>

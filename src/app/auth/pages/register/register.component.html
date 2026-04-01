@@ -95,7 +95,6 @@
     </div>
 </div> -->
 <div id="top"></div>
-<app-new-nav></app-new-nav>
 <div class="container">
     <div>
         <div class="row">
@@ -104,6 +103,27 @@
             </ng-container>
 
             <ng-template  #elseTemplate>
+
+                <!-- Step Progress Bar -->
+                <div class="step-wizard">
+                  <div class="step-progress">
+                    <div class="step-progress-fill" [style.width.%]="((currentStep - 1) / (totalSteps - 1)) * 100"></div>
+                  </div>
+                  <div class="step-indicators">
+                    <div *ngFor="let label of stepLabels; let i = index"
+                      class="step-item" [class.active]="currentStep === i + 1" [class.done]="currentStep > i + 1"
+                      (click)="goToStep(i + 1)">
+                      <div class="step-circle">
+                        <span *ngIf="currentStep <= i + 1">{{ i + 1 }}</span>
+                        <span *ngIf="currentStep > i + 1">✓</span>
+                      </div>
+                      <span class="step-label">{{ label }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- STEP 1: Datos personales -->
+                <div [style.display]="currentStep === 1 ? 'block' : 'none'">
 
                 <div class="row align-items-center mt-3">
                     <div class="col-auto"></div>
@@ -146,83 +166,80 @@
                             
                             <div class="row">
                                 <div class="col-12 col-md-4">
-                                    <mat-form-field appearance="outline">
-                                        <mat-label>Nombre(s)</mat-label>
-                                        <input matInput type="text" placeholder="Jorge" formControlName="name" required>
-                                        <mat-hint class="text-danger" *ngIf="nameInvalid">Complete su nombre(s).</mat-hint>
-                                    </mat-form-field>
+                                    <div class="field-group">
+                                        <label class="field-label">Nombre(s) *</label>
+                                        <input class="field-input" type="text" placeholder="Jorge" formControlName="name" required>
+                                        <span class="field-error" *ngIf="nameInvalid">Complete su nombre(s).</span>
+                                    </div>
                                 </div>
                             
                                 <div class="col-12 col-md-4">
-                                    <mat-form-field appearance="outline">
-                                        <mat-label>Apellido(s)</mat-label>
-                                        <input matInput type="text" placeholder="Sanchez" formControlName="last_name" required>
-                                        <mat-hint class="text-danger" *ngIf="lastnameInvalid">Complete sus apellidos.</mat-hint>
-                                    </mat-form-field>
-                                </div>
-
-                                <div class="col-12 col-md-4">
-                                    <mat-form-field appearance="outline">
-                                        <mat-label>Fecha de nacimiento</mat-label>
-                                            <input matInput type="date" formControlName="birthday" required>
-                                            <mat-hint class="text-danger" *ngIf="dateInvalid">Seleccione la fecha de cumpleaños.</mat-hint>
-                                    </mat-form-field>
-                                </div>
-
-                                <div class="col-12 col-md-4">
-                                    <mat-form-field appearance="outline">
-                                        <mat-label>Teléfono</mat-label>
-                                            <input matInput type="text" placeholder="123456789" formControlName="phone_1" maxlength="10" required>
-                                            <mat-hint class="text-danger" *ngIf="phoneInvalid">Ingrese un teléfono válido.</mat-hint>
-                                    </mat-form-field>
-                                </div>
-
-                                <div class="col-12 col-md-4">
-                                    <mat-form-field appearance="outline">
-                                        <mat-label>Correo Electrónico</mat-label>
-                                            <input matInput type="email" placeholder="a@b.c" formControlName="email" required>
-                                            <mat-hint class="text-danger" *ngIf="emailInvalid">Ingrese un correo electrónico.</mat-hint>
-                                    </mat-form-field>
-                                </div>
-
-                                <div class="col-12 col-md-4">
-                                    <mat-form-field appearance="outline">
-                                        <mat-label>Contraseña</mat-label>
-                                        <input matInput [type]="hide ? 'password' : 'text'" placeholder="********" formControlName="password" required>
-                                        <button mat-icon-button type="button" matSuffix (click)="hide = !hide">
-                                            <img [src]="hide ? 'assets/img/login/icono-ojo-abierto.png' : 'assets/img/login/icono-ojo-cerrado.png'" alt="Icono de imagen" width="24" height="24">
-                                        </button>
-    
-                                    </mat-form-field>
-                                    <mat-hint class="text-danger">
-                                        <div class="row">
-                                            <div class="col-12">
-                                                <p *ngIf="passwordInvalid">La contraseña debe contener al menos una letra mayúscula [A-Z], una letra minúscula [a-z], un dígito [0-9], y un carácter especial permitido: &#64; $ ! % * ? &.</p>
-                                            </div>
-                                            <div class="col-12">
-                                                <p *ngIf="passwordLength">La contraseña debe ser de minímo 8 a 32 caracteres.</p>
-                                            </div>
-                                        </div>
-                                    </mat-hint>
-                                </div>
-
-                                <div class="col-12 col-md-4">
-                                    <mat-form-field appearance="outline">
-                                        <mat-label>Confirmar Contraseña</mat-label>
-                                        <input matInput type='password' formControlName="confirmPassword" required>
-                                    </mat-form-field>
-                                    <mat-hint class="text-danger">
-                                    <div class="row">
-                                        <div class="col-12">
-                                        <p *ngIf="form.hasError('mismatch') && (form.get('confirmPassword')!.dirty || form.get('confirmPassword')!.touched)">Las contraseñas no coinciden.</p>
-                                        </div>
+                                    <div class="field-group">
+                                        <label class="field-label">Apellido(s) *</label>
+                                        <input class="field-input" type="text" placeholder="Sanchez" formControlName="last_name" required>
+                                        <span class="field-error" *ngIf="lastnameInvalid">Complete sus apellidos.</span>
                                     </div>
-                                    </mat-hint>
+                                </div>
+
+                                <div class="col-12 col-md-4">
+                                    <div class="field-group">
+                                        <label class="field-label">Fecha de nacimiento *</label>
+                                        <input class="field-input" type="date" formControlName="birthday" required>
+                                        <span class="field-error" *ngIf="dateInvalid">Seleccione la fecha de cumpleaños.</span>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-4">
+                                    <div class="field-group">
+                                        <label class="field-label">Teléfono *</label>
+                                        <input class="field-input" type="text" placeholder="123456789" formControlName="phone_1" maxlength="10" required>
+                                        <span class="field-error" *ngIf="phoneInvalid">Ingrese un teléfono válido.</span>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-4">
+                                    <div class="field-group">
+                                        <label class="field-label">Correo Electrónico *</label>
+                                        <input class="field-input" type="email" placeholder="tu@correo.com" formControlName="email" required>
+                                        <span class="field-error" *ngIf="emailInvalid">Ingrese un correo electrónico.</span>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-4">
+                                    <div class="field-group">
+                                        <label class="field-label">Contraseña *</label>
+                                        <div class="field-input-wrap">
+                                            <input class="field-input" [type]="hide ? 'password' : 'text'" placeholder="********" formControlName="password" required>
+                                            <button type="button" class="field-toggle" (click)="hide = !hide">
+                                                <img [src]="hide ? 'assets/img/login/icono-ojo-abierto.png' : 'assets/img/login/icono-ojo-cerrado.png'" alt="Toggle" width="20" height="20">
+                                            </button>
+                                        </div>
+                                        <span class="field-error" *ngIf="passwordInvalid">Debe contener mayúscula, minúscula, dígito y carácter especial.</span>
+                                        <span class="field-error" *ngIf="passwordLength">Mínimo 8 a 32 caracteres.</span>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-4">
+                                    <div class="field-group">
+                                        <label class="field-label">Confirmar Contraseña *</label>
+                                        <input class="field-input" type="password" placeholder="********" formControlName="confirmPassword" required>
+                                        <span class="field-error" *ngIf="form.hasError('mismatch') && (form.get('confirmPassword')!.dirty || form.get('confirmPassword')!.touched)">Las contraseñas no coinciden.</span>
+                                    </div>
                                 </div>
                             </div>
                         </form>
                     </div>
                 </div>
+
+                <!-- Step 1 nav -->
+                <div class="step-nav">
+                  <div></div>
+                  <button class="step-btn-next" (click)="nextStep()">Siguiente <span class="material-icons">arrow_forward</span></button>
+                </div>
+                </div><!-- /STEP 1 -->
+
+                <!-- STEP 2: Marca y género -->
+                <div [style.display]="currentStep === 2 ? 'block' : 'none'">
                 
                 <div class="row mt-5 align-items-center">
                     <div class="col-auto"></div>
@@ -256,7 +273,7 @@
                         </div>
                         
 
-                        <div class="row mb-3">
+                        <div class="row mb-3" [hidden]="currentStep !== 2">
 
                             <div class="row mb-3"> 
                                 <div class="col-auto"></div> 
@@ -267,7 +284,7 @@
                                     <div class="d-flex align-items-center justify-content-end" style="height: 100%;">
                                         <h6 class="fw-light mb-0" style="font-size: medium; padding-right: 20px;">Tu marca actual:</h6>
             
-                                        <mat-chip-listbox class="mat-chip-grid" aria-label="{{ brand_quiz?.name }}" (change)="onChipBrandChange($event, brand_quiz!.uuid)">
+                                        <mat-chip-listbox class="mat-chip-grid" aria-label="{{ brand_quiz?.name }}" (change)="onChipBrandChange($event, brand_quiz?.uuid || '')">
                                             <div *ngFor="let value of brand_quiz?.values; let i = index">
                                                 <mat-chip-option 
                                                     class="chip-option"
@@ -300,7 +317,7 @@
                                         
                                         <h6 class="fw-light me-2 mb-0" style="font-size: medium; padding-right: 10px;">Género:</h6>
     
-                                        <mat-chip-listbox class="mat-chip-grid" aria-label="{{ clothes_gender!.name }}" (change)="onChipGenderChange($event, clothes_gender!.uuid)">
+                                        <mat-chip-listbox class="mat-chip-grid" aria-label="{{ clothes_gender?.name }}" (change)="onChipGenderChange($event, clothes_gender?.uuid || '')">
                                             <div *ngFor="let value of clothes_gender?.values; let i = index">
                                                 <mat-chip-option 
                                                     class="chip-option"
@@ -318,59 +335,71 @@
 
                         </div>
 
-                        <div class="row mb-3" *ngIf="chevroletBrandSelected">
+                        <!-- Step 2 nav -->
+                        <div class="step-nav" [hidden]="currentStep !== 2">
+                          <button class="step-btn-prev" (click)="prevStep()"><span class="material-icons">arrow_back</span> Anterior</button>
+                          <button class="step-btn-next" (click)="nextStep()">Siguiente <span class="material-icons">arrow_forward</span></button>
+                        </div>
+
+                        <div class="row mb-3" [hidden]="currentStep !== 3" *ngIf="chevroletBrandSelected">
 
                             <hr />
 
                             <ng-container *ngFor="let question of chevrolet_questions; let i = index">
 
                                 <div class="col-12 col-md-6">
-                                    <h4  style="align-content:center;  min-height: 50px;" >{{question.name}}</h4>
-                                    <mat-form-field appearance="outline">
+                                    <h4 style="align-content:center; min-height: 50px;">{{question.name}}</h4>
+                                    <div class="field-group">
                                         <input 
-                                        matInput 
+                                        class="field-input"
                                         type="text" 
-                                        placeholder=""
+                                        placeholder="Tu respuesta..."
                                         [value]="question.selected_value || ''" 
                                         (input)="onInputChange($event, question.uuid)" 
                                         required>
-                                        <mat-hint *ngIf="chevrolet_validation[i].invalid" class="text-danger">
+                                        <span class="field-error" *ngIf="chevrolet_validation[i]?.invalid">
                                             {{ chevrolet_validation[i].validation_message }}
-                                        </mat-hint>
-                                    </mat-form-field>
+                                        </span>
+                                    </div>
                                 </div>
 
                             </ng-container>
 
                         </div>
 
-                        <div class="row mb-3" *ngIf="defaultBrandSelected || motorradBrandSelected;">
+                        <div class="row mb-3" [hidden]="currentStep !== 3" *ngIf="defaultBrandSelected || motorradBrandSelected;">
 
                             <hr />
 
                             <ng-container *ngFor="let question of default_questions; let i = index">
 
                                 <div class="col-12 col-md-6">
-                                    <h4  style="align-content:center; min-height: 50px;" >{{question.name}}</h4>
-                                    <mat-form-field appearance="outline">
+                                    <h4 style="align-content:center; min-height: 50px;">{{question.name}}</h4>
+                                    <div class="field-group">
                                         <input 
-                                        matInput 
+                                        class="field-input"
                                         type="text" 
-                                        placeholder=""
+                                        placeholder="Tu respuesta..."
                                         [value]="question.selected_value || ''" 
                                         (input)="onInputChange($event, question.uuid)" 
                                         required>
-                                        <mat-hint *ngIf="default_validation[i].invalid" class="text-danger">
+                                        <span class="field-error" *ngIf="default_validation[i]?.invalid">
                                             {{ default_validation[i].validation_message }}
-                                        </mat-hint>
-                                    </mat-form-field>
+                                        </span>
+                                    </div>
                                 </div>
 
                             </ng-container>
 
                         </div>
 
-                        <div class="row mb-3" *ngIf="defaultBrandSelected || motorradBrandSelected;">
+                        <!-- Step 3 nav -->
+                        <div class="step-nav" [hidden]="currentStep !== 3">
+                          <button class="step-btn-prev" (click)="prevStep()"><span class="material-icons">arrow_back</span> Anterior</button>
+                          <button class="step-btn-next" (click)="nextStep()">Siguiente <span class="material-icons">arrow_forward</span></button>
+                        </div>
+
+                        <div class="row mb-3" [hidden]="currentStep !== 4" *ngIf="defaultBrandSelected || motorradBrandSelected;">
                             
                             <hr />
 
@@ -413,7 +442,7 @@
                             <hr />
                         </div>
         
-                        <div class="row mb-3" *ngIf="defaultBrandSelected || motorradBrandSelected || chevroletBrandSelected;">
+                        <div class="row mb-3" [hidden]="currentStep !== 4" *ngIf="defaultBrandSelected || motorradBrandSelected || chevroletBrandSelected;">
 
                             <ng-container *ngIf="defaultBrandSelected;">
                             
@@ -598,7 +627,13 @@
     
                             </ng-container>
     
-                            <div class="row mt-5 align-items-center">
+                            <!-- Step 4 nav -->
+                            <div class="step-nav" [hidden]="currentStep !== 4">
+                              <button class="step-btn-prev" (click)="prevStep()"><span class="material-icons">arrow_back</span> Anterior</button>
+                              <button class="step-btn-next" (click)="nextStep()">Siguiente <span class="material-icons">arrow_forward</span></button>
+                            </div>
+
+                            <div class="row mt-5 align-items-center" [hidden]="currentStep !== 5">
                                 <div class="col-auto"></div>
                             
                                 <div *ngIf="!isMobileView" class="col" style="text-align: justify;">
@@ -698,10 +733,11 @@
             
                             <div class="row">
                                 <div class="col-12 col-md-4 mt-3 mx-auto text-center">
-                                    <div class="text-center mt-3">
+                                    <div class="step-nav" style="justify-content: center; gap: 16px;">
+                                        <button class="step-btn-prev" (click)="prevStep()"><span class="material-icons">arrow_back</span> Anterior</button>
                                         <button mat-raised-button type="submit"
                                             (click)="onSubmit()"
-                                            class="btn abcars-background-color-blue mt-3  mx-2 px-3"
+                                            class="btn abcars-background-color-blue mt-3 mx-2 px-3"
                                             [disabled]="form.invalid || !isFormValid || !status || !statusCards || spinner || file === null || !questions_form_invalid">
                                             <span *ngIf="!spinner">Registrarse</span>
                                             <span *ngIf="spinner" class="spinner-border spinner-border-sm" role="status"
@@ -715,6 +751,7 @@
 
                     </ng-template>
                 </div> 
+                </div><!-- /STEP 2 -->
 
                 
 

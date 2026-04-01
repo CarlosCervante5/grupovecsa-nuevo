@@ -1,0 +1,102 @@
+.permisos-page {
+  padding: 32px;
+  font-family: inherit;
+  background: #f8fafc;
+  min-height: 100vh;
+}
+
+.page-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 24px; flex-wrap: wrap; gap: 16px;
+}
+.page-title { font-size: 1.6rem; font-weight: 800; color: #0f172a; margin: 0; letter-spacing: -0.5px; }
+.page-subtitle { font-size: 0.85rem; color: #94a3b8; margin: 4px 0 0; }
+
+.action-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border: 1px solid #e2e8f0; border-radius: 8px;
+  font-size: 0.82rem; font-weight: 600; cursor: pointer;
+  background: #fff; color: #334155; transition: background 0.15s;
+}
+.action-btn:hover { background: #f1f5f9; }
+.action-btn .material-icons { font-size: 18px; }
+.primary-btn { background: #1c69d4; color: #fff; border-color: #1c69d4; }
+.primary-btn:hover { background: #1554b0; }
+
+.section-title {
+  font-size: 0.95rem; font-weight: 700; color: #0f172a;
+  margin: 28px 0 12px; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0;
+}
+
+/* Loading / Empty */
+.loading-state { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 60px 0; color: #94a3b8; }
+.loading-state p { margin: 0; font-size: 0.85rem; }
+.spinner { width: 36px; height: 36px; border: 3px solid #e2e8f0; border-top-color: #1c69d4; border-radius: 50%; animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.empty-state { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 60px 0; color: #94a3b8; }
+.empty-state .material-icons { font-size: 48px; }
+.empty-state p { margin: 0; font-size: 0.9rem; font-weight: 600; color: #64748b; }
+
+/* Table */
+.table-wrap {
+  overflow-x: auto; background: #fff; border: 1px solid #e2e8f0;
+  border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); margin-bottom: 20px;
+  max-width: 100%;
+}
+.matrix-table { width: max-content; min-width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+.matrix-table th {
+  padding: 10px 12px; background: #f8fafc; color: #475569;
+  font-weight: 600; font-size: 0.72rem; text-transform: uppercase;
+  letter-spacing: 0.04em; border-bottom: 1px solid #e2e8f0;
+  white-space: nowrap; text-align: center;
+}
+.th-role { text-align: left; min-width: 140px; position: sticky; left: 0; background: #f8fafc; z-index: 1; }
+.th-perm { min-width: 100px; }
+
+.matrix-table td { padding: 8px 12px; border-bottom: 1px solid #f1f5f9; text-align: center; }
+.matrix-table tbody tr { transition: background 0.1s; }
+.matrix-table tbody tr:hover { background: #f8fafc; }
+
+.cell-role { text-align: left; position: sticky; left: 0; background: #fff; z-index: 1; }
+.matrix-table tbody tr:hover .cell-role { background: #f8fafc; }
+
+/* Role badges */
+.role-badge {
+  display: inline-block; padding: 3px 10px; border-radius: 20px;
+  font-size: 0.72rem; font-weight: 600; text-transform: capitalize;
+  background: #f1f5f9; color: #475569;
+}
+.role-developer { background: #ede9fe; color: #6d28d9; }
+.role-administrator { background: #dbeafe; color: #1e40af; }
+.role-marketing { background: #fce7f3; color: #be185d; }
+.role-gestor { background: #d1fae5; color: #065f46; }
+.role-staff { background: #fef3c7; color: #92400e; }
+.role-receptionist { background: #e0e7ff; color: #3730a3; }
+.role-valuator { background: #ffedd5; color: #9a3412; }
+.role-appointment_manager { background: #cffafe; color: #155e75; }
+.role-bodywork_paint_technician { background: #fecdd3; color: #9f1239; }
+.role-spare_parts { background: #d9f99d; color: #3f6212; }
+.role-client { background: #f1f5f9; color: #475569; }
+
+/* Toggle switch */
+.toggle-switch { position: relative; display: inline-block; width: 36px; height: 20px; cursor: pointer; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+  position: absolute; inset: 0; background: #e2e8f0; border-radius: 20px;
+  transition: background 0.2s;
+}
+.toggle-slider::before {
+  content: ''; position: absolute; width: 16px; height: 16px;
+  left: 2px; bottom: 2px; background: #fff; border-radius: 50%;
+  transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+.toggle-switch input:checked + .toggle-slider { background: #1c69d4; }
+.toggle-switch input:checked + .toggle-slider::before { transform: translateX(16px); }
+.toggle-switch input:disabled + .toggle-slider { opacity: 0.5; cursor: default; }
+
+.cell-check { vertical-align: middle; }
+
+@media (max-width: 768px) {
+  .permisos-page { padding: 16px; }
+  .page-header { flex-direction: column; }
+}

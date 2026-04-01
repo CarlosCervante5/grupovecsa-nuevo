@@ -1,0 +1,29 @@
+<div class="panel-layout">
+  <aside class="panel-sidebar">
+    <div class="panel-brand">
+      <span class="material-icons panel-brand-icon">admin_panel_settings</span>
+      <span class="panel-brand-name">Gestor</span>
+    </div>
+    <div class="panel-user">
+      <div class="panel-user-avatar">{{ name?.charAt(0)?.toUpperCase() || 'G' }}</div>
+      <div class="panel-user-info">
+        <span class="panel-user-name">{{ name }}</span>
+        <span class="panel-user-role">{{ role }}</span>
+      </div>
+    </div>
+    <nav class="panel-nav">
+      <a *ngFor="let item of navItems" class="panel-nav-item" [routerLink]="item.route" routerLinkActive="active" [routerLinkActiveOptions]="{exact: item.route === '/admin/gestor'}">
+        <span class="material-icons">{{ item.icon }}</span> {{ item.label }}
+      </a>
+      <p class="panel-nav-label" *ngIf="dynamicItems.length">Herramientas</p>
+      <a *ngFor="let item of dynamicItems" class="panel-nav-item" [routerLink]="item.route" routerLinkActive="active">
+        <span class="material-icons">{{ item.icon }}</span> {{ item.label }}
+      </a>
+    </nav>
+    <a class="panel-nav-back" [routerLink]="'/admin/' + role"><span class="material-icons">arrow_back</span> Volver a mi panel</a>
+    <button class="panel-logout" (click)="logout()"><span class="material-icons">logout</span> Cerrar sesión</button>
+  </aside>
+  <main class="panel-main">
+    <router-outlet></router-outlet>
+  </main>
+</div>

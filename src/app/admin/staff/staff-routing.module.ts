@@ -1,19 +1,24 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { StaffLayoutComponent } from './pages/layout/staff-layout.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { RidersComponent } from './pages/riders/riders.component';
-// import { NewCustomerComponent } from './components/new-customer/new-customer.component';
 import { SalesComponent } from './pages/sales/sales.component';
 
 const routes: Routes = [
-    { path: '', component: DashboardComponent},
-    { path: 'riders', component: RidersComponent },
-    { path: 'sales', component: SalesComponent},
-    // { path: 'newc', component: NewCustomerComponent},
+  {
+    path: '',
+    component: StaffLayoutComponent,
+    children: [
+      { path: '', component: DashboardComponent },
+      { path: 'riders', component: RidersComponent },
+      { path: 'sales', component: SalesComponent },
+    ],
+  },
 ];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
-export class StaffRoutingModule { }
+export class StaffRoutingModule {}

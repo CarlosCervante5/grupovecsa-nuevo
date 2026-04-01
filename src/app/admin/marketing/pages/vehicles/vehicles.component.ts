@@ -281,6 +281,40 @@ export class VehiclesComponent {
         }      
       });
     }
+
+    /** Computed last page for custom pagination */
+    get lastPage(): number {
+      return Math.ceil(this.length / this.pageSize) || 1;
+    }
+
+    /** Navigate to a specific page */
+    goToPage(page: number): void {
+      if (page < 1 || page > this.lastPage) return;
+      this.pageIndex = page;
+      this.getVehicles(this.pageIndex);
+    }
+
+    /** Toggle select all checkboxes */
+    toggleSelectAll(event: Event): void {
+      const checked = (event.target as HTMLInputElement).checked;
+      if (checked) {
+        this.vehicle_uuids = this.vehicles.map(v => v.uuid);
+      } else {
+        this.vehicle_uuids = [];
+      }
+    }
+
+    /** Handle individual checkbox change */
+    onCheckboxChange(event: Event, uuid: string): void {
+      const checked = (event.target as HTMLInputElement).checked;
+      if (checked) {
+        if (!this.vehicle_uuids.includes(uuid)) {
+          this.vehicle_uuids.push(uuid);
+        }
+      } else {
+        this.vehicle_uuids = this.vehicle_uuids.filter(id => id !== uuid);
+      }
+    }
 }
 
 

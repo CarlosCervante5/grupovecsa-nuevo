@@ -321,3 +321,373 @@
     font-weight: bold; /* Hacer el texto más llamativo */
     font-size: 1.2rem; /* Tamaño del texto */
 }
+
+/* ── Homologated Design Overrides ── */
+
+/* Container */
+:host { display: block; background: #fff; }
+.container { max-width: 1100px; padding-top: 2rem; padding-bottom: 3rem; }
+
+/* Section titles */
+h3.fw-bold { color: #0f172a; letter-spacing: -0.3px; }
+h5.fw-bold { color: #0f172a; }
+h6.fw-light, .texto { color: #64748b; }
+hr { border-color: #e2e8f0; opacity: 0.5; }
+
+/* Material input overrides to match native field-input style */
+::ng-deep .mat-mdc-form-field {
+  width: 100%;
+  margin-bottom: 4px;
+}
+::ng-deep .mat-mdc-text-field-wrapper {
+  background: #fff !important;
+  border-radius: 10px !important;
+}
+::ng-deep .mdc-notched-outline__leading,
+::ng-deep .mdc-notched-outline__notch,
+::ng-deep .mdc-notched-outline__trailing {
+  border-color: #e2e8f0 !important;
+}
+::ng-deep .mat-mdc-form-field.mat-focused .mdc-notched-outline__leading,
+::ng-deep .mat-mdc-form-field.mat-focused .mdc-notched-outline__notch,
+::ng-deep .mat-mdc-form-field.mat-focused .mdc-notched-outline__trailing {
+  border-color: #1c69d4 !important;
+}
+::ng-deep .mat-mdc-form-field .mdc-floating-label {
+  color: #64748b !important;
+  font-size: 14px !important;
+}
+::ng-deep .mat-mdc-form-field.mat-focused .mdc-floating-label {
+  color: #1c69d4 !important;
+}
+::ng-deep .mat-mdc-input-element {
+  color: #0f172a !important;
+  font-size: 14px !important;
+}
+
+/* Photo section */
+.foto {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 2rem 1.5rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+}
+.foto .row { display: flex; flex-direction: column; align-items: center; width: 100%; }
+.foto .col-img { display: flex; justify-content: center; width: 100%; padding: 0 !important; flex: none; max-width: 100%; }
+.foto .img-fluid-f {
+  width: 100px !important; height: 100px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  border: 3px solid #e2e8f0 !important;
+  background: #f1f5f9;
+  padding: 0 !important;
+  margin: 0 auto 8px !important;
+  display: block;
+}
+
+/* Submit button */
+.abcars-background-color-blue {
+  background: linear-gradient(135deg, #1c69d4, #1e40af) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 10px !important;
+  padding: 10px 32px !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  text-transform: none !important;
+  box-shadow: 0 4px 16px rgba(28,105,212,0.3) !important;
+  transition: all 0.2s !important;
+}
+.abcars-background-color-blue:hover {
+  box-shadow: 0 6px 24px rgba(28,105,212,0.4) !important;
+  transform: translateY(-1px);
+}
+.abcars-background-color-blue:disabled {
+  opacity: 0.5 !important;
+  transform: none !important;
+}
+
+/* Chip overrides */
+::ng-deep .mat-mdc-chip-option {
+  border-radius: 10px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+}
+::ng-deep .mat-mdc-chip-option.mat-mdc-chip-selected {
+  background: #1c69d4 !important;
+  color: #fff !important;
+}
+::ng-deep .mat-mdc-chip-option.mat-mdc-chip-selected .mdc-evolution-chip__text-label {
+  color: #fff !important;
+}
+
+/* Cards section (affinities, events) */
+.records { margin-top: 1.5rem; }
+
+/* Info card style */
+.contenedor, .pMes, .grafica, .div1, .tarjeta {
+  border-radius: 14px !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06) !important;
+}
+
+/* Password hint */
+mat-hint p, .text-danger p {
+  color: #dc2626;
+  font-size: 12px;
+  margin: 4px 0;
+}
+
+/* ── Enhanced Visual Improvements ── */
+
+/* Form card wrapper */
+.col-12.col-md-9.mt-4.mb-5 {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 2rem !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+}
+
+/* Photo card - handled by .foto above */
+
+/* Section headers with accent bar */
+h3.fw-bold::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 1.2em;
+  background: #1c69d4;
+  border-radius: 2px;
+  margin-right: 10px;
+  vertical-align: middle;
+}
+
+/* Smooth section dividers */
+hr {
+  margin: 1.5rem 0 !important;
+  border: none !important;
+  height: 1px !important;
+  background: linear-gradient(to right, transparent, #e2e8f0, transparent) !important;
+}
+
+/* Chip grid improvements */
+::ng-deep .mat-mdc-chip-listbox {
+  gap: 6px;
+}
+::ng-deep .mat-mdc-chip-option:not(.mat-mdc-chip-selected) {
+  background: #f1f5f9 !important;
+  border: 1px solid #e2e8f0 !important;
+  transition: all 0.2s !important;
+}
+::ng-deep .mat-mdc-chip-option:not(.mat-mdc-chip-selected):hover {
+  background: #e2e8f0 !important;
+  border-color: #1c69d4 !important;
+}
+::ng-deep .mat-mdc-chip-option .mdc-evolution-chip__text-label {
+  font-size: 13px !important;
+  font-weight: 500 !important;
+}
+
+/* Brand chip avatars */
+::ng-deep .mat-mdc-chip-avatar {
+  border-radius: 6px !important;
+  width: 28px !important;
+  height: 28px !important;
+}
+
+/* Form field spacing */
+::ng-deep .mat-mdc-form-field-subscript-wrapper {
+  margin-bottom: 4px;
+}
+
+/* Smooth transitions on inputs */
+::ng-deep .mdc-notched-outline__leading,
+::ng-deep .mdc-notched-outline__notch,
+::ng-deep .mdc-notched-outline__trailing {
+  transition: border-color 0.2s ease !important;
+}
+
+/* Upload image button */
+.col-img .btn {
+  font-size: 13px !important;
+  padding: 8px 16px !important;
+  border-radius: 8px !important;
+}
+
+/* Affinities cards grid */
+.records .col-12.col-lg-6 {
+  padding: 6px !important;
+}
+
+/* Quiz image cards */
+.image_container {
+  border-radius: 12px !important;
+  overflow: hidden;
+  border: 2px solid transparent;
+  transition: all 0.2s;
+}
+.image_container:hover {
+  border-color: #1c69d4;
+  transform: scale(1.03);
+}
+
+/* Spinner override */
+::ng-deep app-sk-cube {
+  display: flex;
+  justify-content: center;
+  padding: 3rem 0;
+}
+
+/* Link styles */
+a.abcars-color-hover {
+  color: #1c69d4 !important;
+  font-weight: 600;
+  transition: opacity 0.2s;
+}
+a.abcars-color-hover:hover {
+  opacity: 0.8;
+}
+
+/* Responsive polish */
+@media (max-width: 768px) {
+  .col-12.col-md-9.mt-4.mb-5 {
+    padding: 1.25rem !important;
+    border-radius: 12px;
+  }
+  .col-12.col-md-3.mt-4 .foto {
+    margin-bottom: 1rem;
+  }
+  h3.fw-bold { font-size: 1.2rem !important; }
+}
+
+/* Smooth page entrance */
+:host {
+  animation: regFadeIn 0.3s ease-out;
+}
+@keyframes regFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Force avatar circle — overrides all media queries ── */
+#imagePreview {
+  width: 100px !important;
+  height: 100px !important;
+  min-width: 100px !important;
+  min-height: 100px !important;
+  max-width: 100px !important;
+  max-height: 100px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  aspect-ratio: 1 / 1 !important;
+  border: 3px solid #e2e8f0 !important;
+  background: #f1f5f9 !important;
+  display: block !important;
+  margin: 0 auto !important;
+  overflow: hidden !important;
+}
+
+/* ── Native field styles (matching checkout/login) ── */
+.field-group { margin-bottom: 16px; }
+.field-label {
+  display: block; font-size: 13px; font-weight: 600;
+  color: #374151; margin-bottom: 6px;
+}
+.field-input {
+  width: 100%; padding: 11px 14px;
+  border: 1px solid #e2e8f0; border-radius: 10px;
+  font-size: 14px; color: #0f172a; background: #fff;
+  outline: none; transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+.field-input:focus { border-color: #1c69d4; }
+.field-input::placeholder { color: #94a3b8; }
+.field-error {
+  display: block; font-size: 12px; color: #dc2626;
+  margin-top: 4px;
+}
+.field-input-wrap {
+  position: relative;
+}
+.field-input-wrap .field-input { padding-right: 44px; }
+.field-toggle {
+  position: absolute; right: 10px; top: 50%;
+  transform: translateY(-50%);
+  background: none; border: none; cursor: pointer;
+  padding: 4px; display: flex; align-items: center;
+  opacity: 0.6; transition: opacity 0.2s;
+}
+.field-toggle:hover { opacity: 1; }
+
+/* ── Step Wizard ── */
+.step-wizard { margin: 2rem 0 2.5rem; padding: 0 1rem; }
+.step-progress {
+  height: 4px; background: #e2e8f0; border-radius: 2px;
+  margin-bottom: 16px; position: relative; overflow: hidden;
+}
+.step-progress-fill {
+  height: 100%; background: #1c69d4; border-radius: 2px;
+  transition: width 0.4s ease;
+}
+.step-indicators {
+  display: flex; justify-content: space-between;
+}
+.step-item {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 6px; cursor: pointer; flex: 1;
+}
+.step-circle {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700;
+  background: #e2e8f0; color: #64748b;
+  transition: all 0.3s;
+}
+.step-item.active .step-circle {
+  background: #1c69d4; color: #fff;
+  box-shadow: 0 2px 12px rgba(28,105,212,0.3);
+}
+.step-item.done .step-circle {
+  background: #059669; color: #fff;
+}
+.step-label {
+  font-size: 11px; font-weight: 600; color: #94a3b8;
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+.step-item.active .step-label { color: #1c69d4; }
+.step-item.done .step-label { color: #059669; }
+
+/* Step Navigation */
+.step-nav {
+  display: flex; justify-content: space-between; align-items: center;
+  margin: 2rem 0 1rem; padding-top: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+}
+.step-btn-next, .step-btn-prev {
+  display: flex; align-items: center; gap: 6px;
+  padding: 10px 24px; border-radius: 10px;
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  transition: all 0.2s; border: none;
+}
+.step-btn-next {
+  background: linear-gradient(135deg, #1c69d4, #1e40af);
+  color: #fff; box-shadow: 0 4px 16px rgba(28,105,212,0.3);
+}
+.step-btn-next:hover { box-shadow: 0 6px 24px rgba(28,105,212,0.4); transform: translateY(-1px); }
+.step-btn-prev {
+  background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;
+}
+.step-btn-prev:hover { background: #e2e8f0; }
+.step-btn-next .material-icons, .step-btn-prev .material-icons { font-size: 18px; }
+
+@media (max-width: 480px) {
+  .step-label { display: none; }
+  .step-circle { width: 30px; height: 30px; font-size: 12px; }
+  .step-btn-next, .step-btn-prev { padding: 8px 16px; font-size: 13px; }
+}

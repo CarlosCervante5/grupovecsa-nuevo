@@ -1,0 +1,116 @@
+<!-- Hero Section -->
+<section class="rewards-hero">
+  <div class="hero-overlay">
+    <div class="hero-content">
+      <div class="hero-badge">PROGRAMA DE LEALTAD</div>
+      <h1 class="hero-title">VECSA <span class="hero-accent">Rewards</span></h1>
+      <p class="hero-subtitle">Gana puntos con cada servicio y canjéalos por beneficios exclusivos</p>
+    </div>
+  </div>
+</section>
+
+<!-- Main Content -->
+<div class="rewards-container">
+
+  <!-- Points Banner (logged in) -->
+  <div *ngIf="isLoggedIn" class="points-banner">
+    <div class="points-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+      </svg>
+    </div>
+    <div class="points-info">
+      <span class="points-label">Tus puntos acumulados</span>
+      <span class="points-value">{{ totalPoints | number }}</span>
+    </div>
+    <div class="points-cta">
+      <a routerLink="/auth/account/profile" class="btn-points">Ver mi cuenta</a>
+    </div>
+  </div>
+
+  <!-- Login / Register Section (not logged in) -->
+  <div *ngIf="!isLoggedIn" class="auth-section">
+    <div class="auth-card login-card">
+      <div class="card-header">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+        </div>
+        <h2>Iniciar Sesión</h2>
+        <p>Accede a tu cuenta para ver tus puntos</p>
+      </div>
+      <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="login-form">
+        <div class="form-group">
+          <label>Correo electrónico</label>
+          <input type="email" formControlName="email" placeholder="tu@correo.com" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label>Contraseña</label>
+          <input [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <p *ngIf="loginError" class="error-msg">{{ loginError }}</p>
+        <button type="submit" class="btn-login" [disabled]="isLoading">
+          <span *ngIf="!isLoading">INICIAR SESIÓN</span>
+          <span *ngIf="isLoading" class="spinner"></span>
+        </button>
+      </form>
+    </div>
+
+    <div class="auth-divider">
+      <span>o</span>
+    </div>
+
+    <div class="auth-card register-card">
+      <div class="card-header">
+        <div class="card-icon register-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <line x1="19" y1="8" x2="19" y2="14"/>
+            <line x1="22" y1="11" x2="16" y2="11"/>
+          </svg>
+        </div>
+        <h2>¿Aún no tienes cuenta?</h2>
+        <p>Regístrate gratis y empieza a acumular puntos desde hoy</p>
+      </div>
+      <button (click)="goToRegister()" class="btn-register">REGÍSTRATE AHORA</button>
+    </div>
+  </div>
+
+  <!-- Benefits Section -->
+  <section class="benefits-section">
+    <h2 class="section-title">¿Cómo funciona?</h2>
+    <div class="benefits-grid">
+      <div class="benefit-card">
+        <div class="benefit-icon">🛒</div>
+        <h3>Compra</h3>
+        <p>Realiza servicios o compras en cualquier sucursal VECSA</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">⭐</div>
+        <h3>Acumula</h3>
+        <p>Gana puntos automáticamente con cada transacción</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">🎁</div>
+        <h3>Canjea</h3>
+        <p>Usa tus puntos en descuentos, productos y experiencias exclusivas</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Boutique CTA -->
+  <section class="boutique-cta">
+    <div class="boutique-content">
+      <h2>VECSA <span>Boutique</span></h2>
+      <p>Canjea tus puntos por productos exclusivos de las mejores marcas</p>
+      <a routerLink="/boutique" class="btn-boutique">Explorar Boutique</a>
+    </div>
+    <div class="boutique-image">
+      <img src="assets/images/BOUTIQUE.jpg" alt="VECSA Boutique" onerror="this.style.display='none'">
+    </div>
+  </section>
+
+</div>

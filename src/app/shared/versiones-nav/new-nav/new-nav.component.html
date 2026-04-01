@@ -33,37 +33,99 @@
       </div>
       
       <!-- Desktop Navigation -->
-      <nav class="lg:flex items-center space-x-8">
-        <a routerLink="/compra-tu-auto" class="text-gray-600 hover:text-gray-900 transition-colors text-sm font-medium">Vehículos</a>
-        <a routerLink="/boutique" class="text-gray-600 hover:text-gray-900 transition-colors text-sm font-medium">Boutique</a>
-        <a routerLink="/rewards" class="text-gray-600 hover:text-gray-900 transition-colors text-sm font-medium">Rewards</a>
-        <a routerLink="/experience" class="text-gray-600 hover:text-gray-900 transition-colors text-sm font-medium">Experience</a>
-        <a routerLink="/car-care" class="text-gray-600 hover:text-gray-900 transition-colors text-sm font-medium">Car Care</a>
-        <a routerLink="/promociones" class="text-gray-600 hover:text-gray-900 transition-colors text-sm font-medium">Promociones</a>
+      <nav class="hidden lg:flex items-stretch self-stretch space-x-8">
+        <a routerLink="/compra-tu-auto" routerLinkActive="nav-active" class="nav-link text-gray-600 hover:text-gray-900 transition-colors text-sm font-medium">Vehículos</a>
+        <a routerLink="/boutique" routerLinkActive="nav-active" class="nav-link text-gray-600 hover:text-gray-900 transition-colors text-sm font-medium">Boutique</a>
+        <a routerLink="/rewards" routerLinkActive="nav-active" class="nav-link text-gray-600 hover:text-gray-900 transition-colors text-sm font-medium">Rewards</a>
+        <a routerLink="/experience" routerLinkActive="nav-active" class="nav-link text-gray-600 hover:text-gray-900 transition-colors text-sm font-medium">Experience</a>
+        <a routerLink="/carcare" routerLinkActive="nav-active" class="nav-link text-gray-600 hover:text-gray-900 transition-colors text-sm font-medium">Car Care</a>
+        <a routerLink="/promociones" routerLinkActive="nav-active" class="nav-link text-gray-600 hover:text-gray-900 transition-colors text-sm font-medium">Promociones</a>
       </nav>
       
       <!-- Right Side Actions & Mobile Menu -->
       <div class="flex items-center space-x-4">
-        <!-- Session Management -->
-        <ng-container *ngIf="isLoggedIn; else showLogin">
-          <button mat-button [matMenuTriggerFor]="menu" class="text-gray-600 hover:text-gray-900 transition-colors text-sm font-medium flex items-center">
-            <img [src]="user?.profile?.picture || 'assets/iconos_avatares/default-avatar.png'" alt="Avatar" class="w-6 h-6 rounded-full mr-2 border border-white/20">
-            <span *ngIf="user?.profile?.name as userName">{{ userName.split(' ')[0] }}</span>
-          </button>
-          <mat-menu #menu="matMenu">
-            <a mat-menu-item routerLink="/auth/account/profile">Mi Perfil</a>
-            <a mat-menu-item (click)="logout()">Cerrar Sesión</a>
-          </mat-menu>
-        </ng-container>
-        <ng-template #showLogin>
-          <a routerLink="/auth/login" class="text-gray-600 hover:text-gray-900 transition-colors text-sm font-medium">Iniciar Sesión</a>
-        </ng-template>
+        <!-- Cart icon (always visible) -->
+        <button class="cart-btn" (click)="toggleCartDrawer()" title="Mi carrito">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+          </svg>
+          <span class="cart-badge" *ngIf="cartCount > 0">{{ cartCount }}</span>
+        </button>
+
+        <!-- Session Management (desktop only) -->
+        <div class="hidden lg:flex items-center">
+          <ng-container *ngIf="isLoggedIn; else showLogin">
+            <button mat-button [matMenuTriggerFor]="menu" class="text-gray-600 hover:text-gray-900 transition-colors text-sm font-medium flex items-center">
+              <img [src]="user?.profile?.picture || 'assets/icons/profile.svg'" alt="Avatar" class="w-6 h-6 rounded-full mr-2 border border-white/20">
+              <span *ngIf="user?.profile?.name as userName">{{ userName.split(' ')[0] }}</span>
+            </button>
+            <mat-menu #menu="matMenu">
+              <a mat-menu-item [routerLink]="url_dashboard">Mi Perfil</a>
+              <a mat-menu-item (click)="logout()">Cerrar Sesión</a>
+            </mat-menu>
+          </ng-container>
+          <ng-template #showLogin>
+            <a routerLink="/auth/login" class="text-gray-600 hover:text-gray-900 transition-colors text-sm font-medium">Iniciar Sesión</a>
+          </ng-template>
+        </div>
 
         <!-- Mobile Menu Button -->
-        <button class="lg:hidden text-gray-800 hover:text-gray-900">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+        <button class="lg:hidden text-gray-800 hover:text-gray-900" (click)="mobileOpen = !mobileOpen">
+          <svg *ngIf="!mobileOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+          <svg *ngIf="mobileOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
       </div>
     </div>
   </div>
+
+  <!-- Mobile Sidebar Overlay -->
+  <div class="mobile-overlay" *ngIf="mobileOpen" (click)="mobileOpen = false"></div>
+
+  <!-- Mobile Sidebar -->
+  <aside class="mobile-sidebar" [class.mobile-sidebar--open]="mobileOpen">
+    <div class="mobile-sidebar-header">
+      <span class="mobile-sidebar-title">Menú</span>
+      <button class="mobile-sidebar-close" (click)="mobileOpen = false">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+    <nav class="mobile-sidebar-nav">
+      <a routerLink="/compra-tu-auto" routerLinkActive="mobile-active" class="mobile-link" (click)="mobileOpen = false">
+        <span class="material-icons mobile-icon">directions_car</span> Vehículos
+      </a>
+      <a routerLink="/boutique" routerLinkActive="mobile-active" class="mobile-link" (click)="mobileOpen = false">
+        <span class="material-icons mobile-icon">storefront</span> Boutique
+      </a>
+      <a routerLink="/rewards" routerLinkActive="mobile-active" class="mobile-link" (click)="mobileOpen = false">
+        <span class="material-icons mobile-icon">emoji_events</span> Rewards
+      </a>
+      <a routerLink="/experience" routerLinkActive="mobile-active" class="mobile-link" (click)="mobileOpen = false">
+        <span class="material-icons mobile-icon">auto_awesome</span> Experience
+      </a>
+      <a routerLink="/carcare" routerLinkActive="mobile-active" class="mobile-link" (click)="mobileOpen = false">
+        <span class="material-icons mobile-icon">build</span> Car Care
+      </a>
+      <a routerLink="/promociones" routerLinkActive="mobile-active" class="mobile-link" (click)="mobileOpen = false">
+        <span class="material-icons mobile-icon">local_offer</span> Promociones
+      </a>
+      <div class="mobile-divider"></div>
+      <ng-container *ngIf="isLoggedIn; else mobileLogin">
+        <a [routerLink]="url_dashboard" class="mobile-link" (click)="mobileOpen = false">
+          <span class="material-icons mobile-icon">person</span> Mi Perfil
+        </a>
+        <button class="mobile-link mobile-logout" (click)="logout(); mobileOpen = false">
+          <span class="material-icons mobile-icon">logout</span> Cerrar Sesión
+        </button>
+      </ng-container>
+      <ng-template #mobileLogin>
+        <a routerLink="/auth/login" class="mobile-link" (click)="mobileOpen = false">
+          <span class="material-icons mobile-icon">login</span> Iniciar Sesión
+        </a>
+      </ng-template>
+    </nav>
+  </aside>
 </header>
+
+<!-- Cart Drawer -->
+<app-cart-drawer *ngIf="cartDrawerOpen" (close)="closeCartDrawer()"></app-cart-drawer>

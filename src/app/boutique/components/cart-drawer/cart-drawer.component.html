@@ -1,0 +1,90 @@
+<!-- Backdrop -->
+<div class="cd-backdrop" (click)="close.emit()"></div>
+
+<!-- Drawer panel -->
+<div class="cd-panel">
+
+  <!-- Header -->
+  <div class="cd-header">
+    <div class="cd-header-left">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+        <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>
+      </svg>
+      <span>Mi carrito</span>
+      <span class="cd-count" *ngIf="itemCount > 0">{{ itemCount }}</span>
+    </div>
+    <button class="cd-close" (click)="close.emit()" aria-label="Cerrar carrito">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M18 6L6 18M6 6l12 12"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div class="cd-loading" *ngIf="isLoading">
+    <div class="cd-spinner"></div>
+  </div>
+
+  <!-- Empty -->
+  <div class="cd-empty" *ngIf="!isLoading && isEmpty">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+      <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>
+    </svg>
+    <p>Tu carrito está vacío</p>
+    <a routerLink="/boutique" (click)="close.emit()" class="cd-shop-link">Explorar boutique →</a>
+  </div>
+
+  <!-- Items -->
+  <div class="cd-items" *ngIf="!isLoading && !isEmpty">
+    <div
+      *ngFor="let item of cart!.items"
+      class="cd-item"
+      [class.cd-item-removing]="removingItems.has(item.uuid)"
+    >
+      <!-- Image -->
+      <a [routerLink]="['/boutique/product', item.product.uuid]" (click)="close.emit()" class="cd-item-img-wrap">
+        <img [src]="getItemImage(item)" [alt]="item.product.name" class="cd-item-img">
+      </a>
+
+      <!-- Info -->
+      <div class="cd-item-info">
+        <a [routerLink]="['/boutique/product', item.product.uuid]" (click)="close.emit()" class="cd-item-name">
+          {{ item.product.name }}
+        </a>
+        <div class="cd-item-meta">
+          <span class="cd-item-qty">× {{ item.quantity }}</span>
+          <span class="cd-item-price">{{ item.subtotal | currency:'MXN':'symbol-narrow':'1.2-2' }}</span>
+        </div>
+      </div>
+
+      <!-- Remove -->
+      <button
+        class="cd-item-remove"
+        (click)="removeItem(item)"
+        [disabled]="removingItems.has(item.uuid)"
+        aria-label="Eliminar"
+      >
+        <svg viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="cd-footer" *ngIf="!isLoading && !isEmpty">
+    <div class="cd-total-row">
+      <span>Total</span>
+      <span class="cd-total-amount">{{ total | currency:'MXN':'symbol-narrow':'1.2-2' }}</span>
+    </div>
+    <button class="cd-btn-checkout" (click)="goToCheckout()">
+      Proceder al pago
+    </button>
+    <button class="cd-btn-cart" (click)="goToCart()">
+      Ver carrito completo
+    </button>
+  </div>
+
+</div>

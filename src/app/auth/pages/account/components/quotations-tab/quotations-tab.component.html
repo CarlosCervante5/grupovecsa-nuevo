@@ -1,0 +1,45 @@
+<!-- Loading -->
+<div class="tab-loading" *ngIf="loading">
+  <div class="tab-spinner"></div>
+  <span>Cargando cotizaciones...</span>
+</div>
+
+<!-- Error -->
+<div class="tab-error" *ngIf="!loading && error">
+  <span class="material-icons tab-error-icon">error_outline</span>
+  <p>Error al cargar las cotizaciones. Intenta de nuevo.</p>
+  <button class="tab-retry-btn" (click)="retry()">Reintentar</button>
+</div>
+
+<!-- Empty -->
+<div class="tab-empty" *ngIf="!loading && !error && quotations.length === 0 && loaded">
+  <span class="material-icons tab-empty-icon">directions_car</span>
+  <p class="tab-empty-title">No tienes cotizaciones registradas</p>
+  <p class="tab-empty-sub">Solicita una valuación de tu vehículo</p>
+</div>
+
+<!-- Quotations List -->
+<div class="quotations-list" *ngIf="!loading && !error && quotations.length > 0">
+  <div class="quotation-card" *ngFor="let q of quotations">
+    <div class="quot-header">
+      <span class="quot-vehicle">{{ getVehicleInfo(q) }}</span>
+      <span class="status-badge" [style.background]="getStatusColor(q.status)">
+        {{ getStatusLabel(q.status) }}
+      </span>
+    </div>
+    <div class="quot-details">
+      <span *ngIf="getVehicleYear(q)" class="quot-detail">
+        <span class="material-icons quot-detail-icon">calendar_today</span>
+        {{ getVehicleYear(q) }}
+      </span>
+      <span *ngIf="getVehicleMileage(q)" class="quot-detail">
+        <span class="material-icons quot-detail-icon">speed</span>
+        {{ getVehicleMileage(q) }} km
+      </span>
+      <span class="quot-detail">
+        <span class="material-icons quot-detail-icon">schedule</span>
+        {{ q.created_at | date:'dd/MM/yyyy' }}
+      </span>
+    </div>
+  </div>
+</div>

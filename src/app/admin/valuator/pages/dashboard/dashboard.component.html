@@ -1,2 +1,38 @@
-<app-new-nav></app-new-nav>
-<app-overview [overview]="itemOverview" [url_index]="'/admin/valuator'"></app-overview>
+<div class="dashboard-container">
+  <h1 class="dashboard-title">Dashboard</h1>
+  <p class="dashboard-subtitle">Panel de Valuador — Resumen de valuaciones</p>
+
+  <!-- Stat Cards -->
+  <div class="stats-grid">
+    <div class="stat-card" *ngFor="let stat of stats">
+      <div class="stat-icon" [style.background]="stat.color + '18'" [style.color]="stat.color">
+        <span class="material-icons">{{ stat.icon }}</span>
+      </div>
+      <div class="stat-info">
+        <div class="stat-value" *ngIf="!stat.loading">{{ stat.value }}</div>
+        <div class="stat-value-loading" *ngIf="stat.loading"><span class="spinner-sm"></span></div>
+        <div class="stat-label">{{ stat.label }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="charts-grid">
+    <div class="chart-card">
+      <h3 class="chart-title"><span class="material-icons">pie_chart</span> Valuaciones por estatus</h3>
+      <div class="chart-container" #valuationStatusChart></div>
+    </div>
+  </div>
+
+  <!-- Quick Nav -->
+  <div class="quick-nav-section">
+    <h3 class="section-title"><span class="material-icons">apps</span> Acceso rápido</h3>
+    <div class="quick-nav-grid">
+      <div class="quick-nav-card" *ngFor="let link of quickLinks" (click)="navigateTo(link.route)">
+        <span class="material-icons quick-nav-icon">{{ link.icon }}</span>
+        <span class="quick-nav-label">{{ link.label }}</span>
+        <span class="material-icons quick-nav-arrow">chevron_right</span>
+      </div>
+    </div>
+  </div>
+</div>

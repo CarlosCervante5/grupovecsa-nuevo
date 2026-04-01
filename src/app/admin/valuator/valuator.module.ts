@@ -16,6 +16,7 @@ import { NewNavComponent } from 'src/app/shared/versiones-nav/new-nav/new-nav.co
 import { BodyworkPaintValuatorFormComponent } from './components/bodywork-paint-valuator-form/bodywork-paint-valuator-form.component';
 import { QuoteSellCarRequestComponent } from './pages/quote-sell-car-request/quote-sell-car-request.component';
 import { DocumentationVehicleComponent } from './components/documentation-vehicle/documentation-vehicle.component';
+import { ValuatorLayoutComponent } from './pages/layout/valuator-layout.component';
 import { SkCubeComponent } from "@components/sk-cube/sk-cube.component";
 
 
@@ -30,7 +31,8 @@ import { SkCubeComponent } from "@components/sk-cube/sk-cube.component";
     InternalRevisionPictureComponent,
     QuoteSellCarRequestComponent,
     SparePartsFormComponent,
-    DocumentationVehicleComponent
+    DocumentationVehicleComponent,
+    ValuatorLayoutComponent
   ],
   imports: [
     AdminModule,

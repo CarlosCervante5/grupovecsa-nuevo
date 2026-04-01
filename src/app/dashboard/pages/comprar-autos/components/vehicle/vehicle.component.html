@@ -1,38 +1,22 @@
- <div class="card shadow bg-body   h-100 card-element" style="padding-bottom: 14px;   border-radius: 15px !important; "> <!-- style="width: 18rem;"-->
-    
-    <div class="price-container border-radius: 12px;">
-        <div > <!--class="cover-image"-->
-            <img loading="lazy" [src]="vehicle_image" class="card-img-top fade-in-image"  alt="{{ vehicle.name | titlecase }}">
-        </div>
-        
-        <div class="price-align">
-            <div class="price" *ngIf="!vehicle.offer_price">
-                ${{ vehicle.sale_price | number:'' }}
-                 <!-- $XXXXX -->
-            </div>
-            
-            <div class="price" *ngIf=" vehicle.offer_price" > 
-                ${{ vehicle.sale_price | number:'' }}
-                 <!-- $XXXXX -->
-                 <div class="my-tag">
-                    <div class="tag-choice" *ngIf=" vehicle.offer_price">
-                        <span class="badge rounded-pill price-promo" style="background: #1057DB;">¡PROMOCIÓN!</span>
-                    </div>
-                </div>
-            </div>
- 
-        </div>
+<div class="card-element">
+
+  <!-- Image + price overlay -->
+  <div class="price-container">
+    <img loading="lazy" [src]="vehicle_image" class="fade-in-image" alt="{{ vehicle.name | titlecase }}">
+    <div class="price-align">
+      <div class="price">
+        ${{ vehicle.sale_price | number:'' }}
+        <span class="price-promo" *ngIf="vehicle.offer_price">¡PROMO!</span>
+      </div>
     </div>
-    
-    <div class="card-body font-generic">
-            <h2 class="card-text">{{ vehicle.name}}</h2>
-            <p class="card-text">{{ vehicle.mileage | number:'' }} km • {{ vehicle.transmission | titlecase }} • Año: {{ vehicle.model.year }}
-                • Ubicación: {{ vehicle.dealership.location | titlecase }}</p>
-            <hr>
-            <p *ngFor="let camp of vehicle.campaigns">
-                {{camp.name}}
-            </p>
-            <!-- <span class=" bmw" style=" color: #008bcc !important; font-weight: bold !important;" > {{ vehicle.promotion  }}</span> -->
-    </div>
+  </div>
+
+  <!-- Info -->
+  <div class="card-body">
+    <h2>{{ vehicle.name }}</h2>
+    <p>{{ vehicle.mileage | number:'' }} km &nbsp;·&nbsp; {{ vehicle.transmission | titlecase }} &nbsp;·&nbsp; {{ vehicle.model.year }}</p>
+    <p>{{ vehicle.dealership.location | titlecase }}</p>
+    <p *ngFor="let camp of vehicle.campaigns">{{ camp.name }}</p>
+  </div>
 
 </div>

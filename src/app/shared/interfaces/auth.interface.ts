@@ -32,6 +32,7 @@
         user:  UserL;
         role: string;
         profile: CustomerProfile;
+        permissions?: string[];
     }
 
     export interface UserL {

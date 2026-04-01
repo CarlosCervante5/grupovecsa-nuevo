@@ -1,0 +1,157 @@
+<!-- ===== HERO SLIDER ===== -->
+<section class="hero-slider">
+  @for (slide of heroSlides; track slide.bg; let i = $index) {
+    <div class="hero-slide" [class.active]="i === currentSlide" [class]="'hero-slide ' + slide.bg + (i === currentSlide ? ' active' : '')"
+         [style.background-image]="slide.desktop_image_path ? 'url(' + slide.desktop_image_path + ')' : ''">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <div class="hero-badge">BMW Group Vecsa</div>
+        <h1 class="hero-title">{{ slide.title }}</h1>
+        <p class="hero-subtitle">{{ slide.subtitle }}</p>
+        <button class="hero-cta" (click)="slide.cta_link ? navigateTo(slide.cta_link) : scrollToProducts()">
+          {{ slide.cta }}
+          <span class="hero-cta-arrow">→</span>
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Slider Controls -->
+  <button class="slider-btn slider-prev" (click)="prevSlide()">
+    <span>&#8249;</span>
+  </button>
+  <button class="slider-btn slider-next" (click)="nextSlide()">
+    <span>&#8250;</span>
+  </button>
+
+  <!-- Dots -->
+  <div class="slider-dots">
+    @for (slide of heroSlides; track slide.bg; let i = $index) {
+      <button class="dot" [class.active]="i === currentSlide" (click)="goToSlide(i)"></button>
+    }
+  </div>
+
+  <!-- Scroll indicator -->
+  <div class="scroll-indicator" (click)="scrollToProducts()">
+    <span>Explorar</span>
+    <div class="scroll-arrow">↓</div>
+  </div>
+</section>
+
+<!-- ===== FEATURED PRODUCTS CAROUSEL ===== -->
+<section class="carousel-section featured-section">
+  <div class="carousel-inner">
+    <div class="carousel-header">
+      <div>
+        <span class="carousel-label">Colección</span>
+        <h2 class="carousel-title">Productos Destacados</h2>
+      </div>
+      <button class="carousel-see-all" [routerLink]="['/boutique/shop']">
+        Ver todos <mat-icon>arrow_forward</mat-icon>
+      </button>
+    </div>
+
+    @if (featuredLoading) {
+      <div class="carousel-track">
+        @for (n of [1,2,3,4,5]; track n) {
+          <div class="carousel-skeleton">
+            <div class="cs-img"></div>
+            <div class="cs-line"></div>
+            <div class="cs-line short"></div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="carousel-track" #featuredTrack>
+        @for (product of featuredProducts; track product.uuid) {
+          <a class="carousel-card" [routerLink]="['/boutique/product', product.uuid]">
+            <div class="cc-img-wrap">
+              @if (product.images && product.images.length > 0) {
+                <img [src]="product.images[0].image_path" [alt]="product.name" class="cc-img" />
+              } @else {
+                <div class="cc-img-placeholder"><mat-icon>image_not_supported</mat-icon></div>
+              }
+              @if (product.stock === 0) {
+                <span class="cc-badge-out">Agotado</span>
+              }
+            </div>
+            <div class="cc-body">
+              <span class="cc-category">{{ product.category?.name }}</span>
+              <p class="cc-name">{{ product.name }}</p>
+              <p class="cc-price">{{ product.price | currency:'MXN':'symbol-narrow':'1.2-2' }}</p>
+            </div>
+          </a>
+        }
+      </div>
+    }
+  </div>
+</section>
+
+<!-- ===== CATEGORIES CAROUSEL ===== -->
+<section class="carousel-section categories-carousel-section">
+  <div class="carousel-inner">
+    <div class="carousel-header">
+      <div>
+        <span class="carousel-label">Explorar</span>
+        <h2 class="carousel-title">Categorías</h2>
+      </div>
+    </div>
+
+    @if (safeCategories.length === 0) {
+      <div class="carousel-track">
+        @for (n of [1,2,3,4,5]; track n) {
+          <div class="cat-card-skeleton"></div>
+        }
+      </div>
+    } @else {
+      <div class="carousel-track">
+        @for (cat of safeCategories; track cat.uuid) {
+          <div
+            class="cat-card"
+            [class.active]="selectedCategoryUuid === cat.uuid"
+            [routerLink]="['/boutique/shop', cat.uuid]">
+            <div class="cat-card-icon"><mat-icon>{{ getCategoryIcon(cat.name) }}</mat-icon></div>
+            <span class="cat-card-name">{{ cat.name }}</span>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</section>
+
+<!-- ===== BENEFITS BAR ===== -->
+<section class="benefits-bar">
+  <div class="benefits-inner">
+    <div class="benefit-item">
+      <mat-icon class="benefit-icon">local_shipping</mat-icon>
+      <div class="benefit-text">
+        <span class="benefit-title">Envíos a todo México</span>
+        <span class="benefit-desc">Envíos gratis en compras mínimas de $2000</span>
+      </div>
+    </div>
+    <div class="benefit-divider"></div>
+    <div class="benefit-item">
+      <mat-icon class="benefit-icon">support_agent</mat-icon>
+      <div class="benefit-text">
+        <span class="benefit-title">Soporte</span>
+        <span class="benefit-desc">Te ayudamos en todas tus compras.</span>
+      </div>
+    </div>
+    <div class="benefit-divider"></div>
+    <div class="benefit-item">
+      <mat-icon class="benefit-icon">verified_user</mat-icon>
+      <div class="benefit-text">
+        <span class="benefit-title">Compra 100% segura</span>
+        <span class="benefit-desc">Contamos con formas de pago confiables.</span>
+      </div>
+    </div>
+    <div class="benefit-divider"></div>
+    <div class="benefit-item">
+      <mat-icon class="benefit-icon">local_offer</mat-icon>
+      <div class="benefit-text">
+        <span class="benefit-title">Descuentos</span>
+        <span class="benefit-desc">Pregunta por nuestras promociones.</span>
+      </div>
+    </div>
+  </div>
+</section>

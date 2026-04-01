@@ -9,6 +9,11 @@ import { AdministradorGuard } from './administrador/guards/administrador.guard';
 import { AppointmentManagerGuard } from './appointment-manager/guards/appointment_manager.guard';
 
 
+import { DeveloperGuard } from './developer/guards/developer.guard';
+import { BenchmarkGuard } from './shared/benchmark/benchmark.guard';
+import { StoreManagementGuard } from './store/guards/store-management.guard';
+import { GerenteGuard } from './gerente/guards/gerente.guard';
+
 const routes: Routes = [  
   { path: 'marketing',
     loadChildren: () => import('./marketing/marketing.module').then(m => m.MarketingModule), 
@@ -51,6 +56,26 @@ const routes: Routes = [
   },
   { path: 'spare_parts',
     loadChildren: () => import('./spare-parts/spare-parts.module').then(m => m.SparePartsModule)
+  },
+  { path: 'developer',
+    loadChildren: () => import('./developer/developer.module').then(m => m.DeveloperModule),
+    canActivate: [DeveloperGuard],
+    canLoad: [DeveloperGuard],
+  },
+  { path: 'benchmark',
+    loadChildren: () => import('./shared/benchmark/benchmark.module').then(m => m.BenchmarkModule),
+    canActivate: [BenchmarkGuard],
+    canLoad: [BenchmarkGuard],
+  },
+  { path: 'store',
+    loadChildren: () => import('./store/store.module').then(m => m.StoreModule),
+    canActivate: [StoreManagementGuard],
+    canLoad: [StoreManagementGuard],
+  },
+  { path: 'gerente',
+    loadChildren: () => import('./gerente/gerente.module').then(m => m.GerenteModule),
+    canActivate: [GerenteGuard],
+    canLoad: [GerenteGuard],
   },
   { path: '**', redirectTo: '404' }
 ];

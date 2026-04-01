@@ -1,0 +1,243 @@
+<!-- Hero Section with Dynamic Slider -->
+<section
+  *ngIf="slides.length > 0"
+  class="relative h-[80vh] md:h-[85vh] w-full overflow-hidden"
+>
+  <!-- Slider Container -->
+  <div
+    class="relative w-full h-full"
+    (mouseenter)="onMouseEnter()"
+    (mouseleave)="onMouseLeave()"
+    (touchstart)="onTouchStart($event)"
+    (touchend)="onTouchEnd($event)"
+  >
+    <!-- Slides -->
+    <div
+      *ngFor="let slide of slides; let i = index"
+      class="slide absolute inset-0 w-full h-full transition-opacity duration-1000"
+      [style.opacity]="i === currentSlide ? '1' : '0'"
+      [style.z-index]="i === currentSlide ? '20' : '10'"
+    >
+      <!-- Gradient Overlay -->
+      <div class="absolute inset-0 slide-mobile-gradient z-10"></div>
+
+      <!-- Desktop Image -->
+      <img
+        [src]="slide.desktop_image_path"
+        [alt]="slide.title"
+        class="hidden md:block w-full h-full object-cover object-right md:object-center"
+      />
+
+      <!-- Mobile Image -->
+      <img
+        [src]="slide.mobile_image_path"
+        [alt]="slide.title"
+        class="block md:hidden w-full h-full object-cover object-center"
+      />
+
+      <!-- Slide Content -->
+      <div class="absolute inset-0 z-20">
+        <!-- Mobile Layout -->
+        <div
+          class="h-full flex flex-col justify-between items-center text-center py-12 text-white md:hidden"
+        >
+          <div class="container mx-auto px-4">
+            <h1
+              class="text-4xl font-semibold [text-shadow:_0_2px_10px_rgb(0_0_0_/_60%)] mobile-title-spacing"
+            >
+              {{ slide.title }}
+            </h1>
+          </div>
+          <div class="container mx-auto px-4">
+            <p
+              *ngIf="slide.subtitle"
+              class="text-lg mb-6 [text-shadow:_0_2px_8px_rgb(0_0_0_/_50%)]"
+            >
+              {{ slide.subtitle }}
+            </p>
+
+            <!-- Offer Display -->
+            <div class="mb-6">
+              <p
+                *ngIf="slide.offer_main"
+                class="text-lg mb-4 [text-shadow:_0_2px_8px_rgb(0_0_0_/_50%)]"
+              >
+                <span class="font-bold">{{ slide.offer_main }}</span>
+                <span *ngIf="slide.offer_main_text" class="font-bold">{{
+                  slide.offer_main_text
+                }}</span>
+                <span *ngIf="slide.offer_sub" class="font-bold">{{
+                  slide.offer_sub
+                }}</span>
+              </p>
+
+              <p
+                *ngIf="slide.offer_secondary"
+                class="text-lg mb-4 [text-shadow:_0_2px_8px_rgb(0_0_0_/_50%)]"
+              >
+                <span class="font-bold">{{ slide.offer_secondary }}</span>
+                <span
+                  *ngIf="slide.offer_secondary_text"
+                  class="font-bold"
+                  >{{ slide.offer_secondary_text }}</span
+                >
+              </p>
+            </div>
+
+            <div
+              class="flex flex-col sm:flex-row justify-center items-center gap-3"
+            >
+              <a
+                [href]="slide.button_link || '#'"
+                target="_blank"
+                class="inline-block w-full sm:w-auto bg-white/10 backdrop-blur-sm border border-white/50 text-white px-8 py-3 rounded-full font-bold hover:bg-white/20 hover:border-white/80 transition-all duration-300 shadow-lg text-center"
+              >
+                {{ slide.button_text || 'Más Información' }}
+              </a>
+            </div>
+
+            <p
+              *ngIf="slide.disclaimer"
+              class="text-xs text-white/50 mt-6 max-w-2xl mx-auto [text-shadow:_0_1px_4px_rgb(0_0_0_/_80%)]"
+            >
+              {{ slide.disclaimer }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Desktop Layout -->
+        <div class="hidden md:flex justify-center h-full">
+          <div
+            class="container mx-auto px-4 md:px-6 lg:px-8 flex items-center h-full"
+          >
+            <div class="max-w-3xl">
+              <h1
+                class="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight"
+              >
+                {{ slide.title }}
+              </h1>
+
+              <p *ngIf="slide.subtitle" class="text-xl text-white mb-4">
+                {{ slide.subtitle }}
+              </p>
+
+              <!-- Offer Display -->
+              <div class="flex items-center gap-8 mb-6">
+                <div *ngIf="slide.offer_main">
+                  <span
+                    class="text-5xl md:text-6xl font-bold text-white"
+                    >{{ slide.offer_main }}</span
+                  >
+                  <span
+                    *ngIf="slide.offer_main_text"
+                    class="text-xl md:text-2xl text-white ml-2"
+                    >{{ slide.offer_main_text }}</span
+                  >
+                  <div
+                    *ngIf="slide.offer_sub"
+                    class="text-sm text-white/80"
+                  >
+                    {{ slide.offer_sub }}
+                  </div>
+                </div>
+
+                <div
+                  *ngIf="slide.offer_main && slide.offer_secondary"
+                  class="text-center"
+                >
+                  <span class="text-lg text-white/80">ó</span>
+                </div>
+
+                <div *ngIf="slide.offer_secondary">
+                  <span
+                    class="text-4xl md:text-5xl font-bold text-white"
+                    >{{ slide.offer_secondary }}</span
+                  >
+                  <div
+                    *ngIf="slide.offer_secondary_text"
+                    class="text-sm text-white/80"
+                  >
+                    {{ slide.offer_secondary_text }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="mb-6">
+                <a
+                  [href]="slide.button_link || '#'"
+                  target="_blank"
+                  class="inline-block border-2 border-white text-white px-4 sm:px-8 py-4 rounded-full font-medium hover:bg-white hover:text-[#111827] transition-colors text-sm sm:text-base"
+                >
+                  {{ slide.button_text || 'Más Información' }}
+                </a>
+              </div>
+
+              <p
+                *ngIf="slide.disclaimer"
+                class="text-xs text-white/60 mt-6 max-w-2xl"
+              >
+                {{ slide.disclaimer }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Arrows -->
+    <button
+      (click)="onArrowClick('prev')"
+      class="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 bg-[#111827]/20 hover:bg-[#111827]/40 text-white rounded-full flex items-center justify-center transition-colors backdrop-blur-sm"
+      aria-label="Slide anterior"
+    >
+      <svg
+        class="w-6 h-6"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M15 19l-7-7 7-7"
+        ></path>
+      </svg>
+    </button>
+    <button
+      (click)="onArrowClick('next')"
+      class="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 bg-[#111827]/20 hover:bg-[#111827]/40 text-white rounded-full flex items-center justify-center transition-colors backdrop-blur-sm"
+      aria-label="Slide siguiente"
+    >
+      <svg
+        class="w-6 h-6"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M9 5l7 7-7 7"
+        ></path>
+      </svg>
+    </button>
+
+    <!-- Slide Indicators (Dots) -->
+    <div
+      class="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex space-x-3"
+    >
+      <button
+        *ngFor="let slide of slides; let i = index"
+        (click)="onIndicatorClick(i)"
+        class="w-3 h-3 rounded-full transition-all duration-300"
+        [ngClass]="{
+          'bg-white opacity-100': i === currentSlide,
+          'bg-white/40 opacity-60': i !== currentSlide
+        }"
+        [attr.aria-label]="'Ir a slide ' + (i + 1)"
+      ></button>
+    </div>
+  </div>
+</section>

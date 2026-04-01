@@ -14,9 +14,9 @@ import { CarCareComponent } from './dashboard/pages/car-care/car-care.component'
 
 
 const routes: Routes = [
-  // { path: '', component: RidersComponent},
-  { path: '', loadChildren: () => import('./dashboard/pages/comprar-autos/comprar-autos.module').then(m => m.ComprarAutosModule) },
-  { path: 'promotions', component: EventsComponent },
+  { path: '', loadComponent: () => import('./home/home.component').then(m => m.HomeComponent) },
+  { path: 'compra-tu-auto', loadChildren: () => import('./dashboard/pages/comprar-autos/comprar-autos.module').then(m => m.ComprarAutosModule) },
+  { path: 'promociones', component: EventsComponent },
   { path: 'riders', component: RidersComponent },
   { path: 'carcare', component: CarCareComponent },
   { path: 'community', component: CommunityComponent },
@@ -28,6 +28,9 @@ const routes: Routes = [
   { path: 'landing', loadChildren: () => import('./landings/landings.module').then(m => m.LandingsModule) },
   { path: 'formrider', component: FormRiderComponent },
   { path: 'form-prospection', component: QuoteRequestComponent},
+  { path: 'boutique', loadChildren: () => import('./boutique/boutique.module').then(m => m.BoutiqueModule) },
+  { path: 'rewards', loadChildren: () => import('./rewards/rewards.module').then(m => m.RewardsModule) },
+  { path: 'experience', loadChildren: () => import('./experience/experience.module').then(m => m.ExperienceModule) },
   { path: '**', redirectTo: '404' },
 ];
 

@@ -1,0 +1,27 @@
+/* Gradient overlay for slides - mobile: bottom gradient, desktop: left gradient */
+.slide-mobile-gradient {
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(17, 24, 39, 0.3) 50%,
+    rgba(17, 24, 39, 0.8) 100%
+  );
+}
+
+@media (min-width: 768px) {
+  .slide-mobile-gradient {
+    background: linear-gradient(
+      to right,
+      rgba(17, 24, 39, 0.8) 0%,
+      rgba(17, 24, 39, 0.4) 50%,
+      transparent 100%
+    );
+  }
+}
+
+/* Mobile title top spacing */
+@media (max-width: 767px) {
+  .mobile-title-spacing {
+    margin-top: 5rem;
+  }
+}

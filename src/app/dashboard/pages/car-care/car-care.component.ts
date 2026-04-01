@@ -85,6 +85,11 @@ export class CarCareComponent {
         return this.form.get('hour')?.invalid && (this.form.get('hour')?.dirty || this.form.get('hour')?.touched);
     }
     
+    public onBrandChange(event: Event): void {
+        const value = (event.target as HTMLSelectElement).value;
+        this.otherB = value === 'OTRA MARCA';
+    }
+
     public onBrandSelected(event: MatSelectChange): void {
         const selectedBrand = event.value;
         if(selectedBrand == 'OTRA MARCA'){

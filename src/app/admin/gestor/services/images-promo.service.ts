@@ -32,11 +32,7 @@ export class ImagesPromoService {
   }
 
   public getCampaing (){
-
-    let user_token = localStorage.getItem('user_token');
-    let headers = new HttpHeaders().set('Authorization', `Bearer ${user_token}`);
-
-    return this._http.post<GetcampaingResponse>(`${this.url}/api/campaigns/active`, { headers });
+    return this._http.post<GetcampaingResponse>(`${this.url}/api/campaigns/active`, {});
   }
 
   public getPromotionsByBrand(brand: string): Observable<GetPromotionsByBrand>{

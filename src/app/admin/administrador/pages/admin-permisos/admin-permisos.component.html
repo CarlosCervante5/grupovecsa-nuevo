@@ -1,1 +1,87 @@
-<p>admin-permisos works!</p>
+<div class="permisos-page">
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Matriz Rol-Permisos</h1>
+      <p class="page-subtitle">Asigna permisos a cada rol del sistema</p>
+    </div>
+    <button class="action-btn" (click)="loadMatrix()">
+      <span class="material-icons">refresh</span> Recargar
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="matrixLoading">
+    <div class="spinner"></div>
+    <p>Cargando matriz...</p>
+  </div>
+
+  <!-- Error -->
+  <div class="empty-state" *ngIf="matrixError && !matrixLoading">
+    <span class="material-icons">error</span>
+    <p>{{ matrixError }}</p>
+    <button class="action-btn primary-btn" (click)="loadMatrix()">Reintentar</button>
+  </div>
+
+  <!-- Permisos del Sistema -->
+  <div *ngIf="!matrixLoading && !matrixError && matrixRoles.length > 0">
+
+    <h3 class="section-title">Permisos del Sistema</h3>
+    <div class="table-wrap">
+      <table class="matrix-table">
+        <thead>
+          <tr>
+            <th class="th-role">Rol</th>
+            <th *ngFor="let perm of matrixPermissions" class="th-perm">{{ perm.name }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let role of matrixRoles">
+            <td class="cell-role">
+              <span class="role-badge" [ngClass]="'role-' + role.name">{{ role.name }}</span>
+            </td>
+            <td *ngFor="let perm of matrixPermissions" class="cell-check">
+              <label class="toggle-switch">
+                <input type="checkbox"
+                  [checked]="isActive(role, perm.name)"
+                  (change)="togglePermission(role, perm)"
+                  [disabled]="matrixSaving[role.id + '-' + perm.id]" />
+                <span class="toggle-slider"></span>
+              </label>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="section-title">Acceso a Módulos de Admin</h3>
+    <div class="table-wrap">
+      <table class="matrix-table">
+        <thead>
+          <tr>
+            <th class="th-role">Rol</th>
+            <th *ngFor="let mod of adminModules" class="th-perm">{{ mod }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let role of matrixRoles">
+            <td class="cell-role">
+              <span class="role-badge" [ngClass]="'role-' + role.name">{{ role.name }}</span>
+            </td>
+            <td *ngFor="let mod of adminModules" class="cell-check">
+              <label class="toggle-switch">
+                <input type="checkbox"
+                  [checked]="isActive(role, 'access ' + mod)"
+                  (change)="toggleModuleAccess(role, mod)"
+                  [disabled]="matrixSaving[role.id + '-access-' + mod]" />
+                <span class="toggle-slider"></span>
+              </label>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+</div>

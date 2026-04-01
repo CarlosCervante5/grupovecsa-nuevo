@@ -1,0 +1,50 @@
+<section class="py-20 bg-gray-900 overflow-hidden" *ngIf="testimonials.length > 0">
+  <div class="container mx-auto px-4 md:px-6 lg:px-8">
+    <div class="text-center mb-12">
+      <span class="inline-block bg-blue-600/20 text-blue-400 text-sm font-semibold px-4 py-1.5 rounded-full mb-4 tracking-wide uppercase">Owners Club</span>
+      <h2 class="text-4xl font-bold text-white mb-4" style="font-family: 'Oswald', sans-serif;">Momentos que nos llenan de orgullo</h2>
+      <p class="text-xl text-gray-400 max-w-3xl mx-auto">Cada entrega es una historia de éxito. Conoce a nuestros clientes y sus nuevos compañeros de viaje.</p>
+    </div>
+
+    <div class="relative"
+         (mouseenter)="stopAutoPlay()"
+         (mouseleave)="startAutoPlay()"
+         (touchstart)="onTouchStart($event)"
+         (touchend)="onTouchEnd($event)">
+
+      <!-- Prev Button -->
+      <button (click)="prevSlide()"
+              class="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white w-10 h-10 rounded-full flex items-center justify-center transition-colors -ml-2 md:ml-0"
+              aria-label="Anterior">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+      </button>
+
+      <!-- Next Button -->
+      <button (click)="nextSlide()"
+              class="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white w-10 h-10 rounded-full flex items-center justify-center transition-colors -mr-2 md:mr-0"
+              aria-label="Siguiente">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+      </button>
+
+      <!-- Track -->
+      <div #track class="flex gap-6 transition-transform duration-500 ease-out px-6 md:px-12">
+        <div *ngFor="let t of testimonials"
+             class="sd-card flex-shrink-0 w-72 md:w-80 rounded-2xl overflow-hidden group">
+          <img [src]="t.image_path"
+               [alt]="t.alt"
+               class="w-full aspect-[4/3] object-cover rounded-2xl group-hover:scale-105 transition-transform duration-500">
+        </div>
+      </div>
+    </div>
+
+    <!-- Dots -->
+    <div class="flex justify-center mt-12 gap-2">
+      <button *ngFor="let dot of dots; let i = index"
+              (click)="goToSlide(i)"
+              class="w-2.5 h-2.5 rounded-full transition-all duration-300"
+              [ngClass]="i === currentIndex ? 'bg-white w-8' : 'bg-white/30 hover:bg-white/50'"
+              [attr.aria-label]="'Ir a slide ' + (i + 1)">
+      </button>
+    </div>
+  </div>
+</section>

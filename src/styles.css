@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Admin theme overrides */
+@import url('assets/css/admin-theme.css');
+
 /* You can add global styles to this file, and also import other style files */
  /* styles.css o styles.scss */
 
@@ -22,7 +25,7 @@
 .mat-drawer-content{
     background-color: #fff;
     /* display: none; */
-    overflow-x: hidden !important;
+    overflow-x: clip !important;
 }
  
 .titles{
@@ -46,16 +49,12 @@
 
 
 html {
-    font-size: 62.5%; }
-    @media (max-width: 75em) {
-        html {
-        font-size: 56.25%; } }
-    @media (max-width: 56.25em) {
-        html {
-        font-size: 50%; } }
-    @media (min-width: 112.5em) {
-        html {
-        font-size: 75%; } 
+    font-size: 16px; }
+
+/* Override the reduced font-size when the home page is active.
+   The home page uses Tailwind rem-based utilities that expect 1rem = 16px. */
+html.home-page-active {
+    font-size: 16px !important;
 }
 
 body {

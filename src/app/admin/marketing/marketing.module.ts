@@ -13,8 +13,11 @@ import { UpdateImagesComponent } from './components/update-images/update-images.
 import { UpdateVehicleComponent } from './components/update-vehicle/update-vehicle.component';
 import { StoreVehicleComponent } from './components/store-vehicle/store-vehicle.component';
 import { AVehicleComponent } from './components/a-vehicle/a-vehicle.component';
-import { SkCubeComponent } from '@components/sk-cube/sk-cube.component'
-import { NewNavComponent } from 'src/app/shared/versiones-nav/new-nav/new-nav.component';
+import { SkCubeComponent } from '@components/sk-cube/sk-cube.component';
+import { HomeSlidesComponent } from './pages/home-slides/home-slides.component';
+import { HomeTestimonialsComponent } from './pages/home-testimonials/home-testimonials.component';
+import { BoutiqueBannersComponent } from './pages/boutique-banners/boutique-banners.component';
+import { MarketingLayoutComponent } from './pages/layout/marketing-layout.component';
 
 @NgModule({
   declarations: [
@@ -24,7 +27,11 @@ import { NewNavComponent } from 'src/app/shared/versiones-nav/new-nav/new-nav.co
     UpdateImagesComponent,
     UpdateVehicleComponent,
     StoreVehicleComponent,
-    AVehicleComponent    
+    AVehicleComponent,
+    HomeSlidesComponent,
+    HomeTestimonialsComponent,
+    BoutiqueBannersComponent,
+    MarketingLayoutComponent
   ],
   imports: [
     CommonModule,
@@ -34,8 +41,7 @@ import { NewNavComponent } from 'src/app/shared/versiones-nav/new-nav/new-nav.co
     AdminModule,
     DragDropModule,
     ReactiveFormsModule,
-    SkCubeComponent,
-    NewNavComponent
+    SkCubeComponent
   ]
 })
 export class MarketingModule { }

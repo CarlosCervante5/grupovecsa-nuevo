@@ -1,0 +1,479 @@
+<div class="dev-layout">
+
+  <!-- Sidebar -->
+  <aside class="dev-sidebar">
+    <div class="dev-brand">
+      <span class="material-icons dev-brand-icon">code</span>
+      <span class="dev-brand-name">Dev Panel</span>
+    </div>
+
+    <div class="dev-user">
+      <div class="dev-user-avatar">{{ user?.nickname?.charAt(0)?.toUpperCase() || 'D' }}</div>
+      <div class="dev-user-info">
+        <span class="dev-user-name">{{ user?.nickname || 'Developer' }}</span>
+        <span class="dev-user-role">{{ role }}</span>
+      </div>
+    </div>
+
+    <nav class="dev-nav">
+      <button class="dev-nav-item" [class.active]="activeSection === 'home'" (click)="selectSection('home')">
+        <span class="material-icons">dashboard</span>
+        Dashboard
+      </button>
+
+      <p class="dev-nav-label">CRUDs</p>
+      @for (s of sections; track s.key) {
+        <button class="dev-nav-item" [class.active]="activeSection === s.key" (click)="selectSection(s.key)">
+          <span class="material-icons">{{ s.icon }}</span>
+          {{ s.label }}
+        </button>
+      }
+    </nav>
+
+    <p class="dev-nav-label">Herramientas</p>
+    <button class="dev-nav-item" [class.active]="activeSection === 'role_matrix'" (click)="selectSection('role_matrix')">
+      <span class="material-icons">grid_on</span>
+      Matriz Rol-Permisos
+    </button>
+    <button class="dev-nav-item" [class.active]="activeSection === 'benchmark'" (click)="navigate('/admin/benchmark')">
+      <span class="material-icons">monitoring</span>
+      Benchmark ADS
+    </button>
+    <button class="dev-nav-item" [class.active]="activeSection === 'stripe_config'" (click)="selectSection('stripe_config')">
+      <span class="material-icons">credit_card</span>
+      Configuración Stripe
+    </button>
+
+    <button class="dev-logout" (click)="logout()">
+      <span class="material-icons">logout</span>
+      Cerrar sesión
+    </button>
+  </aside>
+
+  <!-- Main -->
+  <main class="dev-main">
+
+    <!-- HOME VIEW -->
+    @if (activeSection === 'home') {
+      <h1 class="dev-title">Panel de Desarrollo</h1>
+      <p class="dev-subtitle">Entorno de pruebas — VECSA</p>
+
+      <!-- Stats Grid -->
+      <div class="stats-grid">
+        @for (stat of stats; track stat.label) {
+          <div class="stat-card">
+            <div class="stat-icon" [style.background]="stat.color + '15'" [style.color]="stat.color">
+              <span class="material-icons">{{ stat.icon }}</span>
+            </div>
+            <div class="stat-info">
+              @if (stat.loading) {
+                <div class="stat-value-loading"><div class="spinner-sm"></div></div>
+              } @else {
+                <span class="stat-value">{{ stat.value }}</span>
+              }
+              <span class="stat-label">{{ stat.label }}</span>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Charts -->
+      <div class="charts-grid">
+        <div class="chart-card">
+          <h3 class="chart-title">
+            <span class="material-icons">bar_chart</span>
+            Pedidos por mes
+          </h3>
+          <div #ordersChart class="chart-container"></div>
+        </div>
+        <div class="chart-card">
+          <h3 class="chart-title">
+            <span class="material-icons">inventory</span>
+            Stock de productos
+          </h3>
+          <div #productsChart class="chart-container"></div>
+        </div>
+        <div class="chart-card">
+          <h3 class="chart-title">
+            <span class="material-icons">directions_car</span>
+            Vehículos por marca
+          </h3>
+          <div #vehiclesChart class="chart-container"></div>
+        </div>
+        <div class="chart-card">
+          <h3 class="chart-title">
+            <span class="material-icons">donut_large</span>
+            Estatus de pedidos
+          </h3>
+          <div #statusChart class="chart-container"></div>
+        </div>
+      </div>
+
+      <div class="dev-card dev-card-info">
+        <span class="material-icons">info</span>
+        <p>Este panel es solo para uso interno de desarrollo. No exponer en producción.</p>
+      </div>
+    }
+
+    <!-- CRUD VIEW -->
+    @if (activeSection !== 'home' && currentSection) {
+      <div class="crud-header">
+        <div class="crud-header-left">
+          <h1 class="dev-title">{{ currentSection.label }}</h1>
+          <span class="crud-total">{{ total }} registros</span>
+        </div>
+        @if (currentSection.storeEndpoint && currentSection.formFields) {
+          <button class="crud-create-btn" (click)="openCreate()">
+            <span class="material-icons">add</span> Nuevo
+          </button>
+        }
+      </div>
+
+      @if (currentSection.searchable) {
+        <div class="crud-search">
+          <span class="material-icons">search</span>
+          <input type="text" class="crud-search-input" placeholder="Buscar..."
+            [value]="searchTerm" (input)="searchTerm = $any($event.target).value" (keyup.enter)="onSearch()" />
+          <button class="crud-search-btn" (click)="onSearch()">Buscar</button>
+        </div>
+      }
+
+      @if (activeSection === 'users') {
+        <div class="crud-search">
+          <span class="material-icons">filter_list</span>
+          <select class="crud-search-input" [value]="roleFilter" (change)="roleFilter = $any($event.target).value">
+            <option value="">Todos los roles</option>
+            <option value="developer">Developer</option>
+            <option value="administrator">Administrador</option>
+            <option value="marketing">Marketing</option>
+            <option value="staff">Staff</option>
+            <option value="gestor">Gestor</option>
+            <option value="receptionist">Recepcionista</option>
+            <option value="valuator">Valuador</option>
+            <option value="appointment_manager">Gestor de Citas</option>
+            <option value="bodywork_paint_technician">Hojalatería</option>
+            <option value="spare_parts">Refacciones</option>
+            <option value="client">Cliente</option>
+          </select>
+          <select class="crud-search-input" [value]="dealershipFilter" (change)="dealershipFilter = $any($event.target).value" style="margin-left: 8px;">
+            <option value="">Todas las sucursales</option>
+            <option value="__none__">Sin sucursal</option>
+            @for (d of dealershipOptions; track d.value) {
+              <option [value]="d.value">{{ d.label }}</option>
+            }
+          </select>
+        </div>
+      }
+
+      @if (loading) {
+        <div class="crud-loading"><div class="spinner"></div><span>Cargando...</span></div>
+      }
+
+      @if (!loading && filteredRows.length === 0) {
+        <div class="crud-empty"><span class="material-icons">inbox</span><p>No se encontraron registros</p></div>
+      }
+
+      @if (!loading && filteredRows.length > 0) {
+        <div class="crud-table-wrap">
+          <table class="crud-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                @for (col of currentSection.columns; track col.key) { <th>{{ col.label }}</th> }
+                @if (currentSection.updateEndpoint || currentSection.deleteEndpoint) { <th>Acciones</th> }
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of filteredRows; track row.uuid || row.id; let i = $index) {
+                <tr>
+                  <td class="row-num">{{ (currentPage - 1) * 15 + i + 1 }}</td>
+                  @for (col of currentSection.columns; track col.key) { <td>{{ getCellValue(row, col.key) }}</td> }
+                  @if (currentSection.updateEndpoint || currentSection.deleteEndpoint) {
+                    <td class="row-actions">
+                      @if (currentSection.updateEndpoint && currentSection.formFields) {
+                        <button class="action-btn edit" (click)="openEdit(row)" title="Editar">
+                          <span class="material-icons">edit</span>
+                        </button>
+                      }
+                      @if (currentSection.deleteEndpoint) {
+                        <button class="action-btn delete" (click)="confirmDelete(row)" title="Eliminar">
+                          <span class="material-icons">delete</span>
+                        </button>
+                      }
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (currentSection.paginated && lastPage > 1) {
+          <div class="crud-pagination">
+            <button class="crud-page-btn" [disabled]="currentPage <= 1" (click)="prevPage()">
+              <span class="material-icons">chevron_left</span>
+            </button>
+            <span class="crud-page-info">{{ currentPage }} / {{ lastPage }}</span>
+            <button class="crud-page-btn" [disabled]="currentPage >= lastPage" (click)="nextPage()">
+              <span class="material-icons">chevron_right</span>
+            </button>
+          </div>
+        }
+      }
+    }
+
+    <!-- MATRIX VIEW -->
+    @if (activeSection === 'role_matrix') {
+      <h1 class="dev-title">Matriz Rol-Permisos</h1>
+      <p class="dev-subtitle">Asigna permisos a cada rol del sistema</p>
+
+      @if (matrixLoading) {
+        <div class="crud-loading"><div class="spinner"></div><span>Cargando matriz...</span></div>
+      }
+
+      @if (matrixError) {
+        <div class="crud-empty">
+          <span class="material-icons">error</span>
+          <p>{{ matrixError }}</p>
+          <button class="crud-search-btn" (click)="loadMatrix()">Reintentar</button>
+        </div>
+      }
+
+      @if (!matrixLoading && !matrixError && matrixRoles.length > 0) {
+        <h3 class="matrix-section-title">Permisos del Sistema</h3>
+        <div class="matrix-table-wrap">
+          <table class="matrix-table">
+            <thead>
+              <tr>
+                <th class="matrix-role-header">Rol</th>
+                @for (perm of matrixPermissions; track perm.id) {
+                  <th class="matrix-perm-header">{{ perm.name }}</th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (role of matrixRoles; track role.id) {
+                <tr>
+                  <td class="matrix-role-name">{{ role.name }}</td>
+                  @for (perm of matrixPermissions; track perm.id) {
+                    <td class="matrix-cell">
+                      <input type="checkbox"
+                        [checked]="isPermissionActive(role, perm.name)"
+                        (change)="togglePermission(role, perm)"
+                        [disabled]="matrixSaving[role.id + '-' + perm.id]" />
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="matrix-section-title">Acceso a Módulos de Admin</h3>
+        <div class="matrix-table-wrap">
+          <table class="matrix-table">
+            <thead>
+              <tr>
+                <th class="matrix-role-header">Rol</th>
+                @for (mod of adminModules; track mod) {
+                  <th class="matrix-perm-header">{{ mod }}</th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (role of matrixRoles; track role.id) {
+                <tr>
+                  <td class="matrix-role-name">{{ role.name }}</td>
+                  @for (mod of adminModules; track mod) {
+                    <td class="matrix-cell">
+                      <input type="checkbox"
+                        [checked]="isPermissionActive(role, 'access ' + mod)"
+                        (change)="toggleModuleAccess(role, mod)"
+                        [disabled]="matrixSaving[role.id + '-access-' + mod]" />
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+
+    <!-- BENCHMARK VIEW - Now at /admin/benchmark -->
+
+    <!-- STRIPE CONFIG VIEW -->
+    @if (activeSection === 'stripe_config') {
+      <h1 class="dev-title">Configuración Stripe</h1>
+      <p class="dev-subtitle">Gestiona las llaves de Stripe para test y producción</p>
+
+      @if (stripeLoading) {
+        <div class="crud-loading"><div class="spinner"></div><span>Cargando configuración...</span></div>
+      }
+
+      @if (stripeError) {
+        <div class="stripe-alert stripe-alert-error">
+          <span class="material-icons">error</span>
+          {{ stripeError }}
+        </div>
+      }
+
+      @if (stripeSuccess) {
+        <div class="stripe-alert stripe-alert-success">
+          <span class="material-icons">check_circle</span>
+          {{ stripeSuccess }}
+        </div>
+      }
+
+      @if (!stripeLoading) {
+        <!-- Mode Toggle -->
+        <div class="dev-card">
+          <div class="stripe-mode-header">
+            <h3 class="dev-card-title"><span class="material-icons">toggle_on</span> Modo Activo</h3>
+            <span class="stripe-badge" [class.stripe-badge-test]="stripeConfig.stripe_mode !== 'live'" [class.stripe-badge-live]="stripeConfig.stripe_mode === 'live'">
+              {{ stripeConfig.stripe_mode === 'live' ? 'PRODUCCIÓN' : 'TEST' }}
+            </span>
+          </div>
+          <div class="stripe-mode-toggle">
+            <span class="stripe-mode-label" [class.active]="stripeConfig.stripe_mode !== 'live'">Test</span>
+            <label class="stripe-switch">
+              <input type="checkbox" [checked]="stripeConfig.stripe_mode === 'live'" (change)="toggleStripeMode()" />
+              <span class="stripe-slider"></span>
+            </label>
+            <span class="stripe-mode-label" [class.active]="stripeConfig.stripe_mode === 'live'">Producción</span>
+          </div>
+        </div>
+
+        <!-- Keys Grid -->
+        <div class="stripe-keys-grid">
+          <!-- Test Keys -->
+          <div class="dev-card">
+            <h3 class="dev-card-title"><span class="material-icons">science</span> Llaves de Test</h3>
+            <div class="stripe-field">
+              <label class="modal-label">Publishable Key</label>
+              <input class="modal-input" type="text" placeholder="pk_test_..." [value]="stripeConfig.stripe_test_publishable_key || ''" (input)="stripeConfig.stripe_test_publishable_key = $any($event.target).value" />
+            </div>
+            <div class="stripe-field">
+              <label class="modal-label">Secret Key</label>
+              <input class="modal-input" type="text" placeholder="sk_test_..." [value]="stripeConfig.stripe_test_secret_key || ''" (input)="stripeConfig.stripe_test_secret_key = $any($event.target).value" />
+            </div>
+            <div class="stripe-field">
+              <label class="modal-label">Webhook Secret</label>
+              <input class="modal-input" type="text" placeholder="whsec_..." [value]="stripeConfig.stripe_test_webhook_secret || ''" (input)="stripeConfig.stripe_test_webhook_secret = $any($event.target).value" />
+            </div>
+          </div>
+
+          <!-- Live Keys -->
+          <div class="dev-card">
+            <h3 class="dev-card-title"><span class="material-icons">rocket_launch</span> Llaves de Producción</h3>
+            <div class="stripe-field">
+              <label class="modal-label">Publishable Key</label>
+              <input class="modal-input" type="text" placeholder="pk_live_..." [value]="stripeConfig.stripe_live_publishable_key || ''" (input)="stripeConfig.stripe_live_publishable_key = $any($event.target).value" />
+            </div>
+            <div class="stripe-field">
+              <label class="modal-label">Secret Key</label>
+              <input class="modal-input" type="text" placeholder="sk_live_..." [value]="stripeConfig.stripe_live_secret_key || ''" (input)="stripeConfig.stripe_live_secret_key = $any($event.target).value" />
+            </div>
+            <div class="stripe-field">
+              <label class="modal-label">Webhook Secret</label>
+              <input class="modal-input" type="text" placeholder="whsec_..." [value]="stripeConfig.stripe_live_webhook_secret || ''" (input)="stripeConfig.stripe_live_webhook_secret = $any($event.target).value" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Save Button -->
+        <div class="stripe-actions">
+          <button class="crud-create-btn" (click)="saveStripeConfig()" [disabled]="stripeSaving">
+            @if (stripeSaving) { <div class="spinner-sm"></div> } @else { <span class="material-icons">save</span> }
+            Guardar Configuración
+          </button>
+        </div>
+      }
+    }
+
+  </main>
+</div>
+
+<!-- MODAL -->
+@if (modalOpen && currentSection?.formFields) {
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ modalMode === 'create' ? 'Nuevo' : 'Editar' }} {{ currentSection!.label }}</h2>
+        <button class="modal-close" (click)="closeModal()"><span class="material-icons">close</span></button>
+      </div>
+      <div class="modal-body">
+        @for (field of currentSection!.formFields!; track field.key) {
+          <div class="modal-field">
+            @if (field.type !== 'checkbox') {
+              <label class="modal-label">{{ field.label }} @if (field.required) { <span class="req">*</span> }</label>
+            }
+            @if (field.type === 'text' || field.type === 'email' || field.type === 'password' || field.type === 'number') {
+              <input class="modal-input" [type]="field.type" [value]="modalData[field.key] ?? ''"
+                (input)="onFieldChange(field.key, $event)" [placeholder]="field.label" />
+            }
+            @if (field.type === 'textarea') {
+              <textarea class="modal-input modal-textarea" [value]="modalData[field.key] ?? ''"
+                (input)="onFieldChange(field.key, $event)" [placeholder]="field.label"></textarea>
+            }
+            @if (field.type === 'select' && field.options) {
+              <select class="modal-input" (change)="onFieldChange(field.key, $event)">
+                <option value="">Seleccionar...</option>
+                @for (opt of field.options; track opt.value) {
+                  <option [value]="opt.value" [selected]="modalData[field.key] === opt.value">{{ opt.label }}</option>
+                }
+              </select>
+            }
+            @if (field.type === 'checkbox') {
+              <label class="modal-checkbox">
+                <input type="checkbox" [checked]="modalData[field.key]" (change)="onFieldChange(field.key, $event)" />
+                {{ field.label }}
+              </label>
+            }
+            @if (field.type === 'multi-select') {
+              <div class="multi-select-container">
+                @for (opt of dynamicOptions[field.key] || field.options || []; track opt.value) {
+                  <label class="multi-select-option">
+                    <input type="checkbox" [checked]="isMultiSelected(field.key, opt.value)"
+                      (change)="toggleMultiSelect(field.key, opt.value)" />
+                    {{ opt.label }}
+                  </label>
+                }
+              </div>
+            }
+          </div>
+        }
+        @if (modalError) {
+          <div class="modal-error">{{ modalError }}</div>
+        }
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn cancel" (click)="closeModal()">Cancelar</button>
+        <button class="modal-btn save" (click)="saveModal()" [disabled]="modalSaving">
+          @if (modalSaving) { <div class="spinner-sm"></div> } @else { Guardar }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- DELETE CONFIRM -->
+@if (deleteConfirmOpen) {
+  <div class="modal-overlay" (click)="cancelDelete()">
+    <div class="modal-box modal-sm" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Confirmar eliminación</h2>
+        <button class="modal-close" (click)="cancelDelete()"><span class="material-icons">close</span></button>
+      </div>
+      <div class="modal-body">
+        <p class="delete-msg">¿Estás seguro de que deseas eliminar este registro? Esta acción no se puede deshacer.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn cancel" (click)="cancelDelete()">Cancelar</button>
+        <button class="modal-btn danger" (click)="executeDelete()" [disabled]="deleteLoading">
+          @if (deleteLoading) { <div class="spinner-sm"></div> } @else { Eliminar }
+        </button>
+      </div>
+    </div>
+  </div>
+}

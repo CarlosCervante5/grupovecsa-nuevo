@@ -1,0 +1,201 @@
+<div class="shop-layout">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar" [class.open]="sidebarOpen">
+    <div class="sidebar-header">
+      <h2 class="sidebar-title">Filtros</h2>
+      <button class="sidebar-close" (click)="sidebarOpen = false">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <!-- Categories -->
+    <div class="sidebar-section">
+      <h3 class="sidebar-section-title">Categorías</h3>
+      <ul class="cat-list">
+        @for (cat of safeCategories; track cat.uuid) {
+          @if (cat.children && cat.children.length > 0) {
+            <!-- Parent with children = accordion -->
+            <li class="cat-accordion">
+              <div class="cat-accordion-header" (click)="toggleCategory(cat.uuid)">
+                <div class="cat-accordion-left" (click)="$event.stopPropagation(); onCategorySelect(cat.uuid)">
+                  <mat-icon class="cat-list-icon">{{ getCategoryIcon(cat.name) }}</mat-icon>
+                  <span [class.active-text]="selectedCategoryUuid === cat.uuid">{{ cat.name }}</span>
+                </div>
+                <mat-icon class="cat-accordion-arrow" [class.expanded]="expandedCategories[cat.uuid]">expand_more</mat-icon>
+              </div>
+              <ul class="cat-sub-list" [class.open]="expandedCategories[cat.uuid]">
+                @for (child of cat.children; track child.uuid) {
+                  <li
+                    class="cat-sub-item"
+                    [class.active]="selectedCategoryUuid === child.uuid"
+                    (click)="onCategorySelect(child.uuid)">
+                    <span>{{ child.name }}</span>
+                    @if (selectedCategoryUuid === child.uuid) {
+                      <mat-icon class="cat-check">check</mat-icon>
+                    }
+                  </li>
+                }
+              </ul>
+            </li>
+          } @else {
+            <!-- Simple category (no children) -->
+            <li
+              class="cat-list-item"
+              [class.active]="selectedCategoryUuid === cat.uuid"
+              (click)="onCategorySelect(cat.uuid)">
+              <mat-icon class="cat-list-icon">{{ getCategoryIcon(cat.name) }}</mat-icon>
+              <span>{{ cat.name }}</span>
+              @if (selectedCategoryUuid === cat.uuid) {
+                <mat-icon class="cat-check">check</mat-icon>
+              }
+            </li>
+          }
+        }
+      </ul>
+    </div>
+
+    <!-- Price Range -->
+    <div class="sidebar-section">
+      <h3 class="sidebar-section-title">Precio</h3>
+      <div class="price-range">
+        <input
+          class="price-input"
+          type="number"
+          [(ngModel)]="minPrice"
+          min="0"
+          placeholder="Mínimo"
+        />
+        <span class="price-sep">—</span>
+        <input
+          class="price-input"
+          type="number"
+          [(ngModel)]="maxPrice"
+          min="0"
+          placeholder="Máximo"
+        />
+      </div>
+      <button class="apply-btn" (click)="onPriceFilterApply()">Aplicar</button>
+    </div>
+
+    <!-- Clear filters -->
+    @if (hasActiveFilters) {
+      <button class="clear-all-btn" (click)="onClearFilters()">
+        <mat-icon>filter_alt_off</mat-icon>
+        Limpiar filtros
+      </button>
+    }
+  </aside>
+
+  <!-- Overlay mobile -->
+  @if (sidebarOpen) {
+    <div class="sidebar-overlay" (click)="sidebarOpen = false"></div>
+  }
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="shop-main">
+
+    <!-- Top bar -->
+    <div class="shop-topbar">
+      <div class="topbar-left">
+        <button class="filter-toggle" (click)="sidebarOpen = !sidebarOpen">
+          <mat-icon>tune</mat-icon>
+          Filtros
+        </button>
+        <h1 class="shop-heading">
+          {{ selectedCategoryName }}
+          @if (totalProducts > 0) {
+            <span class="shop-count">{{ totalProducts }} productos</span>
+          }
+        </h1>
+      </div>
+      <div class="search-wrap">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input
+          class="search-input"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearchChange()"
+          placeholder="Buscar productos..."
+        />
+        @if (searchTerm) {
+          <button class="search-clear" (click)="searchTerm=''; onSearchChange()">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Active filters chips -->
+    @if (hasActiveFilters) {
+      <div class="active-filters">
+        @if (selectedCategoryUuid) {
+          <span class="filter-chip">
+            {{ selectedCategoryName }}
+            <button (click)="onCategorySelect(null)"><mat-icon>close</mat-icon></button>
+          </span>
+        }
+        @if (minPrice !== null) {
+          <span class="filter-chip">
+            Desde ${{ minPrice }}
+            <button (click)="minPrice = null; onPriceFilterApply()"><mat-icon>close</mat-icon></button>
+          </span>
+        }
+        @if (maxPrice !== null) {
+          <span class="filter-chip">
+            Hasta ${{ maxPrice }}
+            <button (click)="maxPrice = null; onPriceFilterApply()"><mat-icon>close</mat-icon></button>
+          </span>
+        }
+        @if (searchTerm) {
+          <span class="filter-chip">
+            "{{ searchTerm }}"
+            <button (click)="searchTerm=''; onSearchChange()"><mat-icon>close</mat-icon></button>
+          </span>
+        }
+      </div>
+    }
+
+    <!-- Loading skeleton -->
+    @if (isLoading) {
+      <div class="products-grid">
+        @for (n of [1,2,3,4,5,6,7,8,9,10,11,12]; track n) {
+          <div class="skeleton-card">
+            <div class="skeleton-img"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line short"></div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Products grid -->
+    @if (!isLoading) {
+      @if (safeProducts.length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon-wrap"><mat-icon>inventory_2</mat-icon></div>
+          <h3>No se encontraron productos</h3>
+          <p>Intenta con otros filtros o categorías</p>
+          @if (hasActiveFilters) {
+            <button class="apply-btn" (click)="onClearFilters()">Limpiar filtros</button>
+          }
+        </div>
+      } @else {
+        <div class="products-grid">
+          @for (product of safeProducts; track product.uuid) {
+            <app-product-card [product]="product"></app-product-card>
+          }
+        </div>
+
+        <mat-paginator
+          [length]="totalProducts"
+          [pageSize]="pageSize"
+          [pageIndex]="currentPage - 1"
+          [pageSizeOptions]="[12, 24, 48]"
+          (page)="onPageChange($event)"
+          showFirstLastButtons
+          class="shop-paginator"
+        ></mat-paginator>
+      }
+    }
+  </main>
+</div>

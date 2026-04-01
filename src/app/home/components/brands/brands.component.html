@@ -1,0 +1,18 @@
+<section class="py-20 bg-gray-100">
+  <div class="container mx-auto px-4 md:px-6 lg:px-8 text-center">
+    <h2 class="text-4xl font-bold text-gray-900 mb-4" style="font-family: 'Oswald', sans-serif;">Da clic en nuestras marcas</h2>
+    <p class="text-xl text-gray-600 max-w-3xl mx-auto mb-16">Encuentra el inventario con disponibilidad inmediata</p>
+
+    <div class="mt-12 grid gap-8 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+      <a *ngFor="let brand of brands"
+         [href]="brand.url"
+         target="_blank"
+         rel="noopener noreferrer"
+         class="flex justify-center items-center p-6 bg-[#1f2937] rounded-xl hover:shadow-lg transition-shadow">
+        <img [src]="brand.logo"
+             [alt]="brand.name"
+             class="max-h-12 w-auto object-contain">
+      </a>
+    </div>
+  </div>
+</section>

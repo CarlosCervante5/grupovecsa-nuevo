@@ -1,54 +1,64 @@
-import { Component, ViewChild, type OnInit } from '@angular/core';
-import { MatTableDataSource } from '@angular/material/table';
-
+import { Component, OnInit } from '@angular/core';
 import { SparePartsService } from '@services/spare-parts.service';
-
-import { MatPaginator } from '@angular/material/paginator';
-import { GetSearchParts } from '@interfaces/getSearchParts.interfaces';
+import { GetSearchParts, Datum } from '@interfaces/getSearchParts.interfaces';
 
 @Component({
-    selector: 'app-spare-parts-administration',
-    templateUrl: './spare-parts-administration.component.html',
-    styleUrls: ['./spare-parts-administration.component.css'],
-    standalone: false
+  selector: 'app-spare-parts-administration',
+  templateUrl: './spare-parts-administration.component.html',
+  styleUrls: ['./spare-parts-administration.component.css'],
+  standalone: false
 })
 export class SparePartsAdministrationComponent implements OnInit {
+  items: any[] = [];
+  loading = true;
+  length = 0;
+  pageIndex = 1;
+  pageSize = 10;
+  searchTerm = '';
+  private searchTimeout?: ReturnType<typeof setTimeout>;
 
-    public displayedColumns: string[] = ['id', 'technicianName', 'technicianSurname', 'brandName', 'modelName', 'vin', 'year', 'status', 'statusRefac', 'actions'];
-    public dataSource!: MatTableDataSource<any>
+  constructor(private _sparePartsService: SparePartsService) {}
 
-    public length: number = 0;
-    public pageIndex: number = 1;
+  ngOnInit(): void {
+    this.loadData(this.pageIndex);
+  }
 
-    @ViewChild(MatPaginator) paginator!: MatPaginator;
+  get totalPages(): number {
+    return Math.ceil(this.length / this.pageSize) || 1;
+  }
 
-    constructor(
-        private _sparePartsService: SparePartsService
-    ) {}
+  loadData(page: number): void {
+    this.loading = true;
+    this._sparePartsService.getSearchParts(page).subscribe({
+      next: (resp: GetSearchParts) => {
+        this.items = resp.data.data;
+        this.length = resp.data.total;
+        this.pageIndex = resp.data.current_page;
+        this.loading = false;
+      },
+      error: () => {
+        this.items = [];
+        this.loading = false;
+      }
+    });
+  }
 
-    ngOnInit(): void { 
-        this.getSearchParts(this.pageIndex);
-    }
+  onSearch(): void {
+    if (this.searchTimeout) clearTimeout(this.searchTimeout);
+    this.searchTimeout = setTimeout(() => {
+      this.pageIndex = 1;
+      this.loadData(this.pageIndex);
+    }, 400);
+  }
 
-    // public applyFilter(event: Event) {
-    //     const filterValue = (event.target as HTMLInputElement).value;
-    //     this.dataSource.filter = filterValue.trim().toLowerCase();
-    
-    //     if (this.dataSource.paginator) {
-    //       this.dataSource.paginator.firstPage();
-    //     }
-    // }
+  clearSearch(): void {
+    this.searchTerm = '';
+    this.pageIndex = 1;
+    this.loadData(this.pageIndex);
+  }
 
-    public getSearchParts(page?: number) {
-        this._sparePartsService.getSearchParts(page)
-            .subscribe({
-                next: ( resp: GetSearchParts) => {
-                    console.log(resp.data.data);
-                    
-                    this.paginator.length = resp.data.total;
-                    this.dataSource = new MatTableDataSource(resp.data.data);
-                }
-            });
-    }
-
+  goToPage(page: number): void {
+    this.pageIndex = page;
+    this.loadData(page);
+  }
 }

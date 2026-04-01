@@ -1,158 +1,98 @@
-<app-new-nav></app-new-nav>
-<div class="m-5 p-3"></div>
-<div class="container">
-    <div class="row">
-        <!--parte superior para ir al dashboad principal-->
-        <div class="col-12 mt-5 mb-5">
-            <div class="row mb-3">
-                <div class="col-12">
-                    <h4 class="fs-4 fw-bold text-truncate">Usuarios</h4>
-                    <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item" [routerLink]="['/admin/administrator/']">Overview</li>
-                            <li class="breadcrumb-item active" aria-current="page">Usuarios</li>
-                        </ol>
-                    </nav>
-                </div>
-            </div>
-        </div>
+<div class="users-page">
 
-        <!--Barra de busqueda-->
-        <div class="d-flex flex-wrap mb-3 barra">
-            <div class="col-lg-11 col-md-10 col-sm-10s mb-2">
-              <mat-form-field appearance="outline" class="w-100">
-                <mat-label>Buscar...</mat-label>
-                <input  matInput  placeholder="Búsqueda..." #input><!--(keyup)="applyFilter($event)"-->
-              </mat-form-field>
-            </div>
-          
-            <div class="col-lg-1 col-md-1 col-sm-1 text-center">
-              <a  (click)="addUser()">
-                <img src="assets/icons-fontawesome/user-plus-solid.svg" alt="flecha" width="40px" height="40px">
-              </a>
-            </div>
-          </div>
-
-          <!--Tabla de usuarios-->
-          <div class="d-flex justify-content-center mat-table-container">
-            <div class=" w-100">
-              <table mat-table [dataSource]="dataSource" class="w-100">
-                <ng-container matColumnDef="n">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header [ngStyle]="{'font-weight': 'bold'}">No.</th>
-                    <td mat-cell *matCellDef="let row" [ngStyle]="{'background-color': row.color}">
-                        <button class="toggle-button" (click)="details(row.index)" style="font-size: 18px; width: 20px; height: 20px; "><i class="fa-solid fa-caret-down"></i></button>
-                        {{ row.index }}
-                        <div class="" *ngIf="mostrar && row.index == mostrarId && datosM == 'movil' ">
-                            <tr>
-                              <th>Nombre</th>
-                              <td>{{row.name}} {{row.last_name}}</td>
-                            </tr>
-                            <tr>
-                              <th>Sucursal</th>
-                              <td>{{row.location}}</td>
-                            </tr>
-                            <tr>
-                              <th>Email:</th>
-                              <td style="font-size: small;">{{row.email}}</td>
-                            </tr>
-                            <tr>
-                              <th>Fecha:</th>
-                              <td>{{row.fecha}}</td>
-                            </tr>
-                            <tr>
-                              <th>Acciones:</th>
-                              <td>
-                                <div class="d-flex justify-content-between">
-                                    <a class="btn btn-link" matTooltip="Actualizar Usuario" (click)="updateUser(row.uuid)" matTooltipPosition="above">
-                                      <img src="assets/icons-fontawesome/pen-to-square-solid.svg" alt="flecha" width="22px" height="22px">
-                                    </a>
-                                    <a *ngIf="row.rol != valuator"  class="btn btn-link" (click)="deleteUser(row.uuid)">
-                                      <img src="assets/icons-fontawesome/trash-solid_negro.svg" alt="flecha" width="22px" height="22px">
-                                    </a>
-                                </div>
-                              </td>
-                            </tr>
-                          </div>
-                          <div class="" *ngIf="mostrar && row.index == mostrarId  && datosM == 'movil2'">
-                              <tr>
-                                <th>Email:</th>
-                                <td style="font-size: small;">{{row.email}}</td>
-                              </tr>
-                              <tr>
-                                <th>Fecha:</th>
-                                <td>{{row.fecha}}</td>
-                              </tr>
-                              <tr>
-                                <th>Acciones:</th>
-                                <td>
-                                  <div class="d-flex justify-content-between">
-                                      <a class="btn btn-link" matTooltip="Actualizar Usuario" (click)="updateUser(row.uuid)" matTooltipPosition="above">
-                                        <img src="assets/icons-fontawesome/pen-to-square-solid.svg" alt="flecha" width="22px" height="22px">
-                                      </a>
-                                      <a *ngIf="row.rol != valuator"  class="btn btn-link" (click)="deleteUser(row.uuid)">
-                                        <img src="assets/icons-fontawesome/trash-solid_negro.svg" alt="flecha" width="22px" height="22px">
-                                      </a>
-                                  </div>
-                                </td>
-                              </tr>
-                          </div>
-                          <div class="" *ngIf="mostrar && row.index == mostrarId  && datosM == 'tablet'">
-                            <tr>
-                                <th>Acciones:</th>
-                                <td>
-                                  <div class="d-flex justify-content-between">
-                                      <a class="btn btn-link" matTooltip="Actualizar Usuario" (click)="updateUser(row.uuid)" matTooltipPosition="above">
-                                        <img src="assets/icons-fontawesome/pen-to-square-solid.svg" alt="flecha" width="22px" height="22px">
-                                      </a>
-                                      <a *ngIf="row.rol != valuator"  class="btn btn-link" (click)="deleteUser(row.uuid)">
-                                        <img src="assets/icons-fontawesome/trash-solid_negro.svg" alt="flecha" width="22px" height="22px">
-                                      </a>
-                                  </div>
-                                </td>
-                              </tr>
-                          </div>
-                    </td>
-                </ng-container>
-                <ng-container matColumnDef="Rol">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header [ngStyle]="{'font-weight': 'bold'}">Rol</th>
-                    <td mat-cell *matCellDef="let row" [ngStyle]="{'background-color': row.color}">{{ row.rol }}</td>
-                </ng-container>
-                <ng-container matColumnDef="Nombre">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header [ngStyle]="{'font-weight': 'bold'}">Nombre</th>
-                    <td mat-cell *matCellDef="let row" [ngStyle]="{'background-color': row.color}">{{ row.name}} {{row.last_name}}</td>
-                </ng-container>
-                <ng-container matColumnDef="sucursal">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header [ngStyle]="{'font-weight': 'bold'}">Sucursal</th>
-                    <td mat-cell *matCellDef="let row" [ngStyle]="{'background-color': row.color}">{{ row.location}}</td>
-                </ng-container>
-                <ng-container matColumnDef="email">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header [ngStyle]="{'font-weight': 'bold'}">Correo</th>
-                    <td mat-cell *matCellDef="let row" [ngStyle]="{'background-color': row.color}">{{ row.email}}</td>
-                </ng-container>
-                <ng-container matColumnDef="fecha">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header [ngStyle]="{'font-weight': 'bold'}">Fecha de creación</th>
-                    <td mat-cell *matCellDef="let row" [ngStyle]="{'background-color': row.color}">{{ row.fecha}}</td>
-                </ng-container>
-                <ng-container matColumnDef="opciones">
-                    <th mat-header-cell *matHeaderCellDef [ngStyle]="{'font-weight': 'bold'}">Acciones</th>
-                    <td mat-cell *matCellDef="let row" [ngStyle]="{'background-color': row.color}">
-                      <div class="d-flex justify-content-between">
-                        <a class="btn btn-link" matTooltip="Actualizar Usuario" (click)="updateUser(row.uuid)" matTooltipPosition="above">
-                          <img src="assets/icons-fontawesome/pen-to-square-solid.svg" alt="flecha" width="22px" height="22px">
-                        </a>
-                        <a *ngIf="row.rol != valuator" class="btn btn-link" (click)="deleteUser(row.uuid)">
-                          <img src="assets/icons-fontawesome/trash-solid_negro.svg" alt="flecha" width="22px" height="22px">
-                        </a>
-                      </div>
-                    </td>
-                  </ng-container>
-                <!-- Fila de encabezado y datos -->
-                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-              </table>
-              <mat-paginator [pageSize]="paginate" [length]="length" [pageIndex]="pageIndex - 1" (page)="paginationChange($event)"   aria-label="Select page of riders"></mat-paginator>
-            </div>
-          </div>
-          
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Usuarios</h1>
+      <p class="page-subtitle">{{ length }} usuarios registrados</p>
     </div>
+    <div class="header-actions">
+      <button class="action-btn primary-btn" (click)="addUser()">
+        <span class="material-icons">person_add</span>
+        Agregar usuario
+      </button>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="search-bar">
+    <span class="material-icons search-icon">search</span>
+    <input type="text" class="search-input" placeholder="Buscar por nombre, email, rol..."
+           [(ngModel)]="searchTerm" (keyup)="onSearch()" />
+    <button class="search-clear" *ngIf="searchTerm" (click)="clearSearch()">
+      <span class="material-icons">close</span>
+    </button>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th class="th-num">#</th>
+          <th>Usuario</th>
+          <th>Rol</th>
+          <th class="th-hide-sm">Sucursal</th>
+          <th class="th-hide-md">Email</th>
+          <th class="th-hide-md">Fecha</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of uuids; let i = index">
+          <td class="cell-num">{{ user.index }}</td>
+          <td class="cell-user">
+            <div class="user-info">
+              <div class="user-avatar">{{ (user.name || 'U').charAt(0).toUpperCase() }}</div>
+              <div class="user-details">
+                <span class="user-name">{{ user.name }} {{ user.last_name }}</span>
+                <span class="user-email-mobile">{{ user.email }}</span>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span class="role-badge" [ngClass]="'role-' + (user.rol || 'default')">
+              {{ user.rol || '—' }}
+            </span>
+          </td>
+          <td class="td-hide-sm">{{ user.location || '—' }}</td>
+          <td class="td-hide-md cell-email">{{ user.email }}</td>
+          <td class="td-hide-md">{{ user.fecha | date:'dd/MM/yyyy' }}</td>
+          <td>
+            <div class="row-actions">
+              <button class="act-btn edit" (click)="updateUser(user.uuid)" title="Editar">
+                <span class="material-icons">edit</span>
+              </button>
+              <button class="act-btn delete" *ngIf="user.rol !== 'valuator'" (click)="deleteUser(user.uuid)" title="Eliminar">
+                <span class="material-icons">delete</span>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Empty state -->
+  <div class="empty-state" *ngIf="uuids.length === 0">
+    <span class="material-icons">people_outline</span>
+    <p>No se encontraron usuarios</p>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination-bar" *ngIf="length > paginate">
+    <span class="pagination-info">
+      Mostrando {{ ((pageIndex - 1) * paginate) + 1 }}–{{ pageIndex * paginate > length ? length : pageIndex * paginate }} de {{ length }}
+    </span>
+    <div class="pagination-controls">
+      <button class="page-btn" [disabled]="pageIndex <= 1" (click)="goToPage(pageIndex - 1)">
+        <span class="material-icons">chevron_left</span>
+      </button>
+      <span class="page-current">{{ pageIndex }} / {{ totalPages }}</span>
+      <button class="page-btn" [disabled]="pageIndex >= totalPages" (click)="goToPage(pageIndex + 1)">
+        <span class="material-icons">chevron_right</span>
+      </button>
+    </div>
+  </div>
+
 </div>

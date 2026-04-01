@@ -1,0 +1,16 @@
+<!-- Loading State -->
+<div *ngIf="isLoading" class="min-h-screen flex items-center justify-center">
+  <p class="text-gray-500 text-lg">Cargando...</p>
+</div>
+
+<!-- Home Content -->
+<div *ngIf="!isLoading">
+  <app-hero-slider [slides]="slides"></app-hero-slider>
+  <app-brands></app-brands>
+  <app-services-section></app-services-section>
+  <app-success-day *ngIf="testimonials.length > 0" [testimonials]="testimonials"></app-success-day>
+  <app-locations></app-locations>
+  <app-disclaimer></app-disclaimer>
+  <app-home-footer></app-home-footer>
+  <app-floating-actions></app-floating-actions>
+</div>

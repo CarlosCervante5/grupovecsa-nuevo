@@ -4,12 +4,19 @@ import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { PromotionsComponent } from './pages/promotions/promotions.component';
 import { ScheduleEventsComponent } from './pages/schedule-events/schedule-events.component';
 import { RewardsComponent } from './pages/rewards/rewards.component';
+import { GestorLayoutComponent } from './pages/layout/gestor-layout.component';
 
 const routes: Routes = [
-  { path: '', component: DashboardComponent },
-  { path: 'promotions', component: PromotionsComponent },
-  { path: 'scheduled-events', component: ScheduleEventsComponent },
-  { path: 'rewards', component: RewardsComponent },
+  {
+    path: '',
+    component: GestorLayoutComponent,
+    children: [
+      { path: '', component: DashboardComponent },
+      { path: 'promotions', component: PromotionsComponent },
+      { path: 'scheduled-events', component: ScheduleEventsComponent },
+      { path: 'rewards', component: RewardsComponent },
+    ]
+  },
 ];
 
 @NgModule({

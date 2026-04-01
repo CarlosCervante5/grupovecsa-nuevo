@@ -1,0 +1,42 @@
+<!-- Loading -->
+<div class="tab-loading" *ngIf="loading">
+  <div class="tab-spinner"></div>
+  <span>Cargando valuaciones...</span>
+</div>
+
+<!-- Error -->
+<div class="tab-error" *ngIf="error && !loading">
+  <span class="material-icons">error_outline</span>
+  <span>Error al cargar las valuaciones. Intenta de nuevo.</span>
+  <button class="retry-btn" (click)="retry()">Reintentar</button>
+</div>
+
+<!-- Empty -->
+<div class="tab-empty" *ngIf="!loading && !error && valuations.length === 0">
+  <span class="material-icons">directions_car</span>
+  <p>No tienes valuaciones registradas</p>
+  <span class="tab-empty-hint">Solicita una valuación de tu vehículo en cualquiera de nuestras sucursales</span>
+</div>
+
+<!-- List -->
+<div class="val-list" *ngIf="!loading && !error && valuations.length > 0">
+  <div class="val-card" *ngFor="let v of valuations">
+    <div class="val-icon">
+      <span class="material-icons">directions_car</span>
+    </div>
+    <div class="val-info">
+      <span class="val-vehicle">{{ v.vehicle_brandname }} {{ v.vehicle_modelname }}</span>
+      <span class="val-details">
+        <span *ngIf="v.vehicle_year">{{ v.vehicle_year }}</span>
+        <span *ngIf="v.vehicle_mileage"> · {{ v.vehicle_mileage }} km</span>
+      </span>
+      <span class="val-meta">
+        <span class="material-icons val-meta-icon">business</span> {{ v.dealership_name || 'Sin sucursal' }}
+      </span>
+      <span class="val-date">{{ v.appointment_scheduled_date | date:'dd/MM/yyyy' }}</span>
+    </div>
+    <div class="val-badge" [style.background]="getStatusColor(v.valuator_name ? 'confirmed' : 'pending') + '18'" [style.color]="getStatusColor(v.valuator_name ? 'confirmed' : 'pending')">
+      {{ v.valuator_name ? 'Valuador asignado' : 'Pendiente' }}
+    </div>
+  </div>
+</div>

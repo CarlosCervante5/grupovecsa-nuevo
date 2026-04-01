@@ -7,6 +7,7 @@ import { AdminModule } from '../admin.module';
 import { AngularMaterialModule } from 'src/app/angular-material/angular-material.module';
 
 import { BodyworkPaintTechnicianComponent } from './pages/bodywork-paint/bodywork-paint-technician.component';
+import { BodyworkLayoutComponent } from './pages/layout/bodywork-layout.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { BodyworkPaintFormComponent } from './components/bodywork-paint-form/bodywork-paint-form.component';
 import { NewNavComponent } from 'src/app/shared/versiones-nav/new-nav/new-nav.component';
@@ -16,6 +17,7 @@ import { NewNavComponent } from 'src/app/shared/versiones-nav/new-nav/new-nav.co
   declarations: [
     BodyworkPaintFormComponent,
     BodyworkPaintTechnicianComponent,
+    BodyworkLayoutComponent,
     DashboardComponent
   ],
   imports: [

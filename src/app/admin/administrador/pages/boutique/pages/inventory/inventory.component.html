@@ -1,0 +1,146 @@
+<div class="inventory-container">
+  <!-- Header -->
+  <div class="header">
+    <div>
+      <h2 class="page-title">Inventario</h2>
+      <p class="page-subtitle">Gestión de inventario de la Boutique</p>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="metrics-row">
+    <div class="metric-card">
+      <div class="metric-icon-wrap metric-total">
+        <mat-icon>inventory_2</mat-icon>
+      </div>
+      <div class="metric-info">
+        <span class="metric-value">{{ totalItems }}</span>
+        <span class="metric-label">Total productos</span>
+      </div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon-wrap metric-low">
+        <mat-icon>warning</mat-icon>
+      </div>
+      <div class="metric-info">
+        <span class="metric-value">{{ getLowStockCount() }}</span>
+        <span class="metric-label">Stock bajo (≤5)</span>
+      </div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon-wrap metric-out">
+        <mat-icon>error</mat-icon>
+      </div>
+      <div class="metric-info">
+        <span class="metric-value">{{ getOutOfStockCount() }}</span>
+        <span class="metric-label">Agotados</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-bar">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar productos...</mat-label>
+      <input matInput [(ngModel)]="search" (keyup.enter)="onSearch()" placeholder="Nombre o SKU">
+      <mat-icon matSuffix class="search-icon" (click)="onSearch()">search</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="category-filter">
+      <mat-label>Categoría</mat-label>
+      <mat-select [(ngModel)]="selectedCategoryUuid" (selectionChange)="onCategoryFilter()">
+        <mat-option value="">Todas</mat-option>
+        <mat-option *ngFor="let cat of categories" [value]="cat.uuid">{{ cat.name }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <!-- Table -->
+  <div *ngIf="!loading" class="table-wrapper">
+    <table mat-table [dataSource]="products" class="inventory-table">
+
+      <!-- Name -->
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Producto</th>
+        <td mat-cell *matCellDef="let product">
+          <span class="product-name">{{ product.name }}</span>
+        </td>
+      </ng-container>
+
+      <!-- SKU -->
+      <ng-container matColumnDef="sku">
+        <th mat-header-cell *matHeaderCellDef>SKU</th>
+        <td mat-cell *matCellDef="let product">
+          <span class="sku-text">{{ product.sku }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Category -->
+      <ng-container matColumnDef="category">
+        <th mat-header-cell *matHeaderCellDef>Categoría</th>
+        <td mat-cell *matCellDef="let product">{{ product.category?.name || '—' }}</td>
+      </ng-container>
+
+      <!-- Price -->
+      <ng-container matColumnDef="price">
+        <th mat-header-cell *matHeaderCellDef>Precio</th>
+        <td mat-cell *matCellDef="let product">{{ product.price | currency:'MXN':'symbol-narrow' }}</td>
+      </ng-container>
+
+      <!-- Stock -->
+      <ng-container matColumnDef="stock">
+        <th mat-header-cell *matHeaderCellDef>Stock</th>
+        <td mat-cell *matCellDef="let product">
+          <span class="stock-value" [class.stock-low]="isLowStock(product.stock)" [class.stock-zero]="product.stock === 0">
+            {{ product.stock }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Status -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Estado</th>
+        <td mat-cell *matCellDef="let product">
+          <app-inventory-alert [stock]="product.stock"></app-inventory-alert>
+          <span *ngIf="product.stock > 5" class="stock-ok-badge">En stock</span>
+        </td>
+      </ng-container>
+
+      <!-- Actions -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Acciones</th>
+        <td mat-cell *matCellDef="let product">
+          <button mat-icon-button matTooltip="Ajustar stock" (click)="openAdjustDialog(product); $event.stopPropagation()">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button matTooltip="Ver movimientos" (click)="openMovementsDialog(product); $event.stopPropagation()">
+            <mat-icon>history</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+      <tr class="mat-row no-data-row" *matNoDataRow>
+        <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+          No se encontraron productos
+        </td>
+      </tr>
+    </table>
+
+    <mat-paginator
+      [length]="totalItems"
+      [pageSize]="pageSize"
+      [pageIndex]="currentPage - 1"
+      [pageSizeOptions]="[10, 15, 25, 50]"
+      (page)="onPageChange($event)"
+      showFirstLastButtons>
+    </mat-paginator>
+  </div>
+</div>

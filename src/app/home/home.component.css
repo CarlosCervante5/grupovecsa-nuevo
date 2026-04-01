@@ -1,0 +1,27 @@
+/* Reset font-size for the home page — the global styles.css sets html to 62.5%
+   which breaks all Tailwind rem-based sizes. This restores 16px base for home. */
+:host {
+  font-size: 16px;
+  font-family: 'Inter', 'Mulish', sans-serif;
+}
+
+:host ::ng-deep h1,
+:host ::ng-deep h2,
+:host ::ng-deep h3,
+:host ::ng-deep h4,
+:host ::ng-deep h5,
+:host ::ng-deep h6 {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 600;
+}
+
+.home-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.home-container {
+  width: 100%;
+}

@@ -52,6 +52,8 @@ import { NavPromotionsComponent } from './shared/versiones-nav/nav-promotions/na
 import { NavCarcareComponent } from './shared/versiones-nav/nav-carcare/nav-carcare.component';
 import { NavRewardsComponent } from './shared/versiones-nav/nav-rewards/nav-rewards.component';
 import { SwiperComponent } from './shared/components/swiper/swiper.component';
+import { ChatAssistantComponent } from './shared/components/chat-assistant/chat-assistant.component';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 
 
@@ -86,6 +88,7 @@ import { SwiperComponent } from './shared/components/swiper/swiper.component';
     RidersComponent,
     CarCareComponent,
     SwiperComponent,
+    ChatAssistantComponent,
   ],
   exports:[
     PromotionscardComponent
@@ -109,7 +112,7 @@ import { SwiperComponent } from './shared/components/swiper/swiper.component';
     NavRewardsComponent,
     NewNavComponent,
   ],
-  providers: [Title], 
+  providers: [Title, provideHttpClient(withInterceptorsFromDi())], 
   bootstrap: [AppComponent],
   schemas:[CUSTOM_ELEMENTS_SCHEMA]
 })

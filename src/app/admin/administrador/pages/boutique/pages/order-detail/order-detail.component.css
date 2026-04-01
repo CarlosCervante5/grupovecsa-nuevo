@@ -1,0 +1,261 @@
+.order-detail-container {
+  padding: 24px;
+  min-height: 100vh;
+  background-color: #111827;
+  color: #f9fafb;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  color: #f9fafb;
+}
+
+.page-subtitle {
+  font-size: 0.875rem;
+  color: #9ca3af;
+  margin: 4px 0 0;
+}
+
+/* Action loading */
+.action-loading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background-color: #1e3a5f;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  color: #93c5fd;
+  font-size: 0.875rem;
+}
+
+/* Actions Bar */
+.actions-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background-color: #1f2937;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.actions-label {
+  font-size: 0.875rem;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+/* Content Grid */
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+/* Sections */
+.section {
+  background-color: #1f2937;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+  padding: 16px 20px;
+  background-color: #374151;
+  color: #d1d5db;
+}
+
+.section-title mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+/* Info Card */
+.info-card {
+  padding: 16px 20px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.info-label {
+  font-size: 0.85rem;
+  color: #9ca3af;
+}
+
+.info-value {
+  font-size: 0.9rem;
+  color: #f9fafb;
+  text-align: right;
+}
+
+.tracking-number {
+  font-family: monospace;
+  color: #93c5fd;
+  font-weight: 600;
+}
+
+.section-divider {
+  margin: 12px 0;
+  border-color: #374151;
+}
+
+.no-data-text {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* Items Table */
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.items-table {
+  width: 100%;
+}
+
+/* Totals */
+.totals-section {
+  padding: 16px 20px;
+  border-top: 1px solid #374151;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 0.9rem;
+  color: #d1d5db;
+}
+
+.total-final {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #f9fafb;
+  padding-top: 12px;
+}
+
+/* Loading */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 64px 0;
+}
+
+/* Not found */
+.not-found {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 64px 0;
+  color: #6b7280;
+}
+
+.not-found mat-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+}
+
+/* Dark theme overrides for Material table */
+:host ::ng-deep .mat-mdc-header-cell {
+  background-color: #374151 !important;
+  color: #d1d5db !important;
+  font-weight: 600;
+  border-bottom-color: #4b5563 !important;
+}
+
+:host ::ng-deep .mat-mdc-cell {
+  color: #f9fafb !important;
+  border-bottom-color: #374151 !important;
+}
+
+:host ::ng-deep .mat-mdc-row {
+  background-color: #1f2937 !important;
+}
+
+:host ::ng-deep .mat-mdc-row:hover {
+  background-color: #283548 !important;
+}
+
+:host ::ng-deep .mat-mdc-icon-button {
+  color: #d1d5db !important;
+}
+
+:host ::ng-deep .mat-divider {
+  border-color: #374151 !important;
+}
+
+@media (max-width: 768px) {
+  .order-detail-container {
+    padding: 16px;
+  }
+
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .actions-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .info-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .info-value {
+    text-align: left;
+  }
+}

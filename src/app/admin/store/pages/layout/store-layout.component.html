@@ -1,0 +1,1184 @@
+<div class="store-layout">
+
+  <!-- Sidebar -->
+  <aside class="store-sidebar">
+    <div class="store-brand">
+      <span class="material-icons store-brand-icon">storefront</span>
+      <span class="store-brand-name">Store Panel</span>
+    </div>
+
+    <div class="store-user">
+      <div class="store-user-avatar">{{ user?.nickname?.charAt(0)?.toUpperCase() || 'S' }}</div>
+      <div class="store-user-info">
+        <span class="store-user-name">{{ user?.nickname || 'Admin' }}</span>
+        <span class="store-user-role">{{ role }}</span>
+      </div>
+    </div>
+
+    <nav class="store-nav">
+      @for (item of navItems; track item.key) {
+        <button class="store-nav-item" [class.active]="activeSection === item.key" (click)="selectSection(item.key)">
+          <span class="material-icons">{{ item.icon }}</span>
+          {{ item.label }}
+        </button>
+      }
+    </nav>
+
+    <a class="store-nav-home" [routerLink]="'/admin/' + role"><span class="material-icons">arrow_back</span> Volver a mi panel</a>
+    <button class="store-logout" (click)="logout()">
+      <span class="material-icons">logout</span>
+      Cerrar sesión
+    </button>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="store-main">
+
+    <!-- ═══ DASHBOARD ═══ -->
+    @if (activeSection === 'dashboard') {
+      <h1 class="store-title">Dashboard de Tienda</h1>
+      <p class="store-subtitle">Resumen general de operaciones</p>
+
+      <div class="stats-grid">
+        @for (stat of stats; track stat.label) {
+          <div class="stat-card" (click)="selectSection(stat.label === 'Total Pedidos' || stat.label === 'Pedidos Pendientes' ? 'orders' : stat.label === 'Clientes' ? 'customers' : 'dashboard')">
+            <div class="stat-icon" [style.background]="stat.color + '15'" [style.color]="stat.color">
+              <span class="material-icons">{{ stat.icon }}</span>
+            </div>
+            <div class="stat-info">
+              @if (stat.loading) {
+                <div class="stat-value-loading"><div class="spinner-sm"></div></div>
+              } @else {
+                <span class="stat-value">{{ stat.value }}</span>
+              }
+              <span class="stat-label">{{ stat.label }}</span>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="charts-grid">
+        <div class="chart-card">
+          <h3 class="chart-title">
+            <span class="material-icons">bar_chart</span>
+            Pedidos por mes
+          </h3>
+          <div #ordersMonthChart class="chart-container"></div>
+        </div>
+        <div class="chart-card">
+          <h3 class="chart-title">
+            <span class="material-icons">donut_large</span>
+            Distribución por estado
+          </h3>
+          <div #ordersStatusChart class="chart-container"></div>
+        </div>
+      </div>
+
+      <div class="quick-links">
+        @for (item of navItems; track item.key) {
+          @if (item.key !== 'dashboard') {
+            <div class="quick-link" (click)="selectSection(item.key)">
+              <span class="material-icons">{{ item.icon }}</span>
+              <span>{{ item.label }}</span>
+            </div>
+          }
+        }
+      </div>
+    }
+
+    <!-- ═══ PRODUCTS ═══ -->
+    @if (activeSection === 'products' && !selectedProduct) {
+      <div class="section-header">
+        <div class="section-header-left">
+          <h1 class="store-title">Productos</h1>
+          <span class="section-total">{{ productTotal }} registros</span>
+        </div>
+        <button class="filter-btn" (click)="createNewProduct()">
+          <span class="material-icons">add</span> Nuevo producto
+        </button>
+      </div>
+
+      <div class="filters-bar">
+        <input type="text" class="filter-input" placeholder="Buscar por nombre o SKU..."
+          [(ngModel)]="productSearch" (keyup.enter)="onProductSearch()" style="flex:1;max-width:400px;" />
+        <button class="filter-btn" (click)="onProductSearch()">
+          <span class="material-icons">search</span> Buscar
+        </button>
+      </div>
+
+      @if (productLoading) {
+        <div class="loading-state"><div class="spinner"></div><span>Cargando...</span></div>
+      }
+
+      @if (!productLoading && productRows.length === 0) {
+        <div class="empty-state"><span class="material-icons">inbox</span><p>No se encontraron productos</p></div>
+      }
+
+      @if (!productLoading && productRows.length > 0) {
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Imagen</th>
+                <th>Nombre</th>
+                <th>SKU</th>
+                <th>Precio</th>
+                <th>Stock</th>
+                <th>Activo</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of productRows; track row.uuid; let i = $index) {
+                <tr (click)="viewProductDetail(row)" style="cursor:pointer;">
+                  <td class="row-num">{{ (productPage - 1) * 15 + i + 1 }}</td>
+                  <td>
+                    @if (row.images?.length) {
+                      <img [src]="row.images[0].url || row.images[0].path" alt="" style="width:40px;height:40px;object-fit:cover;border-radius:8px;" />
+                    } @else {
+                      <span class="material-icons" style="color:#cbd5e1;font-size:28px;">image</span>
+                    }
+                  </td>
+                  <td style="font-weight:600;max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ row.name || '—' }}</td>
+                  <td>{{ row.sku || '—' }}</td>
+                  <td>{{ formatCurrency(row.price) }}</td>
+                  <td [style.color]="(row.stock || 0) <= 5 ? '#ef4444' : '#059669'" style="font-weight:600;">{{ row.stock ?? 0 }}</td>
+                  <td>
+                    @if (row.active) {
+                      <span style="color:#059669;font-weight:600;">Sí</span>
+                    } @else {
+                      <span style="color:#94a3b8;">No</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (productLastPage > 1) {
+          <div class="pagination">
+            <button class="page-btn" [disabled]="productPage <= 1" (click)="prevProductPage()"><span class="material-icons">chevron_left</span></button>
+            <span class="page-info">{{ productPage }} / {{ productLastPage }}</span>
+            <button class="page-btn" [disabled]="productPage >= productLastPage" (click)="nextProductPage()"><span class="material-icons">chevron_right</span></button>
+          </div>
+        }
+      }
+    }
+
+    <!-- ═══ PRODUCT DETAIL ═══ -->
+    @if (activeSection === 'products' && selectedProduct) {
+      <button class="back-btn" (click)="backToProducts()">
+        <span class="material-icons">arrow_back</span> Volver a productos
+      </button>
+
+      @if (productSaveSuccess) {
+        <div style="background:#f0fdf4;color:#166534;padding:10px 16px;border-radius:10px;margin-bottom:16px;font-size:0.85rem;">{{ productSaveSuccess }}</div>
+      }
+      @if (productSaveError) {
+        <div style="background:#fef2f2;color:#991b1b;padding:10px 16px;border-radius:10px;margin-bottom:16px;font-size:0.85rem;">{{ productSaveError }}</div>
+      }
+
+      @if (!productEditing) {
+        <!-- View Mode — Two Column Layout -->
+        <div class="product-detail-grid">
+          <!-- Left: Images -->
+          <div class="product-images-col">
+            <div class="detail-card">
+              @if (selectedProduct.images?.length) {
+                <img [src]="selectedProduct.images[0].url || selectedProduct.images[0].path" alt="" class="product-main-img" />
+                @if (selectedProduct.images.length > 1) {
+                  <div class="product-thumbs">
+                    @for (img of selectedProduct.images; track img.id || $index) {
+                      <img [src]="img.url || img.path" alt="" class="product-thumb" />
+                    }
+                  </div>
+                }
+              } @else {
+                <div class="product-no-img"><span class="material-icons">image</span><span>Sin imágenes</span></div>
+              }
+            </div>
+          </div>
+
+          <!-- Right: Info -->
+          <div class="product-info-col">
+            <div class="detail-card">
+              <h3 class="detail-card-title"><span class="material-icons">info</span> Información</h3>
+              <h2 style="font-size:1.3rem;font-weight:800;color:#0f172a;margin:0 0 4px;">{{ selectedProduct.name || '—' }}</h2>
+              <p style="font-size:0.8rem;color:#94a3b8;margin:0 0 16px;">SKU: {{ selectedProduct.sku || '—' }}</p>
+
+              <div class="product-meta-grid">
+                <div class="product-meta-item">
+                  <span class="product-meta-label">Precio</span>
+                  <span class="product-meta-value" style="color:#059669;">{{ formatCurrency(selectedProduct.price) }}</span>
+                </div>
+                <div class="product-meta-item">
+                  <span class="product-meta-label">Stock</span>
+                  <span class="product-meta-value" [style.color]="(selectedProduct.stock || 0) <= 5 ? '#ef4444' : '#059669'">{{ selectedProduct.stock ?? 0 }}</span>
+                </div>
+                <div class="product-meta-item">
+                  <span class="product-meta-label">Estado</span>
+                  <span class="product-meta-value">
+                    @if (selectedProduct.active) {
+                      <span style="background:#f0fdf4;color:#059669;padding:3px 10px;border-radius:20px;font-size:0.75rem;font-weight:600;">Activo</span>
+                    } @else {
+                      <span style="background:#f1f5f9;color:#94a3b8;padding:3px 10px;border-radius:20px;font-size:0.75rem;font-weight:600;">Inactivo</span>
+                    }
+                  </span>
+                </div>
+                <div class="product-meta-item">
+                  <span class="product-meta-label">Categoría</span>
+                  <span class="product-meta-value">{{ selectedProduct.category?.name || selectedProduct.category_name || '—' }}</span>
+                </div>
+              </div>
+
+              @if (selectedProduct.description) {
+                <div style="margin-top:16px;padding-top:16px;border-top:1px solid #f1f5f9;">
+                  <span class="product-meta-label">Descripción</span>
+                  <p style="font-size:0.85rem;color:#334155;margin:6px 0 0;line-height:1.5;">{{ selectedProduct.description }}</p>
+                </div>
+              }
+
+              <div class="detail-actions" style="margin-top:20px;">
+                <button class="filter-btn" (click)="startEditProduct()"><span class="material-icons">edit</span> Editar producto</button>
+              </div>
+            </div>
+
+            <!-- Variants -->
+            @if (selectedProduct.variants?.length) {
+              <div class="detail-card">
+                <h3 class="detail-card-title"><span class="material-icons">style</span> Variantes ({{ selectedProduct.variants.length }})</h3>
+                <table class="items-table">
+                  <thead><tr><th>Combinación</th><th>SKU</th><th>Precio</th><th>Stock</th><th>Activo</th></tr></thead>
+                  <tbody>
+                    @for (v of selectedProduct.variants; track v.id || $index) {
+                      <tr>
+                        <td style="font-weight:600;">{{ buildVariantDescription(v) }}</td>
+                        <td>{{ v.sku || '—' }}</td>
+                        <td>{{ formatCurrency(v.price ?? selectedProduct.price) }}</td>
+                        <td [style.color]="(v.stock || 0) <= 5 ? '#ef4444' : '#059669'" style="font-weight:600;">{{ v.stock ?? 0 }}</td>
+                        <td>
+                          @if (v.active) {
+                            <span style="color:#059669;font-weight:600;">Sí</span>
+                          } @else {
+                            <span style="color:#94a3b8;">No</span>
+                          }
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </div>
+        </div>
+      } @else {
+        <!-- Edit Mode — Two Column -->
+        <div class="product-detail-grid">
+          <!-- Left: Images -->
+          <div class="product-images-col">
+            <div class="detail-card">
+              <h3 class="detail-card-title"><span class="material-icons">photo_library</span> Imágenes</h3>
+              @if (selectedProduct.images?.length) {
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                  @for (img of selectedProduct.images; track img.uuid || img.id || $index) {
+                    <div style="position:relative;display:inline-block;">
+                      <img [src]="img.url || img.path" alt="" style="width:90px;height:90px;object-fit:cover;border-radius:8px;border:1px solid #e2e8f0;" />
+                      <button (click)="deleteProductImage(img)" style="position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:#ef4444;color:#fff;border:none;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;">×</button>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <p style="color:#94a3b8;font-size:0.85rem;">Sin imágenes</p>
+              }
+              <div style="margin-top:12px;">
+                <label class="filter-btn" style="cursor:pointer;display:inline-flex;">
+                  <span class="material-icons">add_photo_alternate</span> Subir imagen
+                  <input type="file" accept="image/*" (change)="uploadProductImage($event)" style="display:none;" />
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Form -->
+          <div class="product-info-col">
+            <div class="detail-card">
+              <h3 class="detail-card-title"><span class="material-icons">edit</span> {{ productMode === 'create' ? 'Nuevo Producto' : 'Editar Producto' }}</h3>
+              <div class="edit-form">
+                <div class="field-group">
+                  <label class="field-label">Nombre</label>
+                  <input class="field-input" [(ngModel)]="productEditData.name" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">SKU</label>
+                  <input class="field-input" [(ngModel)]="productEditData.sku" />
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                  <div class="field-group">
+                    <label class="field-label">Precio</label>
+                    <input class="field-input" type="number" [(ngModel)]="productEditData.price" />
+                  </div>
+                  <div class="field-group">
+                    <label class="field-label">Stock</label>
+                    <input class="field-input" type="number" [(ngModel)]="productEditData.stock" />
+                  </div>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">Categoría</label>
+                  <select class="field-input" [(ngModel)]="productEditData.category_uuid">
+                    <option value="">— Seleccionar —</option>
+                    @for (cat of categoryOptions; track cat.uuid) {
+                      <option [value]="cat.uuid">{{ cat.name }}</option>
+                    }
+                  </select>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">Descripción</label>
+                  <textarea class="field-input" rows="3" [(ngModel)]="productEditData.description" style="height:auto;padding:10px 14px;"></textarea>
+                </div>
+                <div class="field-group" style="flex-direction:row;align-items:center;gap:8px;">
+                  <input type="checkbox" id="productActive" [(ngModel)]="productEditData.active" />
+                  <label for="productActive" class="field-label" style="margin:0;">Activo</label>
+                </div>
+                <div class="detail-actions">
+                  <button class="filter-btn" (click)="saveProduct()" [disabled]="productSaving">
+                    @if (productSaving) { <div class="spinner-sm"></div> } @else { <span class="material-icons">save</span> Guardar }
+                  </button>
+                  <button class="filter-btn" style="background:#64748b;" (click)="cancelEditProduct()">
+                    <span class="material-icons">close</span> Cancelar
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Variants Toggle & Attribute-Based Editor -->
+            <div class="detail-card">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <h3 class="detail-card-title" style="margin:0;"><span class="material-icons">style</span> Variantes</h3>
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:0.8rem;color:#475569;">
+                  <input type="checkbox" [(ngModel)]="hasVariants" (change)="hasVariants && loadAttributes()" />
+                  Producto con variantes
+                </label>
+              </div>
+              @if (hasVariants) {
+                <!-- Attribute Selector -->
+                <div class="attr-section" style="margin-top:14px;">
+                  <label class="field-label">Agregar atributo</label>
+                  <div class="attr-add-row">
+                    <select class="field-input" [(ngModel)]="selectedAttrUuid" style="flex:1;height:38px;font-size:0.82rem;">
+                      <option value="">— Seleccionar atributo —</option>
+                      @for (attr of filteredAttributes; track attr.uuid) {
+                        <option [value]="attr.uuid">{{ attr.name }}</option>
+                      }
+                    </select>
+                    <button class="filter-btn" (click)="addAttributeToProduct(selectedAttrUuid)" [disabled]="!selectedAttrUuid" style="height:38px;font-size:0.8rem;">
+                      <span class="material-icons" style="font-size:16px;">add</span> Agregar
+                    </button>
+                  </div>
+                  <!-- Inline create attribute -->
+                  <div class="attr-add-row" style="margin-top:8px;">
+                    <input class="field-input" [(ngModel)]="newAttributeName" placeholder="Nuevo atributo (ej: Material)" style="flex:1;height:38px;font-size:0.82rem;" (keyup.enter)="createAttributeInline()" />
+                    <button class="filter-btn" (click)="createAttributeInline()" [disabled]="!newAttributeName.trim()" style="height:38px;font-size:0.8rem;background:#059669;">
+                      <span class="material-icons" style="font-size:16px;">add</span> Crear
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Selected Attributes with Values -->
+                @for (attr of selectedProductAttributes; track attr.attribute_uuid; let ai = $index) {
+                  <div class="attr-section" style="margin-top:14px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                      <span style="font-size:0.85rem;font-weight:700;color:#0f172a;">{{ attr.attribute_name }}</span>
+                      <button (click)="removeAttributeFromProduct(ai)" style="width:26px;height:26px;border-radius:50%;background:#fef2f2;color:#ef4444;border:1px solid #fecaca;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;" title="Quitar atributo">×</button>
+                    </div>
+                    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                      @for (val of attr.values; track val.uuid) {
+                        <button class="attr-chip" [class.selected]="val.selected" (click)="toggleAttributeValue(ai, val.uuid)">
+                          @if (val.color_hex) {
+                            <span style="width:12px;height:12px;border-radius:50%;display:inline-block;border:1px solid #cbd5e1;" [style.background]="val.color_hex"></span>
+                          }
+                          {{ val.value }}
+                        </button>
+                      }
+                    </div>
+                    <!-- Inline add value -->
+                    <div class="attr-add-row" style="margin-top:8px;">
+                      <input class="field-input" [(ngModel)]="newValueInputs[attr.attribute_uuid]" [placeholder]="'Nuevo valor para ' + attr.attribute_name" style="flex:1;height:34px;font-size:0.8rem;" (keyup.enter)="createValueInline(ai)" />
+                      <button class="filter-btn" (click)="createValueInline(ai)" [disabled]="!(newValueInputs[attr.attribute_uuid] || '').trim()" style="height:34px;font-size:0.78rem;background:#059669;">
+                        <span class="material-icons" style="font-size:14px;">add</span>
+                      </button>
+                    </div>
+                  </div>
+                }
+
+                <!-- Generate Button -->
+                @if (selectedProductAttributes.length > 0) {
+                  <div style="margin-top:16px;display:flex;align-items:center;gap:12px;">
+                    <button class="filter-btn" (click)="generateVariants()" [disabled]="!canGenerateVariants || generatingVariants" style="background:#7c3aed;">
+                      @if (generatingVariants) { <div class="spinner-sm"></div> Generando... } @else { <span class="material-icons">auto_awesome</span> Generar variantes }
+                    </button>
+                  </div>
+                }
+
+                <!-- Variants Table -->
+                @if (editVariants.length > 0) {
+                  <div style="margin-top:16px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                      <span style="font-size:0.8rem;color:#64748b;font-weight:600;">{{ totalVariantsCount }} variantes · Stock total: {{ totalStockCount }}</span>
+                      <button class="filter-btn" (click)="saveVariantChanges()" [disabled]="modifiedVariantUuids.size === 0 || variantsSaving" style="font-size:0.78rem;height:34px;">
+                        @if (variantsSaving) { <div class="spinner-sm"></div> } @else { <span class="material-icons" style="font-size:16px;">save</span> Guardar cambios }
+                      </button>
+                    </div>
+                    <div class="table-wrap">
+                      <table class="data-table">
+                        <thead>
+                          <tr>
+                            <th>Combinación</th>
+                            <th>SKU</th>
+                            <th>Precio</th>
+                            <th>Stock</th>
+                            <th>Activo</th>
+                            <th>Eliminar</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @for (v of editVariants; track v.uuid || $index) {
+                            <tr [style.background]="modifiedVariantUuids.has(v.uuid) ? '#fffbeb' : ''">
+                              <td style="font-weight:600;font-size:0.8rem;">{{ v.description || buildVariantDescription(v) }}</td>
+                              <td><input class="field-input" [(ngModel)]="v.sku" (input)="markVariantModified(v.uuid)" style="height:32px;font-size:0.78rem;width:140px;" /></td>
+                              <td><input class="field-input" type="number" [(ngModel)]="v.price" (input)="markVariantModified(v.uuid)" style="height:32px;font-size:0.78rem;width:90px;" [placeholder]="productEditData.price" /></td>
+                              <td><input class="field-input" type="number" [(ngModel)]="v.stock" (input)="markVariantModified(v.uuid)" style="height:32px;font-size:0.78rem;width:70px;" /></td>
+                              <td style="text-align:center;"><input type="checkbox" [(ngModel)]="v.active" (change)="markVariantModified(v.uuid)" /></td>
+                              <td style="text-align:center;">
+                                <button (click)="deleteVariantItem(v.uuid)" style="width:26px;height:26px;border-radius:50%;background:#fef2f2;color:#ef4444;border:1px solid #fecaca;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;" title="Eliminar variante">×</button>
+                              </td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                }
+              }
+            </div>
+          </div>
+        </div>
+      }
+    }
+
+    <!-- ═══ ORDERS ═══ -->
+    @if (activeSection === 'orders' && !selectedOrder) {
+      <div class="section-header">
+        <div class="section-header-left">
+          <h1 class="store-title">Pedidos</h1>
+          <span class="section-total">{{ total }} registros</span>
+        </div>
+      </div>
+
+      <div class="filters-bar">
+        <input type="text" class="filter-input" placeholder="Buscar por # pedido o cliente..."
+          [(ngModel)]="searchTerm" (keyup.enter)="onOrderSearch()" style="flex:1;max-width:300px;" />
+        <select class="filter-select" [(ngModel)]="orderStatusFilter" (change)="onOrderSearch()">
+          <option value="">Todos los estados</option>
+          @for (s of orderStatuses; track s) {
+            <option [value]="s">{{ s }}</option>
+          }
+        </select>
+        <input type="date" class="filter-input" [(ngModel)]="orderDateFrom" (change)="onOrderSearch()" />
+        <input type="date" class="filter-input" [(ngModel)]="orderDateTo" (change)="onOrderSearch()" />
+        <button class="filter-btn" (click)="onOrderSearch()">
+          <span class="material-icons">search</span> Buscar
+        </button>
+      </div>
+
+      @if (loading) {
+        <div class="loading-state"><div class="spinner"></div><span>Cargando...</span></div>
+      }
+
+      @if (!loading && rows.length === 0) {
+        <div class="empty-state"><span class="material-icons">inbox</span><p>No se encontraron pedidos</p></div>
+      }
+
+      @if (!loading && rows.length > 0) {
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th># Pedido</th>
+                <th>Cliente</th>
+                <th>Estado</th>
+                <th>Total</th>
+                <th>Fecha</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of rows; track row.uuid; let i = $index) {
+                <tr (click)="viewOrderDetail(row)">
+                  <td class="row-num">{{ (currentPage - 1) * 15 + i + 1 }}</td>
+                  <td>{{ row.order_number || '—' }}</td>
+                  <td>{{ row.shipping_name || row.user?.nickname || '—' }}</td>
+                  <td><span [class]="getStatusBadgeClass(row.status)">{{ row.status || '—' }}</span></td>
+                  <td>{{ formatCurrency(row.total) }}</td>
+                  <td>{{ formatDate(row.created_at) }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (lastPage > 1) {
+          <div class="pagination">
+            <button class="page-btn" [disabled]="currentPage <= 1" (click)="prevPage()">
+              <span class="material-icons">chevron_left</span>
+            </button>
+            <span class="page-info">{{ currentPage }} / {{ lastPage }}</span>
+            <button class="page-btn" [disabled]="currentPage >= lastPage" (click)="nextPage()">
+              <span class="material-icons">chevron_right</span>
+            </button>
+          </div>
+        }
+      }
+    }
+
+    <!-- ═══ ORDER DETAIL ═══ -->
+    @if (activeSection === 'orders' && selectedOrder) {
+      <button class="back-btn" (click)="backToOrders()">
+        <span class="material-icons">arrow_back</span> Volver a pedidos
+      </button>
+
+      @if (orderDetailLoading) {
+        <div class="loading-state"><div class="spinner"></div><span>Cargando detalle...</span></div>
+      }
+
+      @if (!orderDetailLoading && selectedOrder) {
+        <h1 class="store-title">Pedido {{ selectedOrder.order_number }}</h1>
+        <p class="store-subtitle">Detalle completo del pedido</p>
+
+        <div class="detail-card">
+          <h3 class="detail-card-title"><span class="material-icons">info</span> Información del Pedido</h3>
+          <div class="detail-row"><span class="detail-label"># Pedido</span><span class="detail-value">{{ selectedOrder.order_number }}</span></div>
+          <div class="detail-row"><span class="detail-label">Estado</span><span class="detail-value"><span [class]="getStatusBadgeClass(selectedOrder.status)">{{ selectedOrder.status }}</span></span></div>
+          <div class="detail-row"><span class="detail-label">Total</span><span class="detail-value">{{ formatCurrency(selectedOrder.total) }}</span></div>
+          <div class="detail-row"><span class="detail-label">Subtotal</span><span class="detail-value">{{ formatCurrency(selectedOrder.subtotal) }}</span></div>
+          <div class="detail-row"><span class="detail-label">Envío</span><span class="detail-value">{{ formatCurrency(selectedOrder.shipping_cost) }}</span></div>
+          <div class="detail-row"><span class="detail-label">Cliente</span><span class="detail-value">{{ selectedOrder.shipping_name || '—' }}</span></div>
+          <div class="detail-row"><span class="detail-label">Fecha</span><span class="detail-value">{{ formatDate(selectedOrder.created_at) }}</span></div>
+
+          <div class="detail-actions">
+            <select class="filter-select" [(ngModel)]="statusChangeValue">
+              @for (s of orderStatuses; track s) {
+                <option [value]="s">{{ s }}</option>
+              }
+            </select>
+            <button class="filter-btn" (click)="changeOrderStatus()" [disabled]="statusChanging">
+              @if (statusChanging) { <div class="spinner-sm"></div> } @else { <span class="material-icons">sync</span> Cambiar estado }
+            </button>
+            <button class="filter-btn" (click)="generateLabel()" [disabled]="labelGenerating" style="background:#059669;">
+              @if (labelGenerating) { <div class="spinner-sm"></div> } @else { <span class="material-icons">local_shipping</span> Generar guía }
+            </button>
+          </div>
+        </div>
+
+        <!-- Order Items -->
+        @if (selectedOrder.order_items?.length || selectedOrder.items?.length) {
+          <div class="detail-card">
+            <h3 class="detail-card-title"><span class="material-icons">inventory_2</span> Productos</h3>
+            <table class="items-table">
+              <thead><tr><th>Producto</th><th>SKU</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th></tr></thead>
+              <tbody>
+                @for (item of (selectedOrder.order_items || selectedOrder.items || []); track item.id || $index) {
+                  <tr>
+                    <td>{{ item.product_name || item.name || '—' }}</td>
+                    <td>{{ item.sku || '—' }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ formatCurrency(item.price) }}</td>
+                    <td>{{ formatCurrency(item.quantity * item.price) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+
+        <!-- Payment Info -->
+        @if (selectedOrder.payment) {
+          <div class="detail-card">
+            <h3 class="detail-card-title"><span class="material-icons">payment</span> Información de Pago</h3>
+            <div class="detail-row"><span class="detail-label">Método</span><span class="detail-value">{{ selectedOrder.payment.payment_method || '—' }}</span></div>
+            <div class="detail-row"><span class="detail-label">Referencia</span><span class="detail-value">{{ selectedOrder.payment.transaction_id || selectedOrder.payment.reference || '—' }}</span></div>
+            <div class="detail-row"><span class="detail-label">Estado</span><span class="detail-value">{{ selectedOrder.payment.status || '—' }}</span></div>
+            <div class="detail-row"><span class="detail-label">Monto</span><span class="detail-value">{{ formatCurrency(selectedOrder.payment.amount) }}</span></div>
+          </div>
+        }
+
+        <!-- Shipping Info -->
+        @if (selectedOrder.shipment) {
+          <div class="detail-card">
+            <h3 class="detail-card-title"><span class="material-icons">local_shipping</span> Información de Envío</h3>
+            <div class="detail-row"><span class="detail-label">Carrier</span><span class="detail-value">{{ selectedOrder.shipment.carrier || '—' }}</span></div>
+            <div class="detail-row"><span class="detail-label">Tracking</span><span class="detail-value">{{ selectedOrder.shipment.tracking_number || '—' }}</span></div>
+            <div class="detail-row"><span class="detail-label">Estado</span><span class="detail-value"><span [class]="getStatusBadgeClass(selectedOrder.shipment.status)">{{ selectedOrder.shipment.status || '—' }}</span></span></div>
+            <div class="detail-row"><span class="detail-label">Fecha estimada</span><span class="detail-value">{{ formatDate(selectedOrder.shipment.estimated_delivery) }}</span></div>
+            @if (selectedOrder.shipment.tracking_url) {
+              <div class="detail-row"><span class="detail-label">Rastreo</span><span class="detail-value"><a [href]="selectedOrder.shipment.tracking_url" target="_blank" style="color:#1c69d4;">Ver tracking</a></span></div>
+            }
+          </div>
+        }
+      }
+    }
+
+    <!-- ═══ SHIPPING ═══ -->
+    @if (activeSection === 'shipping') {
+      <div class="section-header">
+        <div class="section-header-left">
+          <h1 class="store-title">Envíos</h1>
+          <span class="section-total">{{ total }} registros</span>
+        </div>
+      </div>
+
+      <div class="filters-bar">
+        <select class="filter-select" [(ngModel)]="shipmentStatusFilter" (change)="onShipmentSearch()">
+          <option value="">Todos los estados</option>
+          <option value="pendiente">Pendiente</option>
+          <option value="en_preparacion">En preparación</option>
+          <option value="enviado">Enviado</option>
+          <option value="entregado">Entregado</option>
+        </select>
+        <input type="text" class="filter-input" placeholder="Filtrar por carrier..."
+          [(ngModel)]="shipmentCarrierFilter" (keyup.enter)="onShipmentSearch()" />
+        <button class="filter-btn" (click)="onShipmentSearch()">
+          <span class="material-icons">search</span> Filtrar
+        </button>
+      </div>
+
+      @if (loading) {
+        <div class="loading-state"><div class="spinner"></div><span>Cargando...</span></div>
+      }
+
+      @if (!loading && rows.length === 0) {
+        <div class="empty-state"><span class="material-icons">inbox</span><p>No se encontraron envíos</p></div>
+      }
+
+      @if (!loading && rows.length > 0) {
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th># Pedido</th>
+                <th>Cliente</th>
+                <th>Carrier</th>
+                <th>Tracking</th>
+                <th>Estado</th>
+                <th>Fecha estimada</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of rows; track row.uuid || row.id; let i = $index) {
+                <tr>
+                  <td class="row-num">{{ (currentPage - 1) * 15 + i + 1 }}</td>
+                  <td>{{ row.order?.order_number || row.order_number || '—' }}</td>
+                  <td>{{ row.order?.shipping_name || row.shipping_name || '—' }}</td>
+                  <td>{{ row.carrier || '—' }}</td>
+                  <td>
+                    @if (row.tracking_url) {
+                      <a [href]="row.tracking_url" target="_blank" style="color:#1c69d4;">{{ row.tracking_number || 'Ver' }}</a>
+                    } @else {
+                      {{ row.tracking_number || '—' }}
+                    }
+                  </td>
+                  <td><span [class]="getStatusBadgeClass(row.status)">{{ row.status || '—' }}</span></td>
+                  <td>{{ formatDate(row.estimated_delivery) }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (lastPage > 1) {
+          <div class="pagination">
+            <button class="page-btn" [disabled]="currentPage <= 1" (click)="prevPage()"><span class="material-icons">chevron_left</span></button>
+            <span class="page-info">{{ currentPage }} / {{ lastPage }}</span>
+            <button class="page-btn" [disabled]="currentPage >= lastPage" (click)="nextPage()"><span class="material-icons">chevron_right</span></button>
+          </div>
+        }
+      }
+    }
+
+    <!-- ═══ CUSTOMERS ═══ -->
+    @if (activeSection === 'customers' && !selectedCustomer) {
+      <div class="section-header">
+        <div class="section-header-left">
+          <h1 class="store-title">Clientes</h1>
+          <span class="section-total">{{ total }} registros</span>
+        </div>
+      </div>
+
+      <div class="filters-bar">
+        <input type="text" class="filter-input" placeholder="Buscar por nombre o email..."
+          [(ngModel)]="searchTerm" (keyup.enter)="onCustomerSearch()" style="flex:1;max-width:400px;" />
+        <button class="filter-btn" (click)="onCustomerSearch()">
+          <span class="material-icons">search</span> Buscar
+        </button>
+      </div>
+
+      @if (loading) {
+        <div class="loading-state"><div class="spinner"></div><span>Cargando...</span></div>
+      }
+
+      @if (!loading && rows.length === 0) {
+        <div class="empty-state"><span class="material-icons">inbox</span><p>No se encontraron clientes</p></div>
+      }
+
+      @if (!loading && rows.length > 0) {
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Teléfono</th>
+                <th>Puntos</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of rows; track row.uuid || row.customer_uuid; let i = $index) {
+                <tr (click)="viewCustomerDetail(row)">
+                  <td class="row-num">{{ (currentPage - 1) * 15 + i + 1 }}</td>
+                  <td>{{ row.name || row.customer_name || '' }} {{ row.last_name || row.customer_last_name || '' }}</td>
+                  <td>{{ row.email_1 || row.customer_email || row.email || '—' }}</td>
+                  <td>{{ row.cellphone || row.customer_phone || row.phone_1 || '—' }}</td>
+                  <td>{{ row.total_points ?? '—' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (lastPage > 1) {
+          <div class="pagination">
+            <button class="page-btn" [disabled]="currentPage <= 1" (click)="prevPage()"><span class="material-icons">chevron_left</span></button>
+            <span class="page-info">{{ currentPage }} / {{ lastPage }}</span>
+            <button class="page-btn" [disabled]="currentPage >= lastPage" (click)="nextPage()"><span class="material-icons">chevron_right</span></button>
+          </div>
+        }
+      }
+    }
+
+    <!-- ═══ CUSTOMER DETAIL ═══ -->
+    @if (activeSection === 'customers' && selectedCustomer) {
+      <button class="back-btn" (click)="backToCustomers()">
+        <span class="material-icons">arrow_back</span> Volver a clientes
+      </button>
+
+      @if (customerDetailLoading) {
+        <div class="loading-state"><div class="spinner"></div><span>Cargando detalle...</span></div>
+      }
+
+      @if (!customerDetailLoading && selectedCustomer) {
+        <h1 class="store-title">{{ selectedCustomer.name || selectedCustomer.customer_name || '' }} {{ selectedCustomer.last_name || selectedCustomer.customer_last_name || '' }}</h1>
+        <p class="store-subtitle">Perfil del cliente</p>
+
+        <div class="detail-card">
+          <h3 class="detail-card-title"><span class="material-icons">person</span> Datos Personales</h3>
+          <div class="detail-row"><span class="detail-label">Nombre</span><span class="detail-value">{{ selectedCustomer.name || selectedCustomer.customer_name || '' }} {{ selectedCustomer.last_name || selectedCustomer.customer_last_name || '' }}</span></div>
+          <div class="detail-row"><span class="detail-label">Email</span><span class="detail-value">{{ selectedCustomer.email_1 || selectedCustomer.email || '—' }}</span></div>
+          <div class="detail-row"><span class="detail-label">Teléfono</span><span class="detail-value">{{ selectedCustomer.cellphone || selectedCustomer.phone_1 || '—' }}</span></div>
+          <div class="detail-row"><span class="detail-label">Puntos totales</span><span class="detail-value" style="font-weight:700;color:#1c69d4;">{{ selectedCustomer.total_points ?? 0 }}</span></div>
+        </div>
+
+        <!-- Customer Orders -->
+        @if (selectedCustomer.orders?.length) {
+          <div class="detail-card">
+            <h3 class="detail-card-title"><span class="material-icons">receipt_long</span> Historial de Pedidos</h3>
+            <table class="items-table">
+              <thead><tr><th># Pedido</th><th>Estado</th><th>Total</th><th>Fecha</th></tr></thead>
+              <tbody>
+                @for (o of selectedCustomer.orders; track o.uuid || o.id) {
+                  <tr>
+                    <td>{{ o.order_number || '—' }}</td>
+                    <td><span [class]="getStatusBadgeClass(o.status)">{{ o.status }}</span></td>
+                    <td>{{ formatCurrency(o.total) }}</td>
+                    <td>{{ formatDate(o.created_at) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+
+        <!-- Customer Rewards -->
+        @if (selectedCustomer.rewards?.length) {
+          <div class="detail-card">
+            <h3 class="detail-card-title"><span class="material-icons">stars</span> Programas de Rewards</h3>
+            <table class="items-table">
+              <thead><tr><th>Programa</th><th>Puntos</th></tr></thead>
+              <tbody>
+                @for (r of selectedCustomer.rewards; track r.id || $index) {
+                  <tr>
+                    <td>{{ r.reward?.name || r.name || '—' }}</td>
+                    <td>{{ r.total_points ?? r.earned_points ?? '—' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+
+        <!-- Customer Coupons -->
+        @if (selectedCustomer.coupons?.length) {
+          <div class="detail-card">
+            <h3 class="detail-card-title"><span class="material-icons">confirmation_number</span> Cupones Asignados</h3>
+            <table class="items-table">
+              <thead><tr><th>Código</th><th>Monto</th><th>Tipo</th><th>Usos</th></tr></thead>
+              <tbody>
+                @for (c of selectedCustomer.coupons; track c.id || $index) {
+                  <tr>
+                    <td>{{ c.code }}</td>
+                    <td>{{ c.discount_type === 'percentage' ? c.amount + '%' : formatCurrency(c.amount) }}</td>
+                    <td>{{ c.discount_type }}</td>
+                    <td>{{ c.usage_count || 0 }}{{ c.usage_limit ? ' / ' + c.usage_limit : '' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      }
+    }
+
+    <!-- ═══ POINTS ═══ -->
+    @if (activeSection === 'points') {
+      <div class="section-header">
+        <div class="section-header-left">
+          <h1 class="store-title">Puntos / Rewards</h1>
+          <span class="section-total">{{ total }} registros</span>
+        </div>
+      </div>
+
+      <div class="filters-bar">
+        <input type="text" class="filter-input" placeholder="Buscar cliente..."
+          [(ngModel)]="searchTerm" (keyup.enter)="onPointsSearch()" style="flex:1;max-width:400px;" />
+        <button class="filter-btn" (click)="onPointsSearch()">
+          <span class="material-icons">search</span> Buscar
+        </button>
+      </div>
+
+      @if (loading) {
+        <div class="loading-state"><div class="spinner"></div><span>Cargando...</span></div>
+      }
+
+      @if (!loading && rows.length === 0) {
+        <div class="empty-state"><span class="material-icons">inbox</span><p>No se encontraron registros</p></div>
+      }
+
+      @if (!loading && rows.length > 0) {
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Cliente</th>
+                <th>Email</th>
+                <th>Balance</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of rows; track row.uuid || row.customer_reward_uuid; let i = $index) {
+                <tr>
+                  <td class="row-num">{{ (currentPage - 1) * 15 + i + 1 }}</td>
+                  <td>{{ row.customer_name || row.name || '' }} {{ row.customer_last_name || row.last_name || '' }}</td>
+                  <td>{{ row.customer_email || row.email || '—' }}</td>
+                  <td style="font-weight:700;color:#1c69d4;">{{ row.total_points ?? row.balance ?? 0 }}</td>
+                  <td class="row-actions">
+                    <button class="action-btn edit" (click)="openAdjustModal(row)" title="Ajustar puntos">
+                      <span class="material-icons">tune</span>
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (lastPage > 1) {
+          <div class="pagination">
+            <button class="page-btn" [disabled]="currentPage <= 1" (click)="prevPage()"><span class="material-icons">chevron_left</span></button>
+            <span class="page-info">{{ currentPage }} / {{ lastPage }}</span>
+            <button class="page-btn" [disabled]="currentPage >= lastPage" (click)="nextPage()"><span class="material-icons">chevron_right</span></button>
+          </div>
+        }
+      }
+    }
+
+    <!-- ═══ COUPONS ═══ -->
+    @if (activeSection === 'coupons') {
+      <div class="section-header">
+        <div class="section-header-left">
+          <h1 class="store-title">Cupones</h1>
+          <span class="section-total">{{ total }} registros</span>
+        </div>
+        <button class="filter-btn" (click)="openCouponCreate()">
+          <span class="material-icons">add</span> Nuevo cupón
+        </button>
+      </div>
+
+      <div class="filters-bar">
+        <input type="text" class="filter-input" placeholder="Buscar por código..."
+          [(ngModel)]="searchTerm" (keyup.enter)="onCouponSearch()" style="flex:1;max-width:400px;" />
+        <button class="filter-btn" (click)="onCouponSearch()">
+          <span class="material-icons">search</span> Buscar
+        </button>
+      </div>
+
+      @if (loading) {
+        <div class="loading-state"><div class="spinner"></div><span>Cargando...</span></div>
+      }
+
+      @if (!loading && rows.length === 0) {
+        <div class="empty-state"><span class="material-icons">inbox</span><p>No se encontraron cupones</p></div>
+      }
+
+      @if (!loading && rows.length > 0) {
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Código</th>
+                <th>Monto</th>
+                <th>Tipo</th>
+                <th>Usos</th>
+                <th>Límite</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of rows; track row.uuid || row.id; let i = $index) {
+                <tr>
+                  <td class="row-num">{{ (currentPage - 1) * 15 + i + 1 }}</td>
+                  <td style="font-weight:600;">{{ row.code }}</td>
+                  <td>{{ row.discount_type === 'percentage' ? row.amount + '%' : formatCurrency(row.amount) }}</td>
+                  <td>{{ row.discount_type }}</td>
+                  <td>{{ row.usage_count || 0 }}</td>
+                  <td>{{ row.usage_limit || '∞' }}</td>
+                  <td class="row-actions">
+                    <button class="action-btn edit" (click)="openCouponEdit(row); $event.stopPropagation()" title="Editar">
+                      <span class="material-icons">edit</span>
+                    </button>
+                    <button class="action-btn delete" (click)="confirmDeleteCoupon(row); $event.stopPropagation()" title="Eliminar">
+                      <span class="material-icons">delete</span>
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (lastPage > 1) {
+          <div class="pagination">
+            <button class="page-btn" [disabled]="currentPage <= 1" (click)="prevPage()"><span class="material-icons">chevron_left</span></button>
+            <span class="page-info">{{ currentPage }} / {{ lastPage }}</span>
+            <button class="page-btn" [disabled]="currentPage >= lastPage" (click)="nextPage()"><span class="material-icons">chevron_right</span></button>
+          </div>
+        }
+      }
+    }
+
+    <!-- ═══ REDEMPTIONS ═══ -->
+    @if (activeSection === 'redemptions') {
+      <div class="section-header">
+        <div class="section-header-left">
+          <h1 class="store-title">Redenciones</h1>
+          <span class="section-total">{{ total }} registros</span>
+        </div>
+      </div>
+
+      <div class="filters-bar">
+        <select class="filter-select" [(ngModel)]="redemptionStatusFilter" (change)="onRedemptionFilter()">
+          <option value="">Todos los estados</option>
+          <option value="pendiente">Pendiente</option>
+          <option value="aprobada">Aprobada</option>
+          <option value="rechazada">Rechazada</option>
+        </select>
+      </div>
+
+      @if (loading) {
+        <div class="loading-state"><div class="spinner"></div><span>Cargando...</span></div>
+      }
+
+      @if (!loading && rows.length === 0) {
+        <div class="empty-state"><span class="material-icons">inbox</span><p>No se encontraron redenciones</p></div>
+      }
+
+      @if (!loading && rows.length > 0) {
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Cliente</th>
+                <th>Puntos</th>
+                <th>Reward</th>
+                <th>Estado</th>
+                <th>Fecha</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of rows; track row.uuid || row.id; let i = $index) {
+                <tr>
+                  <td class="row-num">{{ (currentPage - 1) * 15 + i + 1 }}</td>
+                  <td>{{ row.customer_name || row.customer?.name || '—' }}</td>
+                  <td style="font-weight:600;">{{ row.points || row.earned_points || '—' }}</td>
+                  <td>{{ row.reward_name || row.reward?.name || '—' }}</td>
+                  <td><span [class]="getStatusBadgeClass(row.status)">{{ row.status || '—' }}</span></td>
+                  <td>{{ formatDate(row.created_at) }}</td>
+                  <td class="row-actions">
+                    @if (row.status === 'pendiente' || row.status === 'pending') {
+                      <button class="action-btn approve" (click)="approveRedemption(row); $event.stopPropagation()" title="Aprobar">
+                        <span class="material-icons">check</span>
+                      </button>
+                      <button class="action-btn reject" (click)="rejectRedemption(row); $event.stopPropagation()" title="Rechazar">
+                        <span class="material-icons">close</span>
+                      </button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (lastPage > 1) {
+          <div class="pagination">
+            <button class="page-btn" [disabled]="currentPage <= 1" (click)="prevPage()"><span class="material-icons">chevron_left</span></button>
+            <span class="page-info">{{ currentPage }} / {{ lastPage }}</span>
+            <button class="page-btn" [disabled]="currentPage >= lastPage" (click)="nextPage()"><span class="material-icons">chevron_right</span></button>
+          </div>
+        }
+      }
+    }
+
+  </main>
+</div>
+
+<!-- ═══ POINTS ADJUST MODAL ═══ -->
+@if (pointsAdjustModal) {
+  <div class="modal-overlay" (click)="closeAdjustModal()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Ajustar Puntos</h2>
+        <button class="modal-close" (click)="closeAdjustModal()"><span class="material-icons">close</span></button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-field">
+          <label class="modal-label">Tipo <span class="req">*</span></label>
+          <select class="modal-input" [(ngModel)]="adjustData.type">
+            <option value="add">Agregar</option>
+            <option value="subtract">Restar</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Cantidad de puntos <span class="req">*</span></label>
+          <input type="number" class="modal-input" [(ngModel)]="adjustData.points" min="1" placeholder="Ej: 100" />
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Motivo <span class="req">*</span> (mín. 5 caracteres)</label>
+          <textarea class="modal-input modal-textarea" [(ngModel)]="adjustData.reason" placeholder="Motivo del ajuste..."></textarea>
+        </div>
+        @if (adjustError) { <div class="modal-error">{{ adjustError }}</div> }
+        @if (adjustSuccess) { <div class="modal-success">{{ adjustSuccess }}</div> }
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn cancel" (click)="closeAdjustModal()">Cancelar</button>
+        <button class="modal-btn save" (click)="saveAdjust()" [disabled]="adjustSaving">
+          @if (adjustSaving) { <div class="spinner-sm"></div> } @else { Guardar }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ═══ COUPON MODAL ═══ -->
+@if (couponModal) {
+  <div class="modal-overlay" (click)="closeCouponModal()">
+    <div class="modal-box modal-lg" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ couponMode === 'create' ? 'Nuevo Cupón' : 'Editar Cupón' }}</h2>
+        <button class="modal-close" (click)="closeCouponModal()"><span class="material-icons">close</span></button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-field">
+          <label class="modal-label">Código <span class="req">*</span> (4-20 caracteres)</label>
+          <input type="text" class="modal-input" [(ngModel)]="couponData.code" placeholder="Ej: VERANO2025" maxlength="20" />
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Monto <span class="req">*</span></label>
+          <input type="number" class="modal-input" [(ngModel)]="couponData.amount" min="0.01" placeholder="Ej: 10" />
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Tipo de descuento <span class="req">*</span></label>
+          <select class="modal-input" [(ngModel)]="couponData.discount_type">
+            <option value="fixed">Fijo ($)</option>
+            <option value="percentage">Porcentaje (%)</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Descripción</label>
+          <textarea class="modal-input modal-textarea" [(ngModel)]="couponData.description" placeholder="Descripción opcional..."></textarea>
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Límite de uso</label>
+          <input type="number" class="modal-input" [(ngModel)]="couponData.usage_limit" min="0" placeholder="Dejar vacío para ilimitado" />
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Monto mínimo de compra</label>
+          <input type="number" class="modal-input" [(ngModel)]="couponData.minimum_amount" min="0" placeholder="Opcional" />
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Monto máximo de compra</label>
+          <input type="number" class="modal-input" [(ngModel)]="couponData.maximum_amount" min="0" placeholder="Opcional" />
+        </div>
+        <div class="modal-field">
+          <label class="modal-checkbox">
+            <input type="checkbox" [(ngModel)]="couponData.individual_use" />
+            Uso individual (no combinable con otros cupones)
+          </label>
+        </div>
+        @if (couponError) { <div class="modal-error">{{ couponError }}</div> }
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn cancel" (click)="closeCouponModal()">Cancelar</button>
+        <button class="modal-btn save" (click)="saveCoupon()" [disabled]="couponSaving">
+          @if (couponSaving) { <div class="spinner-sm"></div> } @else { Guardar }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ═══ DELETE CONFIRM ═══ -->
+@if (deleteConfirmOpen) {
+  <div class="modal-overlay" (click)="cancelDelete()">
+    <div class="modal-box modal-sm" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Confirmar eliminación</h2>
+        <button class="modal-close" (click)="cancelDelete()"><span class="material-icons">close</span></button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:0.88rem;color:#475569;margin:0;line-height:1.5;">¿Estás seguro de que deseas eliminar este cupón? Esta acción no se puede deshacer.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn cancel" (click)="cancelDelete()">Cancelar</button>
+        <button class="modal-btn danger" (click)="executeDeleteCoupon()" [disabled]="deleteLoading">
+          @if (deleteLoading) { <div class="spinner-sm"></div> } @else { Eliminar }
+        </button>
+      </div>
+    </div>
+  </div>
+}

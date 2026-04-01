@@ -1,0 +1,158 @@
+<div class="orders-container">
+  <!-- Header -->
+  <div class="header">
+    <div>
+      <h2 class="page-title">Pedidos</h2>
+      <p class="page-subtitle">Gestión de pedidos de la Boutique</p>
+    </div>
+  </div>
+
+  <!-- Metrics Cards -->
+  <div class="metrics-row">
+    <div class="metric-card">
+      <div class="metric-icon-wrap metric-total">
+        <mat-icon>receipt_long</mat-icon>
+      </div>
+      <div class="metric-info">
+        <span class="metric-value">{{ metricsLoading ? '...' : metrics.total_orders }}</span>
+        <span class="metric-label">Total pedidos</span>
+      </div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon-wrap metric-pending">
+        <mat-icon>pending_actions</mat-icon>
+      </div>
+      <div class="metric-info">
+        <span class="metric-value">{{ metricsLoading ? '...' : metrics.pending_orders }}</span>
+        <span class="metric-label">Pendientes</span>
+      </div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon-wrap metric-revenue">
+        <mat-icon>payments</mat-icon>
+      </div>
+      <div class="metric-info">
+        <span class="metric-value">{{ metricsLoading ? '...' : (metrics.revenue | currency:'MXN':'symbol-narrow') }}</span>
+        <span class="metric-label">Ingresos</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-bar">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar pedidos...</mat-label>
+      <input matInput [(ngModel)]="search" (keyup.enter)="onSearch()" placeholder="Número de pedido o cliente">
+      <mat-icon matSuffix class="search-icon" (click)="onSearch()">search</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="status-filter">
+      <mat-label>Estado</mat-label>
+      <mat-select [(ngModel)]="selectedStatus" (selectionChange)="onStatusFilter()">
+        <mat-option *ngFor="let s of orderStatuses" [value]="s.value">{{ s.label }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="date-field">
+      <mat-label>Desde</mat-label>
+      <input matInput [matDatepicker]="pickerFrom" [(ngModel)]="dateFrom" (dateChange)="onDateFilter()">
+      <mat-datepicker-toggle matSuffix [for]="pickerFrom"></mat-datepicker-toggle>
+      <mat-datepicker #pickerFrom></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="date-field">
+      <mat-label>Hasta</mat-label>
+      <input matInput [matDatepicker]="pickerTo" [(ngModel)]="dateTo" (dateChange)="onDateFilter()">
+      <mat-datepicker-toggle matSuffix [for]="pickerTo"></mat-datepicker-toggle>
+      <mat-datepicker #pickerTo></mat-datepicker>
+    </mat-form-field>
+
+    <button *ngIf="dateFrom || dateTo" mat-icon-button matTooltip="Limpiar fechas" (click)="clearDateFilters()">
+      <mat-icon>clear</mat-icon>
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <!-- Table -->
+  <div *ngIf="!loading" class="table-wrapper">
+    <table mat-table [dataSource]="orders" class="orders-table">
+
+      <!-- Order Number -->
+      <ng-container matColumnDef="order_number">
+        <th mat-header-cell *matHeaderCellDef>Pedido</th>
+        <td mat-cell *matCellDef="let order">
+          <span class="order-number">{{ order.order_number }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Customer -->
+      <ng-container matColumnDef="customer">
+        <th mat-header-cell *matHeaderCellDef>Cliente</th>
+        <td mat-cell *matCellDef="let order">{{ getCustomerName(order) }}</td>
+      </ng-container>
+
+      <!-- Status -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Estado</th>
+        <td mat-cell *matCellDef="let order">
+          <app-order-status-badge [status]="order.status"></app-order-status-badge>
+        </td>
+      </ng-container>
+
+      <!-- Payment -->
+      <ng-container matColumnDef="payment">
+        <th mat-header-cell *matHeaderCellDef>Pago</th>
+        <td mat-cell *matCellDef="let order">
+          <div class="payment-info">
+            <span>{{ getPaymentMethod(order) }}</span>
+            <app-order-status-badge *ngIf="order.payment" [status]="order.payment.status" type="payment"></app-order-status-badge>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Total -->
+      <ng-container matColumnDef="total">
+        <th mat-header-cell *matHeaderCellDef>Total</th>
+        <td mat-cell *matCellDef="let order">{{ order.total | currency:'MXN':'symbol-narrow' }}</td>
+      </ng-container>
+
+      <!-- Date -->
+      <ng-container matColumnDef="date">
+        <th mat-header-cell *matHeaderCellDef>Fecha</th>
+        <td mat-cell *matCellDef="let order">{{ order.created_at | date:'dd/MM/yyyy HH:mm' }}</td>
+      </ng-container>
+
+      <!-- Actions -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Acciones</th>
+        <td mat-cell *matCellDef="let order">
+          <button mat-icon-button matTooltip="Ver detalle" (click)="navigateToDetail(order)">
+            <mat-icon>visibility</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="clickable-row" (click)="navigateToDetail(row)"></tr>
+
+      <tr class="mat-row no-data-row" *matNoDataRow>
+        <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+          No se encontraron pedidos
+        </td>
+      </tr>
+    </table>
+
+    <mat-paginator
+      [length]="totalItems"
+      [pageSize]="pageSize"
+      [pageIndex]="currentPage - 1"
+      [pageSizeOptions]="[10, 15, 25, 50]"
+      (page)="onPageChange($event)"
+      showFirstLastButtons>
+    </mat-paginator>
+  </div>
+</div>

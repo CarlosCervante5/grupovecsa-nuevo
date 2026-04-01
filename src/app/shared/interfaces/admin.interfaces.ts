@@ -474,9 +474,10 @@ export interface tableCustomersData {
     name: string;
     puntos: number;
     customer_uuid: string;
-    email:string;
+    email: string;
     telefono: string;
     color: string;
+    register_date?: string;
 }
 
 export interface rewardsResponse extends GralResponse{
@@ -584,6 +585,13 @@ export interface userTable {
     email:      string;
     fecha:      Date;
     index:      number;
+    color:      string;
+    uuid:       string;
+    name?:      string;
+    last_name?: string;
+    rol:        string;
+    location?:  string | null;
+    picture?:   string | null;
 }
 
 export interface DetailResponsive {
@@ -669,4 +677,61 @@ export interface UserProfile {
     picture:    null;
     location:   null;
     created_at: Date;
+}
+
+
+// HOME CONTENT MANAGER
+
+export interface HomeSlide {
+  uuid: string;
+  title: string;
+  subtitle: string;
+  offer_main: string;
+  offer_main_text: string;
+  offer_sub: string;
+  offer_secondary: string;
+  offer_secondary_text: string;
+  button_text: string;
+  button_link: string;
+  disclaimer: string;
+  desktop_image_path: string;
+  mobile_image_path: string;
+  active: boolean;
+  sort_id: number;
+  created_at: string;
+}
+
+export interface HomeTestimonial {
+  uuid: string;
+  image_path: string;
+  alt: string;
+  active: boolean;
+  sort_id: number;
+  created_at: string;
+}
+
+export interface HomeSlidesResponse extends GralResponse {
+  data: { slides: HomeSlide[] };
+}
+
+export interface HomeTestimonialsResponse extends GralResponse {
+  data: { testimonials: HomeTestimonial[] };
+}
+
+export interface BoutiqueBanner {
+  uuid: string;
+  title: string;
+  subtitle: string;
+  cta_text: string;
+  cta_link: string;
+  bg_class: string;
+  desktop_image_path: string;
+  mobile_image_path: string;
+  active: boolean;
+  sort_id: number;
+  created_at: string;
+}
+
+export interface BoutiqueBannersResponse extends GralResponse {
+  data: { banners: BoutiqueBanner[] };
 }

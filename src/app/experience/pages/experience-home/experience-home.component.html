@@ -1,0 +1,136 @@
+<!-- Hero -->
+<section class="exp-hero">
+  <div class="exp-hero-overlay">
+    <div class="exp-hero-content">
+      <div class="exp-badge">GRUPO VECSA</div>
+      <h1 class="exp-hero-title">VECSA <span>Experience</span></h1>
+      <p class="exp-hero-sub">Eventos, presentaciones, nuevos lanzamientos y noticias relevantes de nuestras marcas. Todo en un solo lugar.</p>
+    </div>
+  </div>
+</section>
+
+<div class="exp-container">
+
+  <!-- Próximos Eventos -->
+  <section class="exp-section">
+    <h2 class="exp-section-title">Próximos eventos</h2>
+
+    <div *ngIf="loadingUpcoming" class="exp-loading">
+      <div class="exp-skeleton" *ngFor="let i of [1,2,3]"></div>
+    </div>
+
+    <div *ngIf="!loadingUpcoming && upcomingEvents.length === 0" class="exp-empty">
+      <span>🗓️</span>
+      <p>No hay eventos próximos por el momento.</p>
+    </div>
+
+    <div *ngIf="!loadingUpcoming && upcomingEvents.length > 0" class="upcoming-list">
+      <!-- Featured first event -->
+      <div class="upcoming-featured" *ngIf="upcomingEvents[0] as featured">
+        <div class="upcoming-featured-img">
+          <img *ngIf="featured.image_path" [src]="featured.image_path" [alt]="featured.name">
+          <div *ngIf="!featured.image_path" class="upcoming-featured-placeholder">
+            <span>🏍️</span>
+          </div>
+        </div>
+        <div class="upcoming-featured-info">
+          <span class="upcoming-tag">Próximo evento</span>
+          <h3>{{ featured.name }}</h3>
+          <p class="upcoming-date">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            {{ formatDate(featured.begin_date) }}
+          </p>
+          <p *ngIf="featured.location" class="upcoming-location">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            {{ featured.location }}
+          </p>
+          <p *ngIf="featured.description" class="upcoming-desc">{{ featured.description }}</p>
+        </div>
+      </div>
+
+      <!-- Rest of events -->
+      <div class="upcoming-rest" *ngIf="upcomingEvents.length > 1">
+        <div class="upcoming-card" *ngFor="let event of upcomingEvents.slice(1)">
+          <div class="upcoming-card-img">
+            <img *ngIf="event.image_path" [src]="event.image_path" [alt]="event.name">
+            <div *ngIf="!event.image_path" class="upcoming-card-placeholder"><span>🏍️</span></div>
+          </div>
+          <div class="upcoming-card-info">
+            <h4>{{ event.name }}</h4>
+            <span class="upcoming-card-date">{{ formatShortDate(event.begin_date) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Galería de Eventos -->
+  <section class="exp-section">
+    <h2 class="exp-section-title">Galería de eventos</h2>
+
+    <div *ngIf="loadingGallery" class="exp-grid-skeleton">
+      <div class="exp-skeleton-card" *ngFor="let i of [1,2,3,4,5,6]"></div>
+    </div>
+
+    <div *ngIf="!loadingGallery && pastEvents.length === 0" class="exp-empty">
+      <span>📸</span>
+      <p>Aún no hay eventos en la galería.</p>
+    </div>
+
+    <div *ngIf="!loadingGallery && pastEvents.length > 0" class="gallery-grid">
+      <div class="gallery-card" *ngFor="let event of pastEvents">
+        <div class="gallery-card-img">
+          <img *ngIf="event.image_path" [src]="event.image_path" [alt]="event.name">
+          <div *ngIf="!event.image_path" class="gallery-placeholder"><span>📸</span></div>
+          <div class="gallery-overlay">
+            <span class="gallery-date">{{ formatDate(event.begin_date) }}</span>
+          </div>
+        </div>
+        <div class="gallery-card-info">
+          <h4>{{ event.name }}</h4>
+          <span class="gallery-card-date">{{ formatDate(event.begin_date) }}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Historias -->
+  <section class="exp-section">
+    <h2 class="exp-section-title">Historias para compartir</h2>
+
+    <div *ngIf="loadingPosts" class="exp-grid-skeleton">
+      <div class="exp-skeleton-card" *ngFor="let i of [1,2,3,4,5,6]"></div>
+    </div>
+
+    <div *ngIf="!loadingPosts && posts.length === 0" class="exp-empty">
+      <span>📰</span>
+      <p>Próximamente nuevas historias.</p>
+    </div>
+
+    <div *ngIf="!loadingPosts && posts.length > 0" class="posts-grid">
+      <div class="post-card" *ngFor="let post of posts">
+        <div class="post-card-img">
+          <img *ngIf="post.image_path" [src]="post.image_path" [alt]="post.title">
+          <div *ngIf="!post.image_path" class="post-placeholder"><span>📰</span></div>
+        </div>
+        <div class="post-card-info">
+          <h4>{{ post.title }}</h4>
+          <span class="post-date">{{ formatDate(post.created_at) }}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Newsletter -->
+  <section class="newsletter-section">
+    <div class="newsletter-content">
+      <h2>Suscríbete a nuestro boletín</h2>
+      <p>Recibe en tu bandeja de entrada los mejores eventos, noticias y lanzamientos de VECSA.</p>
+      <div class="newsletter-form">
+        <input type="email" placeholder="tu@correo.com">
+        <button>Suscribirme</button>
+      </div>
+    </div>
+  </section>
+
+</div>

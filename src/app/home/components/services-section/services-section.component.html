@@ -1,0 +1,39 @@
+<section class="py-20 bg-white">
+  <div class="container mx-auto px-4 md:px-6 lg:px-8">
+    <div class="text-center mb-16">
+      <h2 class="text-4xl font-bold text-gray-900 mb-4" style="font-family: 'Oswald', sans-serif;">Nuestras Secciones</h2>
+      <p class="text-xl text-gray-600 max-w-3xl mx-auto">Descubre todo lo que Grupo VECSA tiene para ofrecerte</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-6 auto-rows-fr">
+      <a *ngFor="let service of services"
+         [href]="service.url"
+         target="_blank"
+         rel="noopener noreferrer"
+         class="service-card group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500"
+         [ngClass]="{
+           'md:col-span-2 md:row-span-2': service.span === '2x2',
+           'md:col-span-1 md:row-span-1 aspect-[4/3] md:aspect-auto': service.span === '1x1'
+         }">
+        <img [src]="service.image"
+             [alt]="service.title"
+             class="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-700">
+        <div class="absolute inset-0 card-gradient-overlay"></div>
+        <div class="absolute inset-0 p-6 flex flex-col justify-end text-white">
+          <h3 class="font-bold mb-2 text-white drop-shadow-lg"
+              [ngClass]="service.span === '2x2' ? 'text-3xl mb-4' : 'text-2xl'">
+            {{ service.title }}
+          </h3>
+          <p class="text-white/90 drop-shadow-md"
+             [ngClass]="service.span === '2x2' ? 'text-base mb-6' : 'text-sm mb-4'">
+            {{ service.description }}
+          </p>
+          <div class="w-full border-2 border-white text-white rounded-full font-medium hover:bg-white hover:text-gray-900 transition-colors text-center"
+               [ngClass]="service.span === '2x2' ? 'py-4 px-8' : 'py-3 px-6'">
+            {{ service.buttonText }}
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>

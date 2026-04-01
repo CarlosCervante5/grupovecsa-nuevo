@@ -1,0 +1,33 @@
+.tab-loading { display: flex; align-items: center; gap: 12px; justify-content: center; padding: 60px 0; color: #64748b; font-size: 0.9rem; }
+.tab-spinner { width: 24px; height: 24px; border: 3px solid #e2e8f0; border-top-color: #1c69d4; border-radius: 50%; animation: spin 0.6s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.tab-error { display: flex; align-items: center; gap: 10px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 14px 18px; color: #dc2626; font-size: 0.85rem; flex-wrap: wrap; }
+.retry-btn { margin-left: auto; padding: 6px 16px; background: #dc2626; color: #fff; border: none; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+.retry-btn:hover { background: #b91c1c; }
+
+.tab-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 60px 0; color: #94a3b8; text-align: center; }
+.tab-empty .material-icons { font-size: 48px; }
+.tab-empty p { margin: 0; font-size: 0.95rem; font-weight: 600; color: #64748b; }
+.tab-empty-hint { font-size: 0.8rem; color: #94a3b8; }
+
+.val-list { display: flex; flex-direction: column; gap: 12px; }
+.val-card { display: flex; align-items: center; gap: 16px; background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 18px 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); transition: box-shadow 0.2s; }
+.val-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+
+.val-icon { width: 44px; height: 44px; border-radius: 12px; background: #eff6ff; color: #1c69d4; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.val-icon .material-icons { font-size: 22px; }
+
+.val-info { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.val-vehicle { font-size: 0.92rem; font-weight: 700; color: #0f172a; }
+.val-details { font-size: 0.8rem; color: #64748b; }
+.val-meta { display: flex; align-items: center; gap: 4px; font-size: 0.78rem; color: #94a3b8; }
+.val-meta-icon { font-size: 14px; }
+.val-date { font-size: 0.75rem; color: #94a3b8; }
+
+.val-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; white-space: nowrap; flex-shrink: 0; }
+
+@media (max-width: 640px) {
+  .val-card { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .val-badge { align-self: flex-start; }
+}

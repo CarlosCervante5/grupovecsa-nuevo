@@ -22,6 +22,7 @@ import { RewardsComponent } from './pages/rewards/rewards.component';
 import { AddRewardrComponent } from './components/add-rewardr/add-rewardr.component';
 import { UpdateRewardsComponent } from './components/update-rewards/update-rewards.component';
 import { NewNavComponent } from 'src/app/shared/versiones-nav/new-nav/new-nav.component';
+import { GestorLayoutComponent } from './pages/layout/gestor-layout.component';
 
 
 @NgModule({
@@ -41,6 +42,7 @@ import { NewNavComponent } from 'src/app/shared/versiones-nav/new-nav/new-nav.co
     RewardsComponent,
     AddRewardrComponent,
     UpdateRewardsComponent,
+    GestorLayoutComponent,
   ],
   imports: [
     AngularMaterialModule,

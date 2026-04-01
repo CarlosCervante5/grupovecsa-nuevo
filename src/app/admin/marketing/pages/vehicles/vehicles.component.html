@@ -1,94 +1,125 @@
-<app-new-nav></app-new-nav>
-<div class="container">
-    <div class="row">
-        <div class="col-12 mb-5">
-            <div class="row pb-2 mb-2">
+<div class="vehicles-page">
 
-                <div class="col-lg-3 col-md-6 col-sm-12 mb-2 padding-col">
-                    <h4 class="fs-4 fw-bold text-truncate">Administrar Vehículos</h4>
-                    <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
-                        <ol class="breadcrumb">
-                        <li class="breadcrumb-item" [routerLink]="['/admin/marketing']">Overview</li>
-                        <li class="breadcrumb-item active" aria-current="page">Vehículos</li>
-                        </ol>
-                    </nav>
-                </div>
-            
-                <div class="col-lg-3 col-md-6 col-sm-12 mb-2 d-flex flex-wrap align-items-center justify-content-center border padding-col">
-                    <button mat-button class="btn abcars-background-color-blue w-100" (click)="openStoreVehicleSheet()"> Crear vehículo </button>
-                </div>
-            
-                <div class="col-lg-3 col-md-6 col-sm-12 mb-2 d-flex flex-wrap align-items-center border padding-col">
-                    <label class="custom-file-upload my-1 flex-grow-1 w-100">
-                        <input type="file" class="w-100" accept=".csv" required (change)="selectCsv($event)">
-                        {{ load_vehicle_message }}
-                    </label>
-                    <button mat-button class="btn abcars-background-color-blue w-100 my-1" 
-                        [disabled]="disabled" 
-                        (click)="uploadCsv()">Subir
-                    </button>
-                </div>
-            
-                <div class="col-lg-3 col-md-6 col-sm-12 mb-2 d-flex flex-column align-items-center border padding-col">
-                    <span class="mx-1 mb-2 w-100 text-truncate text-center">
-                        Seleccionados: ( {{ this.vehicle_uuids.length }} )
-                    </span>
-                    <div class="d-flex w-100 justify-content-between flex-wrap">
-                        <button mat-button class="btn abcars-background-color-blue mx-1 my-1"
-                            [disabled]="this.vehicle_uuids.length === 0"
-                            (click)="deleteSelectedVehicles()" 
-                            matTooltip="Elimina seleccionados">
-                        <div class="trash-content">
-                            <img src="assets/icons-fontawesome/trash-solid.svg" alt="flecha" width="17px" height="17px">
-                        </div>
-                        </button>
-                        <button mat-button class="btn custom-button mx-1 my-1"
-                            [disabled]="this.vehicle_uuids.length === 0"
-                            (click)="changeStatus('active')"
-                            matTooltip="Activa seleccionados">
-                            <div class="trash-content">
-                                <img src="assets/icons-fontawesome/power-off-solid-green.svg" alt="flecha" width="20px" height="20px">
-                            </div>
-                        </button>
-                        <button mat-button class="btn custom-button mx-1 my-1" 
-                            [disabled]="this.vehicle_uuids.length === 0"
-                            (click)="changeStatus('inactive')"
-                            matTooltip="Desactiva seleccionados">
-                            <div class="trash-content">
-                                <img src="assets/icons-fontawesome/power-off-solid-red.svg" alt="flecha" width="20px" height="20px">
-                            </div>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        
-            <!-- Input Search -->
-            
-            <div class="row">
-                <div class="col-12">
-                    <mat-form-field class="chip-list mt-5" appearance="outline">
-                        <mat-label>Buscar por vin, marca, modelo, año...</mat-label>
-                        <input matInput [(ngModel)]="palabra_busqueda" (keyup.enter)="getVehicles(1)">
-                        <mat-icon matSuffix (click)="getVehicles(1)">search</mat-icon>
-                    </mat-form-field>
-                </div>
-            </div>
-            
-        
-            <!-- Vehicles -->
-            <div class="row">
-                <div class="col-lg-4 col-md-6 col-sm-12 mt-2 mb-2" *ngFor="let vehicle of vehicles">
-                    <app-a-vehicle [vehicle]="vehicle" (reload)="procesaPropagar($event)" (remove_vehicle_uuid)="removeVehicle_uuid($event)" (add_vehicle_uuid)="addVehicle_uuid($event)"></app-a-vehicle>                
-                </div>
-            </div>
-            
-            <!-- Pagination -->
-            <div class="row">
-                <div class="col-12 mb-3 mb-5">
-                    <mat-paginator [length]="length" [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions" [pageIndex]="pageIndex - 1" aria-label="Select page" (page)="paginationChange($event)" #paginador>
-                    </mat-paginator>                                        
-                </div>
-            </div>
-        </div>
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Vehículos</h1>
+      <p class="page-subtitle">{{ length }} vehículos registrados</p>
     </div>
+    <div class="header-actions">
+      <label class="action-btn upload-btn">
+        <input type="file" accept=".csv" (change)="selectCsv($event)" style="display:none;" />
+        <span class="material-icons">upload_file</span>
+        {{ load_vehicle_message }}
+      </label>
+      <button class="action-btn primary-btn" [disabled]="disabled" (click)="uploadCsv()">
+        <span class="material-icons">cloud_upload</span> Subir CSV
+      </button>
+      <button class="action-btn primary-btn" (click)="openStoreVehicleSheet()">
+        <span class="material-icons">add</span> Crear vehículo
+      </button>
+    </div>
+  </div>
+
+  <!-- Bulk actions bar -->
+  <div class="bulk-bar" *ngIf="vehicle_uuids.length > 0">
+    <span class="bulk-count">{{ vehicle_uuids.length }} seleccionados</span>
+    <button class="action-btn bulk-action activate" (click)="changeStatus('active')">
+      <span class="material-icons">check_circle</span> Activar
+    </button>
+    <button class="action-btn bulk-action deactivate" (click)="changeStatus('inactive')">
+      <span class="material-icons">cancel</span> Desactivar
+    </button>
+    <button class="action-btn bulk-action delete" (click)="deleteSelectedVehicles()">
+      <span class="material-icons">delete</span> Eliminar
+    </button>
+  </div>
+
+  <!-- Filters bar -->
+  <div class="filters-bar">
+    <input type="text" class="filter-input" placeholder="Buscar por VIN, marca, modelo, año..."
+      [(ngModel)]="palabra_busqueda" (keyup.enter)="getVehicles(1)" />
+    <button class="filter-btn" (click)="getVehicles(1)">
+      <span class="material-icons">search</span> Buscar
+    </button>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>
+            <input type="checkbox" (change)="toggleSelectAll($event)" />
+          </th>
+          <th>Imagen</th>
+          <th>Nombre</th>
+          <th>VIN</th>
+          <th>Precio</th>
+          <th>Estatus</th>
+          <th>Km</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let vehicle of vehicles; let i = index">
+          <td>
+            <input type="checkbox"
+              [checked]="vehicle_uuids.includes(vehicle.uuid)"
+              (change)="onCheckboxChange($event, vehicle.uuid)" />
+          </td>
+          <td>
+            <img *ngIf="vehicle.first_image?.service_image_url"
+              [src]="vehicle.first_image.service_image_url"
+              alt="Vehículo"
+              class="vehicle-thumb" />
+            <span *ngIf="!vehicle.first_image?.service_image_url"
+              class="material-icons thumb-placeholder">directions_car</span>
+          </td>
+          <td class="cell-name">{{ vehicle.name || '—' }}</td>
+          <td class="cell-vin">{{ vehicle.vin || '—' }}</td>
+          <td class="cell-price">{{ vehicle.sale_price | currency:'MXN':'symbol-narrow':'1.0-0' }}</td>
+          <td>
+            <span class="badge"
+              [ngClass]="{
+                'badge-available': vehicle.page_status === 'active',
+                'badge-sold': vehicle.page_status === 'sold' || vehicle.page_status === 'inactive',
+                'badge-reserved': vehicle.page_status === 'reserved'
+              }">
+              {{ vehicle.page_status || '—' }}
+            </span>
+          </td>
+          <td>{{ vehicle.mileage | number:'1.0-0' }} km</td>
+          <td>
+            <div class="row-actions">
+              <button class="act-btn edit" matTooltip="Editar" [routerLink]="['/admin/marketing/vehicle', vehicle.uuid]">
+                <span class="material-icons">edit</span>
+              </button>
+              <button class="act-btn view" matTooltip="Ver detalle" [routerLink]="['/admin/marketing/vehicle', vehicle.uuid]">
+                <span class="material-icons">visibility</span>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Empty state -->
+    <div class="empty-state" *ngIf="vehicles.length === 0">
+      <span class="material-icons">inventory_2</span>
+      <p>No se encontraron vehículos</p>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination" *ngIf="length > pageSize">
+    <button class="page-btn" [disabled]="pageIndex <= 1" (click)="goToPage(pageIndex - 1)">
+      <span class="material-icons">chevron_left</span>
+    </button>
+    <span class="page-info">Página {{ pageIndex }} de {{ lastPage }}</span>
+    <button class="page-btn" [disabled]="pageIndex >= lastPage" (click)="goToPage(pageIndex + 1)">
+      <span class="material-icons">chevron_right</span>
+    </button>
+  </div>
+
 </div>
