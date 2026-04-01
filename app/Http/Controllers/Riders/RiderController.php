@@ -147,6 +147,14 @@ class RiderController extends Controller
             $data = $request->validated();
 
             $year = date('Y');
+
+            // Use strftime for SQLite compatibility, YEAR() for MySQL
+            $driver = DB::connection()->getDriverName();
+            if ($driver === 'sqlite') {
+                $yearExpr = "COALESCE(SUM(CASE WHEN strftime('%Y', app_vecsa_reward_points.created_at) = '" . $year . "' THEN app_vecsa_reward_points.earned_points ELSE 0 END), 0) as total_points";
+            } else {
+                $yearExpr = 'COALESCE(SUM(CASE WHEN YEAR(app_vecsa_reward_points.created_at) = ' . $year . ' THEN app_vecsa_reward_points.earned_points ELSE 0 END), 0) as total_points';
+            }
             
             $query = $query = DB::table('app_vecsa_customers')
             ->leftJoin('users', 'app_vecsa_customers.user_id', '=', 'users.id')
@@ -163,7 +171,7 @@ class RiderController extends Controller
                 'app_vecsa_customers.phone_1 as customer_phone',
                 'app_vecsa_customers.email_1 as customer_email',
                 'app_vecsa_customers.created_at as register_date',
-                DB::raw('COALESCE(SUM(CASE WHEN YEAR(app_vecsa_reward_points.created_at) = ' . $year . ' THEN app_vecsa_reward_points.earned_points ELSE 0 END), 0) as total_points')
+                DB::raw($yearExpr)
             );
 
             if (!empty($data['keyword'])) {
@@ -198,6 +206,7 @@ class RiderController extends Controller
                 'app_vecsa_customers.last_name',
                 'app_vecsa_customers.phone_1',
                 'app_vecsa_customers.email_1',
+                'app_vecsa_customers.created_at',
             )
             ->paginate($data['paginate']);
 
@@ -224,8 +233,8 @@ class RiderController extends Controller
                 ->select(
                     'c.picture',
                     'u.nickname',
-                    DB::raw('COALESCE(SUM(CASE WHEN YEAR(rp.created_at) = ' . $year . ' THEN rp.earned_points ELSE 0 END), 0) as total_earned_points'),
-                    DB::raw('ROW_NUMBER() OVER (ORDER BY COALESCE(SUM(CASE WHEN YEAR(rp.created_at) = ' . $year . ' THEN rp.earned_points ELSE 0 END), 0) DESC) as position')
+                    DB::raw("COALESCE(SUM(CASE WHEN strftime('%Y', rp.created_at) = '" . $year . "' THEN rp.earned_points ELSE 0 END), 0) as total_earned_points"),
+                    DB::raw("ROW_NUMBER() OVER (ORDER BY COALESCE(SUM(CASE WHEN strftime('%Y', rp.created_at) = '" . $year . "' THEN rp.earned_points ELSE 0 END), 0) DESC) as position")
                 )
                 ->whereNull('c.deleted_at')
                 ->groupBy('c.id', 'u.nickname', 'c.picture')
@@ -240,7 +249,7 @@ class RiderController extends Controller
         }
     }
 
-    public function customerPosition(CustomerPointsRequest $request) //TODO: regresar puntajes por mes
+    public function customerPosition(CustomerPointsRequest $request)
     {
         try {
             
@@ -259,9 +268,9 @@ class RiderController extends Controller
                 ->leftJoin('users as u', 'c.user_id', '=', 'u.id')
                 ->select(
                     'c.uuid',
-                    DB::raw('COALESCE(SUM(CASE WHEN YEAR(rp.created_at) = ' . $year . ' THEN rp.earned_points ELSE 0 END), 0) as total_points'),
-                    DB::raw('COALESCE(SUM(CASE WHEN YEAR(rp.created_at) = ' . $year . ' AND MONTH(rp.created_at) = ' . $month . ' THEN rp.earned_points ELSE 0 END), 0) as month_points'),
-                    DB::raw('ROW_NUMBER() OVER (ORDER BY COALESCE(SUM(CASE WHEN YEAR(rp.created_at) = ' . $year . ' THEN rp.earned_points ELSE 0 END), 0) DESC) as position')
+                    DB::raw("COALESCE(SUM(CASE WHEN strftime('%Y', rp.created_at) = '" . $year . "' THEN rp.earned_points ELSE 0 END), 0) as total_points"),
+                    DB::raw("COALESCE(SUM(CASE WHEN strftime('%Y', rp.created_at) = '" . $year . "' AND strftime('%m', rp.created_at) = '" . str_pad($month, 2, '0', STR_PAD_LEFT) . "' THEN rp.earned_points ELSE 0 END), 0) as month_points"),
+                    DB::raw("ROW_NUMBER() OVER (ORDER BY COALESCE(SUM(CASE WHEN strftime('%Y', rp.created_at) = '" . $year . "' THEN rp.earned_points ELSE 0 END), 0) DESC) as position")
                 )
                 ->whereNull('c.deleted_at')
                 ->groupBy('c.uuid')
@@ -276,8 +285,8 @@ class RiderController extends Controller
                          ->where('rp.redeemed', '=', 0);
                 })
                 ->select(
-                    DB::raw('MONTH(rp.created_at) as month'),
-                    DB::raw('COALESCE(SUM(CASE WHEN YEAR(rp.created_at) = ' . $year . ' THEN rp.earned_points ELSE 0 END), 0) as monthly_points')
+                    DB::raw("CAST(strftime('%m', rp.created_at) AS INTEGER) as month"),
+                    DB::raw("COALESCE(SUM(CASE WHEN strftime('%Y', rp.created_at) = '" . $year . "' THEN rp.earned_points ELSE 0 END), 0) as monthly_points")
                 )
                 ->where('c.uuid', $data['customer_uuid'])
                 ->groupBy('month')

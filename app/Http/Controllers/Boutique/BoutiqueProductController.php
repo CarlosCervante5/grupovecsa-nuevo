@@ -1,0 +1,381 @@
+<?php
+
+namespace App\Http\Controllers\Boutique;
+
+use App\Helpers\ApiResponseHelper;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Boutique\DeleteBoutiqueProductRequest;
+use App\Http\Requests\Boutique\StoreBoutiqueProductRequest;
+use App\Models\Boutique\BoutiqueCategory;
+use App\Models\Boutique\BoutiqueProduct;
+use App\Models\Boutique\BoutiqueProductAttribute;
+use App\Models\Boutique\BoutiqueProductAttributeValue;
+use App\Models\Boutique\BoutiqueProductVariant;
+use App\Models\Boutique\BoutiqueVariantAttributeValue;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+
+class BoutiqueProductController extends Controller
+{
+    public function search(Request $request)
+    {
+        try {
+            $query = BoutiqueProduct::with(['category', 'images' => function ($q) {
+                $q->orderBy('sort_id')->limit(1);
+            }]);
+
+            if ($request->filled('category_uuid')) {
+                $category = BoutiqueCategory::findByUuid($request->input('category_uuid'));
+                if ($category) {
+                    $query->where('category_id', $category->id);
+                }
+            }
+
+            if ($request->has('active')) {
+                $query->where('active', $request->boolean('active'));
+            }
+
+            if ($request->filled('search')) {
+                $search = $request->input('search');
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('sku', 'like', "%{$search}%")
+                      ->orWhere('description', 'like', "%{$search}%");
+                });
+            }
+
+            $products = $query->orderBy('created_at', 'desc')->paginate($request->input('per_page', 15));
+
+            $products->getCollection()->transform(function ($product) {
+                $product->low_stock = $product->stock <= 5;
+                return $product;
+            });
+
+            return ApiResponseHelper::apiSuccess(200, 'Productos obtenidos exitosamente', ['products' => $products]);
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al obtener productos', $e->getMessage(), 500, 'GET_PRODUCTS_ERROR');
+        }
+    }
+
+    public function store(StoreBoutiqueProductRequest $request)
+    {
+        try {
+            $data = $request->validated();
+
+            $category = BoutiqueCategory::findByUuid($data['category_uuid']);
+            if (!$category) {
+                return ApiResponseHelper::apiError('La categoría no existe', null, 404, 'CATEGORY_NOT_FOUND');
+            }
+
+            // Validate SKU uniqueness among active products
+            $existingSku = BoutiqueProduct::where('sku', $data['sku'])
+                ->where('active', true)
+                ->first();
+
+            if ($existingSku) {
+                return ApiResponseHelper::apiError('El SKU ya existe en otro producto activo', null, 400, 'SKU_ALREADY_EXISTS');
+            }
+
+            $product = BoutiqueProduct::create([
+                'name' => $data['name'],
+                'description' => $data['description'] ?? null,
+                'price' => $data['price'],
+                'sku' => $data['sku'],
+                'category_id' => $category->id,
+                'stock' => $data['stock'] ?? 0,
+                'active' => $data['active'] ?? true,
+            ]);
+
+            // Sync attributes if provided
+            if ($request->has('attributes') && is_array($request->input('attributes'))) {
+                $this->syncProductAttributes($product, $request->input('attributes'));
+            }
+
+            return ApiResponseHelper::apiSuccess(201, 'Producto creado exitosamente', ['product' => $product]);
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al crear el producto', $e->getMessage(), 500, 'CREATE_PRODUCT_ERROR');
+        }
+    }
+
+    public function update(StoreBoutiqueProductRequest $request)
+    {
+        try {
+            $data = $request->validated();
+            $uuid = $request->input('uuid');
+
+            $product = BoutiqueProduct::findByUuid($uuid);
+            if (!$product) {
+                return ApiResponseHelper::apiError('El producto no existe', 'No existe el uuid: ' . $uuid, 404, 'PRODUCT_NOT_FOUND');
+            }
+
+            $category = BoutiqueCategory::findByUuid($data['category_uuid']);
+            if (!$category) {
+                return ApiResponseHelper::apiError('La categoría no existe', null, 404, 'CATEGORY_NOT_FOUND');
+            }
+
+            // Validate SKU uniqueness excluding current product
+            $existingSku = BoutiqueProduct::where('sku', $data['sku'])
+                ->where('active', true)
+                ->where('id', '!=', $product->id)
+                ->first();
+
+            if ($existingSku) {
+                return ApiResponseHelper::apiError('El SKU ya existe en otro producto activo', null, 400, 'SKU_ALREADY_EXISTS');
+            }
+
+            $product->update([
+                'name' => $data['name'],
+                'description' => $data['description'] ?? null,
+                'price' => $data['price'],
+                'sku' => $data['sku'],
+                'category_id' => $category->id,
+                'stock' => $data['stock'] ?? $product->stock,
+                'active' => $data['active'] ?? $product->active,
+            ]);
+
+            // Sync attributes if provided
+            if ($request->has('attributes') && is_array($request->input('attributes'))) {
+                $this->syncProductAttributes($product, $request->input('attributes'));
+            }
+
+            return ApiResponseHelper::apiSuccess(200, 'Producto actualizado exitosamente', ['product' => $product]);
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al actualizar el producto', $e->getMessage(), 500, 'UPDATE_PRODUCT_ERROR');
+        }
+    }
+
+    public function delete(DeleteBoutiqueProductRequest $request)
+    {
+        try {
+            $data = $request->validated();
+
+            $product = BoutiqueProduct::findByUuid($data['uuid']);
+
+            if (!$product) {
+                return ApiResponseHelper::apiError('El producto no existe', 'No existe el uuid: ' . $data['uuid'], 404, 'PRODUCT_NOT_FOUND');
+            }
+
+            $product->delete();
+
+            return ApiResponseHelper::apiSuccess(200, 'Producto eliminado exitosamente');
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al eliminar el producto', $e->getMessage(), 500, 'DELETE_PRODUCT_ERROR');
+        }
+    }
+
+    public function generateVariants(Request $request)
+    {
+        try {
+            $productUuid = $request->input('product_uuid');
+            $attributeConfigs = $request->input('attributes', []);
+
+            $product = BoutiqueProduct::findByUuid($productUuid);
+            if (!$product) {
+                return ApiResponseHelper::apiError('El producto no existe', null, 404, 'PRODUCT_NOT_FOUND');
+            }
+
+            // Resolve attribute IDs and sync product-attribute pivot
+            $attributeIds = [];
+            $valueSets = [];
+
+            foreach ($attributeConfigs as $config) {
+                $attribute = BoutiqueProductAttribute::findByUuid($config['attribute_uuid']);
+                if (!$attribute) {
+                    return ApiResponseHelper::apiError('El atributo no existe', null, 404, 'ATTRIBUTE_NOT_FOUND');
+                }
+                $attributeIds[] = $attribute->id;
+
+                $values = BoutiqueProductAttributeValue::whereIn('uuid', $config['value_uuids'] ?? [])
+                    ->where('attribute_id', $attribute->id)
+                    ->get();
+
+                if ($values->isEmpty()) {
+                    continue;
+                }
+
+                $valueSets[] = $values;
+            }
+
+            // Sync product-attribute pivot table
+            $product->attributes()->sync($attributeIds);
+
+            // If no value sets, remove all existing variants and return empty
+            if (empty($valueSets)) {
+                $existingVariants = $product->allVariants()->get();
+                foreach ($existingVariants as $variant) {
+                    BoutiqueVariantAttributeValue::where('variant_id', $variant->id)->delete();
+                    $variant->delete();
+                }
+                return ApiResponseHelper::apiSuccess(200, 'Variantes generadas exitosamente', ['variants' => []]);
+            }
+
+            // Calculate cartesian product
+            $combinations = [[]];
+            foreach ($valueSets as $valueSet) {
+                $newCombinations = [];
+                foreach ($combinations as $combo) {
+                    foreach ($valueSet as $value) {
+                        $newCombinations[] = array_merge($combo, [$value]);
+                    }
+                }
+                $combinations = $newCombinations;
+            }
+
+            // Validate limit of 100 combinations
+            if (count($combinations) > 100) {
+                return ApiResponseHelper::apiError(
+                    'El número de combinaciones supera el límite de 100 variantes',
+                    null,
+                    400,
+                    'VARIANT_LIMIT_EXCEEDED'
+                );
+            }
+
+            // Get existing variants with their attribute value IDs
+            $existingVariants = $product->allVariants()->with('attributeValues')->get();
+            $existingMap = [];
+            foreach ($existingVariants as $variant) {
+                $key = $variant->attributeValues->pluck('id')->sort()->values()->implode('-');
+                $existingMap[$key] = $variant;
+            }
+
+            // Create/preserve variants
+            $newValueIdKeys = [];
+            $resultVariants = [];
+
+            foreach ($combinations as $combo) {
+                $valueIds = collect($combo)->pluck('id')->sort()->values();
+                $key = $valueIds->implode('-');
+                $newValueIdKeys[] = $key;
+
+                if (isset($existingMap[$key])) {
+                    // Preserve existing variant
+                    $resultVariants[] = $existingMap[$key];
+                } else {
+                    // Create new variant with auto-generated SKU
+                    $skuParts = collect($combo)->pluck('value')->map(fn($v) => Str::slug($v));
+                    $sku = $product->sku . '-' . $skuParts->implode('-');
+
+                    $variant = BoutiqueProductVariant::create([
+                        'product_id' => $product->id,
+                        'sku' => $sku,
+                        'price' => null,
+                        'stock' => 0,
+                        'active' => true,
+                    ]);
+
+                    // Create pivot records
+                    foreach ($combo as $value) {
+                        BoutiqueVariantAttributeValue::create([
+                            'variant_id' => $variant->id,
+                            'attribute_value_id' => $value->id,
+                        ]);
+                    }
+
+                    $resultVariants[] = $variant;
+                }
+            }
+
+            // Delete variants whose combination no longer applies
+            foreach ($existingMap as $key => $variant) {
+                if (!in_array($key, $newValueIdKeys)) {
+                    BoutiqueVariantAttributeValue::where('variant_id', $variant->id)->delete();
+                    $variant->delete();
+                }
+            }
+
+            // Reload variants with attributeValues
+            $variants = $product->allVariants()->with('attributeValues.attribute')->get();
+
+            return ApiResponseHelper::apiSuccess(200, 'Variantes generadas exitosamente', ['variants' => $variants]);
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al generar variantes', $e->getMessage(), 500, 'GENERATE_VARIANTS_ERROR');
+        }
+    }
+
+    public function updateVariant(Request $request)
+    {
+        try {
+            $variantUuid = $request->input('variant_uuid');
+
+            $variant = BoutiqueProductVariant::where('uuid', $variantUuid)->first();
+            if (!$variant) {
+                return ApiResponseHelper::apiError('La variante no existe', null, 404, 'VARIANT_NOT_FOUND');
+            }
+
+            // Validate SKU uniqueness among active variants of same product
+            if ($request->has('sku') && $request->input('sku') !== null) {
+                $duplicateSku = BoutiqueProductVariant::where('product_id', $variant->product_id)
+                    ->where('sku', $request->input('sku'))
+                    ->where('active', true)
+                    ->where('id', '!=', $variant->id)
+                    ->first();
+
+                if ($duplicateSku) {
+                    return ApiResponseHelper::apiError(
+                        'El SKU ya existe en otra variante activa del producto',
+                        null,
+                        400,
+                        'VARIANT_SKU_DUPLICATE'
+                    );
+                }
+            }
+
+            $updateData = [];
+            if ($request->has('sku')) {
+                $updateData['sku'] = $request->input('sku');
+            }
+            if ($request->has('price')) {
+                $updateData['price'] = $request->input('price');
+            }
+            if ($request->has('stock')) {
+                $updateData['stock'] = $request->input('stock');
+            }
+            if ($request->has('active')) {
+                $updateData['active'] = $request->boolean('active');
+            }
+
+            $variant->update($updateData);
+
+            $variant->load('attributeValues.attribute');
+
+            return ApiResponseHelper::apiSuccess(200, 'Variante actualizada exitosamente', ['variant' => $variant]);
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al actualizar la variante', $e->getMessage(), 500, 'UPDATE_VARIANT_ERROR');
+        }
+    }
+
+    public function deleteVariant(Request $request)
+    {
+        try {
+            $variantUuid = $request->input('variant_uuid');
+
+            $variant = BoutiqueProductVariant::where('uuid', $variantUuid)->first();
+            if (!$variant) {
+                return ApiResponseHelper::apiError('La variante no existe', null, 404, 'VARIANT_NOT_FOUND');
+            }
+
+            // Delete variant (FK cascade handles pivot records)
+            $variant->delete();
+
+            return ApiResponseHelper::apiSuccess(200, 'Variante eliminada exitosamente');
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al eliminar la variante', $e->getMessage(), 500, 'DELETE_VARIANT_ERROR');
+        }
+    }
+
+    /**
+     * Sync product-attribute assignments from an array of attribute UUIDs.
+     */
+    private function syncProductAttributes(BoutiqueProduct $product, array $attributeUuids): void
+    {
+        $attributeIds = [];
+        foreach ($attributeUuids as $uuid) {
+            $attribute = BoutiqueProductAttribute::findByUuid($uuid);
+            if ($attribute) {
+                $attributeIds[] = $attribute->id;
+            }
+        }
+        $product->attributes()->sync($attributeIds);
+    }
+}

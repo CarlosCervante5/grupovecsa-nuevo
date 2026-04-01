@@ -37,7 +37,7 @@ class UserController extends Controller
     {
         try {
             // Obtener todos los usuarios
-            $users = User::whereHas('userProfile')->paginate(15);
+            $users = User::whereHas('userProfile')->with('dealerships')->paginate(15);
 
             $users->getCollection()->transform(function ($user) {
                 
@@ -45,6 +45,8 @@ class UserController extends Controller
                 
                 $user->role = $profile['role'];
                 $user->profile = $profile['profile'];
+                $user->dealership_names = $user->dealerships->pluck('name')->implode(', ') ?: 'Sin sucursal';
+                $user->dealership_ids = $user->dealerships->pluck('id');
 
                 return $user;
             });
@@ -182,18 +184,24 @@ class UserController extends Controller
             }
 
             // Actualizar profile
-            foreach ($data as $key => $value) {
-                if (in_array($key, ['name','last_name','gender', 'phone_1', 'phone_2', 'location'])) {
-                    $profile['profile']->$key = $value;
+            if ($profile['profile']) {
+                foreach ($data as $key => $value) {
+                    if (in_array($key, ['name','last_name','gender', 'phone_1', 'phone_2', 'location'])) {
+                        $profile['profile']->$key = $value;
+                    }
                 }
             }
 
             // Actualizar el usuario con los datos validados
             $user->save();
             
-            $profile['profile']->save();
+            if ($profile['profile']) {
+                $profile['profile']->save();
+            }
 
-            $user->syncRoles($data['role_name']);
+            if (isset($data['role_name']) && $data['role_name']) {
+                $user->syncRoles($data['role_name']);
+            }
 
             if(isset($data['image'])){
 

@@ -98,7 +98,8 @@ class AuthController extends Controller
                     'created_at' => $user->created_at,
                 ],
                 'role' => $profileData['role'],
-                'profile' =>  $profileData['profile']
+                'profile' =>  $profileData['profile'],
+                'permissions' => $user->getAllPermissions()->pluck('name')->toArray(),
             ]);
 
         } catch (\Exception $e) {
@@ -151,18 +152,20 @@ class AuthController extends Controller
             $stored_role = $request->input('stored_role');
             $expected_role = $request->input('expected_role');
 
-
-            if($stored_role !== $expected_role) {
-                return ApiResponseHelper::authError('Roles proporcionados no coinciden', null, 401, 'UNMATCHED_ROLES_PROVIDED');
-            }
-            
             $userRole = $user->getRoleNames()->first();
-            
-            if ($userRole !== $stored_role) {
-                return ApiResponseHelper::authError('Rol no autorizado', null, 403, 'UNAUTHORIZED_ROLE');
+
+            // Direct role match
+            if ($userRole === $expected_role) {
+                return ApiResponseHelper::apiSuccess(200, 'Token y rol válidos', [$userRole, $expected_role]);
+            }
+
+            // Permission-based access: user has "access {expected_role}" permission
+            $accessPermission = 'access ' . $expected_role;
+            if ($user->hasPermissionTo($accessPermission)) {
+                return ApiResponseHelper::apiSuccess(200, 'Acceso por permiso', [$userRole, $expected_role]);
             }
             
-            return ApiResponseHelper::apiSuccess(200, 'Token y rol válidos', [$userRole, $expected_role]);
+            return ApiResponseHelper::authError('Rol no autorizado', null, 403, 'UNAUTHORIZED_ROLE');
             
         } catch (\Exception $e) {
             return ApiResponseHelper::authError('Error al validar el token o rol', $e->getMessage(), 500, 'VALIDATION_ERROR');

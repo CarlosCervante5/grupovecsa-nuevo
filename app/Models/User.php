@@ -198,6 +198,11 @@ class User extends Authenticatable
         return $this->belongsToMany(VehicleValuation::class, env('DB_TABLE_PREFIX', '') . 'user_valuation', 'user_id', 'valuation_id');
     }
 
+    public function dealerships()
+    {
+        return $this->belongsToMany(Dealership::class, env('DB_TABLE_PREFIX', '') . 'dealership_user', 'user_id', 'dealership_id');
+    }
+
     public function opportunities()
     {
         return $this->belongsToMany(Opportunity::class, env('DB_TABLE_PREFIX_STREGA', '') . 'user_opportunity', 'user_id', 'opportunity_id')

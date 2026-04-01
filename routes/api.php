@@ -21,6 +21,7 @@ use App\Http\Controllers\SpareParts\SparePartController;
 use App\Http\Controllers\Strega\OpportunityController;
 use App\Http\Controllers\Tests\TestController;
 use App\Http\Controllers\Users\UserController;
+use App\Http\Controllers\Users\UserDealershipController;
 use App\Http\Controllers\Valuations\ValuationController;
 use App\Http\Controllers\Valuations\ValuationImageController;
 use App\Http\Controllers\Vehicles\BrandLineController;
@@ -30,6 +31,31 @@ use App\Http\Controllers\Vehicles\VehicleBodyController;
 use App\Http\Controllers\Vehicles\VehicleBrandController;
 use App\Http\Controllers\Vehicles\VehicleController;
 use App\Http\Controllers\Vehicles\VehicleImageController;
+use App\Http\Controllers\Home\HomePublicController;
+use App\Http\Controllers\HomeSlides\HomeSlideController;
+use App\Http\Controllers\HomeTestimonials\HomeTestimonialController;
+use App\Http\Controllers\Boutique\BoutiqueCatalogController;
+use App\Http\Controllers\Boutique\BoutiqueCartController;
+use App\Http\Controllers\Boutique\BoutiqueCheckoutController;
+use App\Http\Controllers\Boutique\BoutiqueOrderController;
+use App\Http\Controllers\Boutique\BoutiqueShippingController;
+use App\Http\Controllers\Boutique\BoutiquePaymentController;
+use App\Http\Controllers\Boutique\BoutiqueCategoryController;
+use App\Http\Controllers\Boutique\BoutiqueProductController;
+use App\Http\Controllers\Boutique\BoutiqueProductImageController;
+use App\Http\Controllers\Boutique\BoutiqueAdminOrderController;
+use App\Http\Controllers\Boutique\BoutiqueInventoryController;
+use App\Http\Controllers\Boutique\BoutiqueAttributeController;
+use App\Http\Controllers\Boutique\BoutiqueBannerController;
+use App\Http\Controllers\Experience\ExperienceController;
+use App\Http\Controllers\Benchmark\BenchmarkAdsController;
+use App\Http\Controllers\Assistant\AssistantController;
+use App\Http\Controllers\StoreManagement\StoreManagementController;
+use App\Http\Controllers\StoreManagement\StoreCustomerController;
+use App\Http\Controllers\StoreManagement\StorePointsController;
+use App\Http\Controllers\StoreManagement\StoreCouponController;
+use App\Http\Controllers\AdminDashboard\AdminDashboardController;
+use App\Http\Controllers\Settings\SettingsController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -63,6 +89,7 @@ Route::prefix('auth')->group(function () {
 Route::prefix('dealerships')->middleware('bandwidth_usage')->group(function () {
 
     Route::post('/search', [DealershipController::class, 'search']);
+    Route::post('/users', [DealershipController::class, 'users'])->middleware('auth:sanctum');
 });
 
 // Fin Sucursales
@@ -71,12 +98,14 @@ Route::prefix('dealerships')->middleware('bandwidth_usage')->group(function () {
 
 Route::prefix('users')->middleware('auth:sanctum')->group(function () {
     
-    Route::get('/', [UserController::class, 'index'])->middleware(['role:administrator', 'permission:list users']);
-    Route::post('/', [UserController::class, 'store'])->middleware(['role:administrator', 'permission:create users']);
-    Route::post('/detail', [UserController::class, 'detail'])->middleware('role:administrator');
-    Route::post('/update', [UserController::class, 'update'])->middleware('role:administrator', 'permission:update users');
-    Route::post('/delete', [UserController::class, 'delete'])->middleware('role:administrator', 'permission:delete users');
+    Route::get('/', [UserController::class, 'index'])->middleware(['role:administrator|developer', 'permission:list users']);
+    Route::post('/', [UserController::class, 'store'])->middleware(['role:administrator|developer', 'permission:create users']);
+    Route::post('/detail', [UserController::class, 'detail'])->middleware('role:administrator|developer');
+    Route::post('/update', [UserController::class, 'update'])->middleware('role:administrator|developer', 'permission:update users');
+    Route::post('/delete', [UserController::class, 'delete'])->middleware('role:administrator|developer', 'permission:delete users');
     Route::post('/by_role', [UserController::class, 'ByRole']);
+    Route::post('/assign_dealerships', [UserDealershipController::class, 'assignDealerships'])->middleware('role:administrator|developer');
+    Route::post('/dealerships', [UserDealershipController::class, 'getUserDealerships'])->middleware('role:administrator|developer');
 
 });
 
@@ -549,3 +578,231 @@ Route::prefix('pruebas')->group(function () {
 });
 
 // Fin Strega
+
+
+// Segmento Home Público
+
+Route::prefix('home')->middleware('bandwidth_usage')->group(function () {
+    Route::post('/slides', [HomePublicController::class, 'slides']);
+    Route::post('/testimonials', [HomePublicController::class, 'testimonials']);
+});
+
+// Fin Home Público
+
+
+// Segmento Home Slides
+
+Route::prefix('home_slides')->middleware(['bandwidth_usage', 'auth:sanctum'])->group(function () {
+    Route::post('/', [HomeSlideController::class, 'store']);
+    Route::post('/search', [HomeSlideController::class, 'search']);
+    Route::post('/update', [HomeSlideController::class, 'update']);
+    Route::post('/delete', [HomeSlideController::class, 'delete']);
+    Route::post('/sort_update', [HomeSlideController::class, 'sortUpdate']);
+    Route::post('/toggle', [HomeSlideController::class, 'toggle']);
+});
+
+// Fin Home Slides
+
+
+// Segmento Home Testimonials
+
+Route::prefix('home_testimonials')->middleware(['bandwidth_usage', 'auth:sanctum'])->group(function () {
+    Route::post('/', [HomeTestimonialController::class, 'store']);
+    Route::post('/search', [HomeTestimonialController::class, 'search']);
+    Route::post('/delete', [HomeTestimonialController::class, 'delete']);
+    Route::post('/sort_update', [HomeTestimonialController::class, 'sortUpdate']);
+    Route::post('/toggle', [HomeTestimonialController::class, 'toggle']);
+});
+
+// Fin Home Testimonials
+
+
+// Segmento Boutique
+
+// Boutique Público
+Route::prefix('boutique')->middleware('bandwidth_usage')->group(function () {
+    Route::post('/catalog/search', [BoutiqueCatalogController::class, 'search']);
+    Route::post('/catalog/detail', [BoutiqueCatalogController::class, 'detail']);
+    Route::post('/catalog/categories', [BoutiqueCatalogController::class, 'categories']);
+    Route::post('/checkout/create_guest_order', [BoutiqueCheckoutController::class, 'createGuestOrder']);
+    Route::post('/checkout/shipping_quote_public', [BoutiqueCheckoutController::class, 'shippingQuote']);
+});
+
+// Boutique Cliente Autenticado
+Route::prefix('boutique')->middleware(['bandwidth_usage', 'auth:sanctum'])->group(function () {
+    Route::post('/cart/get', [BoutiqueCartController::class, 'get']);
+    Route::post('/cart/add', [BoutiqueCartController::class, 'add']);
+    Route::post('/cart/update', [BoutiqueCartController::class, 'update']);
+    Route::post('/cart/remove', [BoutiqueCartController::class, 'remove']);
+
+    Route::post('/checkout/shipping_quote', [BoutiqueCheckoutController::class, 'shippingQuote']);
+    Route::post('/checkout/create_order', [BoutiqueCheckoutController::class, 'createOrder']);
+    Route::post('/checkout/payment_intent', [BoutiqueCheckoutController::class, 'createPaymentIntent']);
+
+    Route::post('/orders/search', [BoutiqueOrderController::class, 'search']);
+    Route::post('/orders/detail', [BoutiqueOrderController::class, 'detail']);
+
+    Route::post('/shipping/track', [BoutiqueShippingController::class, 'track']);
+});
+
+// Boutique Webhook Stripe (sin auth)
+Route::prefix('boutique')->middleware('bandwidth_usage')->group(function () {
+    Route::post('/webhook/stripe', [BoutiquePaymentController::class, 'stripeWebhook']);
+});
+
+// Boutique Admin
+Route::prefix('boutique/admin')->middleware(['bandwidth_usage', 'auth:sanctum'])->group(function () {
+    // Categories
+    Route::post('/categories/search', [BoutiqueCategoryController::class, 'search']);
+    Route::post('/categories/store', [BoutiqueCategoryController::class, 'store']);
+    Route::post('/categories/update', [BoutiqueCategoryController::class, 'update']);
+    Route::post('/categories/delete', [BoutiqueCategoryController::class, 'delete']);
+
+    // Products
+    Route::post('/products/search', [BoutiqueProductController::class, 'search']);
+    Route::post('/products/store', [BoutiqueProductController::class, 'store']);
+    Route::post('/products/update', [BoutiqueProductController::class, 'update']);
+    Route::post('/products/delete', [BoutiqueProductController::class, 'delete']);
+    Route::post('/products/generate_variants', [BoutiqueProductController::class, 'generateVariants']);
+    Route::post('/products/update_variant', [BoutiqueProductController::class, 'updateVariant']);
+    Route::post('/products/delete_variant', [BoutiqueProductController::class, 'deleteVariant']);
+
+    // Product Images
+    Route::post('/product_images/store', [BoutiqueProductImageController::class, 'store']);
+    Route::post('/product_images/sort', [BoutiqueProductImageController::class, 'sortUpdate']);
+    Route::post('/product_images/delete', [BoutiqueProductImageController::class, 'delete']);
+
+    // Orders
+    Route::post('/orders/search', [BoutiqueAdminOrderController::class, 'search']);
+    Route::post('/orders/detail', [BoutiqueAdminOrderController::class, 'detail']);
+    Route::post('/orders/update_status', [BoutiqueAdminOrderController::class, 'updateStatus']);
+    Route::post('/orders/generate_label', [BoutiqueAdminOrderController::class, 'generateLabel']);
+    Route::post('/orders/metrics', [BoutiqueAdminOrderController::class, 'metrics']);
+
+    // Payments
+    Route::post('/payments/confirm_manual', [BoutiquePaymentController::class, 'confirmManual']);
+
+    // Inventory
+    Route::post('/inventory/update', [BoutiqueInventoryController::class, 'update']);
+    Route::post('/inventory/movements', [BoutiqueInventoryController::class, 'movements']);
+
+    // Attributes
+    Route::post('/attributes/list', [BoutiqueAttributeController::class, 'list']);
+    Route::post('/attributes/store', [BoutiqueAttributeController::class, 'store']);
+    Route::post('/attributes/update', [BoutiqueAttributeController::class, 'update']);
+    Route::post('/attributes/delete', [BoutiqueAttributeController::class, 'delete']);
+
+    // Attribute Values
+    Route::post('/attribute-values/store', [BoutiqueAttributeController::class, 'storeValue']);
+    Route::post('/attribute-values/update', [BoutiqueAttributeController::class, 'updateValue']);
+    Route::post('/attribute-values/delete', [BoutiqueAttributeController::class, 'deleteValue']);
+
+    // Banners
+    Route::post('/banners/search', [BoutiqueBannerController::class, 'search']);
+    Route::post('/banners/store', [BoutiqueBannerController::class, 'store']);
+    Route::post('/banners/update', [BoutiqueBannerController::class, 'update']);
+    Route::post('/banners/delete', [BoutiqueBannerController::class, 'delete']);
+    Route::post('/banners/sort_update', [BoutiqueBannerController::class, 'sortUpdate']);
+    Route::post('/banners/toggle', [BoutiqueBannerController::class, 'toggle']);
+});
+
+// Boutique Banners Público
+Route::prefix('boutique')->middleware('bandwidth_usage')->group(function () {
+    Route::post('/banners', [BoutiqueBannerController::class, 'publicList']);
+});
+
+// Fin Segmento Boutique
+
+
+// Segmento Experience
+
+Route::prefix('experience')->middleware('bandwidth_usage')->group(function () {
+    Route::get('/upcoming_events', [ExperienceController::class, 'upcomingEvents']);
+    Route::get('/past_events', [ExperienceController::class, 'pastEvents']);
+    Route::post('/event_detail', [ExperienceController::class, 'eventDetail']);
+    Route::get('/posts', [ExperienceController::class, 'posts']);
+
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/events', [ExperienceController::class, 'storeEvent']);
+        Route::post('/events/delete', [ExperienceController::class, 'deleteEvent']);
+    });
+});
+
+// Fin Experience
+
+
+// Segmento Benchmark ADS
+
+Route::prefix('benchmark')->middleware(['bandwidth_usage', 'auth:sanctum', 'permission:access benchmark'])->group(function () {
+    Route::post('/scan', [BenchmarkAdsController::class, 'scan']);
+    Route::get('/search', [BenchmarkAdsController::class, 'search']);
+    Route::get('/history', [BenchmarkAdsController::class, 'history']);
+    Route::get('/history/{file}', [BenchmarkAdsController::class, 'historyDetail']);
+    Route::get('/competitors', [BenchmarkAdsController::class, 'competitors']);
+    Route::post('/competitors', [BenchmarkAdsController::class, 'addCompetitor']);
+    Route::delete('/competitors/{name}', [BenchmarkAdsController::class, 'removeCompetitor']);
+    Route::get('/reports', [BenchmarkAdsController::class, 'reports']);
+});
+
+// Fin Benchmark ADS
+
+
+// Segmento Asistente Virtual
+
+Route::prefix('assistant')->middleware('bandwidth_usage')->group(function () {
+    Route::post('/chat', [AssistantController::class, 'chat']);
+});
+
+// Fin Asistente Virtual
+
+
+// Segmento Store Management
+
+Route::prefix('store-management')->middleware(['bandwidth_usage', 'auth:sanctum', 'permission:access store_management'])->group(function () {
+    Route::post('/metrics', [StoreManagementController::class, 'dashboard']);
+
+    Route::post('/orders/search', [StoreManagementController::class, 'searchOrders']);
+    Route::post('/orders/detail', [StoreManagementController::class, 'orderDetail']);
+    Route::post('/orders/update_status', [StoreManagementController::class, 'updateOrderStatus']);
+    Route::post('/orders/generate_label', [StoreManagementController::class, 'generateLabel']);
+
+    Route::post('/shipments/search', [StoreManagementController::class, 'searchShipments']);
+
+    Route::post('/customers/search', [StoreCustomerController::class, 'search']);
+    Route::post('/customers/detail', [StoreCustomerController::class, 'detail']);
+    Route::post('/customers/orders', [StoreCustomerController::class, 'customerOrders']);
+
+    Route::post('/points/search', [StorePointsController::class, 'search']);
+    Route::post('/points/adjust', [StorePointsController::class, 'adjust']);
+    Route::post('/points/customer_balance', [StorePointsController::class, 'customerBalance']);
+
+    Route::post('/coupons/search', [StoreCouponController::class, 'search']);
+    Route::post('/coupons/store', [StoreCouponController::class, 'store']);
+    Route::post('/coupons/update', [StoreCouponController::class, 'update']);
+    Route::post('/coupons/delete', [StoreCouponController::class, 'delete']);
+
+    Route::post('/redemptions/search', [StorePointsController::class, 'searchRedemptions']);
+    Route::post('/redemptions/update_status', [StorePointsController::class, 'updateRedemptionStatus']);
+});
+
+// Fin Store Management
+
+
+// Segmento Admin Dashboard
+
+Route::prefix('admin-dashboard')->middleware(['bandwidth_usage', 'auth:sanctum'])->group(function () {
+    Route::post('/metrics', [AdminDashboardController::class, 'metrics']);
+});
+
+// Fin Admin Dashboard
+
+
+// Segmento Settings
+
+Route::prefix('settings')->middleware(['bandwidth_usage', 'auth:sanctum'])->group(function () {
+    Route::post('/stripe', [SettingsController::class, 'stripe'])->middleware('role:developer|administrator');
+    Route::post('/stripe/update', [SettingsController::class, 'updateStripe'])->middleware('role:developer|administrator');
+    Route::post('/stripe/publishable_key', [SettingsController::class, 'publishableKey']);
+});
+
+// Fin Settings
