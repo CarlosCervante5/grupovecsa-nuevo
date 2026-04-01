@@ -63,7 +63,10 @@ class HomeContentSeeder extends Seeder
         ];
 
         foreach ($slides as $slide) {
-            HomeSlide::create($slide);
+            HomeSlide::firstOrCreate(
+                ['title' => $slide['title'], 'sort_id' => $slide['sort_id']],
+                $slide
+            );
         }
 
         // Testimoniales - image paths relative to Angular assets folder
@@ -77,7 +80,10 @@ class HomeContentSeeder extends Seeder
         ];
 
         foreach ($testimonials as $testimonial) {
-            HomeTestimonial::create($testimonial);
+            HomeTestimonial::firstOrCreate(
+                ['image_path' => $testimonial['image_path']],
+                $testimonial
+            );
         }
 
         $this->command->info('Home slides y testimoniales creados exitosamente!');

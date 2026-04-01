@@ -40,7 +40,10 @@ class BoutiqueBannerSeeder extends Seeder
         ];
 
         foreach ($banners as $banner) {
-            BoutiqueBanner::create($banner);
+            BoutiqueBanner::firstOrCreate(
+                ['title' => $banner['title']],
+                $banner
+            );
         }
     }
 }
