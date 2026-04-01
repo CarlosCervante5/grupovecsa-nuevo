@@ -14,12 +14,12 @@ return new class extends Migration
             $table->unsignedBigInteger('product_id');
             $table->unsignedBigInteger('attribute_id');
 
-            $table->foreign('product_id')
+            $table->foreign('product_id', 'bpap_product_id_fk')
                   ->references('id')
                   ->on(env('DB_TABLE_PREFIX', '') . 'boutique_products')
                   ->onDelete('cascade');
 
-            $table->foreign('attribute_id')
+            $table->foreign('attribute_id', 'bpap_attribute_id_fk')
                   ->references('id')
                   ->on(env('DB_TABLE_PREFIX', '') . 'boutique_product_attributes')
                   ->onDelete('cascade');
