@@ -87,6 +87,15 @@ class VehicleInventorySeeder extends Seeder
                 ['vin' => $v['vin']],
                 array_merge($v, ['uuid' => Uuid::uuid4()->toString()])
             );
+            // Add placeholder image if vehicle has no images
+            if ($created->images()->count() === 0) {
+                $created->images()->create([
+                    'sort_id' => 1,
+                    'image_name' => 'placeholder.jpg',
+                    'service_public_id' => 'placeholder_' . $created->id,
+                    'service_image_url' => 'https://placehold.co/800x600/1c69d4/white?text=' . urlencode($v['name']),
+                ]);
+            }
             $this->command->info('Vehicle: ' . $v['name'] . ' - ' . ($created->wasRecentlyCreated ? 'CREATED' : 'EXISTS'));
         }
 
