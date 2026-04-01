@@ -8,11 +8,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table(env('DB_TABLE_PREFIX', '') . 'boutique_orders', function (Blueprint $table) {
-            // Make user_id nullable to support guest orders
+        $tbl = env('DB_TABLE_PREFIX', '') . 'boutique_orders';
+        Schema::table($tbl, function (Blueprint $table) use ($tbl) {
             $table->foreignId('user_id')->nullable()->change();
-            $table->string('guest_name', 255)->nullable()->after('user_id');
-            $table->string('guest_email', 255)->nullable()->after('guest_name');
+            if (!Schema::hasColumn($tbl, 'guest_name')) {
+                $table->string('guest_name', 255)->nullable()->after('user_id');
+            }
+            if (!Schema::hasColumn($tbl, 'guest_email')) {
+                $table->string('guest_email', 255)->nullable()->after('guest_name');
+            }
         });
     }
 

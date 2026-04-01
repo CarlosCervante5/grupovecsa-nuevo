@@ -8,9 +8,12 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table(env('DB_TABLE_PREFIX', '') . 'boutique_categories', function (Blueprint $table) {
-            $table->unsignedBigInteger('parent_id')->nullable()->after('id');
-        });
+        $tbl = env('DB_TABLE_PREFIX', '') . 'boutique_categories';
+        if (!Schema::hasColumn($tbl, 'parent_id')) {
+            Schema::table($tbl, function (Blueprint $table) {
+                $table->unsignedBigInteger('parent_id')->nullable()->after('id');
+            });
+        }
     }
 
     public function down(): void

@@ -8,9 +8,12 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table(env('DB_TABLE_PREFIX', '') . 'boutique_product_variants', function (Blueprint $table) {
-            $table->decimal('price', 10, 2)->nullable()->after('stock');
-        });
+        $tbl = env('DB_TABLE_PREFIX', '') . 'boutique_product_variants';
+        if (!Schema::hasColumn($tbl, 'price')) {
+            Schema::table($tbl, function (Blueprint $table) {
+                $table->decimal('price', 10, 2)->nullable()->after('stock');
+            });
+        }
     }
 
     public function down(): void
