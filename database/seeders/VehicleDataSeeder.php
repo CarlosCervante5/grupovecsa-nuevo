@@ -13,6 +13,15 @@ class VehicleDataSeeder extends Seeder
 {
     public function run()
     {
+        // Clean up duplicate brands (keep only first of each name)
+        $brandNames = VehicleBrand::select('name')->groupBy('name')->pluck('name');
+        foreach ($brandNames as $name) {
+            $duplicates = VehicleBrand::where('name', $name)->orderBy('id')->get();
+            if ($duplicates->count() > 1) {
+                VehicleBrand::where('name', $name)->where('id', '>', $duplicates->first()->id)->delete();
+            }
+        }
+
         // Marcas
         $bmw = VehicleBrand::firstOrCreate(['name' => 'BMW'], ['image_path' => 'bmw-logo.png']);
         $mini = VehicleBrand::firstOrCreate(['name' => 'MINI'], ['image_path' => 'mini-logo.png']);

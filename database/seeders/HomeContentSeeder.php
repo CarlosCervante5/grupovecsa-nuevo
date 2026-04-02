@@ -10,6 +10,10 @@ class HomeContentSeeder extends Seeder
 {
     public function run()
     {
+        // Hard reset: delete all existing slides and testimonials to prevent duplicates
+        HomeSlide::query()->delete();
+        HomeTestimonial::query()->delete();
+
         // Slides - image paths relative to Angular assets folder
         $slides = [
             [
@@ -63,10 +67,7 @@ class HomeContentSeeder extends Seeder
         ];
 
         foreach ($slides as $slide) {
-            HomeSlide::firstOrCreate(
-                ['title' => $slide['title'], 'sort_id' => $slide['sort_id']],
-                $slide
-            );
+            HomeSlide::create($slide);
         }
 
         // Testimoniales - image paths relative to Angular assets folder
@@ -80,10 +81,7 @@ class HomeContentSeeder extends Seeder
         ];
 
         foreach ($testimonials as $testimonial) {
-            HomeTestimonial::firstOrCreate(
-                ['image_path' => $testimonial['image_path']],
-                $testimonial
-            );
+            HomeTestimonial::create($testimonial);
         }
 
         $this->command->info('Home slides y testimoniales creados exitosamente!');
