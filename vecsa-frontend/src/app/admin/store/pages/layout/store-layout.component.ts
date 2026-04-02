@@ -119,6 +119,7 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     { key: 'coupons', label: 'Cupones', icon: 'confirmation_number' },
     { key: 'redemptions', label: 'Redenciones', icon: 'redeem' },
     { key: 'incadea', label: 'Sync Incadea', icon: 'sync' },
+    { key: 'wc_import', label: 'WC Import', icon: 'upload_file' },
   ];
 
   readonly orderStatuses = ['pendiente', 'pagado', 'en_preparacion', 'enviado', 'entregado', 'cancelado'];
@@ -1083,5 +1084,48 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
       case 'running': return 'En progreso';
       default: return status;
     }
+  }
+
+  // ── WC Import ──
+  wcImporting = false;
+  wcSyncingImages = false;
+  wcResult: any = null;
+  wcImageResult: any = null;
+  wcError = '';
+  wcImageError = '';
+  wcMode: 'full' | 'images' = 'full';
+
+  onWcFileSelected(event: Event, mode: 'full' | 'images'): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || !input.files[0]) return;
+
+    const file = input.files[0];
+    const formData = new FormData();
+    formData.append('csv', file);
+
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${localStorage.getItem('user_token') || ''}`,
+      'Accept': 'application/json',
+    });
+
+    if (mode === 'full') {
+      this.wcImporting = true;
+      this.wcError = '';
+      this.wcResult = null;
+      this.http.post(`${environment.baseUrl}/api/boutique/admin/wc-import/upload`, formData, { headers }).subscribe({
+        next: (res: any) => { this.wcResult = res.data; this.wcImporting = false; },
+        error: (err: any) => { this.wcError = err?.error?.message || 'Error en importación'; this.wcImporting = false; },
+      });
+    } else {
+      this.wcSyncingImages = true;
+      this.wcImageError = '';
+      this.wcImageResult = null;
+      this.http.post(`${environment.baseUrl}/api/boutique/admin/wc-import/sync-images`, formData, { headers }).subscribe({
+        next: (res: any) => { this.wcImageResult = res.data; this.wcSyncingImages = false; },
+        error: (err: any) => { this.wcImageError = err?.error?.message || 'Error en sync de imágenes'; this.wcSyncingImages = false; },
+      });
+    }
+
+    input.value = '';
   }
 }

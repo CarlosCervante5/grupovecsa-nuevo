@@ -58,6 +58,7 @@ use App\Http\Controllers\AdminDashboard\AdminDashboardController;
 use App\Http\Controllers\Settings\SettingsController;
 use App\Http\Controllers\Boutique\IncadeaSyncController;
 use App\Http\Controllers\Developer\ApiMonitorController;
+use App\Http\Controllers\Boutique\WcImportController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -820,6 +821,16 @@ Route::prefix('boutique/admin/incadea')->middleware(['bandwidth_usage', 'auth:sa
 });
 
 // Fin Incadea Sync
+
+
+// Segmento WooCommerce Import
+
+Route::prefix('boutique/admin/wc-import')->middleware(['auth:sanctum'])->group(function () {
+    Route::post('/upload', [WcImportController::class, 'upload']);
+    Route::post('/sync-images', [WcImportController::class, 'syncImages']);
+});
+
+// Fin WooCommerce Import
 
 
 // Segmento API Monitor
