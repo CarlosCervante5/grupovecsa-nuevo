@@ -57,6 +57,7 @@ use App\Http\Controllers\StoreManagement\StoreCouponController;
 use App\Http\Controllers\AdminDashboard\AdminDashboardController;
 use App\Http\Controllers\Settings\SettingsController;
 use App\Http\Controllers\Boutique\IncadeaSyncController;
+use App\Http\Controllers\Developer\ApiMonitorController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -819,3 +820,14 @@ Route::prefix('boutique/admin/incadea')->middleware(['bandwidth_usage', 'auth:sa
 });
 
 // Fin Incadea Sync
+
+
+// Segmento API Monitor
+
+Route::prefix('developer/monitor')->middleware(['bandwidth_usage', 'auth:sanctum'])->group(function () {
+    Route::post('/logs', [ApiMonitorController::class, 'logs']);
+    Route::post('/stats', [ApiMonitorController::class, 'stats']);
+    Route::post('/health', [ApiMonitorController::class, 'health']);
+});
+
+// Fin API Monitor

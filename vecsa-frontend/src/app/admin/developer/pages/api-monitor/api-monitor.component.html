@@ -1,0 +1,222 @@
+<div class="monitor-layout">
+
+  <!-- Sidebar -->
+  <aside class="dev-sidebar">
+    <div class="dev-brand">
+      <span class="material-icons dev-brand-icon">code</span>
+      <span class="dev-brand-name">Dev Panel</span>
+    </div>
+    <button class="dev-nav-item" (click)="goBack()">
+      <span class="material-icons">arrow_back</span>
+      Volver a mi panel
+    </button>
+    <button class="dev-nav-item active">
+      <span class="material-icons">monitor_heart</span>
+      API Monitor
+    </button>
+  </aside>
+
+  <!-- Main -->
+  <main class="monitor-main">
+    <h1 class="page-title">API Monitor</h1>
+    <p class="page-subtitle">Estado de conexiones, logs de requests y estadísticas en tiempo real</p>
+
+    <!-- ===== HEALTH STATUS ===== -->
+    <div class="section-card">
+      <div class="section-header">
+        <h3 class="section-title">
+          <span class="material-icons">monitor_heart</span>
+          Estado de Servicios
+        </h3>
+        <button class="refresh-btn" (click)="loadHealth()" [disabled]="healthLoading">
+          <span class="material-icons" [class.spinning]="healthLoading">refresh</span>
+        </button>
+      </div>
+
+      <div *ngIf="healthLoading && services.length === 0" class="loading-row">
+        <div class="spinner"></div><span>Verificando servicios...</span>
+      </div>
+
+      <div *ngIf="healthError" class="alert alert-error">
+        <span class="material-icons">error</span> {{ healthError }}
+      </div>
+
+      <div class="health-grid" *ngIf="services.length > 0">
+        <div *ngFor="let svc of services" class="health-card" [class.health-ok]="svc.status === 'ok'" [class.health-error]="svc.status !== 'ok'">
+          <div class="health-icon" [style.background]="getStatusBg(svc.status)" [style.color]="getStatusColor(svc.status)">
+            <span class="material-icons">{{ svc.icon || 'dns' }}</span>
+          </div>
+          <div class="health-info">
+            <span class="health-name">{{ svc.name }}</span>
+            <div class="health-meta">
+              <span class="health-badge" [style.background]="getStatusBg(svc.status)" [style.color]="getStatusColor(svc.status)">
+                {{ svc.status === 'ok' ? 'Conectado' : 'Error' }}
+              </span>
+              <span class="health-latency" *ngIf="svc.latency_ms !== null">{{ svc.latency_ms }}ms</span>
+            </div>
+            <span class="health-error-msg" *ngIf="svc.error">{{ svc.error }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== STATS ===== -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon" style="background: #dbeafe; color: #1c69d4;">
+          <span class="material-icons">schedule</span>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value" *ngIf="!statsLoading">{{ stats.total_hour || 0 }}</span>
+          <div class="stat-value-loading" *ngIf="statsLoading"><div class="spinner-sm"></div></div>
+          <span class="stat-label">Última hora</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: #dcfce7; color: #16a34a;">
+          <span class="material-icons">today</span>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value" *ngIf="!statsLoading">{{ stats.total_today || 0 }}</span>
+          <div class="stat-value-loading" *ngIf="statsLoading"><div class="spinner-sm"></div></div>
+          <span class="stat-label">Hoy</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: #fef3c7; color: #d97706;">
+          <span class="material-icons">query_stats</span>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value" *ngIf="!statsLoading">{{ stats.total_24h || 0 }}</span>
+          <div class="stat-value-loading" *ngIf="statsLoading"><div class="spinner-sm"></div></div>
+          <span class="stat-label">Últimas 24h</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: #f3e8ff; color: #7c3aed;">
+          <span class="material-icons">cloud_upload</span>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value" *ngIf="!statsLoading">{{ formatBytes(stats.bandwidth_today || 0) }}</span>
+          <div class="stat-value-loading" *ngIf="statsLoading"><div class="spinner-sm"></div></div>
+          <span class="stat-label">Bandwidth hoy</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TOP ENDPOINTS ===== -->
+    <div class="section-card" *ngIf="!statsLoading && stats.top_endpoints?.length > 0">
+      <h3 class="section-title">
+        <span class="material-icons">leaderboard</span>
+        Top Endpoints (24h)
+      </h3>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Método</th>
+              <th>Endpoint</th>
+              <th>Hits</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let ep of stats.top_endpoints">
+              <td><span class="method-badge" [style.color]="getMethodColor(ep.method)">{{ ep.method }}</span></td>
+              <td class="endpoint-cell">{{ ep.path }}</td>
+              <td><span class="hits-badge">{{ ep.hits }}</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== TOP IPs ===== -->
+    <div class="section-card" *ngIf="!statsLoading && stats.top_ips?.length > 0">
+      <h3 class="section-title">
+        <span class="material-icons">language</span>
+        Top IPs (24h)
+      </h3>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>IP</th>
+              <th>Requests</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let ip of stats.top_ips">
+              <td><code class="ip-code">{{ ip.ip_address }}</code></td>
+              <td><span class="hits-badge">{{ ip.hits }}</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== REQUEST LOGS ===== -->
+    <div class="section-card">
+      <div class="section-header">
+        <h3 class="section-title">
+          <span class="material-icons">list_alt</span>
+          Request Logs
+        </h3>
+        <span class="log-count">{{ totalLogs }} registros</span>
+      </div>
+
+      <div class="search-row">
+        <div class="search-wrap">
+          <span class="material-icons search-icon">search</span>
+          <input class="search-input" type="text" placeholder="Buscar por path, IP o método..." [(ngModel)]="logSearch" (keyup.enter)="onSearch()" />
+        </div>
+        <button class="filter-btn" (click)="onSearch()">Buscar</button>
+      </div>
+
+      <div *ngIf="logsLoading" class="loading-row">
+        <div class="spinner"></div><span>Cargando logs...</span>
+      </div>
+
+      <div *ngIf="!logsLoading && logs.length === 0" class="empty-state">
+        <span class="material-icons">inbox</span>
+        <p>No hay logs registrados</p>
+      </div>
+
+      <div *ngIf="!logsLoading && logs.length > 0" class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Método</th>
+              <th>Path</th>
+              <th>IP</th>
+              <th>Req</th>
+              <th>Res</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let log of logs">
+              <td class="date-cell">{{ log.created_at }}</td>
+              <td><span class="method-badge" [style.color]="getMethodColor(log.method)">{{ log.method }}</span></td>
+              <td class="endpoint-cell">{{ log.path }}</td>
+              <td><code class="ip-code">{{ log.ip_address }}</code></td>
+              <td>{{ formatBytes(log.request_size || 0) }}</td>
+              <td>{{ formatBytes(log.response_size || 0) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination" *ngIf="lastPage > 1">
+        <button class="page-btn" (click)="prevPage()" [disabled]="currentPage <= 1">
+          <span class="material-icons">chevron_left</span>
+        </button>
+        <span class="page-info">{{ currentPage }} / {{ lastPage }}</span>
+        <button class="page-btn" (click)="nextPage()" [disabled]="currentPage >= lastPage">
+          <span class="material-icons">chevron_right</span>
+        </button>
+      </div>
+    </div>
+
+  </main>
+</div>
