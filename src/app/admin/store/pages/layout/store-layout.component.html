@@ -1196,6 +1196,96 @@
       </div>
     }
 
+    <!-- ═══ WC IMPORT ═══ -->
+    @if (activeSection === 'wc_import') {
+      <h1 class="store-title">Importar desde WooCommerce</h1>
+      <p class="store-subtitle">Sube un CSV exportado de WooCommerce para importar productos e imágenes</p>
+
+      <!-- Full Import -->
+      <div class="store-card" style="margin-bottom: 18px;">
+        <h3 class="card-title"><span class="material-icons" style="color:#1c69d4;font-size:20px;">upload_file</span> Importar Productos Completos</h3>
+        <p style="font-size:0.82rem;color:#64748b;margin:0 0 12px;">Importa productos, categorías, variantes e imágenes desde el CSV. Los productos existentes (por SKU) se omiten.</p>
+        <label class="store-action-btn" [class.disabled]="wcImporting" style="cursor:pointer;display:inline-flex;">
+          @if (wcImporting) {
+            <div class="spinner-sm"></div> Importando...
+          } @else {
+            <span class="material-icons">cloud_upload</span> Seleccionar CSV
+          }
+          <input type="file" accept=".csv" (change)="onWcFileSelected($event, 'full')" style="display:none;" [disabled]="wcImporting" />
+        </label>
+        @if (wcError) {
+          <div class="alert-error" style="margin-top:12px;"><span class="material-icons">error</span> {{ wcError }}</div>
+        }
+      </div>
+
+      @if (wcResult) {
+        <div class="stats-grid" style="margin-bottom: 18px;">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#dbeafe;color:#1c69d4;"><span class="material-icons">description</span></div>
+            <div class="stat-info"><span class="stat-value">{{ wcResult.total_rows }}</span><span class="stat-label">Filas CSV</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#dcfce7;color:#16a34a;"><span class="material-icons">inventory_2</span></div>
+            <div class="stat-info"><span class="stat-value">{{ wcResult.products }}</span><span class="stat-label">Productos</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#fef3c7;color:#d97706;"><span class="material-icons">style</span></div>
+            <div class="stat-info"><span class="stat-value">{{ wcResult.variants }}</span><span class="stat-label">Variantes</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#f3e8ff;color:#7c3aed;"><span class="material-icons">image</span></div>
+            <div class="stat-info"><span class="stat-value">{{ wcResult.images }}</span><span class="stat-label">Imágenes</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#f1f5f9;color:#64748b;"><span class="material-icons">skip_next</span></div>
+            <div class="stat-info"><span class="stat-value">{{ wcResult.skipped }}</span><span class="stat-label">Omitidos</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#fef2f2;color:#ef4444;"><span class="material-icons">error_outline</span></div>
+            <div class="stat-info"><span class="stat-value">{{ wcResult.errors }}</span><span class="stat-label">Errores</span></div>
+          </div>
+        </div>
+      }
+
+      <!-- Sync Images Only -->
+      <div class="store-card" style="margin-bottom: 18px;">
+        <h3 class="card-title"><span class="material-icons" style="color:#7c3aed;font-size:20px;">photo_library</span> Solo Sincronizar Imágenes</h3>
+        <p style="font-size:0.82rem;color:#64748b;margin:0 0 12px;">Vincula las URLs de imágenes del CSV a productos existentes por SKU. No crea productos nuevos.</p>
+        <label class="store-action-btn" [class.disabled]="wcSyncingImages" style="cursor:pointer;display:inline-flex;">
+          @if (wcSyncingImages) {
+            <div class="spinner-sm"></div> Sincronizando imágenes...
+          } @else {
+            <span class="material-icons">add_photo_alternate</span> Seleccionar CSV
+          }
+          <input type="file" accept=".csv" (change)="onWcFileSelected($event, 'images')" style="display:none;" [disabled]="wcSyncingImages" />
+        </label>
+        @if (wcImageError) {
+          <div class="alert-error" style="margin-top:12px;"><span class="material-icons">error</span> {{ wcImageError }}</div>
+        }
+      </div>
+
+      @if (wcImageResult) {
+        <div class="stats-grid" style="margin-bottom: 18px;">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#dcfce7;color:#16a34a;"><span class="material-icons">link</span></div>
+            <div class="stat-info"><span class="stat-value">{{ wcImageResult.linked }}</span><span class="stat-label">Vinculadas</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#f1f5f9;color:#64748b;"><span class="material-icons">skip_next</span></div>
+            <div class="stat-info"><span class="stat-value">{{ wcImageResult.skipped }}</span><span class="stat-label">Omitidas</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#fef3c7;color:#d97706;"><span class="material-icons">search_off</span></div>
+            <div class="stat-info"><span class="stat-value">{{ wcImageResult.not_found }}</span><span class="stat-label">No encontrados</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#fef2f2;color:#ef4444;"><span class="material-icons">error_outline</span></div>
+            <div class="stat-info"><span class="stat-value">{{ wcImageResult.errors }}</span><span class="stat-label">Errores</span></div>
+          </div>
+        </div>
+      }
+    }
+
   </main>
 </div>
 
