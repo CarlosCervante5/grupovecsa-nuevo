@@ -1046,7 +1046,7 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   addIncadeaBrand(): void {
     const val = this.incadeaNewBrand.trim();
     if (val && this.incadeaConfig.excluded_brands.indexOf(val) === -1) {
-      this.incadeaConfig.excluded_brands = [].concat(this.incadeaConfig.excluded_brands, [val]);
+      this.incadeaConfig.excluded_brands = ([] as string[]).concat(this.incadeaConfig.excluded_brands, [val]);
       this.incadeaNewBrand = '';
     }
   }
@@ -1058,7 +1058,7 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   addIncadeaCategory(): void {
     const val = this.incadeaNewCategory.trim();
     if (val && this.incadeaConfig.excluded_categories.indexOf(val) === -1) {
-      this.incadeaConfig.excluded_categories = [].concat(this.incadeaConfig.excluded_categories, [val]);
+      this.incadeaConfig.excluded_categories = ([] as string[]).concat(this.incadeaConfig.excluded_categories, [val]);
       this.incadeaNewCategory = '';
     }
   }
