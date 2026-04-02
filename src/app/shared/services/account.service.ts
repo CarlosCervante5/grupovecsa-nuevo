@@ -31,7 +31,9 @@ export class AccountService {
     let user_token = localStorage.getItem('user_token');
     let stored_role =  localStorage.getItem('role') || '';
 
-    let headers = new HttpHeaders().set('Authorization', `Bearer ${user_token}`);
+    let headers = new HttpHeaders()
+      .set('Authorization', `Bearer ${user_token}`)
+      .set('Accept', 'application/json');
 
     let body = {
       stored_role: stored_role,
