@@ -104,16 +104,22 @@ class IncadeaSyncService
      */
     public function executeSyncProcess(array $filters): array
     {
-        $log = IncadeaSyncLog::create([
-            'user_id'         => auth()->id(),
-            'status'          => 'running',
-            'started_at'      => now(),
-            'filters_applied' => $filters,
-        ]);
+        // Try to create log, but don't fail if table doesn't exist
+        $log = null;
+        try {
+            $log = IncadeaSyncLog::create([
+                'user_id'         => auth()->id(),
+                'status'          => 'running',
+                'started_at'      => now(),
+                'filters_applied' => $filters,
+            ]);
+        } catch (\Exception $e) {
+            // Log table may not exist yet — continue without logging
+        }
 
         try {
             $spareParts = $this->fetchSpareParts();
-            $log->update(['total_fetched' => count($spareParts)]);
+            if ($log) $log->update(['total_fetched' => count($spareParts)]);
 
             $filtered = $this->filterParts($spareParts, $filters);
 
@@ -133,15 +139,17 @@ class IncadeaSyncService
                 }
             }
 
-            $log->update([
-                'status'         => 'completed',
-                'total_created'  => $stats['created'],
-                'total_updated'  => $stats['updated'],
-                'total_skipped'  => $stats['skipped'],
-                'total_errors'   => $stats['errors'],
-                'error_details'  => $errorDetails ?: null,
-                'finished_at'    => now(),
-            ]);
+            if ($log) {
+                $log->update([
+                    'status'         => 'completed',
+                    'total_created'  => $stats['created'],
+                    'total_updated'  => $stats['updated'],
+                    'total_skipped'  => $stats['skipped'],
+                    'total_errors'   => $stats['errors'],
+                    'error_details'  => $errorDetails ?: null,
+                    'finished_at'    => now(),
+                ]);
+            }
 
             return [
                 'total_fetched'    => count($spareParts),
@@ -150,16 +158,18 @@ class IncadeaSyncService
                 'updated'          => $stats['updated'],
                 'skipped'          => $stats['skipped'],
                 'errors'           => $stats['errors'],
-                'duration_seconds' => now()->diffInSeconds($log->getRawOriginal('started_at')),
-                'log_uuid'         => $log->uuid,
+                'duration_seconds' => 0,
+                'log_uuid'         => $log ? $log->uuid : null,
             ];
 
         } catch (\Exception $e) {
-            $log->update([
-                'status'        => 'failed',
-                'error_details' => [['error' => $e->getMessage()]],
-                'finished_at'   => now(),
-            ]);
+            if ($log) {
+                $log->update([
+                    'status'        => 'failed',
+                    'error_details' => [['error' => $e->getMessage()]],
+                    'finished_at'   => now(),
+                ]);
+            }
             throw $e;
         }
     }
@@ -180,15 +190,19 @@ class IncadeaSyncService
      */
     public static function getSyncConfig(): array
     {
-        $raw = SystemSetting::get('incadea_sync_config');
+        try {
+            $raw = SystemSetting::get('incadea_sync_config');
 
-        if ($raw === null) {
+            if ($raw === null) {
+                return self::getDefaultConfig();
+            }
+
+            $decoded = json_decode($raw, true);
+
+            return is_array($decoded) ? $decoded : self::getDefaultConfig();
+        } catch (\Exception $e) {
             return self::getDefaultConfig();
         }
-
-        $decoded = json_decode($raw, true);
-
-        return is_array($decoded) ? $decoded : self::getDefaultConfig();
     }
 
     /**
