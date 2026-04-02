@@ -496,3 +496,31 @@
   background: #1554b0;
   border-color: #1554b0;
 }
+
+/* Incadea Sync */
+.chip-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px; background: #eff6ff; border: 1px solid #bfdbfe;
+  border-radius: 20px; font-size: 0.78rem; color: #1e40af;
+}
+.chip-remove {
+  display: flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; border: none; background: none;
+  color: #1e40af; cursor: pointer; padding: 0; border-radius: 50%;
+}
+.chip-remove:hover { background: rgba(30,64,175,0.1); }
+.alert-error {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; border-radius: 8px; font-size: 0.82rem;
+  background: #fef2f2; border: 1px solid #fecaca; color: #dc2626;
+}
+.alert-success {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; border-radius: 8px; font-size: 0.82rem;
+  background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534;
+}
+.alert-error .material-icons, .alert-success .material-icons { font-size: 18px; }
+.loading-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 24px 0; color: #64748b; font-size: 0.85rem;
+}

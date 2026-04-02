@@ -1064,6 +1064,138 @@
       }
     }
 
+    <!-- ═══ INCADEA SYNC ═══ -->
+    @if (activeSection === 'incadea') {
+      <h1 class="store-title">Sincronización Incadea → Boutique</h1>
+      <p class="store-subtitle">Sincroniza refacciones desde Incadea al catálogo de productos</p>
+
+      <!-- Sync Button -->
+      <div class="store-card" style="margin-bottom: 18px;">
+        <h3 class="card-title"><span class="material-icons" style="color:#1c69d4;font-size:20px;">sync</span> Ejecutar Sincronización</h3>
+        <button class="store-action-btn" (click)="triggerIncadeaSync()" [disabled]="incadeaSyncing" style="margin-top:8px;">
+          @if (incadeaSyncing) {
+            <div class="spinner-sm"></div> Sincronizando...
+          } @else {
+            <span class="material-icons">play_arrow</span> Iniciar Sincronización
+          }
+        </button>
+        @if (incadeaError) {
+          <div class="alert-error" style="margin-top:12px;">
+            <span class="material-icons">error</span> {{ incadeaError }}
+          </div>
+        }
+      </div>
+
+      <!-- Result Summary -->
+      @if (incadeaResult) {
+        <div class="stats-grid" style="margin-bottom: 18px;">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#dbeafe;color:#1c69d4;"><span class="material-icons">cloud_download</span></div>
+            <div class="stat-info"><span class="stat-value">{{ incadeaResult.total_fetched }}</span><span class="stat-label">Obtenidos</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#dcfce7;color:#16a34a;"><span class="material-icons">add_circle</span></div>
+            <div class="stat-info"><span class="stat-value">{{ incadeaResult.created }}</span><span class="stat-label">Creados</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#fef3c7;color:#d97706;"><span class="material-icons">update</span></div>
+            <div class="stat-info"><span class="stat-value">{{ incadeaResult.updated }}</span><span class="stat-label">Actualizados</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#f1f5f9;color:#64748b;"><span class="material-icons">skip_next</span></div>
+            <div class="stat-info"><span class="stat-value">{{ incadeaResult.skipped }}</span><span class="stat-label">Omitidos</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#fef2f2;color:#ef4444;"><span class="material-icons">error_outline</span></div>
+            <div class="stat-info"><span class="stat-value">{{ incadeaResult.errors }}</span><span class="stat-label">Errores</span></div>
+          </div>
+        </div>
+      }
+
+      <!-- Config -->
+      <div class="store-card" style="margin-bottom: 18px;">
+        <h3 class="card-title"><span class="material-icons" style="color:#1c69d4;font-size:20px;">settings</span> Configuración de Filtros</h3>
+        @if (incadeaConfigLoading) {
+          <div class="loading-row"><div class="spinner-sm"></div> Cargando...</div>
+        } @else {
+          <div style="margin-bottom:16px;">
+            <label class="modal-label">Marcas Excluidas</label>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
+              @for (brand of incadeaConfig.excluded_brands; track brand) {
+                <span class="chip-tag">{{ brand }} <button class="chip-remove" (click)="removeIncadeaBrand(brand)"><span class="material-icons" style="font-size:14px;">close</span></button></span>
+              }
+            </div>
+            <div style="display:flex;gap:8px;">
+              <input class="modal-input" type="text" placeholder="Agregar marca..." [(ngModel)]="incadeaNewBrand" (keyup.enter)="addIncadeaBrand()" style="flex:1;" />
+              <button class="store-action-btn" (click)="addIncadeaBrand()" style="padding:8px 14px;"><span class="material-icons" style="font-size:18px;">add</span></button>
+            </div>
+          </div>
+          <div style="margin-bottom:16px;">
+            <label class="modal-label">Categorías Excluidas</label>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
+              @for (cat of incadeaConfig.excluded_categories; track cat) {
+                <span class="chip-tag">{{ cat }} <button class="chip-remove" (click)="removeIncadeaCategory(cat)"><span class="material-icons" style="font-size:14px;">close</span></button></span>
+              }
+            </div>
+            <div style="display:flex;gap:8px;">
+              <input class="modal-input" type="text" placeholder="Agregar categoría..." [(ngModel)]="incadeaNewCategory" (keyup.enter)="addIncadeaCategory()" style="flex:1;" />
+              <button class="store-action-btn" (click)="addIncadeaCategory()" style="padding:8px 14px;"><span class="material-icons" style="font-size:18px;">add</span></button>
+            </div>
+          </div>
+          @if (incadeaConfigSuccess) {
+            <div class="alert-success" style="margin-bottom:12px;"><span class="material-icons">check_circle</span> {{ incadeaConfigSuccess }}</div>
+          }
+          @if (incadeaConfigError) {
+            <div class="alert-error" style="margin-bottom:12px;"><span class="material-icons">error</span> {{ incadeaConfigError }}</div>
+          }
+          <div style="display:flex;justify-content:flex-end;">
+            <button class="store-action-btn" (click)="saveIncadeaConfig()" [disabled]="incadeaConfigSaving">
+              @if (incadeaConfigSaving) { <div class="spinner-sm"></div> Guardando... } @else { <span class="material-icons">save</span> Guardar }
+            </button>
+          </div>
+        }
+      </div>
+
+      <!-- Logs Table -->
+      <div class="store-card">
+        <h3 class="card-title"><span class="material-icons" style="color:#1c69d4;font-size:20px;">history</span> Historial de Sincronizaciones</h3>
+        @if (incadeaLogsLoading) {
+          <div class="loading-row"><div class="spinner-sm"></div> Cargando historial...</div>
+        } @else if (incadeaLogs.length === 0) {
+          <div class="empty-state"><span class="material-icons">inbox</span><p>No hay sincronizaciones registradas</p></div>
+        } @else {
+          <div class="table-wrap">
+            <table class="store-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Estado</th>
+                  <th>Obtenidos</th>
+                  <th>Creados</th>
+                  <th>Actualizados</th>
+                  <th>Omitidos</th>
+                  <th>Errores</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (log of incadeaLogs; track log.uuid) {
+                  <tr>
+                    <td>{{ log.started_at || log.created_at }}</td>
+                    <td><span class="badge" [ngClass]="getIncadeaStatusClass(log.status)">{{ getIncadeaStatusLabel(log.status) }}</span></td>
+                    <td>{{ log.total_fetched }}</td>
+                    <td>{{ log.total_created }}</td>
+                    <td>{{ log.total_updated }}</td>
+                    <td>{{ log.total_skipped }}</td>
+                    <td>{{ log.total_errors }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    }
+
   </main>
 </div>
 

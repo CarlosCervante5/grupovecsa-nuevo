@@ -118,6 +118,7 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     { key: 'points', label: 'Puntos', icon: 'stars' },
     { key: 'coupons', label: 'Cupones', icon: 'confirmation_number' },
     { key: 'redemptions', label: 'Redenciones', icon: 'redeem' },
+    { key: 'incadea', label: 'Sync Incadea', icon: 'sync' },
   ];
 
   readonly orderStatuses = ['pendiente', 'pagado', 'en_preparacion', 'enviado', 'entregado', 'cancelado'];
@@ -170,6 +171,8 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
       this.loadCoupons();
     } else if (key === 'redemptions') {
       this.loadRedemptions();
+    } else if (key === 'incadea') {
+      this.loadIncadea();
     }
   }
 
@@ -955,5 +958,130 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   formatDate(val: any): string {
     if (!val) return '—';
     return new Date(val).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' });
+  }
+
+  // ── Incadea Sync ──
+  incadeaSyncing = false;
+  incadeaResult: any = null;
+  incadeaLogs: any[] = [];
+  incadeaLogsLoading = false;
+  incadeaError = '';
+  incadeaConfig: any = { excluded_brands: [], excluded_categories: [] };
+  incadeaConfigLoading = false;
+  incadeaConfigSaving = false;
+  incadeaConfigSuccess = '';
+  incadeaConfigError = '';
+  incadeaNewBrand = '';
+  incadeaNewCategory = '';
+
+  loadIncadea(): void {
+    this.loadIncadeaLogs();
+    this.loadIncadeaConfig();
+  }
+
+  triggerIncadeaSync(): void {
+    this.incadeaSyncing = true;
+    this.incadeaError = '';
+    this.incadeaResult = null;
+    this.http.post(`${environment.baseUrl}/api/boutique/admin/incadea/sync`, {
+      excluded_brands: this.incadeaConfig.excluded_brands,
+      excluded_categories: this.incadeaConfig.excluded_categories,
+    }, { headers: this.getHeaders() }).subscribe({
+      next: (res: any) => {
+        this.incadeaResult = res.data;
+        this.incadeaSyncing = false;
+        this.loadIncadeaLogs();
+      },
+      error: (err: any) => {
+        this.incadeaError = err?.error?.message || 'Error al sincronizar';
+        this.incadeaSyncing = false;
+      },
+    });
+  }
+
+  loadIncadeaLogs(): void {
+    this.incadeaLogsLoading = true;
+    this.http.post(`${environment.baseUrl}/api/boutique/admin/incadea/logs`, {}, { headers: this.getHeaders() }).subscribe({
+      next: (res: any) => {
+        const paginated = res.data?.logs || {};
+        this.incadeaLogs = paginated.data || paginated || [];
+        this.incadeaLogsLoading = false;
+      },
+      error: () => { this.incadeaLogsLoading = false; },
+    });
+  }
+
+  loadIncadeaConfig(): void {
+    this.incadeaConfigLoading = true;
+    this.http.post(`${environment.baseUrl}/api/boutique/admin/incadea/config`, {}, { headers: this.getHeaders() }).subscribe({
+      next: (res: any) => {
+        const cfg = res.data?.config || {};
+        this.incadeaConfig = {
+          excluded_brands: cfg.excluded_brands || [],
+          excluded_categories: cfg.excluded_categories || [],
+        };
+        this.incadeaConfigLoading = false;
+      },
+      error: () => { this.incadeaConfigLoading = false; },
+    });
+  }
+
+  saveIncadeaConfig(): void {
+    this.incadeaConfigSaving = true;
+    this.incadeaConfigSuccess = '';
+    this.incadeaConfigError = '';
+    this.http.post(`${environment.baseUrl}/api/boutique/admin/incadea/update_config`, this.incadeaConfig, { headers: this.getHeaders() }).subscribe({
+      next: () => {
+        this.incadeaConfigSuccess = 'Configuración guardada';
+        this.incadeaConfigSaving = false;
+        setTimeout(() => { this.incadeaConfigSuccess = ''; }, 3000);
+      },
+      error: (err: any) => {
+        this.incadeaConfigError = err?.error?.message || 'Error al guardar';
+        this.incadeaConfigSaving = false;
+      },
+    });
+  }
+
+  addIncadeaBrand(): void {
+    const val = this.incadeaNewBrand.trim();
+    if (val && this.incadeaConfig.excluded_brands.indexOf(val) === -1) {
+      this.incadeaConfig.excluded_brands = [].concat(this.incadeaConfig.excluded_brands, [val]);
+      this.incadeaNewBrand = '';
+    }
+  }
+
+  removeIncadeaBrand(brand: string): void {
+    this.incadeaConfig.excluded_brands = this.incadeaConfig.excluded_brands.filter((b: string) => b !== brand);
+  }
+
+  addIncadeaCategory(): void {
+    const val = this.incadeaNewCategory.trim();
+    if (val && this.incadeaConfig.excluded_categories.indexOf(val) === -1) {
+      this.incadeaConfig.excluded_categories = [].concat(this.incadeaConfig.excluded_categories, [val]);
+      this.incadeaNewCategory = '';
+    }
+  }
+
+  removeIncadeaCategory(cat: string): void {
+    this.incadeaConfig.excluded_categories = this.incadeaConfig.excluded_categories.filter((c: string) => c !== cat);
+  }
+
+  getIncadeaStatusClass(status: string): string {
+    switch (status) {
+      case 'completed': return 'badge-success';
+      case 'failed': return 'badge-danger';
+      case 'running': return 'badge-warning';
+      default: return '';
+    }
+  }
+
+  getIncadeaStatusLabel(status: string): string {
+    switch (status) {
+      case 'completed': return 'Completado';
+      case 'failed': return 'Fallido';
+      case 'running': return 'En progreso';
+      default: return status;
+    }
   }
 }
