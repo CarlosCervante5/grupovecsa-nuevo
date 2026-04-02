@@ -48,3 +48,6 @@ logs/
 *.cache
 *.temp
 
+
+# Downloaded WC images (local only)
+downloaded-images/
