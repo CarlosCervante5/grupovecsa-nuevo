@@ -149,10 +149,20 @@ class AuthController extends Controller
             
             $user = auth()->user();
 
+            if (!$user) {
+                return ApiResponseHelper::authError('No autenticado', null, 401, 'UNAUTHENTICATED');
+            }
+
             $stored_role = $request->input('stored_role');
             $expected_role = $request->input('expected_role');
 
-            $userRole = $user->getRoleNames()->first();
+            $userRole = null;
+            try {
+                $userRole = $user->getRoleNames()->first();
+            } catch (\Exception $e) {
+                // Spatie tables may not exist yet — fallback to role column
+                $userRole = $user->role ?? null;
+            }
 
             // Direct role match
             if ($userRole === $expected_role) {
@@ -160,9 +170,13 @@ class AuthController extends Controller
             }
 
             // Permission-based access: user has "access {expected_role}" permission
-            $accessPermission = 'access ' . $expected_role;
-            if ($user->hasPermissionTo($accessPermission)) {
-                return ApiResponseHelper::apiSuccess(200, 'Acceso por permiso', [$userRole, $expected_role]);
+            try {
+                $accessPermission = 'access ' . $expected_role;
+                if ($user->hasPermissionTo($accessPermission)) {
+                    return ApiResponseHelper::apiSuccess(200, 'Acceso por permiso', [$userRole, $expected_role]);
+                }
+            } catch (\Exception $e) {
+                // Permission check failed (table missing, etc.) — skip
             }
             
             return ApiResponseHelper::authError('Rol no autorizado', null, 403, 'UNAUTHORIZED_ROLE');
