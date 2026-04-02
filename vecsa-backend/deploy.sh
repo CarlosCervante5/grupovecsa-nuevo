@@ -19,6 +19,7 @@ php artisan db:seed --class=BoutiqueProductsSeeder --force 2>/dev/null || echo "
 
 # Cache config and routes for production
 echo "⚡ Caching config and routes..."
+php artisan permission:cache-reset 2>/dev/null || echo "⚠️ Permission cache reset skipped"
 php artisan config:cache 2>/dev/null || true
 php artisan route:cache 2>/dev/null || true
 
