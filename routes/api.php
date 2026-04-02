@@ -56,6 +56,7 @@ use App\Http\Controllers\StoreManagement\StorePointsController;
 use App\Http\Controllers\StoreManagement\StoreCouponController;
 use App\Http\Controllers\AdminDashboard\AdminDashboardController;
 use App\Http\Controllers\Settings\SettingsController;
+use App\Http\Controllers\Boutique\IncadeaSyncController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -806,3 +807,15 @@ Route::prefix('settings')->middleware(['bandwidth_usage', 'auth:sanctum'])->grou
 });
 
 // Fin Settings
+
+
+// Segmento Incadea Sync
+
+Route::prefix('boutique/admin/incadea')->middleware(['bandwidth_usage', 'auth:sanctum'])->group(function () {
+    Route::post('/sync', [IncadeaSyncController::class, 'sync']);
+    Route::post('/logs', [IncadeaSyncController::class, 'logs']);
+    Route::post('/config', [IncadeaSyncController::class, 'getConfig']);
+    Route::post('/update_config', [IncadeaSyncController::class, 'updateConfig']);
+});
+
+// Fin Incadea Sync
