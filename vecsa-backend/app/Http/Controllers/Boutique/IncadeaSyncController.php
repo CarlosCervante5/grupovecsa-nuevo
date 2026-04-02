@@ -32,7 +32,7 @@ class IncadeaSyncController extends Controller
 
             return ApiResponseHelper::apiSuccess(200, 'Sincronización completada exitosamente', $result);
         } catch (\Exception $e) {
-            return ApiResponseHelper::apiError('Error en la sincronización', $e->getMessage(), 500, 'SYNC_ERROR');
+            return ApiResponseHelper::apiError('Error en la sincronización: ' . $e->getMessage(), $e->getMessage(), 500, 'SYNC_ERROR');
         }
     }
 
