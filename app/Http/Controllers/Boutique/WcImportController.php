@@ -296,4 +296,60 @@ class WcImportController extends Controller
         if (!$value) return 0;
         return (float) preg_replace('/[^0-9.]/', '', $value);
     }
+
+    /**
+     * Deactivate products with no stock or no images.
+     * POST /api/boutique/admin/wc-import/cleanup
+     */
+    public function cleanup(Request $request)
+    {
+        try {
+            $user = $request->user();
+            if (!$user || (!$user->hasRole('developer') && !$user->hasRole('administrator'))) {
+                return ApiResponseHelper::apiError('No autorizado', null, 403, 'UNAUTHORIZED');
+            }
+
+            $noStock = 0;
+            $noImages = 0;
+            $alreadyInactive = 0;
+
+            $products = BoutiqueProduct::where('active', true)->get();
+
+            foreach ($products as $product) {
+                $hasStock = $product->stock > 0;
+
+                // Check variant stock too
+                if (!$hasStock) {
+                    $variantStock = $product->allVariants()->sum('stock');
+                    $hasStock = $variantStock > 0;
+                }
+
+                $hasImages = $product->images()->count() > 0;
+
+                if (!$hasStock && !$hasImages) {
+                    $product->update(['active' => false]);
+                    $noStock++;
+                    $noImages++;
+                } elseif (!$hasStock) {
+                    $product->update(['active' => false]);
+                    $noStock++;
+                } elseif (!$hasImages) {
+                    $product->update(['active' => false]);
+                    $noImages++;
+                }
+            }
+
+            $totalActive = BoutiqueProduct::where('active', true)->count();
+            $totalInactive = BoutiqueProduct::where('active', false)->count();
+
+            return ApiResponseHelper::apiSuccess(200, 'Limpieza completada', [
+                'deactivated_no_stock' => $noStock,
+                'deactivated_no_images' => $noImages,
+                'total_active' => $totalActive,
+                'total_inactive' => $totalInactive,
+            ]);
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error en limpieza', $e->getMessage(), 500, 'CLEANUP_ERROR');
+        }
+    }
 }
