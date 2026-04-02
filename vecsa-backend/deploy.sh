@@ -13,6 +13,9 @@ php artisan db:seed --class=DeveloperUserSeeder --force 2>/dev/null || echo "⚠
 php artisan db:seed --class=HomeContentSeeder --force 2>/dev/null || echo "⚠️ HomeContentSeeder skipped"
 php artisan db:seed --class=BoutiqueBannerSeeder --force 2>/dev/null || echo "⚠️ BoutiqueBannerSeeder skipped"
 php artisan db:seed --class=BoutiqueCategoriesSeeder --force 2>/dev/null || echo "⚠️ BoutiqueCategoriesSeeder skipped"
+php artisan db:seed --class=VehicleDataSeeder --force 2>/dev/null || echo "⚠️ VehicleDataSeeder skipped"
+php artisan db:seed --class=VehicleInventorySeeder --force 2>/dev/null || echo "⚠️ VehicleInventorySeeder skipped"
+php artisan db:seed --class=BoutiqueProductsSeeder --force 2>/dev/null || echo "⚠️ BoutiqueProductsSeeder skipped"
 
 # Cache config and routes for production
 echo "⚡ Caching config and routes..."

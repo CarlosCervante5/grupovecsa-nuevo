@@ -5,7 +5,7 @@
 | Email | Contraseña | Rol | Panel |
 |-------|-----------|-----|-------|
 | dev@vecsa.com | Developer%2024%% | developer | /admin/developer |
-| admin@vecsa.com | TestUser%2024%% | adminristrato | /admin/administrator |
+| admin@vecsa.com | TestUser%2024%% | administrator | /admin/administrator |
 | marketing@vecsa.com | TestUser%2024%% | marketing | /admin/marketing |
 | staff@vecsa.com | TestUser%2024%% | staff | /admin/staff |
 | gestor@vecsa.com | TestUser%2024%% | gestor | /admin/gestor |
@@ -15,15 +15,14 @@
 | bodywork@vecsa.com | TestUser%2024%% | bodywork_paint_technician | /admin/bodywork_paint_technician |
 | parts@vecsa.com | TestUser%2024%% | spare_parts | /admin/spare_parts |
 | gerente@vecsa.com | TestUser%2024%% | gerente | /admin/gerente |
-| client@vecsa.com | TestUser%2024%% | client | /auth/mi-cuenta ||
 | client@vecsa.com | TestUser%2024%% | client | /auth/mi-cuenta |
 
 ## Roles y Permisos
 
+| Rol | Permisos |
+|-----|----------|
 | developer | list users, create users, update users, delete users, access benchmark, access store_management, access marketing, access administrator, access developer, access staff, access gestor, access valuator, access receptionist, access appointment_manager, access bodywork_paint_technician, access spare_parts, access gerente |
-| administrator | list users, create users, update users, delete users, access benchmark, access store_management, access marketing, access administrator, access developer, access staff, access gestor, access valuator, access receptionist, access appointment_manager, access bodywork_paint_technician, access spare_parts, access gerente |ss gerente |
 | administrator | list users, create users, update users, delete users, access benchmark, access store_management, access marketing, access administrator, access developer, access staff, access gestor, access valuator, access receptionist, access appointment_manager, access bodywork_paint_technician, access spare_parts, access gerente |
-| administrator | list users, create users, update users, delete users, access benchmark, access store_management, access marketing, access administrator, access developer, access staff, access gestor, access valuator, access receptionist, access appointment_manager, access bodywork_paint_technician, access spare_parts |
 | staff | — |
 | marketing | access benchmark |
 | gestor | access store_management, access benchmark |
@@ -31,9 +30,6 @@
 | valuator | — |
 | spare_parts | — |
 | gerente | access gerente, access gestor, access receptionist, access valuator, access appointment_manager, access staff, access bodywork_paint_technician, access spare_parts, access store_management, access benchmark, access marketing |
-| client | — || — |
-| gerente | access gerente, access gestor, access receptionist, access valuator, access appointment_manager, access staff, access bodywork_paint_technician, access spare_parts, access store_management, access benchmark, access marketing |
-| client | — || — |
 | client | — |
 
 ## Vistas Administrativas
@@ -45,13 +41,12 @@
 | /admin/marketing | Panel Marketing | MarketingGuard | Rol: marketing |
 | /admin/staff | Panel Staff | StaffGuard | Rol: staff |
 | /admin/gestor | Panel Gestor | GestorGuard | Rol: gestor |
+| /admin/receptionist | Panel Recepcionista | — | Rol: receptionist |
+| /admin/valuator | Panel Valuador | — | Rol: valuator |
+| /admin/appointment_manager | Panel Citas | — | Rol: appointment_manager |
+| /admin/bodywork_paint_technician | Panel Hojalatería | — | Rol: bodywork_paint_technician |
 | /admin/spare_parts | Panel Refacciones | — | Rol: spare_parts |
 | /admin/gerente | Panel Gerente | GerenteGuard | Rol: gerente |
-| /admin/benchmark | Benchmark ADS | BenchmarkGuard | Permiso: access benchmark |
-| /admin/spare_parts | Panel Refacciones | — | Rol: spare_parts |
-| /admin/gerente | Panel Gerente | GerenteGuard | Rol: gerente |
-| /admin/benchmark | Benchmark ADS | BenchmarkGuard | Permiso: access benchmark |technician |
-| /admin/spare_parts | Panel Refacciones | — | Rol: spare_parts |
 | /admin/benchmark | Benchmark ADS | BenchmarkGuard | Permiso: access benchmark |
 | /admin/store | Panel Tienda | StoreManagementGuard | Permiso: access store_management |
 
