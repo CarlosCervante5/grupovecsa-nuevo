@@ -1095,6 +1095,11 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   wcImageError = '';
   wcMode: 'full' | 'images' = 'full';
 
+  // Cleanup
+  wcCleaning = false;
+  wcCleanResult: any = null;
+  wcCleanError = '';
+
   onWcFileSelected(event: Event, mode: 'full' | 'images'): void {
     const input = event.target as HTMLInputElement;
     if (!input.files || !input.files[0]) return;
@@ -1127,5 +1132,15 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     input.value = '';
+  }
+
+  runCleanup(): void {
+    this.wcCleaning = true;
+    this.wcCleanError = '';
+    this.wcCleanResult = null;
+    this.http.post(`${environment.baseUrl}/api/boutique/admin/wc-import/cleanup`, {}, { headers: this.getHeaders() }).subscribe({
+      next: (res: any) => { this.wcCleanResult = res.data; this.wcCleaning = false; },
+      error: (err: any) => { this.wcCleanError = err?.error?.message || 'Error en limpieza'; this.wcCleaning = false; },
+    });
   }
 }

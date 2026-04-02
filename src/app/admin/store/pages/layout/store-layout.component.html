@@ -1284,6 +1284,43 @@
           </div>
         </div>
       }
+
+      <!-- Cleanup -->
+      <div class="store-card">
+        <h3 class="card-title"><span class="material-icons" style="color:#ef4444;font-size:20px;">cleaning_services</span> Limpieza de Catálogo</h3>
+        <p style="font-size:0.82rem;color:#64748b;margin:0 0 12px;">Desactiva productos que no tienen stock <strong>o</strong> no tienen imágenes. Los productos desactivados no aparecen en la tienda.</p>
+        <button class="store-action-btn" (click)="runCleanup()" [disabled]="wcCleaning" style="background:#ef4444;">
+          @if (wcCleaning) {
+            <div class="spinner-sm"></div> Limpiando...
+          } @else {
+            <span class="material-icons">delete_sweep</span> Desactivar sin stock / sin imágenes
+          }
+        </button>
+        @if (wcCleanError) {
+          <div class="alert-error" style="margin-top:12px;"><span class="material-icons">error</span> {{ wcCleanError }}</div>
+        }
+      </div>
+
+      @if (wcCleanResult) {
+        <div class="stats-grid" style="margin-bottom: 18px;">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#fef2f2;color:#ef4444;"><span class="material-icons">remove_shopping_cart</span></div>
+            <div class="stat-info"><span class="stat-value">{{ wcCleanResult.deactivated_no_stock }}</span><span class="stat-label">Sin stock</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#fef3c7;color:#d97706;"><span class="material-icons">hide_image</span></div>
+            <div class="stat-info"><span class="stat-value">{{ wcCleanResult.deactivated_no_images }}</span><span class="stat-label">Sin imágenes</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#dcfce7;color:#16a34a;"><span class="material-icons">check_circle</span></div>
+            <div class="stat-info"><span class="stat-value">{{ wcCleanResult.total_active }}</span><span class="stat-label">Activos</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#f1f5f9;color:#64748b;"><span class="material-icons">block</span></div>
+            <div class="stat-info"><span class="stat-value">{{ wcCleanResult.total_inactive }}</span><span class="stat-label">Inactivos</span></div>
+          </div>
+        </div>
+      }
     }
 
   </main>
