@@ -1,0 +1,211 @@
+<div class="sync-layout">
+
+  <!-- Sidebar -->
+  <aside class="dev-sidebar">
+    <div class="dev-brand">
+      <span class="material-icons dev-brand-icon">code</span>
+      <span class="dev-brand-name">Dev Panel</span>
+    </div>
+    <button class="dev-nav-item" (click)="goBack()">
+      <span class="material-icons">arrow_back</span>
+      Volver a mi panel
+    </button>
+    <button class="dev-nav-item active">
+      <span class="material-icons">sync</span>
+      Sync Incadea
+    </button>
+  </aside>
+
+  <!-- Main -->
+  <main class="sync-main">
+    <h1 class="dev-title">Sincronización Incadea → Boutique</h1>
+    <p class="dev-subtitle">Sincroniza refacciones desde Incadea al catálogo de la Boutique</p>
+
+    <!-- Sync Action -->
+    <div class="dev-card">
+      <h3 class="dev-card-title">
+        <span class="material-icons">sync</span>
+        Ejecutar Sincronización
+      </h3>
+      <button class="sync-btn" (click)="onSync()" [disabled]="syncing">
+        <ng-container *ngIf="syncing">
+          <div class="spinner-sm"></div> Sincronizando...
+        </ng-container>
+        <ng-container *ngIf="!syncing">
+          <span class="material-icons">play_arrow</span> Iniciar Sincronización
+        </ng-container>
+      </button>
+
+      <div *ngIf="syncError" class="alert alert-error">
+        <span class="material-icons">error</span>
+        {{ syncError }}
+      </div>
+    </div>
+
+    <!-- Result Summary -->
+    <div *ngIf="lastResult" class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon" style="background: #dbeafe; color: #1c69d4;">
+          <span class="material-icons">cloud_download</span>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ lastResult.total_fetched }}</span>
+          <span class="stat-label">Obtenidos</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: #dcfce7; color: #16a34a;">
+          <span class="material-icons">add_circle</span>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ lastResult.created }}</span>
+          <span class="stat-label">Creados</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: #fef3c7; color: #d97706;">
+          <span class="material-icons">update</span>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ lastResult.updated }}</span>
+          <span class="stat-label">Actualizados</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: #f1f5f9; color: #64748b;">
+          <span class="material-icons">skip_next</span>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ lastResult.skipped }}</span>
+          <span class="stat-label">Omitidos</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: #fef2f2; color: #ef4444;">
+          <span class="material-icons">error_outline</span>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ lastResult.errors }}</span>
+          <span class="stat-label">Errores</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Config Section -->
+    <div class="dev-card">
+      <h3 class="dev-card-title">
+        <span class="material-icons">settings</span>
+        Configuración de Filtros
+      </h3>
+
+      <div *ngIf="configLoading" class="crud-loading">
+        <div class="spinner"></div><span>Cargando configuración...</span>
+      </div>
+
+      <div *ngIf="!configLoading">
+        <!-- Excluded Brands -->
+        <div class="field-group">
+          <label class="field-label">Marcas Excluidas</label>
+          <div class="chips-container">
+            <span *ngFor="let brand of config.excluded_brands" class="chip">
+              {{ brand }}
+              <button class="chip-remove" (click)="removeBrand(brand)">
+                <span class="material-icons">close</span>
+              </button>
+            </span>
+          </div>
+          <div class="field-row">
+            <input class="field-input" type="text" placeholder="Agregar marca..." [(ngModel)]="newBrand" (keyup.enter)="addBrand()" />
+            <button class="btn-add" (click)="addBrand()">
+              <span class="material-icons">add</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Excluded Categories -->
+        <div class="field-group">
+          <label class="field-label">Categorías Excluidas</label>
+          <div class="chips-container">
+            <span *ngFor="let cat of config.excluded_categories" class="chip">
+              {{ cat }}
+              <button class="chip-remove" (click)="removeCategory(cat)">
+                <span class="material-icons">close</span>
+              </button>
+            </span>
+          </div>
+          <div class="field-row">
+            <input class="field-input" type="text" placeholder="Agregar categoría..." [(ngModel)]="newCategory" (keyup.enter)="addCategory()" />
+            <button class="btn-add" (click)="addCategory()">
+              <span class="material-icons">add</span>
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="configSuccess" class="alert alert-success">
+          <span class="material-icons">check_circle</span>
+          {{ configSuccess }}
+        </div>
+        <div *ngIf="configError" class="alert alert-error">
+          <span class="material-icons">error</span>
+          {{ configError }}
+        </div>
+
+        <div class="config-actions">
+          <button class="sync-btn" (click)="saveConfig()" [disabled]="configSaving">
+            <ng-container *ngIf="configSaving">
+              <div class="spinner-sm"></div> Guardando...
+            </ng-container>
+            <ng-container *ngIf="!configSaving">
+              <span class="material-icons">save</span> Guardar Configuración
+            </ng-container>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Logs Table -->
+    <div class="dev-card">
+      <h3 class="dev-card-title">
+        <span class="material-icons">history</span>
+        Historial de Sincronizaciones
+      </h3>
+
+      <div *ngIf="logsLoading" class="crud-loading">
+        <div class="spinner"></div><span>Cargando historial...</span>
+      </div>
+
+      <div *ngIf="!logsLoading && logs.length === 0" class="crud-empty">
+        <span class="material-icons">inbox</span>
+        <p>No hay sincronizaciones registradas</p>
+      </div>
+
+      <div *ngIf="!logsLoading && logs.length > 0" class="crud-table-wrap">
+        <table class="crud-table">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Estado</th>
+              <th>Obtenidos</th>
+              <th>Creados</th>
+              <th>Actualizados</th>
+              <th>Omitidos</th>
+              <th>Errores</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let log of logs">
+              <td>{{ log.started_at || log.created_at }}</td>
+              <td><span class="badge" [ngClass]="getStatusClass(log.status)">{{ getStatusLabel(log.status) }}</span></td>
+              <td>{{ log.total_fetched }}</td>
+              <td>{{ log.total_created }}</td>
+              <td>{{ log.total_updated }}</td>
+              <td>{{ log.total_skipped }}</td>
+              <td>{{ log.total_errors }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>

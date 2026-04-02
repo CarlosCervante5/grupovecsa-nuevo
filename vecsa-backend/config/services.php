@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'incadea' => [
+        'api_url' => env('INCADEA_API_URL', 'http://52.21.121.207/api/incadea/get_spare_parts'),
+    ],
+
 ];
