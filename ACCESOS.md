@@ -1,5 +1,15 @@
 # Documento de Accesos — Grupo VECSA
 
+## Git: deploy sandbox (backend + frontend)
+
+En el monorepo, después de hacer `git commit` en la raíz, los pushes de código a los repos **`vecsa-frontend`** y **`vecsa-backend`** deben ir **siempre** a las ramas sandbox (`sandboxRailwayGrupoVecsaFrontend` y `sandboxRailwayGrupoVecsaBackend`). Detalle, comandos y política: [`.kiro/steering/deploy-branches.md`](.kiro/steering/deploy-branches.md).
+
+Atajo para publicar ambos subtrees a sandbox:
+
+```bash
+./tools/push-sandbox-subtrees.sh
+```
+
 ## Usuarios de Prueba
 
 | Email | Contraseña | Rol | Panel |

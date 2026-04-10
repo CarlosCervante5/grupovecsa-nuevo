@@ -4,6 +4,12 @@ inclusion: auto
 
 # Deploy Branches Configuration
 
+## Policy (mandatory)
+
+For normal development, **always** push subtree updates to the **sandbox** branches below—both frontend and backend. Do **not** push routine work to `main`, `grupovecsa*Railway`, `vecsa*New`, or `*AmericaV` on `deploy` / `backend-deploy` unless there is an explicit release or merge agreement.
+
+Commits happen in this monorepo (typically on `main`); the split push targets only these sandbox branch names.
+
 When pushing changes to the deploy repositories, always use these branches:
 
 ## Frontend
@@ -17,6 +23,12 @@ When pushing changes to the deploy repositories, always use these branches:
 - Command: `git push backend-deploy $(git subtree split --prefix=vecsa-backend):refs/heads/sandboxRailwayGrupoVecsaBackend --force`
 
 ## Workflow
-1. Commit all changes in the monorepo root
-2. Push frontend subtree to deploy remote
-3. Push backend subtree to backend-deploy remote
+1. Commit all changes in the monorepo root (`git add` / `git commit`).
+2. Push frontend subtree to `deploy` → `sandboxRailwayGrupoVecsaFrontend`.
+3. Push backend subtree to `backend-deploy` → `sandboxRailwayGrupoVecsaBackend`.
+
+Shortcut (both pushes in order):
+
+```bash
+./tools/push-sandbox-subtrees.sh
+```
