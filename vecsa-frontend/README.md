@@ -64,3 +64,7 @@ Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app w
 
 The AB Cars is Private Software developed by Organization Strega System
 Copyright (c) 2021 Strega System - ABCars.mx
+
+## Monorepo / Railway sandbox
+
+El historial canónico de desarrollo puede vivir en el monorepo Grupo VECSA. Los pushes de rutina a Railway usan la rama **`sandboxRailwayGrupoVecsaFrontend`** (`git subtree`). Detalle: `ACCESOS.md` y `tools/push-sandbox-subtrees.sh` en el monorepo.
