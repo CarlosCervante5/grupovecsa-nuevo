@@ -11,7 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create(env('DB_TABLE_PREFIX', '') . 'valuation_checkpoints', function (Blueprint $table) {
+        $tableName = env('DB_TABLE_PREFIX', '') . 'valuation_checkpoints';
+
+        if (Schema::hasTable($tableName)) {
+            return;
+        }
+
+        Schema::create($tableName, function (Blueprint $table) {
             $table->id();
             $table->uuid()->unique();
             $table->integer('sort_id',false,true)->nullable();
