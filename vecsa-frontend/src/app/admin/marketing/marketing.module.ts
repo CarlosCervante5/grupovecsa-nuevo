@@ -18,6 +18,7 @@ import { HomeSlidesComponent } from './pages/home-slides/home-slides.component';
 import { HomeTestimonialsComponent } from './pages/home-testimonials/home-testimonials.component';
 import { BoutiqueBannersComponent } from './pages/boutique-banners/boutique-banners.component';
 import { MarketingLayoutComponent } from './pages/layout/marketing-layout.component';
+import { ExperienceStoriesComponent } from './pages/experience-stories/experience-stories.component';
 
 @NgModule({
   declarations: [
@@ -31,6 +32,7 @@ import { MarketingLayoutComponent } from './pages/layout/marketing-layout.compon
     HomeSlidesComponent,
     HomeTestimonialsComponent,
     BoutiqueBannersComponent,
+    ExperienceStoriesComponent,
     MarketingLayoutComponent
   ],
   imports: [

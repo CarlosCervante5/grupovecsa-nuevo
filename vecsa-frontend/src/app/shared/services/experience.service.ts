@@ -27,11 +27,24 @@ export interface ExperienceMultimedia {
 export interface ExperiencePost {
   uuid: string;
   title: string;
+  excerpt?: string | null;
   image_path: string | null;
   url_name: string;
   status: string;
   category: string;
   created_at: string;
+}
+
+/** Detalle público de una historia (lista + cuerpo HTML). */
+export interface ExperiencePostDetail extends ExperiencePost {
+  excerpt: string | null;
+  body_html: string | null;
+}
+
+export interface ExperiencePostDetailResponse {
+  status: number;
+  message: string;
+  data: { post: ExperiencePostDetail };
 }
 
 export interface ExperienceEventsResponse {
@@ -80,5 +93,12 @@ export class ExperienceService {
 
   getEventDetail(uuid: string): Observable<ExperienceEventDetailResponse> {
     return this.http.post<ExperienceEventDetailResponse>(`${this.baseUrl}/api/experience/event_detail`, { uuid });
+  }
+
+  getPostDetail(params: { uuid?: string; slug?: string }): Observable<ExperiencePostDetailResponse> {
+    const body: { uuid?: string; slug?: string } = {};
+    if (params.uuid) body.uuid = params.uuid;
+    if (params.slug) body.slug = params.slug;
+    return this.http.post<ExperiencePostDetailResponse>(`${this.baseUrl}/api/experience/post_detail`, body);
   }
 }

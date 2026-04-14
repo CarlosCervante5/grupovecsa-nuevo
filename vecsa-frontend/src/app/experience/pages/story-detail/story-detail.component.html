@@ -1,0 +1,21 @@
+<div class="story-page">
+  <a routerLink="/experience" class="back-link">
+    <span class="back-icon">←</span> Volver a Experience
+  </a>
+
+  <div class="loading" *ngIf="loading">Cargando…</div>
+  <div class="error" *ngIf="!loading && error">{{ error }}</div>
+
+  <article class="story-article" *ngIf="!loading && post">
+    <header class="story-header">
+      <p class="story-meta">{{ formatDate(post.created_at) }}</p>
+      <h1>{{ post.title }}</h1>
+      <p class="story-excerpt" *ngIf="post.excerpt">{{ post.excerpt }}</p>
+    </header>
+    <figure class="story-figure" *ngIf="post.image_path">
+      <img [src]="post.image_path" [alt]="post.title" />
+    </figure>
+    <div class="story-body" *ngIf="safeBody" [innerHTML]="safeBody"></div>
+    <p class="story-empty" *ngIf="!safeBody && post">Sin contenido adicional.</p>
+  </article>
+</div>

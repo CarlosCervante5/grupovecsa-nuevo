@@ -1,0 +1,94 @@
+.story-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 3rem;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #1c69d4;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+.loading,
+.error {
+  text-align: center;
+  padding: 2rem;
+  color: #64748b;
+}
+
+.error {
+  color: #b91c1c;
+}
+
+.story-header h1 {
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: 800;
+  color: #0a1628;
+  margin: 0 0 0.75rem;
+  line-height: 1.2;
+}
+
+.story-meta {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin: 0 0 0.5rem;
+}
+
+.story-excerpt {
+  font-size: 1.05rem;
+  color: #374151;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.story-figure {
+  margin: 1.5rem 0;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.story-figure img {
+  width: 100%;
+  display: block;
+  vertical-align: middle;
+}
+
+/* Contenido HTML insertado (WordPress): imágenes y tipografía */
+:host ::ng-deep .story-body {
+  font-size: 1rem;
+  line-height: 1.65;
+  color: #1f2937;
+}
+
+:host ::ng-deep .story-body p {
+  margin: 0 0 1rem;
+}
+
+:host ::ng-deep .story-body img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+:host ::ng-deep .story-body h2,
+:host ::ng-deep .story-body h3 {
+  margin: 1.5rem 0 0.75rem;
+  font-weight: 700;
+  color: #0a1628;
+}
+
+.story-empty {
+  color: #64748b;
+  font-style: italic;
+}
