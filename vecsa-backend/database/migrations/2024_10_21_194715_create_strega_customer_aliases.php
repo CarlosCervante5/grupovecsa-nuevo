@@ -11,7 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create(env('DB_TABLE_PREFIX_STREGA', '') . 'customer_aliases', function (Blueprint $table) {
+        $tableName = env('DB_TABLE_PREFIX_STREGA', '') . 'customer_aliases';
+
+        if (Schema::hasTable($tableName)) {
+            return;
+        }
+
+        Schema::create($tableName, function (Blueprint $table) {
             $table->id();
             $table->foreignId('customer_id')->nullable()->constrained(env('DB_TABLE_PREFIX', '') . 'customers')->cascadeOnUpdate()->nullOnDelete();
             $table->foreignId('opportunity_id')->nullable()->constrained(env('DB_TABLE_PREFIX_STREGA', '') . 'opportunities')->cascadeOnUpdate()->nullOnDelete();

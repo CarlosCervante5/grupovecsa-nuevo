@@ -11,7 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create(env('DB_TABLE_PREFIX_STREGA', '') . 'opportunity_form', function (Blueprint $table) {
+        $tableName = env('DB_TABLE_PREFIX_STREGA', '') . 'opportunity_form';
+
+        if (Schema::hasTable($tableName)) {
+            return;
+        }
+
+        Schema::create($tableName, function (Blueprint $table) {
             $table->id();
             $table->text('selected_value')->nullable();
             $table->foreignId('form_id')->nullable()->constrained(env('DB_TABLE_PREFIX_STREGA', '') . 'forms')->cascadeOnUpdate()->nullOnDelete();
