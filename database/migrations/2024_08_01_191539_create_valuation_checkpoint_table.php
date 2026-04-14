@@ -11,7 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create(env('DB_TABLE_PREFIX', '') . 'valuation_checkpoint', function (Blueprint $table) {
+        $tableName = env('DB_TABLE_PREFIX', '') . 'valuation_checkpoint';
+
+        if (Schema::hasTable($tableName)) {
+            return;
+        }
+
+        Schema::create($tableName, function (Blueprint $table) {
             $table->id();
             $table->string('selected_value', 1000)->nullable();
             $table->foreignId('valuation_id')->constrained(env('DB_TABLE_PREFIX', '') . 'vehicle_valuations')->cascadeOnUpdate()->restrictOnDelete();
