@@ -19,6 +19,7 @@ export class MarketingLayoutComponent {
     { label: 'Home Slides', icon: 'image', route: '/admin/marketing/home-slides' },
     { label: 'Testimonios', icon: 'format_quote', route: '/admin/marketing/home-testimonials' },
     { label: 'Banners Boutique', icon: 'view_carousel', route: '/admin/marketing/boutique-banners' },
+    { label: 'Experience — Historias', icon: 'auto_stories', route: '/admin/marketing/experience-stories' },
   ];
 
   dynamicItems: { label: string; icon: string; route: string }[] = [];

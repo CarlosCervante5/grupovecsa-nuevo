@@ -108,7 +108,7 @@
     </div>
 
     <div *ngIf="!loadingPosts && posts.length > 0" class="posts-grid">
-      <div class="post-card" *ngFor="let post of posts">
+      <a class="post-card" *ngFor="let post of posts" [routerLink]="['/experience', 'historia', post.url_name]">
         <div class="post-card-img">
           <img *ngIf="post.image_path" [src]="post.image_path" [alt]="post.title">
           <div *ngIf="!post.image_path" class="post-placeholder"><span>📰</span></div>
@@ -117,7 +117,7 @@
           <h4>{{ post.title }}</h4>
           <span class="post-date">{{ formatDate(post.created_at) }}</span>
         </div>
-      </div>
+      </a>
     </div>
   </section>
 
