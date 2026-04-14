@@ -1,59 +1,8 @@
-/* Hero */
-.cc-hero {
-  height: 420px;
-  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 40%, #2d2d2d 70%, #1c69d4 100%);
-  position: relative;
-  overflow: hidden;
-}
-.cc-hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at 30% 60%, rgba(28,105,212,0.3) 0%, transparent 55%);
-}
-.cc-hero-overlay {
-  position: relative;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 0 1rem;
-}
-.cc-hero-content { color: #fff; }
-.cc-badge {
-  display: inline-block;
-  background: rgba(255,255,255,0.1);
-  border: 1px solid rgba(255,255,255,0.25);
-  border-radius: 20px;
-  padding: 5px 16px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 3px;
-  margin-bottom: 1rem;
-  text-transform: uppercase;
-}
-.cc-hero-title {
-  font-size: clamp(2.5rem, 6vw, 4.5rem);
-  font-weight: 900;
-  margin: 0 0 1rem;
-  letter-spacing: -2px;
-  line-height: 1;
-}
-.cc-hero-title span { color: #1c69d4; }
-.cc-hero-sub {
-  font-size: 1rem;
-  opacity: 0.75;
-  max-width: 560px;
-  margin: 0 auto;
-  line-height: 1.6;
-}
-
 /* Container */
 .cc-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 4rem 1.5rem 5rem;
+  padding: 1.25rem 1.5rem 4rem;
 }
 
 /* Section */

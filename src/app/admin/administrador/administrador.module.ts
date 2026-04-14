@@ -13,6 +13,7 @@ import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
 import { UpdateUserComponent } from './components/update-user/update-user.component';
 import { AdminLayoutComponent } from './pages/layout/admin-layout.component';
+import { ExperienceStoriesSharedModule } from '../shared/experience-stories/experience-stories-shared.module';
 
 @NgModule({
     declarations: [
@@ -32,7 +33,8 @@ import { AdminLayoutComponent } from './pages/layout/admin-layout.component';
         SkCubeComponent,
         MatFormFieldModule,
         MatInputModule,
-        FormsModule
+        FormsModule,
+        ExperienceStoriesSharedModule,
     ]
   })
   export class AdministradorModule { }

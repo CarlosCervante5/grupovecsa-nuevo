@@ -13,6 +13,10 @@ export interface ExperienceStoryRow {
   status: string;
   category: string;
   wp_import_id: number | null;
+  wp_category_label?: string | null;
+  wp_tags?: string[] | null;
+  event_begin_date?: string | null;
+  event_end_date?: string | null;
   created_at: string;
 }
 
@@ -25,6 +29,7 @@ export interface ExperienceStoriesSearchResponse {
       total: number;
       last_page: number;
       current_page: number;
+      per_page?: number;
     };
   };
 }

@@ -17,6 +17,11 @@ export class AdminLayoutComponent {
     { label: 'Dashboard', icon: 'dashboard', route: '/admin/administrator' },
     { label: 'Usuarios', icon: 'people', route: '/admin/administrator/users' },
     { label: 'Permisos', icon: 'vpn_key', route: '/admin/administrator/permissions' },
+    {
+      label: 'Experience (WordPress)',
+      icon: 'cloud_download',
+      route: '/admin/administrator/experience-wordpress',
+    },
   ];
 
   dynamicItems: { label: string; icon: string; route: string }[] = [];

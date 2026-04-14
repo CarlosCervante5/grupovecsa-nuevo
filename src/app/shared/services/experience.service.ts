@@ -12,7 +12,11 @@ export interface ExperienceEvent {
   location: string | null;
   image_path: string | null;
   type: string;
-  created_at: string;
+  /** 'event' = marketing_events; 'post' = marketing_posts (historia / WP evento) */
+  source?: 'event' | 'post';
+  /** Slug para /experience/historia/:slug cuando source === 'post' */
+  story_slug?: string | null;
+  created_at?: string;
   multimedia?: ExperienceMultimedia[];
 }
 

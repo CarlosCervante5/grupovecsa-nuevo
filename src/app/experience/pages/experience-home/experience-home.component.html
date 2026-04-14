@@ -1,10 +1,10 @@
-<!-- Hero -->
-<section class="exp-hero">
-  <div class="exp-hero-overlay">
-    <div class="exp-hero-content">
-      <div class="exp-badge">GRUPO VECSA</div>
-      <h1 class="exp-hero-title">VECSA <span>Experience</span></h1>
-      <p class="exp-hero-sub">Eventos, presentaciones, nuevos lanzamientos y noticias relevantes de nuestras marcas. Todo en un solo lugar.</p>
+<!-- Hero (mismo bloque que Rewards / Car Care / Promociones) -->
+<section class="vecsa-page-hero">
+  <div class="vecsa-page-hero__overlay">
+    <div class="vecsa-page-hero__inner">
+      <div class="vecsa-page-hero__badge">GRUPO VECSA</div>
+      <h1 class="vecsa-page-hero__title">VECSA <span class="vecsa-page-hero__accent">Experience</span></h1>
+      <p class="vecsa-page-hero__sub">Eventos, presentaciones, nuevos lanzamientos y noticias relevantes de nuestras marcas. Todo en un solo lugar.</p>
     </div>
   </div>
 </section>
@@ -24,41 +24,97 @@
       <p>No hay eventos próximos por el momento.</p>
     </div>
 
-    <div *ngIf="!loadingUpcoming && upcomingEvents.length > 0" class="upcoming-list">
-      <!-- Featured first event -->
-      <div class="upcoming-featured" *ngIf="upcomingEvents[0] as featured">
-        <div class="upcoming-featured-img">
-          <img *ngIf="featured.image_path" [src]="featured.image_path" [alt]="featured.name">
-          <div *ngIf="!featured.image_path" class="upcoming-featured-placeholder">
-            <span>🏍️</span>
+    <div *ngIf="!loadingUpcoming && upcomingEvents.length > 0" class="upcoming-hub">
+      <!-- Carrusel destacado -->
+      <div class="upcoming-carousel-wrap">
+        <div class="upcoming-carousel" *ngIf="carouselSlide as slide">
+          <div class="carousel-slide">
+            <div class="carousel-bg">
+              <img *ngIf="slide.image_path" [src]="slide.image_path" [alt]="slide.name" />
+              <div *ngIf="!slide.image_path" class="carousel-bg-placeholder"><span>🏍️</span></div>
+              <div class="carousel-overlay"></div>
+            </div>
+            <div class="carousel-brand">
+              <span class="carousel-brand-bmw">BMW MOTORRAD</span>
+              <span class="carousel-brand-vecsa">VECSA Hidalgo</span>
+            </div>
+            <div class="carousel-content">
+              <h3 class="carousel-title">{{ slide.name }}</h3>
+              <p class="carousel-date">{{ formatDate(slide.begin_date) }}</p>
+              <button type="button" class="carousel-reserve" (click)="reservar(slide)">Reservar</button>
+            </div>
           </div>
-        </div>
-        <div class="upcoming-featured-info">
-          <span class="upcoming-tag">Próximo evento</span>
-          <h3>{{ featured.name }}</h3>
-          <p class="upcoming-date">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            {{ formatDate(featured.begin_date) }}
-          </p>
-          <p *ngIf="featured.location" class="upcoming-location">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            {{ featured.location }}
-          </p>
-          <p *ngIf="featured.description" class="upcoming-desc">{{ featured.description }}</p>
+          <button type="button" class="carousel-nav carousel-nav-prev" (click)="prevSlide()" aria-label="Anterior">
+            <span class="material-icons">chevron_left</span>
+          </button>
+          <button type="button" class="carousel-nav carousel-nav-next" (click)="nextSlide()" aria-label="Siguiente">
+            <span class="material-icons">chevron_right</span>
+          </button>
+          <div class="carousel-dots" *ngIf="upcomingEvents.length > 1">
+            <button
+              type="button"
+              *ngFor="let ev of upcomingEvents; let i = index"
+              class="carousel-dot"
+              [class.active]="i === carouselIndex"
+              (click)="goToSlide(i)"
+              [attr.aria-label]="'Evento ' + (i + 1)"
+            ></button>
+          </div>
         </div>
       </div>
 
-      <!-- Rest of events -->
-      <div class="upcoming-rest" *ngIf="upcomingEvents.length > 1">
-        <div class="upcoming-card" *ngFor="let event of upcomingEvents.slice(1)">
-          <div class="upcoming-card-img">
-            <img *ngIf="event.image_path" [src]="event.image_path" [alt]="event.name">
-            <div *ngIf="!event.image_path" class="upcoming-card-placeholder"><span>🏍️</span></div>
-          </div>
-          <div class="upcoming-card-info">
-            <h4>{{ event.name }}</h4>
-            <span class="upcoming-card-date">{{ formatShortDate(event.begin_date) }}</span>
-          </div>
+      <!-- Lista de eventos -->
+      <div class="upcoming-side-list">
+        <ul class="upcoming-side-ul">
+          <li
+            *ngFor="let ev of upcomingEvents; trackBy: trackByUuid"
+            class="upcoming-side-item"
+            [class.is-active]="ev.uuid === carouselSlide?.uuid"
+            (click)="selectFromList(ev)"
+            (keydown.enter)="selectFromList(ev)"
+            tabindex="0"
+            role="button"
+          >
+            <div class="upcoming-side-thumb">
+              <img *ngIf="ev.image_path" [src]="ev.image_path" [alt]="ev.name" />
+              <div *ngIf="!ev.image_path" class="upcoming-side-thumb-ph">🏍️</div>
+            </div>
+            <div class="upcoming-side-text">
+              <span class="upcoming-side-title">{{ ev.name }}</span>
+              <span class="upcoming-side-meta">{{ formatDateRange(ev) }}</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Calendario -->
+      <div class="upcoming-calendar">
+        <div class="cal-header">
+          <button type="button" class="cal-nav" (click)="prevCalendarMonth()" aria-label="Mes anterior">
+            <span class="material-icons">chevron_left</span>
+          </button>
+          <h3 class="cal-title">{{ calendarTitle() }}</h3>
+          <button type="button" class="cal-nav" (click)="nextCalendarMonth()" aria-label="Mes siguiente">
+            <span class="material-icons">chevron_right</span>
+          </button>
+        </div>
+        <div class="cal-weekdays">
+          <span *ngFor="let w of weekdayLabels" class="cal-wd">{{ w }}</span>
+        </div>
+        <div class="cal-grid">
+          <ng-container *ngFor="let cell of calendarCells()">
+            <span *ngIf="cell.day === 0" class="cal-cell cal-cell-empty"></span>
+            <button
+              *ngIf="cell.day > 0"
+              type="button"
+              class="cal-cell"
+              [class.cal-cell-event]="cell.hasEvent"
+              [disabled]="!cell.hasEvent"
+              (click)="onCalendarDayClick(cell.key, cell.hasEvent)"
+            >
+              {{ cell.day }}
+            </button>
+          </ng-container>
         </div>
       </div>
     </div>
