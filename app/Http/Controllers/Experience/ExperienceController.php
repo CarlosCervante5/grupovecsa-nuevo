@@ -10,6 +10,7 @@ use App\Models\MarketingPost;
 use App\Services\WordPressExperienceImportService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class ExperienceController extends Controller
@@ -82,9 +83,15 @@ class ExperienceController extends Controller
         try {
             $perPage = $request->input('per_page', 6);
 
+            $table = (new MarketingPost)->getTable();
+            $columns = ['uuid', 'title', 'image_path', 'url_name', 'status', 'category', 'created_at'];
+            if (Schema::hasColumn($table, 'excerpt')) {
+                array_splice($columns, 2, 0, ['excerpt']);
+            }
+
             $posts = MarketingPost::where('category', 'experience')
                 ->where('status', 'published')
-                ->select(['uuid', 'title', 'excerpt', 'image_path', 'url_name', 'status', 'category', 'created_at'])
+                ->select($columns)
                 ->orderBy('created_at', 'desc')
                 ->paginate($perPage);
 
