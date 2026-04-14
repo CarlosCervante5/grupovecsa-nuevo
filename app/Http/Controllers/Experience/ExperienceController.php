@@ -18,17 +18,89 @@ use Illuminate\Support\Str;
 class ExperienceController extends Controller
 {
     /**
-     * Obtener próximos eventos de Experience (fecha >= hoy)
+     * Obtener próximos eventos de Experience (fecha >= hoy).
+     * Incluye MarketingEvent y posts marketing_posts (categoría WP tipo evento + event_begin_date).
      */
     public function upcomingEvents(Request $request)
     {
         try {
-            $events = MarketingEvent::where('type', 'experience')
-                ->where('begin_date', '>=', Carbon::today()->toDateString())
-                ->orderBy('begin_date', 'asc')
-                ->get();
+            $today = Carbon::today()->toDateString();
 
-            return ApiResponseHelper::apiSuccess(200, 'Eventos obtenidos exitosamente', ['events' => $events]);
+            $fromEvents = MarketingEvent::query()
+                ->where('type', 'experience')
+                ->where('begin_date', '>=', $today)
+                ->orderBy('begin_date', 'asc')
+                ->get()
+                ->map(fn (MarketingEvent $e) => [
+                    'uuid' => $e->uuid,
+                    'name' => $e->name,
+                    'begin_date' => Carbon::parse($e->begin_date)->toDateString(),
+                    'end_date' => Carbon::parse($e->end_date)->toDateString(),
+                    'description' => $e->description,
+                    'location' => $e->location,
+                    'image_path' => $e->image_path,
+                    'type' => 'experience',
+                    'source' => 'event',
+                    'story_slug' => null,
+                ]);
+
+            $fromPosts = collect();
+            $postTable = (new MarketingPost)->getTable();
+            if (Schema::hasTable($postTable)
+                && Schema::hasColumn($postTable, 'event_begin_date')
+                && Schema::hasColumn($postTable, 'wp_category_label')
+                && Schema::hasColumn($postTable, 'category')
+                && Schema::hasColumn($postTable, 'status')) {
+                $keywords = config('vecsa.experience_event_category_keywords', []);
+                if ($keywords === []) {
+                    $keywords = ['evento'];
+                }
+
+                $kws = array_values(array_filter(array_map(
+                    fn ($k) => strtolower(trim((string) $k)),
+                    $keywords
+                ), fn ($k) => $k !== ''));
+
+                if ($kws === []) {
+                    $kws = ['evento'];
+                }
+
+                $q = MarketingPost::query()
+                    ->where('category', 'experience')
+                    ->where('status', 'published')
+                    ->whereNotNull('event_begin_date')
+                    ->whereDate('event_begin_date', '>=', $today);
+
+                $q->where(function ($sub) use ($kws) {
+                    foreach ($kws as $kw) {
+                        $sub->orWhereRaw('LOWER(COALESCE(wp_category_label, \'\')) LIKE ?', ['%'.$kw.'%']);
+                    }
+                });
+
+                $fromPosts = $q->orderBy('event_begin_date', 'asc')->get()->map(function (MarketingPost $p) {
+                    $begin = $p->event_begin_date ? Carbon::parse($p->event_begin_date)->toDateString() : null;
+                    $end = $p->event_end_date ? Carbon::parse($p->event_end_date)->toDateString() : $begin;
+
+                    return [
+                        'uuid' => $p->uuid,
+                        'name' => $p->title,
+                        'begin_date' => $begin,
+                        'end_date' => $end,
+                        'description' => $p->excerpt,
+                        'location' => null,
+                        'image_path' => $p->image_path,
+                        'type' => 'experience',
+                        'source' => 'post',
+                        'story_slug' => $p->url_name,
+                    ];
+                });
+            }
+
+            $merged = $fromEvents->concat($fromPosts)
+                ->sortBy('begin_date')
+                ->values();
+
+            return ApiResponseHelper::apiSuccess(200, 'Eventos obtenidos exitosamente', ['events' => $merged]);
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al obtener eventos', $e->getMessage(), 500, 'GET_EXPERIENCE_EVENTS_ERROR');
         }
@@ -67,7 +139,7 @@ class ExperienceController extends Controller
                 ->with('multimedia')
                 ->first();
 
-            if (!$event) {
+            if (! $event) {
                 return ApiResponseHelper::apiError('Evento no encontrado', null, 404, 'EXPERIENCE_EVENT_NOT_FOUND');
             }
 
@@ -141,11 +213,11 @@ class ExperienceController extends Controller
     public function storeEvent(Request $request)
     {
         $data = $request->validate([
-            'name'        => 'required|string|max:255',
-            'begin_date'  => 'required|date',
-            'end_date'    => 'required|date',
+            'name' => 'required|string|max:255',
+            'begin_date' => 'required|date',
+            'end_date' => 'required|date',
             'description' => 'nullable|string',
-            'location'    => 'nullable|string|max:255',
+            'location' => 'nullable|string|max:255',
         ]);
 
         try {
@@ -175,7 +247,7 @@ class ExperienceController extends Controller
                 ->where('type', 'experience')
                 ->first();
 
-            if (!$event) {
+            if (! $event) {
                 return ApiResponseHelper::apiError('Evento no encontrado', null, 404, 'EXPERIENCE_EVENT_NOT_FOUND');
             }
 
@@ -226,14 +298,43 @@ class ExperienceController extends Controller
     public function adminStoriesSearch(Request $request)
     {
         $perPage = min((int) $request->input('per_page', 20), 100);
+        $page = max(1, (int) $request->input('page', 1));
 
         try {
-            $posts = MarketingPost::where('category', 'experience')
-                ->orderBy('created_at', 'desc')
-                ->paginate($perPage);
+            $table = (new MarketingPost)->getTable();
+
+            $emptyPaginator = function () use ($request, $perPage, $page) {
+                return new LengthAwarePaginator(
+                    [],
+                    0,
+                    $perPage,
+                    $page,
+                    ['path' => $request->url(), 'query' => $request->query()]
+                );
+            };
+
+            if (! Schema::hasTable($table)) {
+                return ApiResponseHelper::apiSuccess(200, 'Historias obtenidas exitosamente', ['posts' => $emptyPaginator()]);
+            }
+
+            if (! Schema::hasColumn($table, 'category')) {
+                return ApiResponseHelper::apiSuccess(200, 'Historias obtenidas exitosamente', ['posts' => $emptyPaginator()]);
+            }
+
+            $orderCol = Schema::hasColumn($table, 'created_at') ? 'created_at' : 'id';
+
+            $posts = MarketingPost::query()
+                ->where('category', 'experience')
+                ->orderBy($orderCol, 'desc')
+                ->paginate($perPage, ['*'], 'page', $page);
 
             return ApiResponseHelper::apiSuccess(200, 'Historias obtenidas exitosamente', ['posts' => $posts]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            Log::error('LIST_EXPERIENCE_STORIES_ERROR', [
+                'message' => $e->getMessage(),
+                'table' => (new MarketingPost)->getTable(),
+            ]);
+
             return ApiResponseHelper::apiError('Error al listar historias', $e->getMessage(), 500, 'LIST_EXPERIENCE_STORIES_ERROR');
         }
     }
@@ -251,6 +352,8 @@ class ExperienceController extends Controller
             'image_url' => 'nullable|string|max:2000',
             'image' => 'nullable|image|max:8192',
             'status' => 'nullable|string|in:published,draft,unpublished',
+            'event_begin_date' => 'nullable|date',
+            'event_end_date' => 'nullable|date',
         ]);
 
         try {
@@ -266,6 +369,8 @@ class ExperienceController extends Controller
                 'status' => $data['status'] ?? 'published',
                 'category' => 'experience',
                 'image_path' => $data['image_url'] ?? null,
+                'event_begin_date' => $data['event_begin_date'] ?? null,
+                'event_end_date' => $data['event_end_date'] ?? null,
             ]);
 
             if ($request->hasFile('image')) {
@@ -295,6 +400,8 @@ class ExperienceController extends Controller
             'image_url' => 'nullable|string|max:2000',
             'image' => 'nullable|image|max:8192',
             'status' => 'nullable|string|in:published,draft,unpublished',
+            'event_begin_date' => 'nullable|date',
+            'event_end_date' => 'nullable|date',
         ]);
 
         try {
@@ -321,6 +428,12 @@ class ExperienceController extends Controller
             }
             if (! empty($data['url_name'])) {
                 $updates['url_name'] = strtolower(preg_replace('/[^a-z0-9-]/', '', str_replace(' ', '-', $data['url_name'])));
+            }
+            if (array_key_exists('event_begin_date', $data)) {
+                $updates['event_begin_date'] = $data['event_begin_date'];
+            }
+            if (array_key_exists('event_end_date', $data)) {
+                $updates['event_end_date'] = $data['event_end_date'];
             }
 
             if ($updates !== []) {

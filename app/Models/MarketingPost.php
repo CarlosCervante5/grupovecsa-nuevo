@@ -18,7 +18,7 @@ class MarketingPost extends Model
     public function __construct(array $attributes = [])
     {
         parent::__construct($attributes);
-        $this->table = config('vecsa.db_table_prefix', '') . 'marketing_posts';
+        $this->table = config('vecsa.db_table_prefix', '').'marketing_posts';
     }
 
     protected static function boot()
@@ -30,7 +30,7 @@ class MarketingPost extends Model
         });
 
     }
-    
+
     /**
      * The attributes that are mass assignable.
      *
@@ -45,6 +45,20 @@ class MarketingPost extends Model
         'url_name',
         'category',
         'wp_import_id',
+        'wp_category_label',
+        'wp_tags',
+        'wp_featured_source_url',
+        'event_begin_date',
+        'event_end_date',
+    ];
+
+    /**
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'wp_tags' => 'array',
+        'event_begin_date' => 'date',
+        'event_end_date' => 'date',
     ];
 
     /**
@@ -55,13 +69,13 @@ class MarketingPost extends Model
     protected $hidden = [
         'id',
         'updated_at',
-        'deleted_at'
+        'deleted_at',
     ];
 
     protected $dates = ['created_at', 'updated_at', 'deleted_at'];
 
     public function getCreatedAtAttribute($value)
-    {   
+    {
         return $value ? Carbon::parse($value)->format('Y-m-d H:i:s') : null;
     }
 
@@ -74,7 +88,6 @@ class MarketingPost extends Model
     {
         return $value ? Carbon::parse($value)->format('Y-m-d H:i:s') : null;
     }
-
 
     /**
      * Set the status attribute to lowercase.
@@ -98,18 +111,13 @@ class MarketingPost extends Model
         $this->attributes['url_name'] = strtolower($value);
     }
 
-
     public function contents()
     {
         return $this->hasMany(PostContent::class, 'post_id')->orderBy('sort_id');
     }
 
-
     public static function findByUuid($uuid, $relationships = [])
     {
         return self::with($relationships)->where('uuid', $uuid)->first();
     }
-
-
 }
-
