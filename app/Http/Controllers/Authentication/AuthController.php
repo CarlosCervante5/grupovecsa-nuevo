@@ -169,6 +169,22 @@ class AuthController extends Controller
                 return ApiResponseHelper::apiSuccess(200, 'Token y rol válidos', [$userRole, $expected_role]);
             }
 
+            // Rol administrator: mismo acceso a paneles internos que developer/marketing/etc. (sin ser rol "client")
+            try {
+                if ($user->hasRole('administrator')) {
+                    $adminPanelRoles = [
+                        'developer', 'marketing', 'staff', 'gestor', 'receptionist',
+                        'valuator', 'appointment_manager', 'bodywork_paint_technician',
+                        'spare_parts', 'gerente',
+                    ];
+                    if (in_array($expected_role, $adminPanelRoles, true)) {
+                        return ApiResponseHelper::apiSuccess(200, 'Acceso administrador a panel', [$userRole, $expected_role]);
+                    }
+                }
+            } catch (\Exception $e) {
+                // Spatie no disponible
+            }
+
             // Permission-based access: user has "access {expected_role}" permission
             try {
                 $accessPermission = 'access ' . $expected_role;
