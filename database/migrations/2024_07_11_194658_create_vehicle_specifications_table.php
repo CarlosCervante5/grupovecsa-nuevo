@@ -11,7 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create(env('DB_TABLE_PREFIX', '') . 'vehicle_specifications', function (Blueprint $table) {
+        $tableName = env('DB_TABLE_PREFIX', '') . 'vehicle_specifications';
+
+        if (Schema::hasTable($tableName)) {
+            return;
+        }
+
+        Schema::create($tableName, function (Blueprint $table) {
             $table->id();
             $table->integer('keys_number',false,true)->default(1);
             $table->enum('wheel_locks',['yes','no'])->nullable();

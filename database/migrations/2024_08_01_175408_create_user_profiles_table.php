@@ -11,7 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create(env('DB_TABLE_PREFIX', '') . 'user_profiles', function (Blueprint $table) {
+        $tableName = env('DB_TABLE_PREFIX', '') . 'user_profiles';
+
+        if (Schema::hasTable($tableName)) {
+            return;
+        }
+
+        Schema::create($tableName, function (Blueprint $table) {
             $table->id();
             $table->string('name', 90);
             $table->string('last_name',90);

@@ -11,7 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create(env('DB_TABLE_PREFIX', '') . 'vehicle_campaign', function (Blueprint $table) {
+        $tableName = env('DB_TABLE_PREFIX', '') . 'vehicle_campaign';
+
+        if (Schema::hasTable($tableName)) {
+            return;
+        }
+
+        Schema::create($tableName, function (Blueprint $table) {
             $table->id();
             $table->foreignId('campaign_id')->constrained(env('DB_TABLE_PREFIX', '') . 'marketing_campaigns')->cascadeOnUpdate()->cascadeOnDelete();
             $table->foreignId('vehicle_id')->constrained(env('DB_TABLE_PREFIX', '') . 'vehicles')->cascadeOnUpdate()->cascadeOnDelete();

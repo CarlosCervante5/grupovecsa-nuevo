@@ -11,7 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create(env('DB_TABLE_PREFIX_STREGA', '') . 'appointment_survey', function (Blueprint $table) {
+        $tableName = env('DB_TABLE_PREFIX_STREGA', '') . 'appointment_survey';
+
+        if (Schema::hasTable($tableName)) {
+            return;
+        }
+
+        Schema::create($tableName, function (Blueprint $table) {
             $table->id();
             $table->text('selected_value')->nullable();
             $table->foreignId('survey_id')->nullable()->constrained(env('DB_TABLE_PREFIX_STREGA', '') . 'follow-up_surveys')->cascadeOnUpdate()->nullOnDelete();
