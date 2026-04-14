@@ -724,10 +724,17 @@ Route::prefix('experience')->middleware('bandwidth_usage')->group(function () {
     Route::get('/past_events', [ExperienceController::class, 'pastEvents']);
     Route::post('/event_detail', [ExperienceController::class, 'eventDetail']);
     Route::get('/posts', [ExperienceController::class, 'posts']);
+    Route::post('/post_detail', [ExperienceController::class, 'postDetail']);
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/events', [ExperienceController::class, 'storeEvent']);
         Route::post('/events/delete', [ExperienceController::class, 'deleteEvent']);
+
+        Route::post('/admin/stories/search', [ExperienceController::class, 'adminStoriesSearch']);
+        Route::post('/admin/stories/store', [ExperienceController::class, 'adminStoriesStore']);
+        Route::post('/admin/stories/update', [ExperienceController::class, 'adminStoriesUpdate']);
+        Route::post('/admin/stories/delete', [ExperienceController::class, 'adminStoriesDelete']);
+        Route::post('/admin/stories/import_wordpress', [ExperienceController::class, 'adminStoriesImportWordpress']);
     });
 });
 

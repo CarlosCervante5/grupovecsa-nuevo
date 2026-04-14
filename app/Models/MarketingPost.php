@@ -39,8 +39,12 @@ class MarketingPost extends Model
     protected $fillable = [
         'status',
         'title',
+        'excerpt',
+        'body_html',
         'image_path',
         'url_name',
+        'category',
+        'wp_import_id',
     ];
 
     /**
