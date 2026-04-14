@@ -8,7 +8,7 @@ import Swal from 'sweetalert2';
 @Component({
     selector: 'app-car-care',
     templateUrl: './car-care.component.html',
-    styleUrls: ['./car-care.component.css'],
+    styleUrls: ['./car-care.component.css', '../../../shared/styles/vecsa-page-hero.shared.css'],
     standalone: false
 })
 export class CarCareComponent {

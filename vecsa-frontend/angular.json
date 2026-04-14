@@ -111,6 +111,10 @@
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "hmr": false,
+            "prebundle": false
+          },
           "configurations": {
             "production": {
               "buildTarget": "abcars-frontend:build:production"

@@ -1,6 +1,6 @@
 .exp-stories-page {
   padding: 24px;
-  max-width: 1200px;
+  max-width: 1400px;
 }
 
 .page-header {
@@ -189,4 +189,42 @@
   padding: 24px;
   color: #64748b;
   text-align: center;
+}
+
+.col-thumb {
+  width: 56px;
+}
+
+.row-thumb {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 6px;
+  vertical-align: middle;
+  background: #f1f5f9;
+}
+
+.row-thumb--empty {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  background: #f1f5f9;
+  border-radius: 6px;
+}
+
+.cell-tags {
+  max-width: 220px;
+  white-space: normal;
+  word-break: break-word;
+  color: #475569;
+  font-size: 0.82rem;
+}
+
+.exp-stories-page mat-paginator {
+  margin-top: 16px;
+  border-top: 1px solid #e2e8f0;
 }

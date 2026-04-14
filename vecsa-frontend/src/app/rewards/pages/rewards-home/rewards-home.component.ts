@@ -8,7 +8,7 @@ import { CustomerPoints } from '@interfaces/rewards.interface';
 @Component({
   selector: 'app-rewards-home',
   templateUrl: './rewards-home.component.html',
-  styleUrls: ['./rewards-home.component.css'],
+  styleUrls: ['./rewards-home.component.css', '../../../shared/styles/vecsa-page-hero.shared.css'],
   standalone: false
 })
 export class RewardsHomeComponent implements OnInit {

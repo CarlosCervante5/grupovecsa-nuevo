@@ -1,0 +1,63 @@
+/**
+ * Hero compacto compartido: Experience, Rewards, Car Care, Promociones.
+ */
+.vecsa-page-hero {
+  height: 200px;
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 40%, #16213e 70%, #0f3460 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.vecsa-page-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 70% 50%, rgba(28, 105, 212, 0.25) 0%, transparent 60%);
+}
+
+.vecsa-page-hero__overlay {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 1rem;
+}
+
+.vecsa-page-hero__inner {
+  color: #fff;
+}
+
+.vecsa-page-hero__badge {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 16px;
+  padding: 3px 10px;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  margin-bottom: 0.4rem;
+  text-transform: uppercase;
+}
+
+.vecsa-page-hero__title {
+  font-size: clamp(1.35rem, 4vw, 1.85rem);
+  font-weight: 900;
+  margin: 0 0 0.35rem;
+  letter-spacing: -1px;
+  line-height: 1.1;
+}
+
+.vecsa-page-hero__accent {
+  color: #1c69d4;
+}
+
+.vecsa-page-hero__sub {
+  font-size: 0.78rem;
+  opacity: 0.8;
+  max-width: 520px;
+  margin: 0 auto;
+  line-height: 1.45;
+}

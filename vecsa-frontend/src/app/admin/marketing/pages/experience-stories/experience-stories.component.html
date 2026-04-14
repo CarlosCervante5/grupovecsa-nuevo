@@ -2,7 +2,7 @@
   <div class="page-header">
     <div>
       <h1 class="page-title">Experience — Historias</h1>
-      <p class="page-subtitle">{{ stories.length }} historias (incluye borradores)</p>
+      <p class="page-subtitle">{{ totalStories }} historias (incluye borradores)</p>
     </div>
     <div class="header-actions">
       <button class="action-btn" type="button" (click)="importWp()" [disabled]="importing">
@@ -43,6 +43,14 @@
             <option value="unpublished">No publicado</option>
           </select>
         </div>
+        <div class="field-group">
+          <label class="field-label">Fecha evento (agenda)</label>
+          <input type="date" class="field-input" [(ngModel)]="eventBeginDate" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">Fin evento (opcional)</label>
+          <input type="date" class="field-input" [(ngModel)]="eventEndDate" />
+        </div>
         <div class="field-group full">
           <label class="field-label">URL imagen destacada</label>
           <input type="text" class="field-input" [(ngModel)]="imageUrl" placeholder="https://..." />
@@ -71,8 +79,11 @@
     <table class="data-table">
       <thead>
         <tr>
+          <th class="col-thumb"></th>
           <th>Título</th>
           <th>Slug</th>
+          <th>Categoría (WP)</th>
+          <th>Etiquetas</th>
           <th>Estado</th>
           <th>WP ID</th>
           <th>Fecha</th>
@@ -81,8 +92,20 @@
       </thead>
       <tbody>
         <tr *ngFor="let s of stories">
+          <td class="col-thumb">
+            <img
+              *ngIf="s.image_path"
+              class="row-thumb"
+              [src]="s.image_path"
+              alt=""
+              loading="lazy"
+            />
+            <span *ngIf="!s.image_path" class="row-thumb row-thumb--empty">—</span>
+          </td>
           <td>{{ s.title }}</td>
           <td><code>{{ s.url_name }}</code></td>
+          <td>{{ s.wp_category_label || '—' }}</td>
+          <td class="cell-tags">{{ tagsLine(s) }}</td>
           <td>{{ s.status }}</td>
           <td>{{ s.wp_import_id ?? '—' }}</td>
           <td>{{ s.created_at | slice:0:10 }}</td>
@@ -98,5 +121,15 @@
       </tbody>
     </table>
     <p class="empty" *ngIf="stories.length === 0">No hay historias. Importa desde WordPress o crea una nueva.</p>
+
+    <mat-paginator
+      *ngIf="!loading && totalStories > 0"
+      [length]="totalStories"
+      [pageSize]="pageSize"
+      [pageIndex]="pageIndex"
+      [pageSizeOptions]="[10, 15, 25, 50]"
+      [showFirstLastButtons]="true"
+      (page)="onPageChange($event)"
+    ></mat-paginator>
   </div>
 </div>

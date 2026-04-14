@@ -18,7 +18,7 @@ import { HomeSlidesComponent } from './pages/home-slides/home-slides.component';
 import { HomeTestimonialsComponent } from './pages/home-testimonials/home-testimonials.component';
 import { BoutiqueBannersComponent } from './pages/boutique-banners/boutique-banners.component';
 import { MarketingLayoutComponent } from './pages/layout/marketing-layout.component';
-import { ExperienceStoriesComponent } from './pages/experience-stories/experience-stories.component';
+import { ExperienceStoriesSharedModule } from '../shared/experience-stories/experience-stories-shared.module';
 
 @NgModule({
   declarations: [
@@ -32,7 +32,6 @@ import { ExperienceStoriesComponent } from './pages/experience-stories/experienc
     HomeSlidesComponent,
     HomeTestimonialsComponent,
     BoutiqueBannersComponent,
-    ExperienceStoriesComponent,
     MarketingLayoutComponent
   ],
   imports: [
@@ -43,7 +42,8 @@ import { ExperienceStoriesComponent } from './pages/experience-stories/experienc
     AdminModule,
     DragDropModule,
     ReactiveFormsModule,
-    SkCubeComponent
+    SkCubeComponent,
+    ExperienceStoriesSharedModule,
   ]
 })
 export class MarketingModule { }
