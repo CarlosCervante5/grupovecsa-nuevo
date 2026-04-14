@@ -10,6 +10,8 @@ use App\Models\MarketingPost;
 use App\Services\WordPressExperienceImportService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
@@ -81,22 +83,54 @@ class ExperienceController extends Controller
     public function posts(Request $request)
     {
         try {
-            $perPage = $request->input('per_page', 6);
-
+            $perPage = max(1, min((int) $request->input('per_page', 6), 50));
+            $page = max(1, (int) $request->input('page', 1));
             $table = (new MarketingPost)->getTable();
-            $columns = ['uuid', 'title', 'image_path', 'url_name', 'status', 'category', 'created_at'];
-            if (Schema::hasColumn($table, 'excerpt')) {
-                array_splice($columns, 2, 0, ['excerpt']);
+
+            $emptyPaginator = function () use ($request, $perPage, $page) {
+                return new LengthAwarePaginator(
+                    [],
+                    0,
+                    $perPage,
+                    $page,
+                    ['path' => $request->url(), 'query' => $request->query()]
+                );
+            };
+
+            if (! Schema::hasTable($table)) {
+                return ApiResponseHelper::apiSuccess(200, 'Historias obtenidas exitosamente', ['posts' => $emptyPaginator()]);
             }
 
-            $posts = MarketingPost::where('category', 'experience')
+            if (! Schema::hasColumn($table, 'category') || ! Schema::hasColumn($table, 'status')) {
+                return ApiResponseHelper::apiSuccess(200, 'Historias obtenidas exitosamente', ['posts' => $emptyPaginator()]);
+            }
+
+            if (! Schema::hasColumn($table, 'uuid')) {
+                return ApiResponseHelper::apiSuccess(200, 'Historias obtenidas exitosamente', ['posts' => $emptyPaginator()]);
+            }
+
+            $candidates = ['id', 'uuid', 'title', 'excerpt', 'image_path', 'url_name', 'status', 'category', 'created_at'];
+            $columns = array_values(array_filter($candidates, fn (string $c) => Schema::hasColumn($table, $c)));
+            if ($columns === []) {
+                return ApiResponseHelper::apiSuccess(200, 'Historias obtenidas exitosamente', ['posts' => $emptyPaginator()]);
+            }
+
+            $orderColumn = Schema::hasColumn($table, 'created_at') ? 'created_at' : 'id';
+
+            $posts = MarketingPost::query()
+                ->where('category', 'experience')
                 ->where('status', 'published')
                 ->select($columns)
-                ->orderBy('created_at', 'desc')
+                ->orderBy($orderColumn, 'desc')
                 ->paginate($perPage);
 
             return ApiResponseHelper::apiSuccess(200, 'Historias obtenidas exitosamente', ['posts' => $posts]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            Log::error('GET_EXPERIENCE_POSTS_ERROR', [
+                'message' => $e->getMessage(),
+                'table' => (new MarketingPost)->getTable(),
+            ]);
+
             return ApiResponseHelper::apiError('Error al obtener historias', $e->getMessage(), 500, 'GET_EXPERIENCE_POSTS_ERROR');
         }
     }

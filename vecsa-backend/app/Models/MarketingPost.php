@@ -18,7 +18,7 @@ class MarketingPost extends Model
     public function __construct(array $attributes = [])
     {
         parent::__construct($attributes);
-        $this->table = env('DB_TABLE_PREFIX', '') . 'marketing_posts';
+        $this->table = config('vecsa.db_table_prefix', '') . 'marketing_posts';
     }
 
     protected static function boot()
