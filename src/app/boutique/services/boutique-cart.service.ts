@@ -42,16 +42,10 @@ export class BoutiqueCartService {
     return new HttpHeaders().set('Authorization', `Bearer ${token}`);
   }
 
-  private handle401<T>(obs: Observable<T>): Observable<T> {
-    return obs.pipe(
-      catchError(err => {
-        if (err.status === 401) {
-          localStorage.removeItem('user_token');
-          this._cartCount$.next(0);
-        }
-        return throwError(() => err);
-      })
-    );
+  /** Limpia token inválido y deja de contar como sesión iniciada. */
+  private clearStaleAuth(): void {
+    localStorage.removeItem('user_token');
+    this._cartCount$.next(this.localItems().length);
   }
 
   public updateCount(cart: BoutiqueCart | null): void {
@@ -165,11 +159,18 @@ export class BoutiqueCartService {
 
   public get(): Observable<ApiResponse<BoutiqueCart>> {
     if (!this.isLoggedIn) return this.localGet();
-    return this.handle401(
-      this._http.post<ApiResponse<BoutiqueCart>>(
-        `${this.url}/api/boutique/cart/get`, {},
-        { headers: this.getHeaders() }
-      ).pipe(tap(res => this.updateCount(res.data)))
+    return this._http.post<ApiResponse<BoutiqueCart>>(
+      `${this.url}/api/boutique/cart/get`, {},
+      { headers: this.getHeaders() }
+    ).pipe(
+      tap(res => this.updateCount(res.data)),
+      catchError(err => {
+        if (err.status === 401) {
+          this.clearStaleAuth();
+          return this.localGet();
+        }
+        return throwError(() => err);
+      })
     );
   }
 
@@ -185,34 +186,58 @@ export class BoutiqueCartService {
       }
       return this.localAdd(productSnapshot, quantity, variant_uuid);
     }
-    return this.handle401(
-      this._http.post<ApiResponse<BoutiqueCart>>(
-        `${this.url}/api/boutique/cart/add`,
-        { product_uuid, quantity, ...(variant_uuid ? { variant_uuid } : {}) },
-        { headers: this.getHeaders() }
-      ).pipe(tap(res => this.updateCount(res.data)))
+    return this._http.post<ApiResponse<BoutiqueCart>>(
+      `${this.url}/api/boutique/cart/add`,
+      { product_uuid, quantity, ...(variant_uuid ? { variant_uuid } : {}) },
+      { headers: this.getHeaders() }
+    ).pipe(
+      tap(res => this.updateCount(res.data)),
+      catchError(err => {
+        if (err.status === 401) {
+          this.clearStaleAuth();
+          if (productSnapshot) {
+            return this.localAdd(productSnapshot, quantity, variant_uuid);
+          }
+          return this.localGet();
+        }
+        return throwError(() => err);
+      })
     );
   }
 
   public update(item_uuid: string, quantity: number): Observable<ApiResponse<BoutiqueCart>> {
     if (!this.isLoggedIn) return this.localUpdate(item_uuid, quantity);
-    return this.handle401(
-      this._http.post<ApiResponse<BoutiqueCart>>(
-        `${this.url}/api/boutique/cart/update`,
-        { item_uuid, quantity },
-        { headers: this.getHeaders() }
-      ).pipe(tap(res => this.updateCount(res.data)))
+    return this._http.post<ApiResponse<BoutiqueCart>>(
+      `${this.url}/api/boutique/cart/update`,
+      { item_uuid, quantity },
+      { headers: this.getHeaders() }
+    ).pipe(
+      tap(res => this.updateCount(res.data)),
+      catchError(err => {
+        if (err.status === 401) {
+          this.clearStaleAuth();
+          return this.localUpdate(item_uuid, quantity);
+        }
+        return throwError(() => err);
+      })
     );
   }
 
   public remove(item_uuid: string): Observable<ApiResponse<BoutiqueCart>> {
     if (!this.isLoggedIn) return this.localRemove(item_uuid);
-    return this.handle401(
-      this._http.post<ApiResponse<BoutiqueCart>>(
-        `${this.url}/api/boutique/cart/remove`,
-        { item_uuid },
-        { headers: this.getHeaders() }
-      ).pipe(tap(res => this.updateCount(res.data)))
+    return this._http.post<ApiResponse<BoutiqueCart>>(
+      `${this.url}/api/boutique/cart/remove`,
+      { item_uuid },
+      { headers: this.getHeaders() }
+    ).pipe(
+      tap(res => this.updateCount(res.data)),
+      catchError(err => {
+        if (err.status === 401) {
+          this.clearStaleAuth();
+          return this.localRemove(item_uuid);
+        }
+        return throwError(() => err);
+      })
     );
   }
 }
