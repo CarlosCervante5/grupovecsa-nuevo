@@ -40,8 +40,11 @@ export class AdminLayoutComponent {
       { perm: 'access spare_parts', label: 'Refacciones', icon: 'settings', route: '/admin/spare_parts' },
     ];
 
+    const fullAccess =
+      this.role === 'administrator' || this.role === 'developer';
+
     for (const link of panelLinks) {
-      if (this.permissions.includes(link.perm)) {
+      if (fullAccess || this.permissions.includes(link.perm)) {
         this.panelItems.push({ label: link.label, icon: link.icon, route: link.route });
       }
     }
@@ -54,9 +57,17 @@ export class AdminLayoutComponent {
     ];
 
     for (const link of toolLinks) {
-      if (this.permissions.includes(link.perm)) {
+      if (fullAccess || this.permissions.includes(link.perm)) {
         this.dynamicItems.push({ label: link.label, icon: link.icon, route: link.route });
       }
+    }
+
+    if (this.role === 'administrator') {
+      this.dynamicItems.push({
+        label: 'Panel Developer',
+        icon: 'code',
+        route: '/admin/developer',
+      });
     }
   }
 

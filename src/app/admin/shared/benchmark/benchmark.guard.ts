@@ -10,7 +10,7 @@ export class BenchmarkGuard {
     if (perms.includes('access benchmark')) return true;
     // Developer role always has access
     const role = localStorage.getItem('role') || '';
-    if (role === 'developer') return true;
+    if (role === 'developer' || role === 'administrator') return true;
     this.router.navigateByUrl('/');
     return false;
   }
