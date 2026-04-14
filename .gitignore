@@ -51,3 +51,6 @@ logs/
 
 # Downloaded WC images (local only)
 downloaded-images/
+
+# Exportaciones locales (WordPress / scraping)
+tools/data/vecsaexperience-*.json
