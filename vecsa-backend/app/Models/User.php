@@ -148,9 +148,10 @@ class User extends Authenticatable
     {
         $role = $this->getRoleNames()->first();
 
+        // Usar la relación cargada (evita query extra si ya hizo loadMissing)
         $profile = match ($role) {
-            'client' => $this->customerProfile()->first(),
-            default => $this->userProfile()->first(),
+            'client' => $this->customerProfile,
+            default => $this->userProfile,
         };
 
         return [
@@ -167,7 +168,7 @@ class User extends Authenticatable
             return str_starts_with($role, 'strega-');
         });
 
-        $profile = $stregaRoles->isNotEmpty() ? $this->userProfile()->first() : null;
+        $profile = $stregaRoles->isNotEmpty() ? $this->userProfile : null;
 
         return [
             'role' => $stregaRoles->first(),

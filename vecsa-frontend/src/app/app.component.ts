@@ -2,6 +2,7 @@ import { Component, OnDestroy } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
+import { AuthService } from './auth/services/auth.service';
 
 
 @Component({
@@ -22,8 +23,13 @@ export class AppComponent implements OnDestroy {
 
     constructor(
         private _router: Router,
+        private _authService: AuthService,
     ) { 
         this._router.routeReuseStrategy.shouldReuseRoute = () => false;
+
+        if (localStorage.getItem('user_token')) {
+            this._authService.refreshPermissionsInStorage().subscribe({ error: () => {} });
+        }
 
         this.routerSub = this._router.events
             .pipe(filter(event => event instanceof NavigationEnd))
