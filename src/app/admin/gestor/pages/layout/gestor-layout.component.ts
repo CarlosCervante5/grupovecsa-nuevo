@@ -38,6 +38,12 @@ export class GestorLayoutComponent implements OnInit, OnDestroy {
       } catch {
         this.permissions = [];
       }
+      try {
+        const profile = JSON.parse(localStorage.getItem('profile') || '{}');
+        this.name = profile?.name || this.user?.nickname || 'Usuario';
+      } catch {
+        this.name = this.user?.nickname || 'Usuario';
+      }
       this.rebuildSidebar();
     });
   }

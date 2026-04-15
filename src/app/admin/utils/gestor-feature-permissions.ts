@@ -8,15 +8,16 @@ export const GESTOR_FEATURE_PERMISSIONS = {
 const ALL_GESTOR_FEATURE_VALUES = Object.values(GESTOR_FEATURE_PERMISSIONS);
 
 /**
- * Si el rol es `gestor` y aún no tiene ninguno de los permisos granulares, se asume acceso
- * completo al módulo (compatibilidad hasta migrar datos en BD).
+ * Si el rol es `gestor` o `manager` y aún no tiene ninguno de los permisos granulares del
+ * módulo marketing, se asume acceso completo a esas vistas (mismo criterio: comparten
+ * `GestorModule` / URL distinta). Si ya hay permisos `access gestor_*`, solo se usan esos.
  */
 export function expandLegacyGestorPermissions(
   permissions: string[],
   role: string | null | undefined,
 ): string[] {
   const r = (role ?? '').trim().toLowerCase();
-  if (r !== 'gestor') {
+  if (r !== 'gestor' && r !== 'manager') {
     return permissions;
   }
   const hasAny = ALL_GESTOR_FEATURE_VALUES.some((p) => permissions.includes(p));

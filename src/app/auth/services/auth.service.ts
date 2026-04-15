@@ -68,7 +68,20 @@ export class AuthService {
             return of([]);
         }
         return this._http.get<AuthMeResponse>(`${this.url}/api/auth/me`, { headers: this.bearerHeaders() }).pipe(
-            map((res) => res.data?.permissions ?? []),
+            map((res) => {
+                const perms = res.data?.permissions ?? [];
+                const apiProfile = res.data?.profile;
+                if (apiProfile && typeof apiProfile === 'object') {
+                    try {
+                        const prev = JSON.parse(localStorage.getItem('profile') || '{}');
+                        const merged = { ...prev, ...apiProfile };
+                        localStorage.setItem('profile', JSON.stringify(merged));
+                    } catch {
+                        localStorage.setItem('profile', JSON.stringify(apiProfile));
+                    }
+                }
+                return perms;
+            }),
             catchError((err: unknown) => {
                 const status = err instanceof HttpErrorResponse ? err.status : 0;
                 if (status === 401) {

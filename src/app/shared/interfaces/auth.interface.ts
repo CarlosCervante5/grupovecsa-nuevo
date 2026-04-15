@@ -16,7 +16,11 @@
 
     /** GET /api/auth/me */
     export interface AuthMeResponse extends GralResponse {
-        data: { permissions: string[] };
+        data: {
+            permissions: string[];
+            /** Presente cuando hay userProfile; el cliente fusiona con `profile` en localStorage. */
+            profile?: { name?: string | null; last_name?: string | null } | null;
+        };
     }
     
     export interface ShowProfileResponse extends GralResponse{
