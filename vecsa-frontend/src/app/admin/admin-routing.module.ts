@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { MarketingGuard } from './marketing/guards/marketing.guard';
 import { GestorGuard } from './gestor/guards/gestor.guard';
+import { ManagerPanelGuard } from './gestor/guards/manager-panel.guard';
 import { StaffGuard } from './staff/guards/staff.guard';
 import { ReceptionistGuard } from './receptionist/guards/receptionist.guard'; 
 import { ValuatorGuard } from './valuator/guards/valuator.guard';
@@ -27,6 +28,11 @@ const routes: Routes = [
     loadChildren: () => import('./gestor/gestor.module').then( m => m.GestorModule),
     canActivate: [GestorGuard],
     canLoad: [GestorGuard],
+  },
+  { path: 'manager',
+    loadChildren: () => import('./gestor/gestor.module').then(m => m.GestorModule),
+    canActivate: [ManagerPanelGuard],
+    canLoad: [ManagerPanelGuard],
   },
   { path: 'staff',
     loadChildren: () => import('./staff/staff.module').then( m => m.StaffModule),

@@ -1,9 +1,8 @@
 /**
- * El login devuelve nombres de rol de BD (p. ej. `manager` del seeder legacy).
- * Las rutas de Angular usan el segmento del panel (p. ej. `gestor`).
+ * Mapeos donde el nombre de rol en BD no coincide con el segmento de ruta del panel.
+ * `manager` tiene su propia ruta `/admin/manager` (mismo módulo que gestor).
  */
 const LEGACY_ROLE_TO_ADMIN_SEGMENT: Record<string, string> = {
-  manager: 'gestor',
   technician: 'bodywork_paint_technician',
   /** Variante corta o datos legacy */
   admin: 'administrator',

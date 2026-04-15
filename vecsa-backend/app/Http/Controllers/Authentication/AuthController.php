@@ -231,7 +231,7 @@ class AuthController extends Controller
             try {
                 if ($user->hasRole('administrator') || $user->hasRole('developer')) {
                     $adminPanelRoles = [
-                        'developer', 'marketing', 'staff', 'gestor', 'receptionist',
+                        'developer', 'marketing', 'staff', 'gestor', 'manager', 'receptionist',
                         'valuator', 'appointment_manager', 'bodywork_paint_technician',
                         'spare_parts', 'gerente',
                     ];

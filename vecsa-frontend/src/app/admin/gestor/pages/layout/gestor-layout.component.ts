@@ -88,6 +88,22 @@ export class GestorLayoutComponent implements OnInit, OnDestroy {
     return adminDashboardUrl(this.role);
   }
 
+  /** Etiqueta lateral según URL (/admin/manager vs /admin/gestor). */
+  get panelBrandLabel(): string {
+    const parts = this.router.url.split('?')[0].split('/').filter(Boolean);
+    const seg = parts[0] === 'admin' && parts[1] ? parts[1] : '';
+    if (!seg) {
+      return 'Panel';
+    }
+    if (seg === 'manager') {
+      return 'Manager';
+    }
+    if (seg === 'gestor') {
+      return 'Gestor';
+    }
+    return seg.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+
   get panelHomeUrl(): string {
     return adminDashboardUrl(this.role);
   }
