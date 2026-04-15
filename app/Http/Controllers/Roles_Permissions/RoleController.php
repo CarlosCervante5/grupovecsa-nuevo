@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Roles_Permissions;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 use Throwable;
@@ -59,11 +60,21 @@ class RoleController extends Controller
                 ->values()
                 ->all();
             try {
+                // Asegura filas en `permissions` con el mismo guard que el rol; evita fallos de
+                // syncPermissions (p. ej. permiso solo creado bajo otro guard o aún no existente).
+                $guard = $role->guard_name;
+                foreach ($names as $name) {
+                    Permission::findOrCreate($name, $guard);
+                }
+                app(PermissionRegistrar::class)->forgetCachedPermissions();
+
                 $role->syncPermissions($names);
                 app(PermissionRegistrar::class)->forgetCachedPermissions();
             } catch (Throwable $e) {
                 Log::warning('roles.sync_permissions_failed', [
                     'role_id' => $id,
+                    'guard' => $role->guard_name ?? null,
+                    'permission_count' => count($names),
                     'message' => $e->getMessage(),
                 ]);
 
