@@ -22,6 +22,7 @@ class DeveloperUserSeeder extends Seeder
             'access valuator', 'access appointment_manager', 'access staff',
             'access bodywork_paint_technician', 'access spare_parts',
             'access marketing',
+            'access gestor_promotions', 'access gestor_scheduled_events', 'access gestor_rewards',
         ];
         foreach ($permissions as $perm) {
             Permission::firstOrCreate(['name' => $perm]);
@@ -29,7 +30,7 @@ class DeveloperUserSeeder extends Seeder
 
         // ── Create all roles used in the system ──
         $roleNames = [
-            'developer', 'administrator', 'staff', 'marketing', 'gestor',
+            'developer', 'administrator', 'staff', 'marketing', 'gestor', 'manager',
             'receptionist', 'valuator', 'appointment_manager',
             'bodywork_paint_technician', 'spare_parts', 'client', 'gerente',
         ];
@@ -46,6 +47,17 @@ class DeveloperUserSeeder extends Seeder
         // Give gerente all access permissions, excluding user management
         $gerentePermissions = Permission::where('name', 'like', 'access %')->get();
         $roles['gerente']->syncPermissions($gerentePermissions);
+
+        $gestorNav = [
+            'access gestor_promotions',
+            'access gestor_scheduled_events',
+            'access gestor_rewards',
+        ];
+        foreach ($gestorNav as $navPerm) {
+            $roles['gestor']->givePermissionTo($navPerm);
+        }
+        // Ejemplo: rol manager con un subconjunto (ajustar en BD según negocio)
+        $roles['manager']->givePermissionTo('access gestor_promotions');
 
         // ── Developer user (superuser) ──
         $devUser = User::where('email', 'dev@vecsa.com')->first();

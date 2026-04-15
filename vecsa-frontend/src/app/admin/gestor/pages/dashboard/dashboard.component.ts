@@ -2,6 +2,8 @@ import { Component, OnInit, AfterViewInit, ElementRef, ViewChild, OnDestroy } fr
 import { Router } from '@angular/router';
 import { AdminDashboardService } from '../../../shared/services/admin-dashboard.service';
 import * as echarts from 'echarts';
+import { adminDashboardUrl } from 'src/app/admin/utils/admin-route.util';
+import { expandLegacyGestorPermissions, GESTOR_FEATURE_PERMISSIONS } from 'src/app/admin/utils/gestor-feature-permissions';
 
 @Component({
   selector: 'app-dashboard',
@@ -13,36 +15,92 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   loading = true;
   error = false;
 
+  /** Muestra gráfica de eventos solo si el usuario puede gestionar eventos. */
+  showEventsChart = false;
+
   @ViewChild('eventsBarChart') eventsBarChartEl!: ElementRef;
   private chartInstances: echarts.ECharts[] = [];
   private chartsData: any = {};
 
-  stats: { label: string; value: string | number; icon: string; color: string; loading: boolean }[] = [
-    { label: 'Promociones', value: '—', icon: 'local_offer', color: '#1c69d4', loading: true },
-    { label: 'Eventos', value: '—', icon: 'event', color: '#059669', loading: true },
-    { label: 'Recompensas', value: '—', icon: 'emoji_events', color: '#d97706', loading: true },
+  stats: {
+    metricKey: string;
+    label: string;
+    value: string | number;
+    icon: string;
+    color: string;
+    loading: boolean;
+  }[] = [];
+
+  quickLinks: { label: string; icon: string; route: string }[] = [];
+
+  private readonly statDefs: {
+    metricKey: string;
+    label: string;
+    icon: string;
+    color: string;
+    perm: string;
+  }[] = [
+    { metricKey: 'promotions', label: 'Promociones', icon: 'local_offer', color: '#1c69d4', perm: GESTOR_FEATURE_PERMISSIONS.promotions },
+    { metricKey: 'events', label: 'Eventos', icon: 'event', color: '#059669', perm: GESTOR_FEATURE_PERMISSIONS.scheduledEvents },
+    { metricKey: 'active_rewards', label: 'Recompensas', icon: 'emoji_events', color: '#d97706', perm: GESTOR_FEATURE_PERMISSIONS.rewards },
   ];
 
-  quickLinks: { label: string; icon: string; route: string }[] = [
-    { label: 'Promociones', icon: 'campaign', route: '/admin/gestor/promotions' },
-    { label: 'Eventos', icon: 'event', route: '/admin/gestor/scheduled-events' },
-    { label: 'Recompensas', icon: 'emoji_events', route: '/admin/gestor/rewards' },
+  private readonly quickDefs: { perm: string; label: string; icon: string; path: string }[] = [
+    { perm: GESTOR_FEATURE_PERMISSIONS.promotions, label: 'Promociones', icon: 'campaign', path: 'promotions' },
+    { perm: GESTOR_FEATURE_PERMISSIONS.scheduledEvents, label: 'Eventos', icon: 'event', path: 'scheduled-events' },
+    { perm: GESTOR_FEATURE_PERMISSIONS.rewards, label: 'Recompensas', icon: 'emoji_events', path: 'rewards' },
   ];
 
-  constructor(private router: Router, private dashboardService: AdminDashboardService) {
-    // Add dynamic links based on permissions
-    let permissions: string[] = [];
-    try { permissions = JSON.parse(localStorage.getItem('permissions') || '[]'); } catch {}
-    if (permissions.includes('access store_management')) {
+  constructor(private router: Router, private dashboardService: AdminDashboardService) {}
+
+  ngOnInit(): void {
+    this.buildFromPermissions();
+    this.loadMetrics();
+  }
+
+  private buildFromPermissions(): void {
+    let raw: string[] = [];
+    try {
+      raw = JSON.parse(localStorage.getItem('permissions') || '[]');
+    } catch {
+      raw = [];
+    }
+    const role = localStorage.getItem('role');
+    const permissions = expandLegacyGestorPermissions(raw, role);
+    const base = adminDashboardUrl(role);
+
+    this.showEventsChart = this.canSee(permissions, GESTOR_FEATURE_PERMISSIONS.scheduledEvents);
+
+    this.stats = this.statDefs
+      .filter((d) => this.canSee(permissions, d.perm))
+      .map((d) => ({
+        metricKey: d.metricKey,
+        label: d.label,
+        value: '—',
+        icon: d.icon,
+        color: d.color,
+        loading: true,
+      }));
+
+    this.quickLinks = this.quickDefs
+      .filter((d) => this.canSee(permissions, d.perm))
+      .map((d) => ({ label: d.label, icon: d.icon, route: `${base}/${d.path}` }));
+
+    if (raw.includes('access store_management')) {
       this.quickLinks.push({ label: 'Tienda', icon: 'storefront', route: '/admin/store' });
     }
-    if (permissions.includes('access benchmark')) {
+    if (raw.includes('access benchmark')) {
       this.quickLinks.push({ label: 'Benchmark ADS', icon: 'monitoring', route: '/admin/benchmark' });
     }
   }
 
-  ngOnInit(): void {
-    this.loadMetrics();
+  /** @param effective permisos tras expandLegacyGestorPermissions (gestor sin permisos granulares = acceso completo al módulo). */
+  private canSee(effective: string[], perm: string): boolean {
+    const r = (localStorage.getItem('role') || '').toLowerCase();
+    if (r === 'developer' || r === 'administrator') {
+      return true;
+    }
+    return effective.includes(perm);
   }
 
   ngAfterViewInit(): void {
@@ -60,17 +118,14 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
         const data = res?.data;
         if (data?.stats) {
           const s = data.stats;
-          const keys = ['promotions', 'events', 'active_rewards'];
-          keys.forEach((key, i) => {
-            if (this.stats[i]) {
-              this.stats[i].value = s[key] ?? 0;
-              this.stats[i].loading = false;
-            }
+          this.stats.forEach((row) => {
+            row.value = s[row.metricKey] ?? 0;
+            row.loading = false;
           });
         } else {
-          this.stats.forEach(s => { s.value = 0; s.loading = false; });
+          this.stats.forEach((s) => { s.value = 0; s.loading = false; });
         }
-        if (data?.charts) {
+        if (data?.charts && this.showEventsChart) {
           this.chartsData = data.charts;
           setTimeout(() => this.initCharts(), 100);
         }
@@ -85,6 +140,9 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private initCharts(): void {
+    if (!this.showEventsChart) {
+      return;
+    }
     this.loadEventsBarChart();
     window.addEventListener('resize', this.onResize);
   }
