@@ -1,0 +1,12 @@
+# Railway: migraciones en cada deploy (release) antes de levantar el nuevo servicio.
+# Documentación: https://docs.railway.com/guides/config-as-code
+#
+# Si en el dashboard ya tienes un Start Command distinto (Apache, Octane, etc.),
+# sustituye solo `startCommand` o bórralo para seguir usando el de la UI.
+
+[build]
+builder = "nixpacks"
+
+[deploy]
+releaseCommand = "php artisan migrate --force --no-interaction"
+startCommand = "php artisan serve --host=0.0.0.0 --port=$PORT"

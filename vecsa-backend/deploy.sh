@@ -3,9 +3,9 @@ set -e
 
 echo "🚀 Running deploy script..."
 
-# Run migrations
+# Run migrations (falla el script si la migración falla; no ocultar errores)
 echo "📦 Running migrations..."
-php artisan migrate --force 2>/dev/null || echo "⚠️ Some migrations skipped (tables may already exist)"
+php artisan migrate --force --no-interaction
 
 # Run seeders (safe to re-run - they use firstOrCreate patterns)
 echo "🌱 Running seeders..."
