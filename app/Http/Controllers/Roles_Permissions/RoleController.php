@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Roles_Permissions;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class RoleController extends Controller
 {
@@ -24,6 +25,7 @@ class RoleController extends Controller
         $role = Role::create(['name' => $request->name]);
         if ($request->has('permissions')) {
             $role->givePermissionTo($request->permissions);
+            app(PermissionRegistrar::class)->forgetCachedPermissions();
         }
 
         return response()->json($role, 201);
@@ -50,6 +52,7 @@ class RoleController extends Controller
 
         if ($request->has('permissions')) {
             $role->syncPermissions($request->permissions);
+            app(PermissionRegistrar::class)->forgetCachedPermissions();
         }
 
         return response()->json($role);
