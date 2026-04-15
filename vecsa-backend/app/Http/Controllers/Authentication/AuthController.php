@@ -165,11 +165,25 @@ class AuthController extends Controller
                 return ApiResponseHelper::authError('No autenticado', null, 401, 'UNAUTHENTICATED');
             }
 
-            $user->loadMissing(['roles', 'roles.permissions', 'permissions']);
+            $user->loadMissing(['roles', 'roles.permissions', 'permissions', 'userProfile']);
             $permissions = $user->getAllPermissions()->pluck('name')->values()->all();
+
+            $profilePayload = null;
+            try {
+                $p = $user->userProfile;
+                if ($p) {
+                    $profilePayload = [
+                        'name' => $p->name,
+                        'last_name' => $p->last_name,
+                    ];
+                }
+            } catch (\Exception $e) {
+                // Sin perfil o tabla ausente: solo permisos
+            }
 
             return ApiResponseHelper::apiSuccess(200, 'Sesión actual', [
                 'permissions' => $permissions,
+                'profile' => $profilePayload,
             ]);
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al obtener permisos de sesión', $e->getMessage(), 500, 'ME_ERROR');
