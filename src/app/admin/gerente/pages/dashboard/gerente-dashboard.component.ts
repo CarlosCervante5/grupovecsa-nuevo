@@ -65,7 +65,8 @@ export class GerenteDashboardComponent implements OnInit, AfterViewInit, OnDestr
     { label: 'Valuador', icon: 'price_check', route: '/admin/valuator' },
     { label: 'Citas', icon: 'event', route: '/admin/appointment_manager' },
     { label: 'Staff', icon: 'badge', route: '/admin/staff' },
-    { label: 'Hojalatería', icon: 'build', route: '/admin/bodywork_paint_technician' },
+    { label: 'Técnico HyP', icon: 'handyman', route: '/admin/technician' },
+    { label: 'Hojalatería y pintura', icon: 'build', route: '/admin/bodywork_paint_technician' },
     { label: 'Refacciones', icon: 'settings', route: '/admin/spare_parts' },
     { label: 'Benchmark ADS', icon: 'analytics', route: '/admin/benchmark' },
   ];

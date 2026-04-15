@@ -1,6 +1,7 @@
 import { Component, OnInit, AfterViewInit, ElementRef, ViewChild, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AdminDashboardService } from '../../../shared/services/admin-dashboard.service';
+import { adminBodyworkPanelBaseFromRouterUrl } from 'src/app/admin/utils/admin-route.util';
 import * as echarts from 'echarts';
 
 @Component({
@@ -23,9 +24,10 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     { label: 'Completadas', value: '—', icon: 'check_circle', color: '#059669', loading: true },
   ];
 
-  readonly quickLinks = [
-    { label: 'Hojalatería y Pintura', icon: 'build', route: '/admin/bodywork_paint_technician/bodywork-paint' },
-  ];
+  get quickLinks(): { label: string; icon: string; route: string }[] {
+    const b = adminBodyworkPanelBaseFromRouterUrl(this.router.url);
+    return [{ label: 'Hojalatería y Pintura', icon: 'build', route: `${b}/bodywork-paint` }];
+  }
 
   constructor(private router: Router, private dashboardService: AdminDashboardService) {}
 

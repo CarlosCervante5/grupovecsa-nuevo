@@ -16,8 +16,9 @@ export class AdminPermisosComponent implements OnInit {
 
   adminModules = [
     'benchmark', 'store_management', 'marketing', 'administrator',
-    'developer', 'staff', 'gestor', 'valuator', 'receptionist',
-    'appointment_manager', 'bodywork_paint_technician', 'spare_parts'
+    'developer', 'staff', 'gestor', 'manager', 'valuator', 'receptionist',
+    'appointment_manager', 'technician', 'bodywork_paint_technician', 'spare_parts',
+    'gerente', 'seller', 'strega-seller', 'strega-manager', 'strega-administrator',
   ];
 
   constructor(private crud: DevCrudService) {}

@@ -1,18 +1,18 @@
 <div class="panel-layout">
   <aside class="panel-sidebar">
     <div class="panel-brand">
-      <span class="material-icons panel-brand-icon">build</span>
-      <span class="panel-brand-name">Hojalatería</span>
+      <span class="material-icons panel-brand-icon">{{ panelIcon }}</span>
+      <span class="panel-brand-name">{{ panelTitle }}</span>
     </div>
     <div class="panel-user">
-      <div class="panel-user-avatar">{{ name?.charAt(0)?.toUpperCase() || 'H' }}</div>
+      <div class="panel-user-avatar">{{ name?.charAt(0)?.toUpperCase() || 'S' }}</div>
       <div class="panel-user-info">
         <span class="panel-user-name">{{ name }}</span>
         <span class="panel-user-role">{{ role }}</span>
       </div>
     </div>
     <nav class="panel-nav">
-      <a *ngFor="let item of navItems" class="panel-nav-item" [routerLink]="item.route" routerLinkActive="active" [routerLinkActiveOptions]="{exact: item.route === panelBase}">
+      <a *ngFor="let item of navItems" class="panel-nav-item" [routerLink]="item.route" routerLinkActive="active" [routerLinkActiveOptions]="{exact: item.route === basePath}">
         <span class="material-icons">{{ item.icon }}</span> {{ item.label }}
       </a>
       <p class="panel-nav-label" *ngIf="dynamicItems.length">Herramientas</p>

@@ -1,0 +1,11 @@
+.page { max-width: 1200px; }
+.title { font-size: 1.5rem; font-weight: 700; color: #0f172a; margin: 0 0 6px; }
+.subtitle { color: #64748b; margin: 0 0 20px; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; margin-bottom: 20px; }
+.search-field { flex: 1; min-width: 220px; }
+.loading, .error { padding: 24px; }
+.error { color: #b91c1c; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; }
+.empty { padding: 16px; color: #64748b; }
+.pager { display: flex; align-items: center; gap: 16px; margin-top: 16px; }

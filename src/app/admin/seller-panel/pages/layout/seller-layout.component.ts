@@ -1,39 +1,29 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/auth/services/auth.service';
-import { adminBodyworkPanelBaseFromRouterUrl, adminDashboardUrl } from 'src/app/admin/utils/admin-route.util';
+import { adminDashboardUrl } from 'src/app/admin/utils/admin-route.util';
 
 @Component({
-  selector: 'app-bodywork-layout',
-  templateUrl: './bodywork-layout.component.html',
-  styleUrls: ['./bodywork-layout.component.css'],
+  selector: 'app-seller-layout',
+  templateUrl: './seller-layout.component.html',
+  styleUrls: ['./seller-layout.component.css'],
   standalone: false,
 })
-export class BodyworkLayoutComponent implements OnInit, OnDestroy {
+export class SellerLayoutComponent implements OnInit, OnDestroy {
   user: any = null;
   role = '';
   name = '';
   permissions: string[] = [];
-
-  get panelBase(): string {
-    return adminBodyworkPanelBaseFromRouterUrl(this.router.url);
-  }
-
-  get navItems(): { label: string; icon: string; route: string }[] {
-    const b = this.panelBase;
-    return [
-      { label: 'Dashboard', icon: 'dashboard', route: b },
-      { label: 'Hojalatería y Pintura', icon: 'build', route: `${b}/bodywork-paint` },
-    ];
-  }
-
+  panelTitle = 'Vendedor';
+  panelIcon = 'sell';
+  navItems: { label: string; icon: string; route: string }[] = [];
   dynamicItems: { label: string; icon: string; route: string }[] = [];
-
   private permSub?: Subscription;
 
   constructor(
     private router: Router,
+    private route: ActivatedRoute,
     private auth: AuthService,
   ) {
     this.loadSession();
@@ -41,6 +31,17 @@ export class BodyworkLayoutComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    const merged: Record<string, unknown> = {};
+    for (const snap of this.route.snapshot.pathFromRoot) {
+      Object.assign(merged, snap.data);
+    }
+    if (merged['panelTitle']) {
+      this.panelTitle = merged['panelTitle'] as string;
+    }
+    if (merged['panelIcon']) {
+      this.panelIcon = merged['panelIcon'] as string;
+    }
+    this.navItems = [{ label: 'Mis valuaciones', icon: 'price_check', route: this.basePath }];
     this.permSub = this.auth.permissionsRevision$.subscribe(() => {
       try {
         this.permissions = JSON.parse(localStorage.getItem('permissions') || '[]');
@@ -53,6 +54,12 @@ export class BodyworkLayoutComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.permSub?.unsubscribe();
+  }
+
+  get basePath(): string {
+    const url = this.router.url.split('?')[0];
+    const m = url.match(/^(\/admin\/[^/]+)/);
+    return m ? m[1] : '/admin/seller';
   }
 
   private loadSession(): void {
@@ -69,6 +76,9 @@ export class BodyworkLayoutComponent implements OnInit, OnDestroy {
 
   private rebuildDynamicItems(): void {
     this.dynamicItems = [];
+    if (this.permissions.includes('access valuator')) {
+      this.dynamicItems.push({ label: 'Panel valuador', icon: 'open_in_new', route: '/admin/valuator' });
+    }
     if (this.permissions.includes('access store_management')) {
       this.dynamicItems.push({ label: 'Tienda', icon: 'storefront', route: '/admin/store' });
     }
