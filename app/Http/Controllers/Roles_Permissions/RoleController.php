@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Roles_Permissions;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
+use Throwable;
 
 class RoleController extends Controller
 {
@@ -41,7 +43,8 @@ class RoleController extends Controller
     {
         $request->validate([
             'name' => 'sometimes|required|string|unique:roles,name,' . $id,
-            'permissions' => 'array'
+            'permissions' => 'sometimes|array',
+            'permissions.*' => 'string',
         ]);
 
         $role = Role::findOrFail($id);
@@ -50,12 +53,28 @@ class RoleController extends Controller
             $role->save();
         }
 
-        if ($request->has('permissions')) {
-            $role->syncPermissions($request->permissions);
-            app(PermissionRegistrar::class)->forgetCachedPermissions();
+        if ($request->exists('permissions')) {
+            $names = collect($request->input('permissions', []))
+                ->filter(fn ($n) => is_string($n) && $n !== '')
+                ->values()
+                ->all();
+            try {
+                $role->syncPermissions($names);
+                app(PermissionRegistrar::class)->forgetCachedPermissions();
+            } catch (Throwable $e) {
+                Log::warning('roles.sync_permissions_failed', [
+                    'role_id' => $id,
+                    'message' => $e->getMessage(),
+                ]);
+
+                return response()->json([
+                    'message' => 'No se pudieron sincronizar los permisos del rol.',
+                    'error' => $e->getMessage(),
+                ], 422);
+            }
         }
 
-        return response()->json($role);
+        return response()->json($role->load('permissions'));
     }
 
     public function destroy($id)
