@@ -28,4 +28,17 @@ return [
         explode(',', (string) env('EXPERIENCE_EVENT_WP_CATEGORY_KEYWORDS', 'evento,eventos,rodada'))
     ))),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Experience admin: opciones de categoría (wp_category_label)
+    |--------------------------------------------------------------------------
+    |
+    | Listado para el desplegable al crear/editar historias en el panel.
+    |
+    */
+    'experience_story_wp_category_options' => array_values(array_filter(array_map(
+        'trim',
+        explode(',', (string) env('EXPERIENCE_STORY_WP_CATEGORIES', 'Noticia,Evento,Eventos,Rodada,Comunidad,Lanzamiento'))
+    ))),
+
 ];
