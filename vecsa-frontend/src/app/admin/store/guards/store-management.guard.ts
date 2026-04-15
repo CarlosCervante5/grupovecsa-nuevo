@@ -26,7 +26,11 @@ export class StoreManagementGuard {
     }
     const perms = this.getPermissions();
     if (perms.includes('access store_management')) return true;
-    this.router.navigateByUrl('/');
+    // Mismo criterio que admin-layout (fullAccess): muestran «Tienda» sin depender del array en localStorage.
+    const role = localStorage.getItem('role') || '';
+    if (role === 'developer' || role === 'administrator') return true;
+    const home = role ? `/admin/${role}` : '/';
+    this.router.navigateByUrl(home);
     return false;
   }
 
