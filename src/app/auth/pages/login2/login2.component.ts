@@ -6,6 +6,7 @@ import Swal from 'sweetalert2';
 import { AuthService } from '../../services/auth.service';
 import { LoginResponse } from '@interfaces/auth.interface';
 import { BoutiqueCartService } from 'src/app/boutique/services/boutique-cart.service';
+import { adminRouteSegmentForRole } from 'src/app/admin/utils/admin-route.util';
 
 @Component({
     selector: 'app-login2',
@@ -92,7 +93,7 @@ export class Login2Component {
 
                 const dest = loginResponse.data.role === 'client'
                     ? ['/auth/mi-cuenta']
-                    : ['/admin', loginResponse.data.role];
+                    : ['/admin', adminRouteSegmentForRole(loginResponse.data.role)];
                 this._router.navigate(dest).finally(() => { this.spinner = false; });
 
                 this._cartService.syncLocalCartToServer().subscribe();

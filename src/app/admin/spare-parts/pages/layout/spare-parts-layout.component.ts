@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/auth/services/auth.service';
+import { adminDashboardUrl } from 'src/app/admin/utils/admin-route.util';
 
 @Component({
   selector: 'app-spare-parts-layout',
@@ -67,6 +68,10 @@ export class SparePartsLayoutComponent implements OnInit, OnDestroy {
     if (this.permissions.includes('access benchmark')) {
       this.dynamicItems.push({ label: 'Benchmark ADS', icon: 'monitoring', route: '/admin/benchmark' });
     }
+  }
+
+  get panelHomeUrl(): string {
+    return adminDashboardUrl(this.role);
   }
 
   logout(): void {

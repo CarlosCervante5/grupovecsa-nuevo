@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/auth/services/auth.service';
+import { adminDashboardUrl } from 'src/app/admin/utils/admin-route.util';
 
 @Component({
   selector: 'app-admin-layout',
@@ -107,6 +108,10 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
         route: '/admin/developer',
       });
     }
+  }
+
+  get panelHomeUrl(): string {
+    return adminDashboardUrl(this.role);
   }
 
   logout(): void {

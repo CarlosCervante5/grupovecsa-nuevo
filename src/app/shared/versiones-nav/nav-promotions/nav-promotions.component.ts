@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, HostListener } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from 'src/app/auth/services/auth.service';
+import { adminDashboardUrl } from 'src/app/admin/utils/admin-route.util';
 import Swal from 'sweetalert2';
 import { Campaign, GetcampaingResponse, menu } from '../../interfaces/admin.interfaces';
 import { CampaingService } from '@services/campaing.service';
@@ -84,7 +85,7 @@ export class NavPromotionsComponent {
         if(role === 'client')
             return `/auth/mi-cuenta`
 
-        return `/admin/${role}`;
+        return adminDashboardUrl(role);
     }
 
     return `/admin/not-autorized`;

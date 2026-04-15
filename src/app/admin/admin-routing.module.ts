@@ -76,7 +76,7 @@ const routes: Routes = [
     canActivate: [GerenteGuard],
     canLoad: [GerenteGuard],
   },
-  { path: '**', redirectTo: '404' }
+  { path: '**', redirectTo: '/404', pathMatch: 'full' }
 ];
 
 @NgModule({

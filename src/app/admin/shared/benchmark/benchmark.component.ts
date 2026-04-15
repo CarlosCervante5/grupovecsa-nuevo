@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { DevCrudService } from '../../developer/services/dev-crud.service';
+import { adminRouteSegmentForRole } from 'src/app/admin/utils/admin-route.util';
 
 @Component({
   selector: 'app-benchmark',
@@ -120,6 +121,6 @@ export class BenchmarkComponent implements OnInit {
 
   goBack(): void {
     const role = localStorage.getItem('role') || '';
-    this.router.navigate(['/admin', role]);
+    this.router.navigate(['/admin', adminRouteSegmentForRole(role)]);
   }
 }

@@ -3,6 +3,7 @@ import { Router, CanMatch, Route, UrlSegment } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { AuthService } from 'src/app/auth/services/auth.service';
+import { adminDashboardUrl } from 'src/app/admin/utils/admin-route.util';
 
 /**
  * Solo canMatch en la ruta (evita canLoad + canActivate = dos GET /me en paralelo y condiciones de carrera).
@@ -34,7 +35,7 @@ export class StoreManagementGuard implements CanMatch {
     if (StoreManagementGuard.bypassRoles.includes(role)) {
       return true;
     }
-    const home = role ? `/admin/${role}` : '/';
+    const home = role ? adminDashboardUrl(role) : '/';
     this.router.navigateByUrl(home);
     return false;
   }
