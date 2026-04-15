@@ -13,6 +13,7 @@ import { ValuationAppointments, VehicleValuations } from '@interfaces/getAppoint
 import { Repair } from '@interfaces/getOnHoldBodyworkPaint.interface';
 
 import { BodyworkPaintFormComponent } from '../../components/bodywork-paint-form/bodywork-paint-form.component';
+import { adminBodyworkPanelBaseFromRouterUrl } from 'src/app/admin/utils/admin-route.util';
 
 
 @Component({
@@ -41,7 +42,11 @@ export class BodyworkPaintTechnicianComponent implements OnInit {
     private _appointmentService: AppointmentService,
     private _bottomSheet: MatBottomSheet,
     private _router: Router
-  ){}
+  ) {}
+
+  get bodyworkOverviewLink(): string[] {
+    return [adminBodyworkPanelBaseFromRouterUrl(this._router.url)];
+  }
 
   ngOnInit(): void {
     this.getAppointmentsHyP(this.page);

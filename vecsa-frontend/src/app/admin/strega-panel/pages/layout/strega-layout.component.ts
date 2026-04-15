@@ -1,39 +1,29 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/auth/services/auth.service';
-import { adminBodyworkPanelBaseFromRouterUrl, adminDashboardUrl } from 'src/app/admin/utils/admin-route.util';
+import { adminDashboardUrl } from 'src/app/admin/utils/admin-route.util';
 
 @Component({
-  selector: 'app-bodywork-layout',
-  templateUrl: './bodywork-layout.component.html',
-  styleUrls: ['./bodywork-layout.component.css'],
+  selector: 'app-strega-layout',
+  templateUrl: './strega-layout.component.html',
+  styleUrls: ['./strega-layout.component.css'],
   standalone: false,
 })
-export class BodyworkLayoutComponent implements OnInit, OnDestroy {
+export class StregaLayoutComponent implements OnInit, OnDestroy {
   user: any = null;
   role = '';
   name = '';
   permissions: string[] = [];
-
-  get panelBase(): string {
-    return adminBodyworkPanelBaseFromRouterUrl(this.router.url);
-  }
-
-  get navItems(): { label: string; icon: string; route: string }[] {
-    const b = this.panelBase;
-    return [
-      { label: 'Dashboard', icon: 'dashboard', route: b },
-      { label: 'Hojalatería y Pintura', icon: 'build', route: `${b}/bodywork-paint` },
-    ];
-  }
-
+  panelTitle = 'Strega';
+  panelIcon = 'hub';
+  navItems: { label: string; icon: string; route: string }[] = [];
   dynamicItems: { label: string; icon: string; route: string }[] = [];
-
   private permSub?: Subscription;
 
   constructor(
     private router: Router,
+    private route: ActivatedRoute,
     private auth: AuthService,
   ) {
     this.loadSession();
@@ -41,6 +31,17 @@ export class BodyworkLayoutComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    const merged: Record<string, unknown> = {};
+    for (const snap of this.route.snapshot.pathFromRoot) {
+      Object.assign(merged, snap.data);
+    }
+    if (merged['panelTitle']) {
+      this.panelTitle = merged['panelTitle'] as string;
+    }
+    if (merged['panelIcon']) {
+      this.panelIcon = merged['panelIcon'] as string;
+    }
+    this.rebuildNav();
     this.permSub = this.auth.permissionsRevision$.subscribe(() => {
       try {
         this.permissions = JSON.parse(localStorage.getItem('permissions') || '[]');
@@ -53,6 +54,27 @@ export class BodyworkLayoutComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.permSub?.unsubscribe();
+  }
+
+  get basePath(): string {
+    const url = this.router.url.split('?')[0];
+    const m = url.match(/^(\/admin\/[^/]+)/);
+    return m ? m[1] : '/admin';
+  }
+
+  get isStregaManager(): boolean {
+    return (localStorage.getItem('role') || '').trim() === 'strega-manager';
+  }
+
+  private rebuildNav(): void {
+    const b = this.basePath;
+    const items: { label: string; icon: string; route: string }[] = [
+      { label: 'Oportunidades', icon: 'list_alt', route: b },
+    ];
+    if (this.isStregaManager) {
+      items.push({ label: 'Citas en espera', icon: 'event_note', route: `${b}/citas` });
+    }
+    this.navItems = items;
   }
 
   private loadSession(): void {

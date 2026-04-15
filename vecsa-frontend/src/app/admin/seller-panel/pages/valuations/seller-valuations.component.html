@@ -1,0 +1,44 @@
+<div class="page">
+  <h1 class="title">Valuaciones asignadas</h1>
+  <p class="subtitle">Vehículos en los que figuras como vendedor en el flujo de valuación.</p>
+
+  <div class="toolbar">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar cliente o vehículo</mat-label>
+      <input matInput [(ngModel)]="keyword" (keyup.enter)="search()" />
+    </mat-form-field>
+    <button mat-flat-button color="primary" (click)="search()" [disabled]="loading">Buscar</button>
+  </div>
+
+  <div class="loading" *ngIf="loading">Cargando…</div>
+  <div class="error" *ngIf="error && !loading">No se pudieron cargar las valuaciones.</div>
+
+  <div class="table-wrap" *ngIf="!loading && !error">
+    <table mat-table [dataSource]="rows" class="mat-elevation-z1">
+      <ng-container matColumnDef="customer">
+        <th mat-header-cell *matHeaderCellDef>Cliente</th>
+        <td mat-cell *matCellDef="let row">{{ customerName(row) }}</td>
+      </ng-container>
+      <ng-container matColumnDef="vehicle">
+        <th mat-header-cell *matHeaderCellDef>Vehículo</th>
+        <td mat-cell *matCellDef="let row">{{ vehicleLabel(row) }}</td>
+      </ng-container>
+      <ng-container matColumnDef="year">
+        <th mat-header-cell *matHeaderCellDef>Año</th>
+        <td mat-cell *matCellDef="let row">{{ vehicleYear(row) }}</td>
+      </ng-container>
+      <ng-container matColumnDef="uuid">
+        <th mat-header-cell *matHeaderCellDef>UUID</th>
+        <td mat-cell *matCellDef="let row"><code class="uuid">{{ row.uuid || '—' }}</code></td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+    <p class="empty" *ngIf="rows.length === 0">No hay valuaciones asignadas o no coinciden con el filtro.</p>
+    <div class="pager" *ngIf="lastPage > 1">
+      <button mat-stroked-button (click)="goPage(page - 1)" [disabled]="page <= 1">Anterior</button>
+      <span>Página {{ page }} de {{ lastPage }} ({{ total }})</span>
+      <button mat-stroked-button (click)="goPage(page + 1)" [disabled]="page >= lastPage">Siguiente</button>
+    </div>
+  </div>
+</div>

@@ -212,4 +212,16 @@ class User extends Authenticatable
                     ->wherePivotNull('deleted_at')
                     ->orderByPivot('created_at', 'desc');
     }
+
+    /**
+     * Oportunidades Strega asignadas al ejecutivo (rol strega-seller).
+     */
+    public function stregaSellerOpportunities()
+    {
+        return $this->belongsToMany(Opportunity::class, env('DB_TABLE_PREFIX_STREGA', '') . 'user_opportunity', 'user_id', 'opportunity_id')
+                    ->withPivot('user_role_name', 'created_at', 'deleted_at')
+                    ->wherePivot('user_role_name', 'strega-seller')
+                    ->wherePivotNull('deleted_at')
+                    ->orderByPivot('created_at', 'desc');
+    }
 }

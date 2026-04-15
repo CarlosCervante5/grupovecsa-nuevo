@@ -48,9 +48,10 @@ export class DeveloperDashboardComponent implements OnInit, AfterViewInit, OnDes
   matrixError = '';
   matrixSaving: Record<string, boolean> = {};
   readonly adminModules = [
-    'marketing', 'gestor', 'staff', 'receptionist', 'valuator',
-    'appointment_manager', 'administrator', 'bodywork_paint_technician',
-    'spare_parts', 'developer', 'benchmark', 'store_management',
+    'marketing', 'gestor', 'manager', 'staff', 'receptionist', 'valuator',
+    'appointment_manager', 'administrator', 'technician', 'bodywork_paint_technician',
+    'spare_parts', 'developer', 'gerente', 'seller', 'strega-seller', 'strega-manager',
+    'strega-administrator', 'benchmark', 'store_management',
   ];
 
   // Benchmark state
@@ -117,8 +118,15 @@ export class DeveloperDashboardComponent implements OnInit, AfterViewInit, OnDes
           { value: 'staff', label: 'Staff' }, { value: 'gestor', label: 'Gestor' },
           { value: 'receptionist', label: 'Recepcionista' }, { value: 'valuator', label: 'Valuador' },
           { value: 'appointment_manager', label: 'Gestor de Citas' },
+          { value: 'technician', label: 'Técnico HyP' },
           { value: 'bodywork_paint_technician', label: 'Hojalatería y Pintura' },
           { value: 'spare_parts', label: 'Refacciones' },
+          { value: 'manager', label: 'Manager' },
+          { value: 'seller', label: 'Vendedor' },
+          { value: 'gerente', label: 'Gerente' },
+          { value: 'strega-seller', label: 'Strega vendedor' },
+          { value: 'strega-manager', label: 'Strega gerente' },
+          { value: 'strega-administrator', label: 'Strega administrador' },
           { value: 'client', label: 'Cliente' },
           { value: 'developer', label: 'Developer' },
         ]},

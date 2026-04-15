@@ -214,10 +214,9 @@ class AuthController extends Controller
                 return ApiResponseHelper::apiSuccess(200, 'Token y rol válidos', [$userRoleFirst, $expected_role]);
             }
 
-            // Roles legacy (RolesPermissionsSeeder): manager → panel gestor; technician → bodywork_paint_technician
+            // Roles legacy: manager puede usar el panel gestor (URL /admin/gestor) si aplica en datos antiguos
             $legacyPanelRoles = [
                 'gestor' => ['manager'],
-                'bodywork_paint_technician' => ['technician'],
             ];
             if ($expected_role && isset($legacyPanelRoles[$expected_role])) {
                 foreach ($legacyPanelRoles[$expected_role] as $legacyName) {
@@ -232,8 +231,9 @@ class AuthController extends Controller
                 if ($user->hasRole('administrator') || $user->hasRole('developer')) {
                     $adminPanelRoles = [
                         'developer', 'marketing', 'staff', 'gestor', 'manager', 'receptionist',
-                        'valuator', 'appointment_manager', 'bodywork_paint_technician',
-                        'spare_parts', 'gerente',
+                        'valuator', 'appointment_manager', 'technician', 'bodywork_paint_technician',
+                        'spare_parts', 'gerente', 'seller', 'strega-seller', 'strega-manager',
+                        'strega-administrator',
                     ];
                     if (in_array($expected_role, $adminPanelRoles, true)) {
                         return ApiResponseHelper::apiSuccess(200, 'Acceso administrador a panel', [$userRoleFirst, $expected_role]);

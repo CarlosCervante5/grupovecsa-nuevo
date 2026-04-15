@@ -737,6 +737,50 @@ class OpportunityService
         return $oportunities;
     }
 
+    /**
+     * Busca oportunidades asignadas al vendedor Strega (mismo criterio que gerente, distinto pivot).
+     *
+     * @param  array  $data  Datos de búsqueda que incluyen condiciones y paginación.
+     * @param  \App\Models\User  $user  Usuario con rol strega-seller.
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
+    public function searchOpportunitiesSeller($data, $user)
+    {
+        $query = $user->stregaSellerOpportunities();
+
+        if ($data['has_appointments']) {
+            $query->whereHas('appointments');
+        } else {
+            $query->doesntHave('appointments');
+        }
+
+        $query->with($data['relationship_names']);
+
+        if ($data['attempts_type'] == 'first_contact') {
+            $query->withCount('firstContactAttempts');
+        } else {
+            $query->withCount('experienceContactAttempts');
+        }
+
+        $query->where($this->statusCondition($data['status']));
+
+        $dealershipCondition = $this->dealershipCondition($data['by_dealership']);
+        if ($dealershipCondition) {
+            $query->where($dealershipCondition);
+        }
+
+        $typeCondition = $this->typeCondition($data['by_type']);
+        if ($typeCondition) {
+            $query->where($typeCondition);
+        }
+
+        $keywordCondition = $this->keywordCondition($data['keyword']);
+        if ($keywordCondition) {
+            $query->where($keywordCondition);
+        }
+
+        return $query->paginate($data['paginate']);
+    }
 
     /**
      * Busca oportunidades en base a los criterios proporcionados.
