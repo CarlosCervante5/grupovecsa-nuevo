@@ -1,6 +1,5 @@
 import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
-import { AdminModule } from "../admin.module";
 import { AngularMaterialModule } from "src/app/angular-material/angular-material.module";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { DashboardAdminComponent } from "./pages/dashboard/dashboardAdmin.component";
@@ -28,7 +27,6 @@ import { ExperienceStoriesSharedModule } from '../shared/experience-stories/expe
         CommonModule,
         AngularMaterialModule,
         ReactiveFormsModule,
-        AdminModule,
         AdministradorRoutingModule,
         SkCubeComponent,
         MatFormFieldModule,

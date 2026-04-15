@@ -27,6 +27,10 @@ export class AppComponent implements OnDestroy {
     ) { 
         this._router.routeReuseStrategy.shouldReuseRoute = () => false;
 
+        const initialUrl = this._router.url || '';
+        this.hideChrome = initialUrl.startsWith('/admin/');
+        this.isHomeRoute = initialUrl === '/' || initialUrl === '';
+
         if (localStorage.getItem('user_token')) {
             this._authService.refreshPermissionsInStorage().subscribe({ error: () => {} });
         }
