@@ -81,11 +81,13 @@ class AdminDashboardController extends Controller
 
     private function marketingMetrics(): array
     {
+        // marketing_campaigns usa page_status (enum), no existe columna status.
+        // vehicles usa page_status (active|inactive|sale|valuing), no status/available.
         $stats = [
-            'campaigns'  => MarketingCampaign::where('status', 'active')->count(),
+            'campaigns'  => MarketingCampaign::count(),
             'promotions' => MarketingPromotion::count(),
             'events'     => MarketingEvent::count(),
-            'vehicles'   => Vehicle::where('status', 'available')->count(),
+            'vehicles'   => Vehicle::where('page_status', 'active')->count(),
         ];
 
         $vehiclesByBrand = VehicleBrand::withCount('vehicles')->get()
