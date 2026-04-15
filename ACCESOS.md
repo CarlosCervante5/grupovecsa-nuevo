@@ -4,6 +4,8 @@
 
 En el monorepo, después de hacer `git commit` en la raíz, los pushes de código a los repos **`vecsa-frontend`** y **`vecsa-backend`** deben ir **siempre** a las ramas sandbox (`sandboxRailwayGrupoVecsaFrontend` y `sandboxRailwayGrupoVecsaBackend`). Detalle, comandos y política: [`.kiro/steering/deploy-branches.md`](.kiro/steering/deploy-branches.md).
 
+**No publicar sandbox con `git push origin main`.** El despliegue a Railway sandbox es solo vía subtrees al remoto `deploy` / `backend-deploy` (ramas anteriores), no empujando el monorepo a `origin/main`.
+
 Atajo para publicar ambos subtrees a sandbox:
 
 ```bash
