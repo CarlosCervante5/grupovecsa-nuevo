@@ -178,13 +178,18 @@ export class UpdateVehicleComponent implements OnInit {
         next: (detailResponse: FullDetailResponse) => {
           this.vehicle = detailResponse.data;
           this.getBrands();
-          this.getLines(this.vehicle.brand.name);
-          this.getModels(this.vehicle.line.name);
-          this.getVersions(this.vehicle.model.name);
+          if (this.vehicle.brand?.name) {
+            void this.getLines(this.vehicle.brand.name).catch(() => {});
+          }
+          if (this.vehicle.line?.name) {
+            void this.getModels(this.vehicle.line.name).catch(() => {});
+          }
+          if (this.vehicle.model?.name) {
+            void this.getVersions(this.vehicle.model.name).catch(() => {});
+          }
           this.getBodies();
           this.getCampaigns();
-          let x = this.vehicle.campaigns;
-          x.forEach(element => {
+          (this.vehicle.campaigns ?? []).forEach((element) => {
             this.camps.push(element.name);
             this.id_camp.push(element.uuid);
           });
@@ -240,7 +245,7 @@ export class UpdateVehicleComponent implements OnInit {
     this._campaignService.getCampaing()
     .subscribe({
      next: (campaignResponse: GetcampaingResponse) => {
-      this.campaigns = campaignResponse.data.campaigns;
+      this.campaigns = campaignResponse.data?.campaigns ?? [];
       this.filters();
      }
     })
@@ -291,6 +296,7 @@ export class UpdateVehicleComponent implements OnInit {
         .subscribe({
           next: (bodiesResponse: BodiesResponse) => {
             this.bodies = bodiesResponse.data.vehicle_bodies;
+            this.filters();
             resolve();
           },
           error: (error) => reject(error)

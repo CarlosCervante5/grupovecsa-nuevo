@@ -325,6 +325,11 @@
   transition: background 0.15s;
 }
 
+a.act-btn {
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
 .act-btn .material-icons {
   font-size: 16px;
 }

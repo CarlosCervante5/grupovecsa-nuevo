@@ -175,7 +175,7 @@ export class StoreVehicleComponent  implements OnInit{
     this._vehicleService.getBrands()
       .subscribe({
         next: (brandsResponse: BrandsResponse) => {
-          this.brands = brandsResponse.data.vehicle_brands;
+          this.brands = brandsResponse.data?.vehicle_brands ?? [];
           this.filters();
         }
       });
@@ -185,7 +185,7 @@ export class StoreVehicleComponent  implements OnInit{
     this._campaignService.getCampaing()
     .subscribe({
      next: (campaignResponse: GetcampaingResponse) => {
-      this.campaigns = campaignResponse.data.campaigns;
+      this.campaigns = campaignResponse.data?.campaigns ?? [];
       this.filters();
      }
     })
@@ -236,6 +236,7 @@ export class StoreVehicleComponent  implements OnInit{
         .subscribe({
           next: (bodiesResponse: BodiesResponse) => {
             this.bodies = bodiesResponse.data.vehicle_bodies;
+            this.filters();
             resolve();
           },
           error: (error) => reject(error)
@@ -272,19 +273,17 @@ export class StoreVehicleComponent  implements OnInit{
           campaign_2:       [''],
       });
   }
-  public InitForm(){
+  /**
+   * Alta de vehículo: solo catálogos base. Líneas/modelos/versiones se cargan al elegir marca/línea/modelo.
+   * (Antes se llamaba getLines(this.getBrands.name) → URL .../getBrands y 404; y this.vehicle.campaigns rompía sin vehículo.)
+   */
+  public InitForm(): void {
+    this.camps = [];
+    this.id_camp = [];
     this.getBrands();
-    this.getBodies();
-    this.getLines(this.getBrands.name);
-    this.getModels(this.getLines.name);
-    this.getVersions(this.getModels.name);
+    void this.getBodies().catch(() => {});
     this.getCampaigns();
-    let x = this.vehicle.campaigns;
-    x.forEach(element => {
-      this.camps.push(element.name);
-      this.id_camp.push(element.uuid);
-    });
-   }
+  }
 
   onSubmit() {
     this._vehicleService.storeVehicle( this.form.value)

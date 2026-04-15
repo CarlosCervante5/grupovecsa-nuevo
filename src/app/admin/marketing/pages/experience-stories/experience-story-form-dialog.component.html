@@ -34,6 +34,14 @@
       <p class="field-hint">
         Sube un archivo de imagen (máx. 8 MB). Para <strong>publicar</strong> hace falta imagen: archivo o URL de imagen abajo.
       </p>
+      <div class="admin-media-specs admin-media-specs--dialog" role="note">
+        <strong>Medidas recomendadas — imagen destacada (Experience)</strong>
+        <ul>
+          <li><strong>Listados y tarjetas:</strong> 1200 × 630 px (proporción ~1,91:1, útil también para vista previa en redes).</li>
+          <li><strong>Alternativa 16:9:</strong> 1600 × 900 px o 1920 × 1080 px si priorizas pantallas grandes.</li>
+        </ul>
+        <span class="admin-media-specs__note">JPG o WebP; si subes URL externa, usa la misma proporción para evitar recortes raros.</span>
+      </div>
       <div class="featured-preview" *ngIf="featuredPreviewSrc as src">
         <img [src]="src" alt="Vista previa imagen destacada" />
       </div>
