@@ -7,8 +7,6 @@ import { RegisterComponent } from './pages/register/register.component';
 
 // Modules
 import { AuthRoutingModule } from './auth-routing.module';
-import { AccountRoutingModule } from './pages/account/account-routing.module';
-import { AccountModule } from './pages/account/account.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { RecoverAccountComponent } from './pages/recover-account/recover-account.component';
@@ -33,8 +31,6 @@ import { NewNavComponent } from '../shared/versiones-nav/new-nav/new-nav.compone
     schemas: [CUSTOM_ELEMENTS_SCHEMA], imports: [CommonModule,
         AuthRoutingModule,
         AngularMaterialModule,
-        AccountRoutingModule,
-        AccountModule,
         FormsModule,
         ReactiveFormsModule,
         SkCubeComponent,
