@@ -84,11 +84,20 @@ class AuthController extends Controller
             }
 
             $user = auth()->user();
-            
+
+            // Solo rol + perfil en login; permisos en GET /api/auth/me (menos trabajo antes de emitir token)
+            $user->loadMissing(['roles']);
+            $primaryRole = $user->getRoleNames()->first();
+            if ($primaryRole === 'client') {
+                $user->loadMissing('customerProfile');
+            } else {
+                $user->loadMissing('userProfile');
+            }
+
             $token = $user->getOrCreateToken();
 
             $profileData = $user->getRoleProfile();
-            
+
             return ApiResponseHelper::authSuccess(200, 'Login correcto', [
                 'token' => $token->plainTextToken,
                 'user' => [
@@ -99,7 +108,6 @@ class AuthController extends Controller
                 ],
                 'role' => $profileData['role'],
                 'profile' =>  $profileData['profile'],
-                'permissions' => $user->getAllPermissions()->pluck('name')->toArray(),
             ]);
 
         } catch (\Exception $e) {
@@ -117,7 +125,9 @@ class AuthController extends Controller
             }
 
             $user = auth()->user();
-            
+
+            $user->loadMissing(['roles', 'userProfile']);
+
             $token = $user->getOrCreateStregaToken();
 
             $profileData = $user->getStregaRoleProfile();
@@ -143,6 +153,29 @@ class AuthController extends Controller
         }
     }
 
+    /**
+     * Sesión actual: permisos Spatie (tras login o para refrescar en el cliente).
+     */
+    public function me(Request $request)
+    {
+        try {
+            $user = $request->user();
+
+            if (! $user) {
+                return ApiResponseHelper::authError('No autenticado', null, 401, 'UNAUTHENTICATED');
+            }
+
+            $user->loadMissing(['roles', 'roles.permissions', 'permissions']);
+            $permissions = $user->getAllPermissions()->pluck('name')->values()->all();
+
+            return ApiResponseHelper::apiSuccess(200, 'Sesión actual', [
+                'permissions' => $permissions,
+            ]);
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al obtener permisos de sesión', $e->getMessage(), 500, 'ME_ERROR');
+        }
+    }
+
     public function validateRole(Request $request)
     {
         try {
@@ -151,6 +184,12 @@ class AuthController extends Controller
 
             if (!$user) {
                 return ApiResponseHelper::authError('No autenticado', null, 401, 'UNAUTHENTICATED');
+            }
+
+            try {
+                $user->loadMissing(['roles', 'roles.permissions', 'permissions']);
+            } catch (\Exception $e) {
+                // Spatie/tablas no disponibles: se sigue con comprobaciones parciales
             }
 
             $stored_role = $request->input('stored_role');
