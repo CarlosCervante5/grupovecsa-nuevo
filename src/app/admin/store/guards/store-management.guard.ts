@@ -1,44 +1,41 @@
 import { Injectable } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, CanMatch, Route, UrlSegment } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { AuthService } from 'src/app/auth/services/auth.service';
 
+/**
+ * Solo canMatch en la ruta (evita canLoad + canActivate = dos GET /me en paralelo y condiciones de carrera).
+ */
 @Injectable({ providedIn: 'root' })
-export class StoreManagementGuard {
+export class StoreManagementGuard implements CanMatch {
+  private static readonly bypassRoles = ['developer', 'administrator', 'gerente', 'gestor'];
+
   constructor(
     private router: Router,
     private auth: AuthService,
   ) {}
 
-  canActivate(): Observable<boolean> {
-    return this.auth.refreshPermissionsInStorage().pipe(map(() => this.evaluate()));
+  canMatch(_route: Route, _segments: UrlSegment[]): Observable<boolean> {
+    return this.auth.refreshPermissionsForGuard().pipe(
+      map((perms) => this.evaluate(perms)),
+    );
   }
 
-  canLoad(): Observable<boolean> {
-    return this.canActivate();
-  }
-
-  private evaluate(): boolean {
+  private evaluate(perms: string[]): boolean {
     if (!localStorage.getItem('user_token')) {
       this.router.navigateByUrl('/auth/login');
       return false;
     }
-    const perms = this.getPermissions();
-    if (perms.includes('access store_management')) return true;
-    // Mismo criterio que admin-layout (fullAccess): muestran «Tienda» sin depender del array en localStorage.
-    const role = localStorage.getItem('role') || '';
-    if (role === 'developer' || role === 'administrator') return true;
+    if (perms.includes('access store_management')) {
+      return true;
+    }
+    const role = (localStorage.getItem('role') || '').trim().toLowerCase();
+    if (StoreManagementGuard.bypassRoles.includes(role)) {
+      return true;
+    }
     const home = role ? `/admin/${role}` : '/';
     this.router.navigateByUrl(home);
     return false;
-  }
-
-  private getPermissions(): string[] {
-    try {
-      return JSON.parse(localStorage.getItem('permissions') || '[]');
-    } catch {
-      return [];
-    }
   }
 }

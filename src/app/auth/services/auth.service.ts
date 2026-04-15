@@ -80,21 +80,27 @@ export class AuthService {
     }
 
     /**
-     * Refresca permisos en localStorage (p. ej. tras F5 con token válido).
+     * GET /me, persiste permisos y devuelve el array (para guards que evalúan en el mismo flujo).
      */
-    public refreshPermissionsInStorage(): Observable<void> {
+    public refreshPermissionsForGuard(): Observable<string[]> {
         if (!localStorage.getItem('user_token')) {
             this.clearClientAuthState();
             this.permissionsRevision.next(this.permissionsRevision.value + 1);
-            return of(undefined);
+            return of([]);
         }
         return this.fetchPermissions().pipe(
             tap((perms) => {
                 localStorage.setItem('permissions', JSON.stringify(perms));
                 this.permissionsRevision.next(this.permissionsRevision.value + 1);
             }),
-            map(() => undefined)
         );
+    }
+
+    /**
+     * Refresca permisos en localStorage (p. ej. tras F5 con token válido).
+     */
+    public refreshPermissionsInStorage(): Observable<void> {
+        return this.refreshPermissionsForGuard().pipe(map(() => undefined));
     }
 
     /**
