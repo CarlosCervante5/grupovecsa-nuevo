@@ -732,6 +732,7 @@ Route::prefix('experience')->middleware('bandwidth_usage')->group(function () {
         Route::post('/events/delete', [ExperienceController::class, 'deleteEvent']);
 
         Route::post('/admin/stories/search', [ExperienceController::class, 'adminStoriesSearch']);
+        Route::get('/admin/stories/meta', [ExperienceController::class, 'adminStoriesMeta']);
         Route::post('/admin/stories/store', [ExperienceController::class, 'adminStoriesStore']);
         Route::post('/admin/stories/update', [ExperienceController::class, 'adminStoriesUpdate']);
         Route::post('/admin/stories/delete', [ExperienceController::class, 'adminStoriesDelete']);

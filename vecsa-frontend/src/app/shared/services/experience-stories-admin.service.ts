@@ -46,6 +46,21 @@ export interface ExperienceImportResponse {
   data: { imported: number; skipped: number; errors: string[] };
 }
 
+export interface ExperienceStoryPostTypeOption {
+  value: string;
+  label: string;
+}
+
+export interface ExperienceStoriesMetaResponse {
+  status: number;
+  message: string;
+  data: {
+    wp_category_options: string[];
+    event_agenda_keywords: string[];
+    post_types: ExperienceStoryPostTypeOption[];
+  };
+}
+
 @Injectable({ providedIn: 'root' })
 export class ExperienceStoriesAdminService {
   private baseUrl = environment.baseUrl;
@@ -55,6 +70,13 @@ export class ExperienceStoriesAdminService {
   private headers(): HttpHeaders {
     const token = localStorage.getItem('user_token');
     return new HttpHeaders().set('Authorization', `Bearer ${token}`);
+  }
+
+  getMeta(): Observable<ExperienceStoriesMetaResponse> {
+    return this.http.get<ExperienceStoriesMetaResponse>(
+      `${this.baseUrl}/api/experience/admin/stories/meta`,
+      { headers: this.headers() }
+    );
   }
 
   search(page = 1, perPage = 20): Observable<ExperienceStoriesSearchResponse> {
@@ -74,12 +96,79 @@ export class ExperienceStoriesAdminService {
     );
   }
 
+  /**
+   * Crear historia con imagen destacada (multipart). No fijar Content-Type (boundary).
+   */
+  storeWithImage(body: Record<string, unknown>, imageFile: File): Observable<ExperienceStoryMutationResponse> {
+    const fd = this.storyFormData(body, { includeImageUrl: !imageFile });
+    fd.append('image', imageFile, imageFile.name);
+    return this.http.post<ExperienceStoryMutationResponse>(
+      `${this.baseUrl}/api/experience/admin/stories/store`,
+      fd,
+      { headers: this.headersOnlyAuth() }
+    );
+  }
+
   update(body: Record<string, unknown>): Observable<ExperienceStoryMutationResponse> {
     return this.http.post<ExperienceStoryMutationResponse>(
       `${this.baseUrl}/api/experience/admin/stories/update`,
       body,
       { headers: this.headers().set('Content-Type', 'application/json') }
     );
+  }
+
+  /**
+   * Actualizar historia; si se envía imageFile, reemplaza la imagen en el servidor.
+   */
+  updateWithOptionalImage(body: Record<string, unknown>, imageFile: File | null): Observable<ExperienceStoryMutationResponse> {
+    if (!imageFile) {
+      return this.update(body);
+    }
+    const fd = this.storyFormData(body, { includeImageUrl: false });
+    fd.append('image', imageFile, imageFile.name);
+    return this.http.post<ExperienceStoryMutationResponse>(
+      `${this.baseUrl}/api/experience/admin/stories/update`,
+      fd,
+      { headers: this.headersOnlyAuth() }
+    );
+  }
+
+  private headersOnlyAuth(): HttpHeaders {
+    const token = localStorage.getItem('user_token');
+    return new HttpHeaders().set('Authorization', `Bearer ${token ?? ''}`);
+  }
+
+  private storyFormData(
+    body: Record<string, unknown>,
+    opts: { includeImageUrl: boolean }
+  ): FormData {
+    const fd = new FormData();
+    const appendIf = (key: string, v: unknown) => {
+      if (v === undefined || v === null) return;
+      const s = String(v).trim();
+      if (s === '') return;
+      fd.append(key, s);
+    };
+
+    fd.append('title', String(body['title'] ?? '').trim());
+    appendIf('url_name', body['url_name']);
+    appendIf('excerpt', body['excerpt']);
+    appendIf('body_html', body['body_html']);
+    appendIf('status', body['status']);
+    appendIf('event_begin_date', body['event_begin_date']);
+    appendIf('event_end_date', body['event_end_date']);
+    appendIf('wp_category_label', body['wp_category_label']);
+
+    if (opts.includeImageUrl) {
+      appendIf('image_url', body['image_url']);
+    }
+
+    const uuid = body['uuid'];
+    if (uuid != null && String(uuid).trim() !== '') {
+      fd.append('uuid', String(uuid).trim());
+    }
+
+    return fd;
   }
 
   delete(uuid: string): Observable<{ status: number; message: string }> {

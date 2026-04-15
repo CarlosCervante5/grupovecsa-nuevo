@@ -340,6 +340,35 @@ class ExperienceController extends Controller
     }
 
     /**
+     * Opciones de formulario admin (categorías WP, tipo de publicación, palabras agenda).
+     */
+    public function adminStoriesMeta()
+    {
+        $options = config('vecsa.experience_story_wp_category_options', []);
+        if (! is_array($options) || $options === []) {
+            $options = ['Noticia', 'Evento', 'Eventos', 'Rodada', 'Comunidad', 'Lanzamiento'];
+        }
+        $options = array_values(array_unique(array_filter(array_map(
+            static fn ($v) => is_string($v) ? trim($v) : '',
+            $options
+        ), static fn ($v) => $v !== '')));
+
+        $keywords = config('vecsa.experience_event_category_keywords', ['evento']);
+        if (! is_array($keywords) || $keywords === []) {
+            $keywords = ['evento'];
+        }
+
+        return ApiResponseHelper::apiSuccess(200, 'Meta de historias Experience', [
+            'wp_category_options' => $options,
+            'event_agenda_keywords' => array_values($keywords),
+            'post_types' => [
+                ['value' => 'story', 'label' => 'Historia o noticia'],
+                ['value' => 'event', 'label' => 'Evento (calendario público)'],
+            ],
+        ]);
+    }
+
+    /**
      * Crear historia Experience (admin).
      */
     public function adminStoriesStore(Request $request)
@@ -354,6 +383,7 @@ class ExperienceController extends Controller
             'status' => 'nullable|string|in:published,draft,unpublished',
             'event_begin_date' => 'nullable|date',
             'event_end_date' => 'nullable|date',
+            'wp_category_label' => 'nullable|string|max:255',
         ]);
 
         try {
@@ -362,6 +392,15 @@ class ExperienceController extends Controller
             $slug = strtolower(preg_replace('/[^a-z0-9-]/', '', str_replace(' ', '-', $slug)));
 
             $eventBegin = $data['event_begin_date'] ?? null;
+            $explicitLabel = array_key_exists('wp_category_label', $data)
+                ? trim((string) ($data['wp_category_label'] ?? ''))
+                : '';
+            $explicitLabel = $explicitLabel !== '' ? $explicitLabel : null;
+            $wpCategoryLabel = $explicitLabel;
+            if ($wpCategoryLabel === null && $eventBegin) {
+                $wpCategoryLabel = $this->defaultExperienceEventCategoryLabel();
+            }
+
             $post = MarketingPost::create([
                 'title' => $title,
                 'url_name' => $slug,
@@ -372,8 +411,7 @@ class ExperienceController extends Controller
                 'image_path' => $data['image_url'] ?? null,
                 'event_begin_date' => $eventBegin,
                 'event_end_date' => $data['event_end_date'] ?? null,
-                // Agenda pública: upcoming_events filtra por palabras en wp_category_label
-                'wp_category_label' => $eventBegin ? $this->defaultExperienceEventCategoryLabel() : null,
+                'wp_category_label' => $wpCategoryLabel,
             ]);
 
             if ($request->hasFile('image')) {
@@ -405,6 +443,7 @@ class ExperienceController extends Controller
             'status' => 'nullable|string|in:published,draft,unpublished',
             'event_begin_date' => 'nullable|date',
             'event_end_date' => 'nullable|date',
+            'wp_category_label' => 'nullable|string|max:255',
         ]);
 
         try {
@@ -438,12 +477,19 @@ class ExperienceController extends Controller
             if (array_key_exists('event_end_date', $data)) {
                 $updates['event_end_date'] = $data['event_end_date'];
             }
+            if (array_key_exists('wp_category_label', $data)) {
+                $raw = trim((string) ($data['wp_category_label'] ?? ''));
+                $updates['wp_category_label'] = $raw !== '' ? $raw : null;
+            }
 
             $effectiveBegin = array_key_exists('event_begin_date', $updates)
                 ? $updates['event_begin_date']
                 : $post->event_begin_date;
-            $currentLabel = trim((string) ($post->wp_category_label ?? ''));
-            if ($effectiveBegin && $currentLabel === '') {
+            if (
+                ! array_key_exists('wp_category_label', $updates)
+                && $effectiveBegin
+                && trim((string) ($post->wp_category_label ?? '')) === ''
+            ) {
                 $updates['wp_category_label'] = $this->defaultExperienceEventCategoryLabel();
             }
 

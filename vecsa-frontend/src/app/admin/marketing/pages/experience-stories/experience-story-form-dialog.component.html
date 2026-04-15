@@ -1,0 +1,98 @@
+<h2 mat-dialog-title class="exp-story-dialog__title">{{ dialogTitle }}</h2>
+
+<mat-dialog-content class="exp-story-dialog__content">
+  <div class="upload-fields-grid" *ngIf="metaLoaded">
+    <div class="field-group full">
+      <label class="field-label">Título *</label>
+      <input type="text" class="field-input" [(ngModel)]="title" />
+    </div>
+    <div class="field-group">
+      <label class="field-label">Slug (URL)</label>
+      <input type="text" class="field-input" [(ngModel)]="urlName" placeholder="auto desde título si vacío" />
+    </div>
+    <div class="field-group">
+      <label class="field-label">Tipo de publicación</label>
+      <select class="field-input" [(ngModel)]="postType" (ngModelChange)="onPostTypeChange()">
+        <option *ngFor="let pt of postTypeOptions" [value]="pt.value">{{ pt.label }}</option>
+      </select>
+      <p class="field-hint" *ngIf="postType === 'event'">Requiere fecha de evento. La categoría debe coincidir con las palabras de agenda si quieres el calendario.</p>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Estado</label>
+      <select class="field-input" [(ngModel)]="status">
+        <option value="published">Publicado</option>
+        <option value="draft">Borrador</option>
+        <option value="unpublished">No publicado</option>
+      </select>
+    </div>
+    <div class="field-group full">
+      <label class="field-label">Categoría (WordPress / listado)</label>
+      <select class="field-input" [(ngModel)]="wpCategoryChoice">
+        <option value="">— Sin categoría —</option>
+        <option *ngFor="let c of wpCategoryOptions" [value]="c">{{ c }}</option>
+        <option [value]="otherCategoryValue">Otra categoría…</option>
+      </select>
+      <p class="field-hint" *ngIf="agendaHint">{{ agendaHint }}</p>
+    </div>
+    <div class="field-group full" *ngIf="showOtherCategory">
+      <label class="field-label">Nombre de categoría (texto libre)</label>
+      <input type="text" class="field-input" [(ngModel)]="wpCategoryOther" placeholder="Ej. Rodada BMW" />
+    </div>
+    <div class="field-group">
+      <label class="field-label">Fecha evento (agenda)</label>
+      <input type="date" class="field-input" [(ngModel)]="eventBeginDate" />
+    </div>
+    <div class="field-group">
+      <label class="field-label">Fin evento (opcional)</label>
+      <input type="date" class="field-input" [(ngModel)]="eventEndDate" />
+    </div>
+    <div class="field-group full">
+      <label class="field-label">Imagen destacada — subir archivo</label>
+      <div class="file-row">
+        <input
+          #featuredFileEl
+          type="file"
+          class="field-input field-input--file"
+          accept="image/jpeg,image/png,image/webp,image/gif"
+          (change)="onFeaturedFileChange($event)"
+        />
+        <button
+          type="button"
+          class="action-btn action-btn--compact"
+          (click)="clearFeaturedFile(featuredFileEl)"
+          [disabled]="!featuredImageFile"
+        >
+          Quitar archivo
+        </button>
+      </div>
+      <p class="field-hint">Máx. 8 MB. Si eliges archivo, se usa en lugar de la URL (el servidor la procesa al guardar).</p>
+      <div class="featured-preview" *ngIf="featuredPreviewSrc as src">
+        <img [src]="src" alt="Vista previa imagen destacada" />
+      </div>
+    </div>
+    <div class="field-group full">
+      <label class="field-label">Imagen destacada — URL (opcional)</label>
+      <input type="text" class="field-input" [(ngModel)]="imageUrl" placeholder="https://..." />
+      <p class="field-hint">Úsalo si la imagen ya está en internet. Si subes archivo arriba, no hace falta.</p>
+    </div>
+    <div class="field-group full">
+      <label class="field-label">Resumen</label>
+      <textarea class="field-input field-textarea" rows="3" [(ngModel)]="excerpt"></textarea>
+    </div>
+    <div class="field-group full">
+      <label class="field-label">Contenido (HTML)</label>
+      <textarea class="field-input field-textarea field-textarea--body" rows="12" [(ngModel)]="bodyHtml"></textarea>
+    </div>
+  </div>
+
+  <div class="meta-loading" *ngIf="!metaLoaded">
+    <p>Cargando opciones…</p>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="exp-story-dialog__actions">
+  <button type="button" class="action-btn" (click)="cancel()" [disabled]="saving">Cancelar</button>
+  <button type="button" class="action-btn primary-btn" (click)="save()" [disabled]="saving || !metaLoaded">
+    {{ saving ? 'Guardando…' : (editing ? 'Actualizar' : 'Crear') }}
+  </button>
+</mat-dialog-actions>

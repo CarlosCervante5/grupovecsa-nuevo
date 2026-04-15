@@ -18,58 +18,6 @@
 
   <p class="hint" *ngIf="lastImportSummary">{{ lastImportSummary }}</p>
 
-  <div class="upload-card" *ngIf="showForm">
-    <div class="upload-card-header">
-      <h3>{{ editing ? 'Editar historia' : 'Nueva historia' }}</h3>
-      <button class="action-btn" type="button" (click)="cancelForm()">
-        <span class="material-icons">close</span> Cerrar
-      </button>
-    </div>
-    <div class="upload-card-body">
-      <div class="upload-fields-grid">
-        <div class="field-group full">
-          <label class="field-label">Título *</label>
-          <input type="text" class="field-input" [(ngModel)]="title" />
-        </div>
-        <div class="field-group">
-          <label class="field-label">Slug (URL)</label>
-          <input type="text" class="field-input" [(ngModel)]="urlName" placeholder="auto desde título si vacío" />
-        </div>
-        <div class="field-group">
-          <label class="field-label">Estado</label>
-          <select class="field-input" [(ngModel)]="status">
-            <option value="published">Publicado</option>
-            <option value="draft">Borrador</option>
-            <option value="unpublished">No publicado</option>
-          </select>
-        </div>
-        <div class="field-group">
-          <label class="field-label">Fecha evento (agenda)</label>
-          <input type="date" class="field-input" [(ngModel)]="eventBeginDate" />
-        </div>
-        <div class="field-group">
-          <label class="field-label">Fin evento (opcional)</label>
-          <input type="date" class="field-input" [(ngModel)]="eventEndDate" />
-        </div>
-        <div class="field-group full">
-          <label class="field-label">URL imagen destacada</label>
-          <input type="text" class="field-input" [(ngModel)]="imageUrl" placeholder="https://..." />
-        </div>
-        <div class="field-group full">
-          <label class="field-label">Resumen</label>
-          <textarea class="field-input field-textarea" rows="3" [(ngModel)]="excerpt"></textarea>
-        </div>
-        <div class="field-group full">
-          <label class="field-label">Contenido (HTML)</label>
-          <textarea class="field-input field-textarea" rows="12" [(ngModel)]="bodyHtml"></textarea>
-        </div>
-      </div>
-      <button class="action-btn primary-btn save-btn" type="button" (click)="save()" [disabled]="saving">
-        {{ saving ? 'Guardando…' : (editing ? 'Actualizar' : 'Crear') }}
-      </button>
-    </div>
-  </div>
-
   <div class="loading-state" *ngIf="loading">
     <div class="spinner"></div>
     <p>Cargando…</p>
