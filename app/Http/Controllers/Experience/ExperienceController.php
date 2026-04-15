@@ -361,6 +361,7 @@ class ExperienceController extends Controller
             $slug = $data['url_name'] ?? Str::slug(Str::limit($title, 80, ''));
             $slug = strtolower(preg_replace('/[^a-z0-9-]/', '', str_replace(' ', '-', $slug)));
 
+            $eventBegin = $data['event_begin_date'] ?? null;
             $post = MarketingPost::create([
                 'title' => $title,
                 'url_name' => $slug,
@@ -369,8 +370,10 @@ class ExperienceController extends Controller
                 'status' => $data['status'] ?? 'published',
                 'category' => 'experience',
                 'image_path' => $data['image_url'] ?? null,
-                'event_begin_date' => $data['event_begin_date'] ?? null,
+                'event_begin_date' => $eventBegin,
                 'event_end_date' => $data['event_end_date'] ?? null,
+                // Agenda pública: upcoming_events filtra por palabras en wp_category_label
+                'wp_category_label' => $eventBegin ? $this->defaultExperienceEventCategoryLabel() : null,
             ]);
 
             if ($request->hasFile('image')) {
@@ -436,6 +439,14 @@ class ExperienceController extends Controller
                 $updates['event_end_date'] = $data['event_end_date'];
             }
 
+            $effectiveBegin = array_key_exists('event_begin_date', $updates)
+                ? $updates['event_begin_date']
+                : $post->event_begin_date;
+            $currentLabel = trim((string) ($post->wp_category_label ?? ''));
+            if ($effectiveBegin && $currentLabel === '') {
+                $updates['wp_category_label'] = $this->defaultExperienceEventCategoryLabel();
+            }
+
             if ($updates !== []) {
                 $post->update($updates);
             }
@@ -493,5 +504,17 @@ class ExperienceController extends Controller
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error en importación WordPress', $e->getMessage(), 500, 'IMPORT_WORDPRESS_EXPERIENCE_ERROR');
         }
+    }
+
+    /**
+     * Etiqueta de categoría compatible con config('vecsa.experience_event_category_keywords') para incluir el post en la agenda.
+     */
+    private function defaultExperienceEventCategoryLabel(): string
+    {
+        $keywords = config('vecsa.experience_event_category_keywords', ['evento']);
+        $first = is_array($keywords) && $keywords !== [] ? $keywords[0] : 'evento';
+        $first = is_string($first) ? trim($first) : 'evento';
+
+        return $first !== '' ? $first : 'evento';
     }
 }
