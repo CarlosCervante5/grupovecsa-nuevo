@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Observable, BehaviorSubject } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { Observable, BehaviorSubject, of } from 'rxjs';
+import { catchError, map, switchMap, tap } from 'rxjs/operators';
 
 // Form
 import { UntypedFormGroup } from '@angular/forms';
@@ -12,7 +12,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '@environments/environment';
 
 // Interfaces
-import { RecoverAccount , ResetPassword, LoginResponse, LogoutResponse, RegisterResponse} from '@interfaces/auth.interface';
+import { RecoverAccount , ResetPassword, LoginResponse, LogoutResponse, RegisterResponse, AuthMeResponse } from '@interfaces/auth.interface';
 
 
 @Injectable({
@@ -36,16 +36,67 @@ export class AuthService {
         return !!localStorage.getItem('user_token');
     }
 
+    private bearerHeaders(): HttpHeaders {
+        const token = localStorage.getItem('user_token');
+        return new HttpHeaders()
+            .set('Content-Type', 'application/json')
+            .set('X-Requested-With', 'XMLHttpRequest')
+            .set('Authorization', `Bearer ${token}`);
+    }
+
     /**
-     * API Login
+     * Permisos de la sesión actual (mismo contrato que antes en el login).
      */
-    public login(user: UntypedFormGroup): Observable<LoginResponse> {   
-        return this._http.post<LoginResponse>(`${ this.url }/api/auth/login`, user, { headers: this.headers }).pipe(
-            tap(response => {
-                if (response.data.token) {
-                    localStorage.setItem('user_token', response.data.token);
-                    const { token, ...userData } = response.data;
+    public fetchPermissions(): Observable<string[]> {
+        return this._http.get<AuthMeResponse>(`${this.url}/api/auth/me`, { headers: this.bearerHeaders() }).pipe(
+            map((res) => res.data?.permissions ?? []),
+            catchError(() => of([]))
+        );
+    }
+
+    /**
+     * Refresca permisos en localStorage (p. ej. tras F5 con token válido).
+     */
+    public refreshPermissionsInStorage(): Observable<void> {
+        return this.fetchPermissions().pipe(
+            tap((perms) => {
+                localStorage.setItem('permissions', JSON.stringify(perms));
+            }),
+            map(() => undefined)
+        );
+    }
+
+    /**
+     * API Login (POST login + GET /me para permisos)
+     */
+    public login(user: UntypedFormGroup): Observable<LoginResponse> {
+        return this._http.post<LoginResponse>(`${this.url}/api/auth/login`, user, { headers: this.headers }).pipe(
+            switchMap((response) => {
+                if (!response.data?.token) {
+                    return of(response);
+                }
+                localStorage.setItem('user_token', response.data.token);
+                return this._http.get<AuthMeResponse>(`${this.url}/api/auth/me`, { headers: this.bearerHeaders() }).pipe(
+                    map((me) => ({
+                        ...response,
+                        data: {
+                            ...response.data,
+                            permissions: me.data?.permissions ?? [],
+                        },
+                    })),
+                    catchError(() =>
+                        of({
+                            ...response,
+                            data: { ...response.data, permissions: [] as string[] },
+                        })
+                    )
+                );
+            }),
+            tap((full) => {
+                if (full.data?.token) {
+                    const { token, ...userData } = full.data;
                     localStorage.setItem('user_data', JSON.stringify(userData));
+                    localStorage.setItem('permissions', JSON.stringify(full.data.permissions ?? []));
                     this.authStatus.next(true);
                 }
             })
@@ -61,7 +112,10 @@ export class AuthService {
         let headers = new HttpHeaders().set('Authorization', `Bearer ${user_token}`);
 
         return this._http.post<LogoutResponse>(`${ this.url }/api/auth/logout`, null , { headers }).pipe(
-            tap(() => this.authStatus.next(false))
+            tap(() => {
+                this.authStatus.next(false);
+                localStorage.removeItem('permissions');
+            })
         );
     }
 

@@ -89,23 +89,13 @@ export class LoginComponent {
                   localStorage.setItem('permissions', JSON.stringify(loginResponse.data.permissions));
                 }
 
-                // Sync guest cart to server, then navigate
-                this._cartService.syncLocalCartToServer().subscribe({
-                  next: () => {
-                    if( loginResponse.data.role === 'client'){
-                        this._router.navigate(['/auth/mi-cuenta'])
-                    } else {
-                        this._router.navigate(['/admin', loginResponse.data.role])
-                    }
-                  },
-                  error: () => {
-                    if( loginResponse.data.role === 'client'){
-                        this._router.navigate(['/auth/mi-cuenta'])
-                    } else {
-                        this._router.navigate(['/admin', loginResponse.data.role])
-                    }
-                  }
-                });
+                const dest = loginResponse.data.role === 'client'
+                    ? ['/auth/mi-cuenta']
+                    : ['/admin', loginResponse.data.role];
+                this._router.navigate(dest).finally(() => { this.spinner = false; });
+
+                // Carrito en segundo plano: no retrasa la navegación percibida tras login
+                this._cartService.syncLocalCartToServer().subscribe();
 
             },
             error: ( errorResponse ) => {

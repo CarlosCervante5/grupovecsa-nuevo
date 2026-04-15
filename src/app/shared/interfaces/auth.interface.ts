@@ -13,6 +13,11 @@
     export interface LogoutResponse extends GralResponse{
     data:    null;
     }
+
+    /** GET /api/auth/me */
+    export interface AuthMeResponse extends GralResponse {
+        data: { permissions: string[] };
+    }
     
     export interface ShowProfileResponse extends GralResponse{
     data:    ShowData;
