@@ -149,6 +149,11 @@ export class ExperienceStoryFormDialogComponent implements OnInit, OnDestroy {
     return u || null;
   }
 
+  /** Nombre del archivo elegido (solo subida nueva). */
+  get featuredImageLabel(): string {
+    return this.featuredImageFile?.name ?? '';
+  }
+
   get showOtherCategory(): boolean {
     return this.wpCategoryChoice === this.otherCategoryValue;
   }
@@ -212,6 +217,39 @@ export class ExperienceStoryFormDialogComponent implements OnInit, OnDestroy {
     return (this.wpCategoryChoice || '').trim();
   }
 
+  /** Hay imagen: archivo nuevo, URL válida como imagen, o imagen ya guardada al editar. */
+  private hasFeaturedImageSource(): boolean {
+    if (this.featuredImageFile) {
+      return true;
+    }
+    const u = this.imageUrl.trim();
+    if (u) {
+      return this.looksLikeImageUrl(u);
+    }
+    return !!this.editing?.image_path?.trim();
+  }
+
+  /** URL o ruta que parezca apuntar a un archivo de imagen. */
+  private looksLikeImageUrl(url: string): boolean {
+    const u = url.trim();
+    if (!u) {
+      return false;
+    }
+    const lower = u.toLowerCase();
+    if (lower.startsWith('data:image/')) {
+      return true;
+    }
+    if (/\.(jpe?g|png|gif|webp|avif|svg)(\?|#|$)/i.test(u)) {
+      return true;
+    }
+    try {
+      const parsed = new URL(u, typeof window !== 'undefined' ? window.location.origin : 'https://vecsa.local');
+      return /\.(jpe?g|png|gif|webp|avif|svg)(\?|#|$)/i.test(parsed.pathname);
+    } catch {
+      return /\.(jpe?g|png|gif|webp|avif|svg)(\?|#|$)/i.test(u);
+    }
+  }
+
   cancel(): void {
     this.ref.close();
   }
@@ -236,6 +274,24 @@ export class ExperienceStoryFormDialogComponent implements OnInit, OnDestroy {
       this.snack.open('Escribe la categoría en «Otra categoría» o elige una de la lista.', 'OK', {
         duration: 4000,
       });
+      return;
+    }
+
+    const urlTrim = this.imageUrl.trim();
+    if (urlTrim && !this.looksLikeImageUrl(urlTrim)) {
+      this.snack.open(
+        'La imagen destacada por URL debe ser un enlace a un archivo de imagen (.jpg, .png, .webp, .gif, .svg).',
+        'OK',
+        { duration: 5000 }
+      );
+      return;
+    }
+    if (this.status === 'published' && !this.hasFeaturedImageSource()) {
+      this.snack.open(
+        'Para publicar necesitas una imagen destacada: usa «Seleccionar imagen» o una URL válida de imagen.',
+        'OK',
+        { duration: 5000 }
+      );
       return;
     }
 

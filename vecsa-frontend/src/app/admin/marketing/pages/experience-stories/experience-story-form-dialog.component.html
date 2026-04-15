@@ -6,6 +6,39 @@
       <label class="field-label">Título *</label>
       <input type="text" class="field-input" [(ngModel)]="title" />
     </div>
+
+    <div class="field-group full featured-image-block">
+      <label class="field-label">Imagen destacada</label>
+      <input
+        #featuredFileEl
+        type="file"
+        class="file-input-hidden"
+        accept="image/*"
+        (change)="onFeaturedFileChange($event)"
+      />
+      <div class="featured-upload-row">
+        <button type="button" class="action-btn primary-btn" (click)="featuredFileEl.click()">
+          <span class="material-icons icon-18">add_photo_alternate</span>
+          {{ featuredImageFile ? 'Cambiar imagen' : 'Seleccionar imagen' }}
+        </button>
+        <span class="featured-file-name" *ngIf="featuredImageLabel">{{ featuredImageLabel }}</span>
+        <button
+          type="button"
+          class="action-btn action-btn--compact"
+          (click)="clearFeaturedFile(featuredFileEl)"
+          [disabled]="!featuredImageFile"
+        >
+          Quitar archivo
+        </button>
+      </div>
+      <p class="field-hint">
+        Sube un archivo de imagen (máx. 8 MB). Para <strong>publicar</strong> hace falta imagen: archivo o URL de imagen abajo.
+      </p>
+      <div class="featured-preview" *ngIf="featuredPreviewSrc as src">
+        <img [src]="src" alt="Vista previa imagen destacada" />
+      </div>
+    </div>
+
     <div class="field-group">
       <label class="field-label">Slug (URL)</label>
       <input type="text" class="field-input" [(ngModel)]="urlName" placeholder="auto desde título si vacío" />
@@ -47,33 +80,15 @@
       <input type="date" class="field-input" [(ngModel)]="eventEndDate" />
     </div>
     <div class="field-group full">
-      <label class="field-label">Imagen destacada — subir archivo</label>
-      <div class="file-row">
-        <input
-          #featuredFileEl
-          type="file"
-          class="field-input field-input--file"
-          accept="image/jpeg,image/png,image/webp,image/gif"
-          (change)="onFeaturedFileChange($event)"
-        />
-        <button
-          type="button"
-          class="action-btn action-btn--compact"
-          (click)="clearFeaturedFile(featuredFileEl)"
-          [disabled]="!featuredImageFile"
-        >
-          Quitar archivo
-        </button>
-      </div>
-      <p class="field-hint">Máx. 8 MB. Si eliges archivo, se usa en lugar de la URL (el servidor la procesa al guardar).</p>
-      <div class="featured-preview" *ngIf="featuredPreviewSrc as src">
-        <img [src]="src" alt="Vista previa imagen destacada" />
-      </div>
-    </div>
-    <div class="field-group full">
-      <label class="field-label">Imagen destacada — URL (opcional)</label>
-      <input type="text" class="field-input" [(ngModel)]="imageUrl" placeholder="https://..." />
-      <p class="field-hint">Úsalo si la imagen ya está en internet. Si subes archivo arriba, no hace falta.</p>
+      <label class="field-label">Imagen destacada — URL alternativa</label>
+      <input
+        type="text"
+        class="field-input"
+        [(ngModel)]="imageUrl"
+        placeholder="https://…/foto.jpg o /storage/…/foto.png"
+        autocomplete="off"
+      />
+      <p class="field-hint">Solo si no subes archivo: enlace directo a .jpg, .png, .webp, .gif o .svg.</p>
     </div>
     <div class="field-group full">
       <label class="field-label">Resumen</label>
