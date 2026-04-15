@@ -51,7 +51,8 @@
 .store-user-name { font-size: 0.8rem; font-weight: 600; color: #f1f5f9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .store-user-role { font-size: 0.7rem; color: #64748b; }
 
-.store-nav { flex: 1; overflow-y: auto; }
+/* min-height:0 permite que el nav haga scroll dentro del sidebar en flex (evita cortar OpenPay abajo). */
+.store-nav { flex: 1; overflow-y: auto; min-height: 0; }
 
 .store-nav-label {
   font-size: 0.65rem; font-weight: 600; color: #475569;
@@ -444,11 +445,38 @@
   .store-sidebar {
     width: 100%; height: auto; position: static;
     flex-direction: row; flex-wrap: wrap; padding: 12px; gap: 8px;
+    align-content: flex-start;
   }
   .store-brand { margin-bottom: 0; }
-  .store-user { margin-bottom: 0; flex: 1; }
-  .store-nav { display: none; }
-  .store-logout { width: auto; margin-top: 0; }
+  .store-user { margin-bottom: 0; flex: 1; min-width: 0; }
+  /* Antes: display:none ocultaba todo el menú (incl. OpenPay). Mostrar envoltura horizontal. */
+  .store-nav {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    flex: 1 1 100%;
+    width: 100%;
+    max-width: 100%;
+    min-height: 0;
+    max-height: 220px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    gap: 6px;
+    padding: 10px 0 4px;
+    margin-top: 4px;
+    border-top: 1px solid rgba(148, 163, 184, 0.25);
+    box-sizing: border-box;
+  }
+  .store-nav-item {
+    flex: 1 1 auto;
+    min-width: calc(50% - 4px);
+    justify-content: flex-start;
+    margin-bottom: 0;
+    font-size: 0.75rem;
+    padding: 8px 10px;
+  }
+  .store-nav-home { flex: 1 1 auto; margin-top: 0; }
+  .store-logout { width: auto; margin-top: 0; flex: 0 0 auto; }
   .store-main { margin-left: 0; padding: 16px; }
   .charts-grid { grid-template-columns: 1fr; }
   .product-detail-grid { grid-template-columns: 1fr; }

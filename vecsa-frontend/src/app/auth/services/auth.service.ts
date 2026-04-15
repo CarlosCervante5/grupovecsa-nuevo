@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
-import { Observable, BehaviorSubject, of } from 'rxjs';
+import { Observable, BehaviorSubject, of, throwError } from 'rxjs';
 import { catchError, map, switchMap, tap } from 'rxjs/operators';
 
 // Form
 import { UntypedFormGroup } from '@angular/forms';
 
 // HTTP Client
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 
 // Enviroment
 import { environment } from '@environments/environment';
@@ -39,6 +39,19 @@ export class AuthService {
         return !!localStorage.getItem('user_token');
     }
 
+    /**
+     * Limpia datos de sesión en el cliente (token inválido, logout, estado huérfano).
+     */
+    public clearClientAuthState(): void {
+        localStorage.removeItem('user_token');
+        localStorage.removeItem('user_data');
+        localStorage.removeItem('user');
+        localStorage.removeItem('role');
+        localStorage.removeItem('profile');
+        localStorage.removeItem('permissions');
+        this.authStatus.next(false);
+    }
+
     private bearerHeaders(): HttpHeaders {
         const token = localStorage.getItem('user_token');
         return new HttpHeaders()
@@ -51,9 +64,18 @@ export class AuthService {
      * Permisos de la sesión actual (mismo contrato que antes en el login).
      */
     public fetchPermissions(): Observable<string[]> {
+        if (!localStorage.getItem('user_token')) {
+            return of([]);
+        }
         return this._http.get<AuthMeResponse>(`${this.url}/api/auth/me`, { headers: this.bearerHeaders() }).pipe(
             map((res) => res.data?.permissions ?? []),
-            catchError(() => of([]))
+            catchError((err: unknown) => {
+                const status = err instanceof HttpErrorResponse ? err.status : 0;
+                if (status === 401) {
+                    this.clearClientAuthState();
+                }
+                return of([]);
+            })
         );
     }
 
@@ -61,6 +83,11 @@ export class AuthService {
      * Refresca permisos en localStorage (p. ej. tras F5 con token válido).
      */
     public refreshPermissionsInStorage(): Observable<void> {
+        if (!localStorage.getItem('user_token')) {
+            this.clearClientAuthState();
+            this.permissionsRevision.next(this.permissionsRevision.value + 1);
+            return of(undefined);
+        }
         return this.fetchPermissions().pipe(
             tap((perms) => {
                 localStorage.setItem('permissions', JSON.stringify(perms));
@@ -118,8 +145,14 @@ export class AuthService {
 
         return this._http.post<LogoutResponse>(`${ this.url }/api/auth/logout`, null , { headers }).pipe(
             tap(() => {
-                this.authStatus.next(false);
-                localStorage.removeItem('permissions');
+                this.clearClientAuthState();
+            }),
+            catchError((err: unknown) => {
+                const status = err instanceof HttpErrorResponse ? err.status : 0;
+                if (status === 401) {
+                    this.clearClientAuthState();
+                }
+                return throwError(() => err);
             })
         );
     }
