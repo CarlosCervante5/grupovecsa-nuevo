@@ -214,6 +214,19 @@ class AuthController extends Controller
                 return ApiResponseHelper::apiSuccess(200, 'Token y rol válidos', [$userRoleFirst, $expected_role]);
             }
 
+            // Roles legacy (RolesPermissionsSeeder): manager → panel gestor; technician → bodywork_paint_technician
+            $legacyPanelRoles = [
+                'gestor' => ['manager'],
+                'bodywork_paint_technician' => ['technician'],
+            ];
+            if ($expected_role && isset($legacyPanelRoles[$expected_role])) {
+                foreach ($legacyPanelRoles[$expected_role] as $legacyName) {
+                    if ($userRoleNames->contains($legacyName)) {
+                        return ApiResponseHelper::apiSuccess(200, 'Token y rol válidos (rol legacy)', [$userRoleFirst, $expected_role]);
+                    }
+                }
+            }
+
             // Administrator / developer: acceso a paneles internos (mismo criterio que antes, ampliado a developer)
             try {
                 if ($user->hasRole('administrator') || $user->hasRole('developer')) {
