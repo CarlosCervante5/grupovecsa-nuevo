@@ -195,29 +195,35 @@ class AuthController extends Controller
             $stored_role = $request->input('stored_role');
             $expected_role = $request->input('expected_role');
 
-            $userRole = null;
+            $userRoleNames = collect();
+            $userRoleFirst = null;
             try {
-                $userRole = $user->getRoleNames()->first();
+                $userRoleNames = $user->getRoleNames();
+                $userRoleFirst = $userRoleNames->first();
             } catch (\Exception $e) {
                 // Spatie tables may not exist yet — fallback to role column
-                $userRole = $user->role ?? null;
+                $fallback = $user->role ?? null;
+                if ($fallback !== null) {
+                    $userRoleNames = collect([$fallback]);
+                    $userRoleFirst = $fallback;
+                }
             }
 
-            // Direct role match
-            if ($userRole === $expected_role) {
-                return ApiResponseHelper::apiSuccess(200, 'Token y rol válidos', [$userRole, $expected_role]);
+            // Coincide si el panel esperado es cualquiera de los roles asignados (evita 403 con varios roles si first() no es el del panel)
+            if ($expected_role && $userRoleNames->contains($expected_role)) {
+                return ApiResponseHelper::apiSuccess(200, 'Token y rol válidos', [$userRoleFirst, $expected_role]);
             }
 
-            // Rol administrator: mismo acceso a paneles internos que developer/marketing/etc. (sin ser rol "client")
+            // Administrator / developer: acceso a paneles internos (mismo criterio que antes, ampliado a developer)
             try {
-                if ($user->hasRole('administrator')) {
+                if ($user->hasRole('administrator') || $user->hasRole('developer')) {
                     $adminPanelRoles = [
                         'developer', 'marketing', 'staff', 'gestor', 'receptionist',
                         'valuator', 'appointment_manager', 'bodywork_paint_technician',
                         'spare_parts', 'gerente',
                     ];
                     if (in_array($expected_role, $adminPanelRoles, true)) {
-                        return ApiResponseHelper::apiSuccess(200, 'Acceso administrador a panel', [$userRole, $expected_role]);
+                        return ApiResponseHelper::apiSuccess(200, 'Acceso administrador a panel', [$userRoleFirst, $expected_role]);
                     }
                 }
             } catch (\Exception $e) {
@@ -228,7 +234,7 @@ class AuthController extends Controller
             try {
                 $accessPermission = 'access ' . $expected_role;
                 if ($user->hasPermissionTo($accessPermission)) {
-                    return ApiResponseHelper::apiSuccess(200, 'Acceso por permiso', [$userRole, $expected_role]);
+                    return ApiResponseHelper::apiSuccess(200, 'Acceso por permiso', [$userRoleFirst, $expected_role]);
                 }
             } catch (\Exception $e) {
                 // Permission check failed (table missing, etc.) — skip
