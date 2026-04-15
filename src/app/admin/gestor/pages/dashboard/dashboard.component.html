@@ -3,7 +3,7 @@
   <p class="dashboard-subtitle">Panel de gestión — Gestor de marketing</p>
 
   <!-- Stat Cards -->
-  <div class="stats-grid">
+  <div class="stats-grid" *ngIf="stats.length">
     <div class="stat-card" *ngFor="let stat of stats">
       <div class="stat-icon" [style.background]="stat.color + '18'" [style.color]="stat.color">
         <span class="material-icons">{{ stat.icon }}</span>
@@ -16,8 +16,8 @@
     </div>
   </div>
 
-  <!-- Charts -->
-  <div class="charts-grid">
+  <!-- Charts (solo con permiso de eventos) -->
+  <div class="charts-grid" *ngIf="showEventsChart">
     <div class="chart-card">
       <h3 class="chart-title"><span class="material-icons">bar_chart</span> Eventos por mes</h3>
       <div class="chart-container" #eventsBarChart></div>
@@ -25,7 +25,7 @@
   </div>
 
   <!-- Quick Nav -->
-  <div class="quick-nav-section">
+  <div class="quick-nav-section" *ngIf="quickLinks.length">
     <h3 class="section-title"><span class="material-icons">apps</span> Acceso rápido</h3>
     <div class="quick-nav-grid">
       <div class="quick-nav-card" *ngFor="let link of quickLinks" (click)="navigateTo(link.route)">

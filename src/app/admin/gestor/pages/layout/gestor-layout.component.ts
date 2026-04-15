@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/auth/services/auth.service';
 import { adminDashboardUrl } from 'src/app/admin/utils/admin-route.util';
+import { expandLegacyGestorPermissions, GESTOR_FEATURE_PERMISSIONS } from 'src/app/admin/utils/gestor-feature-permissions';
 
 @Component({
   selector: 'app-gestor-layout',
@@ -16,12 +17,7 @@ export class GestorLayoutComponent implements OnInit, OnDestroy {
   name = '';
   permissions: string[] = [];
 
-  readonly navItems = [
-    { label: 'Dashboard', icon: 'dashboard', route: '/admin/gestor' },
-    { label: 'Promociones', icon: 'campaign', route: '/admin/gestor/promotions' },
-    { label: 'Eventos', icon: 'event', route: '/admin/gestor/scheduled-events' },
-    { label: 'Recompensas', icon: 'emoji_events', route: '/admin/gestor/rewards' },
-  ];
+  navItems: { label: string; icon: string; route: string }[] = [];
 
   dynamicItems: { label: string; icon: string; route: string }[] = [];
 
@@ -32,7 +28,7 @@ export class GestorLayoutComponent implements OnInit, OnDestroy {
     private auth: AuthService,
   ) {
     this.loadSession();
-    this.rebuildDynamicItems();
+    this.rebuildSidebar();
   }
 
   ngOnInit(): void {
@@ -42,7 +38,7 @@ export class GestorLayoutComponent implements OnInit, OnDestroy {
       } catch {
         this.permissions = [];
       }
-      this.rebuildDynamicItems();
+      this.rebuildSidebar();
     });
   }
 
@@ -62,7 +58,23 @@ export class GestorLayoutComponent implements OnInit, OnDestroy {
     this.name = profile?.name || this.user?.nickname || 'Usuario';
   }
 
-  private rebuildDynamicItems(): void {
+  private rebuildSidebar(): void {
+    const base = adminDashboardUrl(this.role);
+    this.navItems = [{ label: 'Dashboard', icon: 'dashboard', route: base }];
+
+    const effective = expandLegacyGestorPermissions(this.permissions, this.role);
+
+    const main: { perm: string; label: string; icon: string; path: string }[] = [
+      { perm: GESTOR_FEATURE_PERMISSIONS.promotions, label: 'Promociones', icon: 'campaign', path: 'promotions' },
+      { perm: GESTOR_FEATURE_PERMISSIONS.scheduledEvents, label: 'Eventos', icon: 'event', path: 'scheduled-events' },
+      { perm: GESTOR_FEATURE_PERMISSIONS.rewards, label: 'Recompensas', icon: 'emoji_events', path: 'rewards' },
+    ];
+    for (const item of main) {
+      if (effective.includes(item.perm)) {
+        this.navItems.push({ label: item.label, icon: item.icon, route: `${base}/${item.path}` });
+      }
+    }
+
     this.dynamicItems = [];
     if (this.permissions.includes('access store_management')) {
       this.dynamicItems.push({ label: 'Tienda', icon: 'storefront', route: '/admin/store' });
@@ -70,6 +82,10 @@ export class GestorLayoutComponent implements OnInit, OnDestroy {
     if (this.permissions.includes('access benchmark')) {
       this.dynamicItems.push({ label: 'Benchmark ADS', icon: 'monitoring', route: '/admin/benchmark' });
     }
+  }
+
+  get panelBaseUrl(): string {
+    return adminDashboardUrl(this.role);
   }
 
   get panelHomeUrl(): string {

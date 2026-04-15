@@ -12,7 +12,7 @@
       </div>
     </div>
     <nav class="panel-nav">
-      <a *ngFor="let item of navItems" class="panel-nav-item" [routerLink]="item.route" routerLinkActive="active" [routerLinkActiveOptions]="{exact: item.route === '/admin/gestor'}">
+      <a *ngFor="let item of navItems" class="panel-nav-item" [routerLink]="item.route" routerLinkActive="active" [routerLinkActiveOptions]="{exact: item.route === panelBaseUrl}">
         <span class="material-icons">{{ item.icon }}</span> {{ item.label }}
       </a>
       <p class="panel-nav-label" *ngIf="dynamicItems.length">Herramientas</p>
