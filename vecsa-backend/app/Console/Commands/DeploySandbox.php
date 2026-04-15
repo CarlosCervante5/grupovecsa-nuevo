@@ -37,6 +37,7 @@ class DeploySandbox extends Command
                 'MigrateVariantsToAttributesSeeder', // Product attributes & variants
                 'BoutiqueBannerSeeder',      // Boutique banners (3 default)
                 'HomeContentSeeder',         // Home slides & testimonials
+                'ExperienceDemoEventsSeeder', // Experience: carrusel + calendario (marketing_events)
                 'TestCustomersSeeder',       // Test customers for rewards
                 'CampaignsSeeder',           // Marketing campaigns
             ];

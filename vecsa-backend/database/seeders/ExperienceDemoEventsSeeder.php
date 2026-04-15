@@ -8,24 +8,46 @@ use Illuminate\Database\Seeder;
 
 /**
  * Eventos de prueba para la home de Experience (carrusel + calendario).
- * Idempotente: no duplica si ya existen filas con segment_name = demo_exp_ui.
+ * Idempotente: no duplica mientras haya al menos un demo con fecha >= hoy.
+ * Si todos los demo_exp_ui quedaron en el pasado (p. ej. sandbox antiguo), los reemplaza.
  */
 class ExperienceDemoEventsSeeder extends Seeder
 {
     public function run(): void
     {
-        $already = MarketingEvent::withTrashed()
+        $today = Carbon::today();
+        $todayStr = $today->toDateString();
+
+        $demos = MarketingEvent::withTrashed()
             ->where('type', 'experience')
             ->where('segment_name', 'demo_exp_ui')
-            ->exists();
+            ->get();
 
-        if ($already) {
-            $this->command?->info('Experience: ya hay eventos demo (segment_name=demo_exp_ui). No se insertaron duplicados.');
+        if ($demos->isNotEmpty()) {
+            $hasUpcoming = $demos->contains(function (MarketingEvent $e) use ($todayStr) {
+                if ($e->trashed()) {
+                    return false;
+                }
+                if (! $e->begin_date) {
+                    return false;
+                }
 
-            return;
+                return Carbon::parse($e->begin_date)->toDateString() >= $todayStr;
+            });
+
+            if ($hasUpcoming) {
+                $this->command?->info('Experience: ya hay eventos demo futuros (demo_exp_ui). No se modificaron.');
+
+                return;
+            }
+
+            MarketingEvent::withTrashed()
+                ->where('type', 'experience')
+                ->where('segment_name', 'demo_exp_ui')
+                ->forceDelete();
+
+            $this->command?->info('Experience: eventos demo estaban vencidos; se recrearon con fechas nuevas.');
         }
-
-        $today = Carbon::today();
 
         $rows = [
             [
