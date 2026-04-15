@@ -20,10 +20,12 @@ export class StoreManagementGuard {
   }
 
   private evaluate(): boolean {
+    if (!localStorage.getItem('user_token')) {
+      this.router.navigateByUrl('/auth/login');
+      return false;
+    }
     const perms = this.getPermissions();
     if (perms.includes('access store_management')) return true;
-    const role = localStorage.getItem('role') || '';
-    if (role === 'developer' || role === 'administrator') return true;
     this.router.navigateByUrl('/');
     return false;
   }
