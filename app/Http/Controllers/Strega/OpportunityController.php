@@ -175,6 +175,24 @@ class OpportunityController extends Controller
     }
 
     /**
+     * Buscar oportunidades asignadas al ejecutivo Strega (strega-seller).
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function searchSeller(SearchOpportunityRequest $request)
+    {
+        try {
+            $user = auth()->user();
+            $data = $request->validated();
+            $oportunities = $this->opportunityService->searchOpportunitiesSeller($data, $user);
+
+            return ApiResponseHelper::apiSuccess(200, 'Oportunidades obtenidas exitosamente', $oportunities);
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al obtener las oportunidades', $e->getMessage(), 500, 'GET_OPPORTUNITIES_ERROR');
+        }
+    }
+
+    /**
      * Buscar citas
      *
      * @return \Illuminate\Http\JsonResponse
