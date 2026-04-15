@@ -9,6 +9,7 @@ import { ShowData } from 'src/app/auth/interfaces/login.interface';
 import { MatMenuModule } from '@angular/material/menu';
 import { BoutiqueCartService } from 'src/app/boutique/services/boutique-cart.service';
 import { CartDrawerComponent } from 'src/app/boutique/components/cart-drawer/cart-drawer.component';
+import { adminDashboardUrl } from 'src/app/admin/utils/admin-route.util';
 
 @Component({
     selector: 'app-new-nav',
@@ -133,7 +134,7 @@ export class NewNavComponent implements OnInit, OnDestroy {
         if(role === 'client')
             return `/auth/mi-cuenta`
 
-        return `/admin/${role}`;
+        return adminDashboardUrl(role);
     }
 
     return `/admin/not-autorized`;

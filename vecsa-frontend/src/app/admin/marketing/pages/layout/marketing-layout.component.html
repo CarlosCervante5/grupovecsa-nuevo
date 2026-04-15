@@ -20,7 +20,7 @@
         <span class="material-icons">{{ item.icon }}</span> {{ item.label }}
       </a>
     </nav>
-    <a class="panel-nav-back" [routerLink]="'/admin/' + role"><span class="material-icons">arrow_back</span> Volver a mi panel</a>
+    <a class="panel-nav-back" [routerLink]="panelHomeUrl"><span class="material-icons">arrow_back</span> Volver a mi panel</a>
     <button class="panel-logout" (click)="logout()"><span class="material-icons">logout</span> Cerrar sesión</button>
   </aside>
   <main class="panel-main">

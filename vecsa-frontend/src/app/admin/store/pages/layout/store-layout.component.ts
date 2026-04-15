@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { StoreService } from '../../services/store.service';
 import { environment } from '@environments/environment';
+import { adminDashboardUrl } from 'src/app/admin/utils/admin-route.util';
 import { DashboardStat, CouponCreate, PointAdjustment } from '../../interfaces/store.interfaces';
 import * as echarts from 'echarts';
 
@@ -130,6 +131,10 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   ];
 
   readonly orderStatuses = ['pendiente', 'pagado', 'en_preparacion', 'enviado', 'entregado', 'cancelado'];
+
+  get panelHomeUrl(): string {
+    return adminDashboardUrl(this.role);
+  }
 
   constructor(private router: Router, private storeService: StoreService, private http: HttpClient) {}
 

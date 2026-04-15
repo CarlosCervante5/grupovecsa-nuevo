@@ -13,6 +13,7 @@ import { AvatarsProfileComponent } from '../../../../components/avatars-profile/
 import { MatDialog } from '@angular/material/dialog';
 
 import {reload} from '@helpers/session.helper';
+import { adminDashboardUrl } from 'src/app/admin/utils/admin-route.util';
 
 interface Card {
     id: number;
@@ -125,7 +126,7 @@ export class SettingsComponent {
             if(role === 'client')
                 return `/auth/mi-cuenta`
     
-            return `/admin/${role}`;
+            return adminDashboardUrl(role);
         }
     
         return `/admin/not-autorized`;
