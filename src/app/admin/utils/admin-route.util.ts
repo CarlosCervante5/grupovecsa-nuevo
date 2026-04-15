@@ -5,6 +5,8 @@
 const LEGACY_ROLE_TO_ADMIN_SEGMENT: Record<string, string> = {
   manager: 'gestor',
   technician: 'bodywork_paint_technician',
+  /** Variante corta o datos legacy */
+  admin: 'administrator',
 };
 
 export function adminRouteSegmentForRole(role: string | null | undefined): string {

@@ -13,8 +13,10 @@ import { DeveloperGuard } from './developer/guards/developer.guard';
 import { BenchmarkGuard } from './shared/benchmark/benchmark.guard';
 import { StoreManagementGuard } from './store/guards/store-management.guard';
 import { GerenteGuard } from './gerente/guards/gerente.guard';
+import { AdminEntryRedirectComponent } from './admin-entry-redirect.component';
 
-const routes: Routes = [  
+const routes: Routes = [
+  { path: '', pathMatch: 'full', component: AdminEntryRedirectComponent },
   { path: 'marketing',
     loadChildren: () => import('./marketing/marketing.module').then(m => m.MarketingModule), 
     canActivate: [MarketingGuard],
@@ -76,7 +78,7 @@ const routes: Routes = [
     canActivate: [GerenteGuard],
     canLoad: [GerenteGuard],
   },
-  { path: '**', redirectTo: '/404', pathMatch: 'full' }
+  { path: '**', redirectTo: '/404' }
 ];
 
 @NgModule({
