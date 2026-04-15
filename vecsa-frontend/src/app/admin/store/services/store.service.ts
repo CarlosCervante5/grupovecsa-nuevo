@@ -27,6 +27,10 @@ export class StoreService {
     return this.http.post(`${this.baseUrl}/api/store-management/${endpoint}`, body, { headers: this.headers });
   }
 
+  private boutiquePost(path: string, body: object = {}): Observable<any> {
+    return this.http.post(`${this.baseUrl}/api/boutique/admin/${path}`, body, { headers: this.headers });
+  }
+
   // Dashboard
   getDashboardMetrics(params?: { date_from?: string; date_to?: string }): Observable<any> {
     return this.post('metrics', params || {});
@@ -104,5 +108,14 @@ export class StoreService {
 
   updateRedemptionStatus(uuid: string, status: string): Observable<any> {
     return this.post('redemptions/update_status', { uuid, status });
+  }
+
+  /** OpenPay — documentación https://documents.openpay.mx/docs/api/ */
+  getOpenpayConfig(): Observable<any> {
+    return this.boutiquePost('openpay/config');
+  }
+
+  updateOpenpayConfig(payload: Record<string, unknown>): Observable<any> {
+    return this.boutiquePost('openpay/update', payload);
   }
 }

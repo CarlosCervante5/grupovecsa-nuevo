@@ -109,6 +109,12 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   variantsSaving = false;
   modifiedVariantUuids: Set<string> = new Set();
 
+  openpayConfig: Record<string, string> = {};
+  openpayLoading = false;
+  openpaySaving = false;
+  openpayError = '';
+  openpaySuccess = '';
+
   readonly navItems = [
     { key: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
     { key: 'products', label: 'Productos', icon: 'inventory_2' },
@@ -118,6 +124,7 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     { key: 'points', label: 'Puntos', icon: 'stars' },
     { key: 'coupons', label: 'Cupones', icon: 'confirmation_number' },
     { key: 'redemptions', label: 'Redenciones', icon: 'redeem' },
+    { key: 'openpay', label: 'Pagos OpenPay', icon: 'account_balance' },
     { key: 'incadea', label: 'Sync Incadea', icon: 'sync' },
     { key: 'wc_import', label: 'WC Import', icon: 'upload_file' },
   ];
@@ -172,6 +179,8 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
       this.loadCoupons();
     } else if (key === 'redemptions') {
       this.loadRedemptions();
+    } else if (key === 'openpay') {
+      this.loadOpenpayConfig();
     } else if (key === 'incadea') {
       this.loadIncadea();
     }
@@ -583,6 +592,7 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     else if (this.activeSection === 'points') this.loadPoints();
     else if (this.activeSection === 'coupons') this.loadCoupons();
     else if (this.activeSection === 'redemptions') this.loadRedemptions();
+    else if (this.activeSection === 'openpay') this.loadOpenpayConfig();
   }
 
   // ── Products ──
@@ -959,6 +969,69 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   formatDate(val: any): string {
     if (!val) return '—';
     return new Date(val).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' });
+  }
+
+  loadOpenpayConfig(): void {
+    this.openpayLoading = true;
+    this.openpayError = '';
+    this.openpaySuccess = '';
+    this.storeService.getOpenpayConfig().subscribe({
+      next: (res: any) => {
+        this.openpayConfig = { ...(res?.data || {}) };
+        this.openpayLoading = false;
+      },
+      error: (err: any) => {
+        this.openpayError = err?.error?.message || 'Error al cargar OpenPay';
+        this.openpayLoading = false;
+      },
+    });
+  }
+
+  toggleOpenpayMode(): void {
+    this.openpayConfig['openpay_mode'] =
+      this.openpayConfig['openpay_mode'] === 'production' ? 'sandbox' : 'production';
+  }
+
+  saveOpenpayConfig(): void {
+    this.openpaySaving = true;
+    this.openpayError = '';
+    this.openpaySuccess = '';
+    const payload: Record<string, unknown> = {
+      openpay_mode: this.openpayConfig['openpay_mode'] || 'sandbox',
+    };
+    const fields = [
+      'openpay_sandbox_merchant_id',
+      'openpay_sandbox_public_key',
+      'openpay_sandbox_private_key',
+      'openpay_production_merchant_id',
+      'openpay_production_public_key',
+      'openpay_production_private_key',
+    ];
+    for (const f of fields) {
+      const v = this.openpayConfig[f];
+      if (v === undefined || v === null || String(v).trim() === '') {
+        continue;
+      }
+      if (String(v).startsWith('••••••••')) {
+        continue;
+      }
+      payload[f] = v;
+    }
+    this.storeService.updateOpenpayConfig(payload).subscribe({
+      next: () => {
+        this.openpaySuccess = 'Configuración guardada';
+        this.openpaySaving = false;
+        this.loadOpenpayConfig();
+      },
+      error: (err: any) => {
+        const e = err?.error;
+        this.openpayError =
+          (e?.errors
+            ? ([] as string[]).concat(...(Object.values(e.errors) as string[][])).join(' ')
+            : '') || e?.message || 'Error al guardar';
+        this.openpaySaving = false;
+      },
+    });
   }
 
   // ── Incadea Sync ──

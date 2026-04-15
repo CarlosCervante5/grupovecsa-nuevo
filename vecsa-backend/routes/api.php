@@ -630,6 +630,7 @@ Route::prefix('boutique')->middleware('bandwidth_usage')->group(function () {
     Route::post('/catalog/categories', [BoutiqueCatalogController::class, 'categories']);
     Route::post('/checkout/create_guest_order', [BoutiqueCheckoutController::class, 'createGuestOrder']);
     Route::post('/checkout/shipping_quote_public', [BoutiqueCheckoutController::class, 'shippingQuote']);
+    Route::post('/checkout/openpay_public_config', [SettingsController::class, 'openpayCheckoutPublic']);
 });
 
 // Boutique Cliente Autenticado
@@ -685,6 +686,10 @@ Route::prefix('boutique/admin')->middleware(['bandwidth_usage', 'auth:sanctum'])
 
     // Payments
     Route::post('/payments/confirm_manual', [BoutiquePaymentController::class, 'confirmManual']);
+
+    // OpenPay (config tienda; documentación https://documents.openpay.mx/docs/api/)
+    Route::post('/openpay/config', [SettingsController::class, 'openpay']);
+    Route::post('/openpay/update', [SettingsController::class, 'updateOpenpay']);
 
     // Inventory
     Route::post('/inventory/update', [BoutiqueInventoryController::class, 'update']);
@@ -815,6 +820,8 @@ Route::prefix('settings')->middleware(['bandwidth_usage', 'auth:sanctum'])->grou
     Route::post('/stripe', [SettingsController::class, 'stripe'])->middleware('role:developer|administrator');
     Route::post('/stripe/update', [SettingsController::class, 'updateStripe'])->middleware('role:developer|administrator');
     Route::post('/stripe/publishable_key', [SettingsController::class, 'publishableKey']);
+    Route::post('/openpay', [SettingsController::class, 'openpay'])->middleware('role:developer|administrator');
+    Route::post('/openpay/update', [SettingsController::class, 'updateOpenpay'])->middleware('role:developer|administrator');
 });
 
 // Fin Settings

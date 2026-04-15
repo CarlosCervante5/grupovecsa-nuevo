@@ -1064,6 +1064,72 @@
       }
     }
 
+    <!-- ═══ OPENPAY ═══ -->
+    @if (activeSection === 'openpay') {
+      <h1 class="store-title">Pagos OpenPay (Boutique)</h1>
+      <p class="store-subtitle">
+        Credenciales para cobros con tarjeta vía
+        <a href="https://documents.openpay.mx/docs/api/" target="_blank" rel="noopener noreferrer">OpenPay API</a>.
+        El checkout público usa <code>POST /api/boutique/checkout/openpay_public_config</code> (merchant id y llave pública).
+      </p>
+
+      @if (openpayLoading) {
+        <div class="crud-loading"><div class="spinner"></div><span>Cargando configuración...</span></div>
+      }
+
+      @if (openpayError) {
+        <div class="alert-error" style="margin-bottom:12px;"><span class="material-icons">error</span> {{ openpayError }}</div>
+      }
+      @if (openpaySuccess) {
+        <div class="alert-success" style="margin-bottom:12px;"><span class="material-icons">check_circle</span> {{ openpaySuccess }}</div>
+      }
+
+      @if (!openpayLoading) {
+        <div class="store-card" style="margin-bottom:16px;">
+          <h3 class="card-title"><span class="material-icons" style="color:#1c69d4;">toggle_on</span> Modo activo</h3>
+          <p style="font-size:0.85rem;color:#64748b;margin:0 0 12px;">Sandbox para pruebas; Producción para cobros reales.</p>
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+            <span [style.font-weight]="openpayConfig['openpay_mode'] !== 'production' ? '700' : '400'">Sandbox</span>
+            <label class="store-switch">
+              <input type="checkbox" [checked]="openpayConfig['openpay_mode'] === 'production'" (change)="toggleOpenpayMode()" />
+              <span class="store-switch-slider"></span>
+            </label>
+            <span [style.font-weight]="openpayConfig['openpay_mode'] === 'production' ? '700' : '400'">Producción</span>
+            <span class="badge" [class.badge-available]="openpayConfig['openpay_mode'] === 'production'" [class.badge-sold]="openpayConfig['openpay_mode'] !== 'production'" style="margin-left:8px;">
+              {{ openpayConfig['openpay_mode'] === 'production' ? 'PROD' : 'SANDBOX' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="charts-grid" style="grid-template-columns:1fr 1fr;">
+          <div class="store-card">
+            <h3 class="card-title"><span class="material-icons">science</span> Sandbox</h3>
+            <label class="modal-label">ID de comercio</label>
+            <input class="modal-input" type="text" [(ngModel)]="openpayConfig['openpay_sandbox_merchant_id']" placeholder="mxxxxxxxxxxxx" />
+            <label class="modal-label">Llave pública (pk_)</label>
+            <input class="modal-input" type="text" [(ngModel)]="openpayConfig['openpay_sandbox_public_key']" placeholder="pk_..." />
+            <label class="modal-label">Llave privada (sk_) — dejar vacío para no cambiar</label>
+            <input class="modal-input" type="password" autocomplete="new-password" [(ngModel)]="openpayConfig['openpay_sandbox_private_key']" placeholder="sk_..." />
+          </div>
+          <div class="store-card">
+            <h3 class="card-title"><span class="material-icons">rocket_launch</span> Producción</h3>
+            <label class="modal-label">ID de comercio</label>
+            <input class="modal-input" type="text" [(ngModel)]="openpayConfig['openpay_production_merchant_id']" />
+            <label class="modal-label">Llave pública (pk_)</label>
+            <input class="modal-input" type="text" [(ngModel)]="openpayConfig['openpay_production_public_key']" />
+            <label class="modal-label">Llave privada (sk_) — dejar vacío para no cambiar</label>
+            <input class="modal-input" type="password" autocomplete="new-password" [(ngModel)]="openpayConfig['openpay_production_private_key']" />
+          </div>
+        </div>
+
+        <div style="margin-top:16px;">
+          <button class="store-action-btn" (click)="saveOpenpayConfig()" [disabled]="openpaySaving">
+            @if (openpaySaving) { <div class="spinner-sm"></div> Guardando... } @else { <span class="material-icons">save</span> Guardar }
+          </button>
+        </div>
+      }
+    }
+
     <!-- ═══ INCADEA SYNC ═══ -->
     @if (activeSection === 'incadea') {
       <h1 class="store-title">Sincronización Incadea → Boutique</h1>

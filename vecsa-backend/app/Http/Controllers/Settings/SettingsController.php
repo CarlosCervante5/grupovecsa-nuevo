@@ -30,6 +30,33 @@ class SettingsController extends Controller
         'stripe_live_webhook_secret' => 'whsec_',
     ];
 
+    private const OPENPAY_SECRET_KEYS = [
+        'openpay_sandbox_private_key',
+        'openpay_production_private_key',
+    ];
+
+    private const OPENPAY_PUBLIC_KEYS = [
+        'openpay_sandbox_public_key',
+        'openpay_production_public_key',
+    ];
+
+    private const OPENPAY_MERCHANT_KEYS = [
+        'openpay_sandbox_merchant_id',
+        'openpay_production_merchant_id',
+    ];
+
+    /** Llaves públicas OpenPay deben empezar con pk_ (sandbox o producción). */
+    private const OPENPAY_PUBLIC_PREFIX_RULES = [
+        'openpay_sandbox_public_key' => 'pk_',
+        'openpay_production_public_key' => 'pk_',
+    ];
+
+    /** Llaves privadas OpenPay (API) suelen empezar con sk_. */
+    private const OPENPAY_PRIVATE_PREFIX_RULES = [
+        'openpay_sandbox_private_key' => 'sk_',
+        'openpay_production_private_key' => 'sk_',
+    ];
+
     public function stripe(Request $request)
     {
         try {
@@ -114,6 +141,125 @@ class SettingsController extends Controller
             ]);
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al obtener la llave publicable', $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Configuración OpenPay (tienda). Documentación: https://documents.openpay.mx/docs/api/
+     */
+    public function openpay(Request $request)
+    {
+        try {
+            $data = [
+                'openpay_mode' => SystemSetting::get('openpay_mode', 'sandbox'),
+            ];
+
+            foreach (self::OPENPAY_MERCHANT_KEYS as $key) {
+                $data[$key] = SystemSetting::get($key, '');
+            }
+
+            foreach (self::OPENPAY_PUBLIC_KEYS as $key) {
+                $data[$key] = SystemSetting::get($key, '');
+            }
+
+            foreach (self::OPENPAY_SECRET_KEYS as $key) {
+                $raw = SystemSetting::getEncrypted($key, '');
+                $data[$key] = $this->mask($raw);
+            }
+
+            return ApiResponseHelper::apiSuccess(200, 'Configuración de OpenPay obtenida', $data);
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al obtener la configuración de OpenPay', $e->getMessage(), 500);
+        }
+    }
+
+    public function updateOpenpay(Request $request)
+    {
+        try {
+            $errors = [];
+
+            foreach (self::OPENPAY_PUBLIC_PREFIX_RULES as $field => $prefix) {
+                $value = $request->input($field);
+                if (! empty($value) && ! str_starts_with($value, $prefix)) {
+                    $errors[$field] = ["El campo {$field} debe comenzar con {$prefix}"];
+                }
+            }
+
+            foreach (self::OPENPAY_PRIVATE_PREFIX_RULES as $field => $prefix) {
+                $value = $request->input($field);
+                if (! empty($value) && ! str_starts_with($value, $prefix)) {
+                    $errors[$field] = ["El campo {$field} debe comenzar con {$prefix}"];
+                }
+            }
+
+            foreach (self::OPENPAY_MERCHANT_KEYS as $field) {
+                $value = $request->input($field);
+                if (! empty($value) && ! preg_match('/^[a-zA-Z0-9_-]{4,}$/', $value)) {
+                    $errors[$field] = ['El ID de comercio no tiene un formato válido'];
+                }
+            }
+
+            if (! empty($errors)) {
+                return response()->json([
+                    'status' => 422,
+                    'message' => 'Error de validación',
+                    'errors' => $errors,
+                ], 422);
+            }
+
+            if ($request->has('openpay_mode')) {
+                $mode = $request->input('openpay_mode');
+                if (in_array($mode, ['sandbox', 'production'], true)) {
+                    SystemSetting::set('openpay_mode', $mode);
+                }
+            }
+
+            foreach (self::OPENPAY_MERCHANT_KEYS as $key) {
+                $value = $request->input($key);
+                if ($value !== null && $value !== '') {
+                    SystemSetting::set($key, $value);
+                }
+            }
+
+            foreach (self::OPENPAY_PUBLIC_KEYS as $key) {
+                $value = $request->input($key);
+                if (! empty($value)) {
+                    SystemSetting::set($key, $value);
+                }
+            }
+
+            foreach (self::OPENPAY_SECRET_KEYS as $key) {
+                $value = $request->input($key);
+                if (! empty($value)) {
+                    SystemSetting::setEncrypted($key, $value);
+                }
+            }
+
+            return ApiResponseHelper::apiSuccess(200, 'Configuración de OpenPay actualizada correctamente');
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al actualizar la configuración de OpenPay', $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Datos no sensibles para el checkout (OpenPay.js en el navegador).
+     */
+    public function openpayCheckoutPublic(Request $request)
+    {
+        try {
+            $mode = SystemSetting::get('openpay_mode', 'sandbox');
+            $suffix = $mode === 'production' ? 'production' : 'sandbox';
+
+            $merchantId = SystemSetting::get("openpay_{$suffix}_merchant_id", '');
+            $publicKey = SystemSetting::get("openpay_{$suffix}_public_key", '');
+
+            return ApiResponseHelper::apiSuccess(200, 'Configuración pública OpenPay', [
+                'merchant_id' => $merchantId,
+                'public_key' => $publicKey,
+                'sandbox' => $mode !== 'production',
+            ]);
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al leer OpenPay', $e->getMessage(), 500);
         }
     }
 

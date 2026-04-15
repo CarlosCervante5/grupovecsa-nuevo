@@ -74,6 +74,12 @@ export class DeveloperDashboardComponent implements OnInit, AfterViewInit, OnDes
   stripeError = '';
   stripeSuccess = '';
 
+  openpayConfig: Record<string, string> = {};
+  openpayLoading = false;
+  openpaySaving = false;
+  openpayError = '';
+  openpaySuccess = '';
+
   stats: { label: string; value: string | number; icon: string; color: string; loading: boolean }[] = [
     { label: 'Vehículos publicados', value: '—', icon: 'directions_car', color: '#1c69d4', loading: true },
     { label: 'Productos Boutique', value: '—', icon: 'inventory_2', color: '#7c3aed', loading: true },
@@ -529,6 +535,8 @@ export class DeveloperDashboardComponent implements OnInit, AfterViewInit, OnDes
       this.loadBenchmark();
     } else if (key === 'stripe_config') {
       this.loadStripeConfig();
+    } else if (key === 'openpay_config') {
+      this.loadOpenpayConfig();
     } else {
       this.loadData();
       if (key === 'users' && this.dealershipOptions.length === 0) {
@@ -997,6 +1005,64 @@ export class DeveloperDashboardComponent implements OnInit, AfterViewInit, OnDes
 
   toggleStripeMode(): void {
     this.stripeConfig.stripe_mode = this.stripeConfig.stripe_mode === 'live' ? 'test' : 'live';
+  }
+
+  loadOpenpayConfig(): void {
+    this.openpayLoading = true;
+    this.openpayError = '';
+    this.openpaySuccess = '';
+    this.crud.fetch('settings/openpay', 'POST', {}).subscribe({
+      next: (res: any) => {
+        this.openpayConfig = { ...(res?.data || {}) };
+        this.openpayLoading = false;
+      },
+      error: (err: any) => {
+        this.openpayError = err?.error?.message || 'Error al cargar OpenPay';
+        this.openpayLoading = false;
+      },
+    });
+  }
+
+  saveOpenpayConfig(): void {
+    this.openpaySaving = true;
+    this.openpayError = '';
+    this.openpaySuccess = '';
+    const payload: Record<string, unknown> = {
+      openpay_mode: this.openpayConfig['openpay_mode'] || 'sandbox',
+    };
+    const fields = [
+      'openpay_sandbox_merchant_id',
+      'openpay_sandbox_public_key',
+      'openpay_sandbox_private_key',
+      'openpay_production_merchant_id',
+      'openpay_production_public_key',
+      'openpay_production_private_key',
+    ];
+    fields.forEach((f) => {
+      const val = this.openpayConfig[f];
+      if (val && !String(val).startsWith('••••••••')) {
+        payload[f] = val;
+      }
+    });
+    this.crud.fetch('settings/openpay/update', 'POST', payload).subscribe({
+      next: () => {
+        this.openpaySuccess = 'Configuración OpenPay guardada';
+        this.openpaySaving = false;
+        this.loadOpenpayConfig();
+      },
+      error: (err: any) => {
+        const errors = err?.error?.errors;
+        this.openpayError = errors
+          ? ([] as string[]).concat(...(Object.values(errors) as string[][])).join(', ')
+          : err?.error?.message || 'Error al guardar';
+        this.openpaySaving = false;
+      },
+    });
+  }
+
+  toggleOpenpayMode(): void {
+    this.openpayConfig['openpay_mode'] =
+      this.openpayConfig['openpay_mode'] === 'production' ? 'sandbox' : 'production';
   }
 
   navigate(route: string): void { this.router.navigateByUrl(route); }

@@ -43,6 +43,10 @@
       <span class="material-icons">credit_card</span>
       Configuración Stripe
     </button>
+    <button class="dev-nav-item" [class.active]="activeSection === 'openpay_config'" (click)="selectSection('openpay_config')">
+      <span class="material-icons">account_balance</span>
+      Configuración OpenPay
+    </button>
     <button class="dev-nav-item" (click)="navigate('/admin/developer/incadea-sync')">
       <span class="material-icons">sync</span>
       Sync Incadea
@@ -394,6 +398,85 @@
           <button class="crud-create-btn" (click)="saveStripeConfig()" [disabled]="stripeSaving">
             @if (stripeSaving) { <div class="spinner-sm"></div> } @else { <span class="material-icons">save</span> }
             Guardar Configuración
+          </button>
+        </div>
+      }
+    }
+
+    <!-- OPENPAY CONFIG -->
+    @if (activeSection === 'openpay_config') {
+      <h1 class="dev-title">Configuración OpenPay</h1>
+      <p class="dev-subtitle">
+        Pagos de la tienda (Boutique). Referencia:
+        <a href="https://documents.openpay.mx/docs/api/" target="_blank" rel="noopener noreferrer">documentación OpenPay</a>.
+      </p>
+
+      @if (openpayLoading) {
+        <div class="crud-loading"><div class="spinner"></div><span>Cargando...</span></div>
+      }
+
+      @if (openpayError) {
+        <div class="stripe-alert stripe-alert-error"><span class="material-icons">error</span> {{ openpayError }}</div>
+      }
+      @if (openpaySuccess) {
+        <div class="stripe-alert stripe-alert-success"><span class="material-icons">check_circle</span> {{ openpaySuccess }}</div>
+      }
+
+      @if (!openpayLoading) {
+        <div class="dev-card">
+          <div class="stripe-mode-header">
+            <h3 class="dev-card-title"><span class="material-icons">toggle_on</span> Modo</h3>
+            <span class="stripe-badge" [class.stripe-badge-test]="openpayConfig['openpay_mode'] !== 'production'" [class.stripe-badge-live]="openpayConfig['openpay_mode'] === 'production'">
+              {{ openpayConfig['openpay_mode'] === 'production' ? 'PRODUCCIÓN' : 'SANDBOX' }}
+            </span>
+          </div>
+          <div class="stripe-mode-toggle">
+            <span class="stripe-mode-label" [class.active]="openpayConfig['openpay_mode'] !== 'production'">Sandbox</span>
+            <label class="stripe-switch">
+              <input type="checkbox" [checked]="openpayConfig['openpay_mode'] === 'production'" (change)="toggleOpenpayMode()" />
+              <span class="stripe-slider"></span>
+            </label>
+            <span class="stripe-mode-label" [class.active]="openpayConfig['openpay_mode'] === 'production'">Producción</span>
+          </div>
+        </div>
+
+        <div class="stripe-keys-grid">
+          <div class="dev-card">
+            <h3 class="dev-card-title"><span class="material-icons">science</span> Sandbox</h3>
+            <div class="stripe-field">
+              <label class="modal-label">ID de comercio</label>
+              <input class="modal-input" type="text" [value]="openpayConfig['openpay_sandbox_merchant_id'] || ''" (input)="openpayConfig['openpay_sandbox_merchant_id'] = $any($event.target).value" />
+            </div>
+            <div class="stripe-field">
+              <label class="modal-label">Llave pública (pk_)</label>
+              <input class="modal-input" type="text" [value]="openpayConfig['openpay_sandbox_public_key'] || ''" (input)="openpayConfig['openpay_sandbox_public_key'] = $any($event.target).value" />
+            </div>
+            <div class="stripe-field">
+              <label class="modal-label">Llave privada (sk_)</label>
+              <input class="modal-input" type="text" [value]="openpayConfig['openpay_sandbox_private_key'] || ''" (input)="openpayConfig['openpay_sandbox_private_key'] = $any($event.target).value" />
+            </div>
+          </div>
+          <div class="dev-card">
+            <h3 class="dev-card-title"><span class="material-icons">rocket_launch</span> Producción</h3>
+            <div class="stripe-field">
+              <label class="modal-label">ID de comercio</label>
+              <input class="modal-input" type="text" [value]="openpayConfig['openpay_production_merchant_id'] || ''" (input)="openpayConfig['openpay_production_merchant_id'] = $any($event.target).value" />
+            </div>
+            <div class="stripe-field">
+              <label class="modal-label">Llave pública (pk_)</label>
+              <input class="modal-input" type="text" [value]="openpayConfig['openpay_production_public_key'] || ''" (input)="openpayConfig['openpay_production_public_key'] = $any($event.target).value" />
+            </div>
+            <div class="stripe-field">
+              <label class="modal-label">Llave privada (sk_)</label>
+              <input class="modal-input" type="text" [value]="openpayConfig['openpay_production_private_key'] || ''" (input)="openpayConfig['openpay_production_private_key'] = $any($event.target).value" />
+            </div>
+          </div>
+        </div>
+
+        <div class="stripe-actions">
+          <button class="crud-create-btn" (click)="saveOpenpayConfig()" [disabled]="openpaySaving">
+            @if (openpaySaving) { <div class="spinner-sm"></div> } @else { <span class="material-icons">save</span> }
+            Guardar OpenPay
           </button>
         </div>
       }
