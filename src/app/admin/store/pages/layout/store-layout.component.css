@@ -497,6 +497,44 @@
   border-color: #1554b0;
 }
 
+/* OpenPay toggle (mismo patrón que dev/stripe) */
+.store-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+.store-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.store-switch-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background: #cbd5e1;
+  border-radius: 24px;
+  transition: 0.2s;
+}
+.store-switch-slider::before {
+  position: absolute;
+  content: '';
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background: #fff;
+  border-radius: 50%;
+  transition: 0.2s;
+}
+.store-switch input:checked + .store-switch-slider {
+  background: #1c69d4;
+}
+.store-switch input:checked + .store-switch-slider::before {
+  transform: translateX(20px);
+}
+
 /* Incadea Sync */
 .chip-tag {
   display: inline-flex; align-items: center; gap: 4px;
