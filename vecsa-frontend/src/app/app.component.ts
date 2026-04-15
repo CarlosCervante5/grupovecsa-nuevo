@@ -38,6 +38,9 @@ export class AppComponent implements OnDestroy {
                 const url = navEnd.urlAfterRedirects || navEnd.url;
                 this.isHomeRoute = url === '/' || navEnd.url === '/';
                 this.hideChrome = url.startsWith('/admin/');
+                if (localStorage.getItem('user_token') && url.startsWith('/admin/')) {
+                    this._authService.refreshPermissionsInStorage().subscribe({ error: () => {} });
+                }
             });
     }
 

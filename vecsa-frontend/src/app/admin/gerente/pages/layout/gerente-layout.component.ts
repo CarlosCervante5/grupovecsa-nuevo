@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { AuthService } from 'src/app/auth/services/auth.service';
 
 @Component({
   selector: 'app-gerente-layout',
@@ -7,27 +9,58 @@ import { Router } from '@angular/router';
   styleUrls: ['./gerente-layout.component.css'],
   standalone: false,
 })
-export class GerenteLayoutComponent {
+export class GerenteLayoutComponent implements OnInit, OnDestroy {
   user: any = null;
   role = '';
   name = '';
   permissions: string[] = [];
 
-  readonly navItems = [
-    { label: 'Dashboard', icon: 'dashboard', route: '/admin/gerente' },
-  ];
+  readonly navItems = [{ label: 'Dashboard', icon: 'dashboard', route: '/admin/gerente' }];
 
   panelItems: { label: string; icon: string; route: string }[] = [];
   dynamicItems: { label: string; icon: string; route: string }[] = [];
 
-  constructor(private router: Router) {
-    try { this.user = JSON.parse(localStorage.getItem('user')!); } catch {}
-    try { this.permissions = JSON.parse(localStorage.getItem('permissions') || '[]'); } catch {}
+  private permSub?: Subscription;
+
+  constructor(
+    private router: Router,
+    private auth: AuthService,
+  ) {
+    this.loadSession();
+    this.rebuildNavLists();
+  }
+
+  ngOnInit(): void {
+    this.permSub = this.auth.permissionsRevision$.subscribe(() => {
+      try {
+        this.permissions = JSON.parse(localStorage.getItem('permissions') || '[]');
+      } catch {
+        this.permissions = [];
+      }
+      this.rebuildNavLists();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.permSub?.unsubscribe();
+  }
+
+  private loadSession(): void {
+    try {
+      this.user = JSON.parse(localStorage.getItem('user')!);
+    } catch {}
+    try {
+      this.permissions = JSON.parse(localStorage.getItem('permissions') || '[]');
+    } catch {}
     this.role = localStorage.getItem('role') || '';
     const profile = JSON.parse(localStorage.getItem('profile') || '{}');
     this.name = profile?.name || this.user?.nickname || 'Usuario';
+  }
 
-    // Paneles de roles
+  private rebuildNavLists(): void {
+    this.panelItems = [];
+    this.dynamicItems = [];
+
     const panelLinks: { perm: string; label: string; icon: string; route: string }[] = [
       { perm: 'access gestor', label: 'Gestor', icon: 'manage_accounts', route: '/admin/gestor' },
       { perm: 'access receptionist', label: 'Recepción', icon: 'assignment_ind', route: '/admin/receptionist' },
@@ -44,7 +77,6 @@ export class GerenteLayoutComponent {
       }
     }
 
-    // Herramientas
     const toolLinks: { perm: string; label: string; icon: string; route: string }[] = [
       { perm: 'access store_management', label: 'Tienda', icon: 'storefront', route: '/admin/store' },
       { perm: 'access benchmark', label: 'Benchmark ADS', icon: 'analytics', route: '/admin/benchmark' },
@@ -58,5 +90,8 @@ export class GerenteLayoutComponent {
     }
   }
 
-  logout(): void { localStorage.clear(); this.router.navigateByUrl('/auth/login'); }
+  logout(): void {
+    localStorage.clear();
+    this.router.navigateByUrl('/auth/login');
+  }
 }

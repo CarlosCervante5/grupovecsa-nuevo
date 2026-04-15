@@ -24,6 +24,9 @@ export class AuthService {
     private authStatus = new BehaviorSubject<boolean>(this.hasToken());
     public authStatus$ = this.authStatus.asObservable();
 
+    private permissionsRevision = new BehaviorSubject<number>(0);
+    public permissionsRevision$ = this.permissionsRevision.asObservable();
+
     // Global Url
     private url: string = environment.baseUrl;
 
@@ -61,6 +64,7 @@ export class AuthService {
         return this.fetchPermissions().pipe(
             tap((perms) => {
                 localStorage.setItem('permissions', JSON.stringify(perms));
+                this.permissionsRevision.next(this.permissionsRevision.value + 1);
             }),
             map(() => undefined)
         );
@@ -97,6 +101,7 @@ export class AuthService {
                     const { token, ...userData } = full.data;
                     localStorage.setItem('user_data', JSON.stringify(userData));
                     localStorage.setItem('permissions', JSON.stringify(full.data.permissions ?? []));
+                    this.permissionsRevision.next(this.permissionsRevision.value + 1);
                     this.authStatus.next(true);
                 }
             })

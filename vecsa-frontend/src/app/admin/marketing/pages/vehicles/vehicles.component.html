@@ -92,12 +92,12 @@
           <td>{{ vehicle.mileage | number:'1.0-0' }} km</td>
           <td>
             <div class="row-actions">
-              <button class="act-btn edit" matTooltip="Editar" [routerLink]="['/admin/marketing/vehicle', vehicle.uuid]">
+              <button type="button" class="act-btn edit" matTooltip="Editar" (click)="openEditVehicleSheet(vehicle.uuid)">
                 <span class="material-icons">edit</span>
               </button>
-              <button class="act-btn view" matTooltip="Ver detalle" [routerLink]="['/admin/marketing/vehicle', vehicle.uuid]">
+              <a class="act-btn view" matTooltip="Ver en sitio público" [routerLink]="['/compra-tu-auto/detail', vehicle.uuid]" target="_blank" rel="noopener noreferrer">
                 <span class="material-icons">visibility</span>
-              </button>
+              </a>
             </div>
           </td>
         </tr>

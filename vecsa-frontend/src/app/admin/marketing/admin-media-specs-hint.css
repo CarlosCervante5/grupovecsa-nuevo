@@ -1,0 +1,37 @@
+/* Bloque informativo: medidas recomendadas para imágenes en marketing admin */
+.admin-media-specs {
+  margin: 0 0 20px;
+  padding: 12px 14px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  color: #1e3a5f;
+  line-height: 1.55;
+}
+
+.admin-media-specs strong {
+  color: #0c4a6e;
+}
+
+.admin-media-specs ul {
+  margin: 8px 0 0;
+  padding-left: 1.15em;
+}
+
+.admin-media-specs li {
+  margin: 5px 0;
+}
+
+.admin-media-specs__note {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.78rem;
+  color: #475569;
+}
+
+/* Variante dentro de diálogos Material (menos margen lateral) */
+.admin-media-specs--dialog {
+  margin-top: 6px;
+  margin-bottom: 0;
+}

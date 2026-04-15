@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { AuthService } from 'src/app/auth/services/auth.service';
 
 @Component({
   selector: 'app-staff-layout',
@@ -7,7 +9,7 @@ import { Router } from '@angular/router';
   styleUrls: ['./staff-layout.component.css'],
   standalone: false,
 })
-export class StaffLayoutComponent {
+export class StaffLayoutComponent implements OnInit, OnDestroy {
   user: any = null;
   role = '';
   name = '';
@@ -21,13 +23,45 @@ export class StaffLayoutComponent {
 
   dynamicItems: { label: string; icon: string; route: string }[] = [];
 
-  constructor(private router: Router) {
-    try { this.user = JSON.parse(localStorage.getItem('user')!); } catch {}
-    try { this.permissions = JSON.parse(localStorage.getItem('permissions') || '[]'); } catch {}
+  private permSub?: Subscription;
+
+  constructor(
+    private router: Router,
+    private auth: AuthService,
+  ) {
+    this.loadSession();
+    this.rebuildDynamicItems();
+  }
+
+  ngOnInit(): void {
+    this.permSub = this.auth.permissionsRevision$.subscribe(() => {
+      try {
+        this.permissions = JSON.parse(localStorage.getItem('permissions') || '[]');
+      } catch {
+        this.permissions = [];
+      }
+      this.rebuildDynamicItems();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.permSub?.unsubscribe();
+  }
+
+  private loadSession(): void {
+    try {
+      this.user = JSON.parse(localStorage.getItem('user')!);
+    } catch {}
+    try {
+      this.permissions = JSON.parse(localStorage.getItem('permissions') || '[]');
+    } catch {}
     this.role = localStorage.getItem('role') || '';
     const profile = JSON.parse(localStorage.getItem('profile') || '{}');
     this.name = profile?.name || this.user?.nickname || 'Usuario';
+  }
 
+  private rebuildDynamicItems(): void {
+    this.dynamicItems = [];
     if (this.permissions.includes('access store_management')) {
       this.dynamicItems.push({ label: 'Tienda', icon: 'storefront', route: '/admin/store' });
     }
@@ -36,5 +70,8 @@ export class StaffLayoutComponent {
     }
   }
 
-  logout(): void { localStorage.clear(); this.router.navigateByUrl('/auth/login'); }
+  logout(): void {
+    localStorage.clear();
+    this.router.navigateByUrl('/auth/login');
+  }
 }

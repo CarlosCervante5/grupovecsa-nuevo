@@ -12,7 +12,8 @@ import Swal from 'sweetalert2';
 import { VehicleService, } from '@services/vehicle.service';
 
 import { Vehicle, SearchResponse, LoadVehiclesResponse} from '@interfaces/vehicle_data.interface';
-import { StoreVehicleComponent } from '../../components/store-vehicle/store-vehicle.component'; 
+import { StoreVehicleComponent } from '../../components/store-vehicle/store-vehicle.component';
+import { UpdateVehicleComponent } from '../../components/update-vehicle/update-vehicle.component';
 
 
 
@@ -279,6 +280,18 @@ export class VehiclesComponent {
         if(dataFromChild != undefined && dataFromChild.reload === true ){        
           this.getVehicles( this.pageIndex );
         }      
+      });
+    }
+
+    /** Edición: no hay ruta /admin/marketing/vehicle/:id; se usa el mismo panel que en tarjetas legacy */
+    openEditVehicleSheet(uuid: string): void {
+      const ref = this._bottomSheet.open(UpdateVehicleComponent, {
+        data: { uuid },
+      });
+      ref.afterDismissed().subscribe((dataFromChild) => {
+        if (dataFromChild != undefined && dataFromChild.reload === true) {
+          this.getVehicles(this.pageIndex);
+        }
       });
     }
 
