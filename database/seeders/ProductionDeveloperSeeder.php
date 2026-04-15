@@ -54,6 +54,7 @@ class ProductionDeveloperSeeder extends Seeder
             'access bodywork_paint_technician', 'access spare_parts',
             'access marketing',
             'access administrator', 'access developer',
+            'access gestor_promotions', 'access gestor_scheduled_events', 'access gestor_rewards',
         ];
 
         foreach ($permissions as $perm) {
@@ -77,6 +78,15 @@ class ProductionDeveloperSeeder extends Seeder
 
         $gerentePermissions = Permission::where('name', 'like', 'access %')->get();
         $roles['gerente']->syncPermissions($gerentePermissions);
+
+        $gestorNav = [
+            'access gestor_promotions',
+            'access gestor_scheduled_events',
+            'access gestor_rewards',
+        ];
+        foreach ($gestorNav as $navPerm) {
+            $roles['gestor']->givePermissionTo($navPerm);
+        }
 
         $devUser = User::withTrashed()->where('email', $email)->first();
 
