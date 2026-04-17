@@ -28,8 +28,11 @@ const routes: Routes = [
   },
   {
     path: 'vehicle-inventory',
-    loadChildren: () => import('./vehicle-inventory/vehicle-inventory.module').then(m => m.VehicleInventoryModule),
     canMatch: [VehicleInventoryGuard],
+    loadComponent: () =>
+      import('./vehicle-inventory/vehicle-inventory-redirect.component').then(
+        (m) => m.VehicleInventoryRedirectComponent,
+      ),
   },
   { path: 'gestor',
     loadChildren: () => import('./gestor/gestor.module').then( m => m.GestorModule),

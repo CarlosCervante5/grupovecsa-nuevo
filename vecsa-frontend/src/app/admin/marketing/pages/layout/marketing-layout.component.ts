@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/auth/services/auth.service';
-import { adminDashboardUrl } from 'src/app/admin/utils/admin-route.util';
+import { adminDashboardUrl, adminVehicleInventoryUrl } from 'src/app/admin/utils/admin-route.util';
 
 @Component({
   selector: 'app-marketing-layout',
@@ -78,7 +78,7 @@ export class MarketingLayoutComponent implements OnInit, OnDestroy {
       this.dynamicItems.push({
         label: 'Inventario de vehículos',
         icon: 'inventory_2',
-        route: '/admin/vehicle-inventory',
+        route: adminVehicleInventoryUrl(this.role) ?? '/admin/vehicle-inventory',
       });
     }
   }

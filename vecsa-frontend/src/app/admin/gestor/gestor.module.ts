@@ -24,6 +24,7 @@ import { UpdateRewardsComponent } from './components/update-rewards/update-rewar
 import { NewNavComponent } from 'src/app/shared/versiones-nav/new-nav/new-nav.component';
 import { GestorLayoutComponent } from './pages/layout/gestor-layout.component';
 import { ExperienceStoriesSharedModule } from '../shared/experience-stories/experience-stories-shared.module';
+import { VehicleStockModule } from '../shared/vehicle-stock/vehicle-stock.module';
 
 @NgModule({
   declarations: [
@@ -53,6 +54,7 @@ import { ExperienceStoriesSharedModule } from '../shared/experience-stories/expe
     ReactiveFormsModule,
     NewNavComponent,
     ExperienceStoriesSharedModule,
+    VehicleStockModule,
   ]
 })
 export class GestorModule { }

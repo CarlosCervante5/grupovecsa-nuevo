@@ -25,7 +25,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   ];
 
   readonly quickLinks = [
-    { label: 'Inventario de vehículos', icon: 'inventory_2', route: '/admin/vehicle-inventory' },
+    { label: 'Inventario de vehículos', icon: 'inventory_2', route: '/admin/marketing/vehicles' },
     { label: 'Home Slides', icon: 'image', route: '/admin/marketing/home-slides' },
     { label: 'Testimonios', icon: 'format_quote', route: '/admin/marketing/home-testimonials' },
   ];

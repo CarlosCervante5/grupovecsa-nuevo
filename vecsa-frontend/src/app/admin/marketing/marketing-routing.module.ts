@@ -6,6 +6,8 @@ import { HomeTestimonialsComponent } from './pages/home-testimonials/home-testim
 import { BoutiqueBannersComponent } from './pages/boutique-banners/boutique-banners.component';
 import { MarketingLayoutComponent } from './pages/layout/marketing-layout.component';
 import { ExperienceStoriesComponent } from './pages/experience-stories/experience-stories.component';
+import { VehiclesComponent } from '../shared/vehicle-stock/pages/vehicles/vehicles.component';
+import { VehicleInventoryGuard } from '../vehicle-inventory/guards/vehicle-inventory.guard';
 
 const routes: Routes = [
   {
@@ -13,7 +15,11 @@ const routes: Routes = [
     component: MarketingLayoutComponent,
     children: [
       { path: '', component: DashboardComponent },
-      { path: 'vehicles', redirectTo: '/admin/vehicle-inventory', pathMatch: 'full' },
+      {
+        path: 'vehicles',
+        component: VehiclesComponent,
+        canActivate: [VehicleInventoryGuard],
+      },
       { path: 'home-slides', component: HomeSlidesComponent },
       { path: 'home-testimonials', component: HomeTestimonialsComponent },
       { path: 'boutique-banners', component: BoutiqueBannersComponent },

@@ -13,6 +13,7 @@ import { HomeTestimonialsComponent } from './pages/home-testimonials/home-testim
 import { BoutiqueBannersComponent } from './pages/boutique-banners/boutique-banners.component';
 import { MarketingLayoutComponent } from './pages/layout/marketing-layout.component';
 import { ExperienceStoriesSharedModule } from '../shared/experience-stories/experience-stories-shared.module';
+import { VehicleStockModule } from '../shared/vehicle-stock/vehicle-stock.module';
 
 @NgModule({
   declarations: [
@@ -32,6 +33,7 @@ import { ExperienceStoriesSharedModule } from '../shared/experience-stories/expe
     ReactiveFormsModule,
     SkCubeComponent,
     ExperienceStoriesSharedModule,
+    VehicleStockModule,
   ],
 })
 export class MarketingModule {}
