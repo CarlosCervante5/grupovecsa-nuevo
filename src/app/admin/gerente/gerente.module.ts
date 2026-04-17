@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { GerenteRoutingModule } from './gerente-routing.module';
 import { GerenteDashboardComponent } from './pages/dashboard/gerente-dashboard.component';
 import { GerenteLayoutComponent } from './pages/layout/gerente-layout.component';
+import { VehicleStockModule } from '../shared/vehicle-stock/vehicle-stock.module';
 
 @NgModule({
   declarations: [
@@ -15,6 +16,7 @@ import { GerenteLayoutComponent } from './pages/layout/gerente-layout.component'
     CommonModule,
     GerenteRoutingModule,
     FormsModule,
+    VehicleStockModule,
   ]
 })
 export class GerenteModule { }

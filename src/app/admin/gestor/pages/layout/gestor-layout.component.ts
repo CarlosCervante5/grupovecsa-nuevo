@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/auth/services/auth.service';
-import { adminDashboardUrl } from 'src/app/admin/utils/admin-route.util';
+import { adminDashboardUrl, adminVehicleInventoryUrl } from 'src/app/admin/utils/admin-route.util';
 import { expandLegacyGestorPermissions, GESTOR_FEATURE_PERMISSIONS } from 'src/app/admin/utils/gestor-feature-permissions';
 
 @Component({
@@ -98,7 +98,7 @@ export class GestorLayoutComponent implements OnInit, OnDestroy {
       this.dynamicItems.push({
         label: 'Inventario de vehículos',
         icon: 'inventory_2',
-        route: '/admin/vehicle-inventory',
+        route: adminVehicleInventoryUrl(this.role) ?? '/admin/vehicle-inventory',
       });
     }
   }

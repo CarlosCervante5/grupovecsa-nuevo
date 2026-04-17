@@ -61,7 +61,10 @@
       (sin inventario de autos ahí).
       <br /><br />
       <strong>Inventario de vehículos (autos, CSV, alta/edición):</strong> columna <code>vehicle_inventory</code> →
-      <code>access vehicle_inventory</code> y ruta <code>/admin/vehicle-inventory</code>. Quien solo tenga
+      <code>access vehicle_inventory</code>; la pantalla vive en el layout del panel
+      (p. ej. <code>/admin/administrator/vehicle-inventory</code>, <code>/admin/gestor/vehicle-inventory</code>,
+      <code>/admin/marketing/vehicles</code>). La URL <code>/admin/vehicle-inventory</code> solo redirige al panel
+      según el rol. Quien solo tenga
       <code>access marketing</code> sigue pudiendo abrir el inventario (compatibilidad).
       En la tabla de arriba, permisos como <code>create vehicles</code> / <code>update vehicles</code> son de Spatie
       si existen en tu BD.

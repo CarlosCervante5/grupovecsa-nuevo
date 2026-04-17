@@ -13,6 +13,7 @@ import { MatInputModule } from "@angular/material/input";
 import { UpdateUserComponent } from './components/update-user/update-user.component';
 import { AdminLayoutComponent } from './pages/layout/admin-layout.component';
 import { ExperienceStoriesSharedModule } from '../shared/experience-stories/experience-stories-shared.module';
+import { VehicleStockModule } from '../shared/vehicle-stock/vehicle-stock.module';
 
 @NgModule({
     declarations: [
@@ -33,6 +34,7 @@ import { ExperienceStoriesSharedModule } from '../shared/experience-stories/expe
         MatInputModule,
         FormsModule,
         ExperienceStoriesSharedModule,
+        VehicleStockModule,
     ]
   })
   export class AdministradorModule { }

@@ -63,3 +63,24 @@ export function adminDashboardUrl(role: string | null | undefined): string {
   const seg = adminRouteSegmentForRole(role);
   return seg ? `/admin/${seg}` : '/';
 }
+
+/**
+ * Inventario de vehículos embebido en el layout del panel (no la URL plana `/admin/vehicle-inventory`).
+ * Marketing conserva el segmento `vehicles`. Developer se trata como administrador.
+ */
+export function adminVehicleInventoryUrl(role: string | null | undefined): string | null {
+  let seg = adminRouteSegmentForRole(role);
+  if (seg === 'developer') {
+    seg = 'administrator';
+  }
+  if (!seg) {
+    return null;
+  }
+  if (seg === 'marketing') {
+    return '/admin/marketing/vehicles';
+  }
+  if (seg === 'administrator' || seg === 'gestor' || seg === 'manager' || seg === 'gerente') {
+    return `/admin/${seg}/vehicle-inventory`;
+  }
+  return null;
+}

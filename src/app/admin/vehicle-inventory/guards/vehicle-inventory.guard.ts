@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Router, CanMatch, Route, UrlSegment } from '@angular/router';
+import { Router, CanActivate, CanMatch, Route, UrlSegment } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { AuthService } from 'src/app/auth/services/auth.service';
@@ -13,7 +13,7 @@ import { adminDashboardUrl } from 'src/app/admin/utils/admin-route.util';
  * Si GET /me falla, se reevalúa con permisos ya guardados en localStorage.
  */
 @Injectable({ providedIn: 'root' })
-export class VehicleInventoryGuard implements CanMatch {
+export class VehicleInventoryGuard implements CanMatch, CanActivate {
   private static readonly permissionAllowList = [
     'access vehicle_inventory',
     'access marketing',
@@ -39,6 +39,14 @@ export class VehicleInventoryGuard implements CanMatch {
   ) {}
 
   canMatch(_route: Route, _segments: UrlSegment[]): Observable<boolean> {
+    return this.check$();
+  }
+
+  canActivate(): Observable<boolean> {
+    return this.check$();
+  }
+
+  private check$(): Observable<boolean> {
     return this.auth.refreshPermissionsForGuard().pipe(
       map((perms) => this.evaluate(perms)),
       catchError(() => {
