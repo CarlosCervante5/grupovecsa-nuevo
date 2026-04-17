@@ -19,6 +19,23 @@ constructor(
     private _http: HttpClient
 ) { }
 
+    /**
+     * Login clásico guarda `user`; AuthService.login guarda `user_data` con forma { user, role, ... }.
+     */
+    private sessionUserEmail(): string {
+        try {
+            const raw = localStorage.getItem('user') ?? localStorage.getItem('user_data');
+            if (!raw) {
+                return '';
+            }
+            const parsed = JSON.parse(raw) as { user?: { email?: string }; email?: string };
+            const email = parsed?.user?.email ?? parsed?.email;
+            return typeof email === 'string' ? email : '';
+        } catch {
+            return '';
+        }
+    }
+
     public getVehicle( uuid:string ):Observable<FullDetailResponse>{
 
         let user_token = localStorage.getItem('user_token');
@@ -90,7 +107,7 @@ constructor(
 
     public getVehicles( page:number, word:string, paginate: number, relationshipNames: string[]):Observable<SearchResponse>{
         
-        let userMail = JSON.parse(localStorage.getItem('user')!).email;
+        const userMail = this.sessionUserEmail();
 
         let params = new HttpParams(); 
 
