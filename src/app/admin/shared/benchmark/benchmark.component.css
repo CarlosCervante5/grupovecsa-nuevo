@@ -12,8 +12,64 @@
 .bench-tab.active { background: #fff; color: #1c69d4; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
 .bench-tab .material-icons { font-size: 18px; }
 
-.bench-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
-.bench-select { padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: #fff; color: #1e293b; font-size: 13px; }
+.bench-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+/* Método + acción principal juntos; evita “hueco” visual entre select y botón azul en pantallas anchas. */
+.bench-controls-main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.bench-controls-side {
+  margin-left: auto;
+}
+@media (max-width: 640px) {
+  .bench-controls-side {
+    margin-left: 0;
+    width: 100%;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+}
+.bench-select {
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: #fff;
+  color: #1e293b;
+  font-size: 13px;
+  min-width: 200px;
+  max-width: min(100%, 320px);
+}
+.bench-scan-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 18px;
+  margin-bottom: 16px;
+  background: #fff;
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+  color: #64748b;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+.bench-scan-hint .material-icons {
+  flex-shrink: 0;
+  font-size: 22px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+.bench-scan-hint p {
+  margin: 0;
+}
 .bench-input { width: 100%; padding: 9px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.85rem; color: #0f172a; background: #fff; outline: none; box-sizing: border-box; }
 .bench-input:focus { border-color: #1c69d4; }
 

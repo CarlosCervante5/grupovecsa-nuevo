@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { HttpErrorResponse } from '@angular/common/http';
 import { DevCrudService } from '../../../developer/services/dev-crud.service';
+import { AuthService } from 'src/app/auth/services/auth.service';
 
 @Component({
   selector: 'app-admin-permisos',
@@ -16,9 +17,13 @@ export class AdminPermisosComponent implements OnInit {
   matrixError = '';
   matrixSaving: Record<string, boolean> = {};
 
+  /**
+   * Claves para permisos `access {clave}` en la matriz «Acceso a Módulos».
+   * `gestor_scheduled_events` → vista Experience (historias) en /admin/gestor|manager/scheduled-events.
+   */
   adminModules = [
     'benchmark', 'store_management', 'marketing', 'administrator',
-    'developer', 'staff', 'gestor', 'manager', 'valuator', 'receptionist',
+    'developer', 'staff', 'gestor', 'gestor_scheduled_events', 'manager', 'valuator', 'receptionist',
     'appointment_manager', 'technician', 'bodywork_paint_technician', 'spare_parts',
     'gerente', 'seller', 'strega-seller', 'strega-manager', 'strega-administrator',
   ];
@@ -26,6 +31,8 @@ export class AdminPermisosComponent implements OnInit {
   constructor(
     private crud: DevCrudService,
     private snackBar: MatSnackBar,
+    private auth: AuthService,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -68,11 +75,11 @@ export class AdminPermisosComponent implements OnInit {
             roleList.forEach((r: any) => {
               this.crud.fetch('roles/' + r.id, 'GET', {}).subscribe({
                 next: (detail: any) => {
-                  const d = detail?.data || detail;
+                  const d = detail?.data ?? detail;
                   this.matrixRoles.push({
                     id: d.id,
                     name: d.name,
-                    permissions: (d.permissions || []).map((p: any) => p.name),
+                    permissions: this.parsePermissionsFromApiBody(detail),
                   });
                   loaded++;
                   if (loaded === roleList.length) {
@@ -111,12 +118,42 @@ export class AdminPermisosComponent implements OnInit {
     return `${role.id}-access-${mod}`;
   }
 
-  private applyRolePermissionsFromServer(role: any, detail: any): void {
-    const d = detail?.data || detail;
-    role.permissions = (d.permissions || []).map((p: any) => p.name);
+  /**
+   * Extrae nombres de permiso del JSON del rol (PUT/GET), tolerando envoltorio `data` y
+   * elementos string u objeto `{ name }`.
+   */
+  private parsePermissionsFromApiBody(raw: unknown): string[] {
+    if (raw == null) {
+      return [];
+    }
+    const root = raw as Record<string, unknown>;
+    const roleObj =
+      root.data !== undefined && root.data !== null && typeof root.data === 'object'
+        ? (root.data as Record<string, unknown>)
+        : root;
+    const perms = roleObj.permissions;
+    if (!Array.isArray(perms)) {
+      return [];
+    }
+    return perms
+      .map((p: unknown) => (typeof p === 'string' ? p : (p as { name?: string })?.name))
+      .filter((n): n is string => typeof n === 'string' && n !== '');
+  }
+
+  private applyRolePermissionsFromServer(role: any, detail: any, fallbackIfEmpty?: string[]): void {
+    let names = this.parsePermissionsFromApiBody(detail);
+    if (names.length === 0 && fallbackIfEmpty && fallbackIfEmpty.length > 0) {
+      names = [...fallbackIfEmpty];
+    }
+    role.permissions = names;
   }
 
   /** Logs en consola para depurar guardado de permisos (filtrar por "AdminPermisos"). */
+  /** Si el cambio afecta al usuario logueado, actualiza permisos en localStorage desde GET /api/auth/me. */
+  private syncSessionPermissionsFromServer(): void {
+    this.auth.refreshPermissionsInStorage().subscribe({ error: () => {} });
+  }
+
   private logPermiso(event: string, payload?: Record<string, unknown>): void {
     if (payload) {
       console.log(`[AdminPermisos] ${event}`, payload);
@@ -125,10 +162,11 @@ export class AdminPermisosComponent implements OnInit {
     }
   }
 
-  private refreshRoleFromApi(role: any, done: () => void): void {
+  private refreshRoleFromApi(role: any, fallbackIfEmpty: string[] | undefined, done: () => void): void {
     this.crud.fetch('roles/' + role.id, 'GET', {}).subscribe({
       next: (detail: any) => {
-        this.applyRolePermissionsFromServer(role, detail);
+        this.applyRolePermissionsFromServer(role, detail, fallbackIfEmpty);
+        this.cdr.detectChanges();
         done();
       },
       error: () => {
@@ -153,14 +191,17 @@ export class AdminPermisosComponent implements OnInit {
       totalPermisosTrasGuardar: newPerms.length,
     });
     this.crud.put('roles/' + role.id, { permissions: newPerms }).subscribe({
-      next: () => {
-        this.refreshRoleFromApi(role, () => {
+      next: (res: unknown) => {
+        this.applyRolePermissionsFromServer(role, res, newPerms);
+        this.cdr.detectChanges();
+        this.refreshRoleFromApi(role, newPerms, () => {
           this.matrixSaving[key] = false;
           this.logPermiso('Guardado OK (permiso)', {
             roleId: role.id,
             permiso: perm.name,
             permisosEnServidor: role.permissions?.length,
           });
+          this.syncSessionPermissionsFromServer();
           this.toast('Permiso actualizado');
         });
       },
@@ -173,7 +214,7 @@ export class AdminPermisosComponent implements OnInit {
         });
         console.error('[AdminPermisos] detalle HTTP', err);
         this.toast(this.httpErrorMessage(err), true);
-        this.refreshRoleFromApi(role, () => {});
+        this.refreshRoleFromApi(role, undefined, () => {});
       },
     });
   }
@@ -198,8 +239,10 @@ export class AdminPermisosComponent implements OnInit {
         totalPermisosTrasGuardar: newPerms.length,
       });
       this.crud.put('roles/' + role.id, { permissions: newPerms }).subscribe({
-        next: () => {
-          this.refreshRoleFromApi(role, () => {
+        next: (res: unknown) => {
+          this.applyRolePermissionsFromServer(role, res, newPerms);
+          this.cdr.detectChanges();
+          this.refreshRoleFromApi(role, newPerms, () => {
             this.matrixSaving[saveKey] = false;
             this.logPermiso('Guardado OK (acceso módulo)', {
               roleId: role.id,
@@ -207,6 +250,7 @@ export class AdminPermisosComponent implements OnInit {
               permiso: permName,
               permisosEnServidor: role.permissions?.length,
             });
+            this.syncSessionPermissionsFromServer();
             this.toast('Acceso a módulo actualizado');
           });
         },
@@ -219,7 +263,7 @@ export class AdminPermisosComponent implements OnInit {
           });
           console.error('[AdminPermisos] detalle HTTP', err);
           this.toast(this.httpErrorMessage(err), true);
-          this.refreshRoleFromApi(role, () => {});
+          this.refreshRoleFromApi(role, undefined, () => {});
         },
       });
     };

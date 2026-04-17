@@ -69,8 +69,13 @@ export class AuthService {
         }
         return this._http.get<AuthMeResponse>(`${this.url}/api/auth/me`, { headers: this.bearerHeaders() }).pipe(
             map((res) => {
-                const perms = res.data?.permissions ?? [];
-                const apiProfile = res.data?.profile;
+                const payload = res?.data;
+                const perms = Array.isArray(payload?.permissions) ? payload.permissions : [];
+                const apiProfile = payload?.profile;
+                const apiRole = payload?.role;
+                if (apiRole != null && String(apiRole).trim() !== '') {
+                    localStorage.setItem('role', String(apiRole).trim());
+                }
                 if (apiProfile && typeof apiProfile === 'object') {
                     try {
                         const prev = JSON.parse(localStorage.getItem('profile') || '{}');
@@ -86,8 +91,10 @@ export class AuthService {
                 const status = err instanceof HttpErrorResponse ? err.status : 0;
                 if (status === 401) {
                     this.clearClientAuthState();
+                    return of([] as string[]);
                 }
-                return of([]);
+                // No pisar permisos en localStorage ante error de red / 5xx (antes se guardaba []).
+                return throwError(() => err);
             })
         );
     }

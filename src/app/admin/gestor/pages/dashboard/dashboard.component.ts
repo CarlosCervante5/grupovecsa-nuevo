@@ -41,13 +41,13 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     perm: string;
   }[] = [
     { metricKey: 'promotions', label: 'Promociones', icon: 'local_offer', color: '#1c69d4', perm: GESTOR_FEATURE_PERMISSIONS.promotions },
-    { metricKey: 'events', label: 'Eventos', icon: 'event', color: '#059669', perm: GESTOR_FEATURE_PERMISSIONS.scheduledEvents },
+    { metricKey: 'events', label: 'Agenda (eventos)', icon: 'event', color: '#059669', perm: GESTOR_FEATURE_PERMISSIONS.scheduledEvents },
     { metricKey: 'active_rewards', label: 'Recompensas', icon: 'emoji_events', color: '#d97706', perm: GESTOR_FEATURE_PERMISSIONS.rewards },
   ];
 
   private readonly quickDefs: { perm: string; label: string; icon: string; path: string }[] = [
     { perm: GESTOR_FEATURE_PERMISSIONS.promotions, label: 'Promociones', icon: 'campaign', path: 'promotions' },
-    { perm: GESTOR_FEATURE_PERMISSIONS.scheduledEvents, label: 'Eventos', icon: 'event', path: 'scheduled-events' },
+    { perm: GESTOR_FEATURE_PERMISSIONS.scheduledEvents, label: 'Experience', icon: 'auto_stories', path: 'scheduled-events' },
     { perm: GESTOR_FEATURE_PERMISSIONS.rewards, label: 'Recompensas', icon: 'emoji_events', path: 'rewards' },
   ];
 

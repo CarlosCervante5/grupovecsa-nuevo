@@ -28,6 +28,21 @@
   margin: 28px 0 12px; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0;
 }
 
+.section-hint {
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: #64748b;
+  margin: -4px 0 14px;
+  max-width: 960px;
+}
+.section-hint code {
+  font-size: 0.78rem;
+  background: #f1f5f9;
+  padding: 1px 6px;
+  border-radius: 4px;
+  color: #334155;
+}
+
 /* Loading / Empty */
 .loading-state { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 60px 0; color: #94a3b8; }
 .loading-state p { margin: 0; font-size: 0.85rem; }

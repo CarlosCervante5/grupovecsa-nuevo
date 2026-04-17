@@ -1,7 +1,7 @@
 import { Component, OnDestroy } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
-import { filter } from 'rxjs/operators';
-import { Subscription } from 'rxjs';
+import { Subscription, fromEvent, merge } from 'rxjs';
+import { debounceTime, filter } from 'rxjs/operators';
 import { AuthService } from './auth/services/auth.service';
 
 
@@ -20,6 +20,7 @@ export class AppComponent implements OnDestroy {
     public hideChrome: boolean = false;
 
     private routerSub: Subscription;
+    private sessionRefreshSub?: Subscription;
 
     constructor(
         private _router: Router,
@@ -46,9 +47,24 @@ export class AppComponent implements OnDestroy {
                     this._authService.refreshPermissionsInStorage().subscribe({ error: () => {} });
                 }
             });
+
+        // Tras cambios de rol/permisos en otro tab o por un admin, al volver al foco se re-sincroniza /me.
+        this.sessionRefreshSub = merge(
+            fromEvent(window, 'focus'),
+            fromEvent(document, 'visibilitychange').pipe(
+                filter(() => document.visibilityState === 'visible'),
+            ),
+        )
+            .pipe(debounceTime(500))
+            .subscribe(() => {
+                if (localStorage.getItem('user_token')) {
+                    this._authService.refreshPermissionsInStorage().subscribe({ error: () => {} });
+                }
+            });
     }
 
     ngOnDestroy(): void {
         this.routerSub.unsubscribe();
+        this.sessionRefreshSub?.unsubscribe();
     }
 }

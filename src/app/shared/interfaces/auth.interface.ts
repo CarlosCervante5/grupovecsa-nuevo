@@ -20,6 +20,8 @@
             permissions: string[];
             /** Presente cuando hay userProfile; el cliente fusiona con `profile` en localStorage. */
             profile?: { name?: string | null; last_name?: string | null } | null;
+            /** Rol principal (misma lógica que login); el cliente puede sincronizar `localStorage.role`. */
+            role?: string | null;
         };
     }
     

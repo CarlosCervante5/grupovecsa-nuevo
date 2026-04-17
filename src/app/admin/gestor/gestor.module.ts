@@ -23,7 +23,7 @@ import { AddRewardrComponent } from './components/add-rewardr/add-rewardr.compon
 import { UpdateRewardsComponent } from './components/update-rewards/update-rewards.component';
 import { NewNavComponent } from 'src/app/shared/versiones-nav/new-nav/new-nav.component';
 import { GestorLayoutComponent } from './pages/layout/gestor-layout.component';
-
+import { ExperienceStoriesSharedModule } from '../shared/experience-stories/experience-stories-shared.module';
 
 @NgModule({
   declarations: [
@@ -51,7 +51,8 @@ import { GestorLayoutComponent } from './pages/layout/gestor-layout.component';
     AdminModule,
     DragDropModule,
     ReactiveFormsModule,
-    NewNavComponent
+    NewNavComponent,
+    ExperienceStoriesSharedModule,
   ]
 })
 export class GestorModule { }
