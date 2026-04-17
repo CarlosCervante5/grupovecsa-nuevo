@@ -22,7 +22,7 @@ export class AdminPermisosComponent implements OnInit {
    * `gestor_scheduled_events` → vista Experience (historias) en /admin/gestor|manager/scheduled-events.
    */
   adminModules = [
-    'benchmark', 'store_management', 'marketing', 'administrator',
+    'benchmark', 'store_management', 'marketing', 'vehicle_inventory', 'administrator',
     'developer', 'staff', 'gestor', 'gestor_scheduled_events', 'manager', 'valuator', 'receptionist',
     'appointment_manager', 'technician', 'bodywork_paint_technician', 'spare_parts',
     'gerente', 'seller', 'strega-seller', 'strega-manager', 'strega-administrator',

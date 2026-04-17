@@ -56,10 +56,15 @@
 
     <h3 class="section-title">Acceso a Módulos de Admin</h3>
     <p class="section-hint">
-      <strong>Marketing (banners home, boutique, vehículos, testimonios, Experience…):</strong>
-      con la columna <code>marketing</code> asignas <code>access marketing</code>: permite entrar a
-      <code>/admin/marketing</code> y usar ahí <strong>Home Slides</strong>, <strong>Banners Boutique</strong>,
-      testimonios, vehículos y <strong>Experience — Historias</strong>. No hay permisos separados por cada subpantalla.
+      <strong>Marketing (banners, boutique, testimonios, Experience…):</strong>
+      columna <code>marketing</code> → <code>access marketing</code> y ruta <code>/admin/marketing</code>
+      (sin inventario de autos ahí).
+      <br /><br />
+      <strong>Inventario de vehículos (autos, CSV, alta/edición):</strong> columna <code>vehicle_inventory</code> →
+      <code>access vehicle_inventory</code> y ruta <code>/admin/vehicle-inventory</code>. Quien solo tenga
+      <code>access marketing</code> sigue pudiendo abrir el inventario (compatibilidad).
+      En la tabla de arriba, permisos como <code>create vehicles</code> / <code>update vehicles</code> son de Spatie
+      si existen en tu BD.
       <br /><br />
       <strong>Experience solo en gestor/manager:</strong> columna <code>gestor_scheduled_events</code> →
       <code>…/scheduled-events</code>. La web pública <code>/experience</code> no se asigna aquí.

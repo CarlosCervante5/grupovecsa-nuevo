@@ -16,6 +16,7 @@ import { StoreManagementGuard } from './store/guards/store-management.guard';
 import { GerenteGuard } from './gerente/guards/gerente.guard';
 import { AdminEntryRedirectComponent } from './admin-entry-redirect.component';
 import { ExpectedRolePanelGuard } from './shared/guards/expected-role-panel.guard';
+import { VehicleInventoryGuard } from './vehicle-inventory/guards/vehicle-inventory.guard';
 
 const routes: Routes = [
   { path: '', pathMatch: 'full', component: AdminEntryRedirectComponent },
@@ -24,7 +25,12 @@ const routes: Routes = [
     canActivate: [MarketingGuard],
     canLoad: [MarketingGuard],
     data: { requiredRole: 'marketing' } 
-  }, 
+  },
+  {
+    path: 'vehicle-inventory',
+    loadChildren: () => import('./vehicle-inventory/vehicle-inventory.module').then(m => m.VehicleInventoryModule),
+    canMatch: [VehicleInventoryGuard],
+  },
   { path: 'gestor',
     loadChildren: () => import('./gestor/gestor.module').then( m => m.GestorModule),
     canActivate: [GestorGuard],
