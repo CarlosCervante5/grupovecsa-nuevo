@@ -159,19 +159,27 @@ class AuthController extends Controller
     public function me(Request $request)
     {
         try {
-            $user = $request->user();
+            $tokenUser = $request->user();
 
-            if (! $user) {
+            if (! $tokenUser) {
                 return ApiResponseHelper::authError('No autenticado', null, 401, 'UNAUTHENTICATED');
             }
 
-            $user->loadMissing(['roles', 'roles.permissions', 'permissions', 'userProfile']);
+            // Nueva consulta desde BD (evita instancia/token con relaciones «pegadas» y permisos de rol desactualizados).
+            $user = User::query()
+                ->whereKey($tokenUser->getAuthIdentifier())
+                ->with(['roles.permissions', 'permissions', 'userProfile', 'customerProfile'])
+                ->firstOrFail();
+
             $permissions = $user->getAllPermissions()->pluck('name')->values()->all();
 
             $profilePayload = null;
+            $roleName = null;
             try {
-                $p = $user->userProfile;
-                if ($p) {
+                $profileData = $user->getRoleProfile();
+                $roleName = $profileData['role'] ?? null;
+                $p = $profileData['profile'] ?? null;
+                if ($p && is_object($p)) {
                     $profilePayload = [
                         'name' => $p->name,
                         'last_name' => $p->last_name,
@@ -184,6 +192,7 @@ class AuthController extends Controller
             return ApiResponseHelper::apiSuccess(200, 'Sesión actual', [
                 'permissions' => $permissions,
                 'profile' => $profilePayload,
+                'role' => $roleName,
             ]);
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al obtener permisos de sesión', $e->getMessage(), 500, 'ME_ERROR');

@@ -36,8 +36,9 @@ class RoleController extends Controller
 
     public function show($id)
     {
-        $role = Role::with('permissions')->findOrFail($id);
-        return response()->json($role);
+        $role = Role::query()->findOrFail($id);
+
+        return response()->json($role->load('permissions'));
     }
 
     public function update(Request $request, $id)
@@ -84,6 +85,8 @@ class RoleController extends Controller
                 ], 422);
             }
         }
+
+        $role->refresh();
 
         return response()->json($role->load('permissions'));
     }
