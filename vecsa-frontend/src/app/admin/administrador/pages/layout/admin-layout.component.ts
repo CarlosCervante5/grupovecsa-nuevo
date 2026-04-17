@@ -94,14 +94,31 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
       }
     }
 
-    const toolLinks: { perm: string; label: string; icon: string; route: string }[] = [
+    const toolLinks: {
+      perm: string;
+      label: string;
+      icon: string;
+      route: string;
+      extraPerms?: string[];
+    }[] = [
       { perm: 'access store_management', label: 'Tienda', icon: 'storefront', route: '/admin/store' },
       { perm: 'access benchmark', label: 'Benchmark ADS', icon: 'analytics', route: '/admin/benchmark' },
       { perm: 'access marketing', label: 'Marketing', icon: 'campaign', route: '/admin/marketing' },
+      {
+        perm: 'access vehicle_inventory',
+        extraPerms: ['access marketing'],
+        label: 'Inventario de vehículos',
+        icon: 'inventory_2',
+        route: '/admin/vehicle-inventory',
+      },
     ];
 
     for (const link of toolLinks) {
-      if (fullAccess || this.permissions.includes(link.perm)) {
+      const allow =
+        fullAccess ||
+        this.permissions.includes(link.perm) ||
+        (link.extraPerms?.some((p) => this.permissions.includes(p)) ?? false);
+      if (allow) {
         this.dynamicItems.push({ label: link.label, icon: link.icon, route: link.route });
       }
     }

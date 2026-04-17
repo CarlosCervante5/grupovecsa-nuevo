@@ -253,7 +253,7 @@ class AuthController extends Controller
             try {
                 if ($user->hasRole('administrator') || $user->hasRole('developer')) {
                     $adminPanelRoles = [
-                        'developer', 'marketing', 'staff', 'gestor', 'manager', 'receptionist',
+                        'developer', 'marketing', 'vehicle_inventory', 'staff', 'gestor', 'manager', 'receptionist',
                         'valuator', 'appointment_manager', 'technician', 'bodywork_paint_technician',
                         'spare_parts', 'gerente', 'seller', 'strega-seller', 'strega-manager',
                         'strega-administrator',
@@ -275,7 +275,18 @@ class AuthController extends Controller
             } catch (\Exception $e) {
                 // Permission check failed (table missing, etc.) — skip
             }
-            
+
+            // Inventario de vehículos: legacy con solo access marketing
+            if ($expected_role === 'vehicle_inventory') {
+                try {
+                    if ($user->hasPermissionTo('access marketing')) {
+                        return ApiResponseHelper::apiSuccess(200, 'Acceso inventario vía marketing', [$userRoleFirst, $expected_role]);
+                    }
+                } catch (\Exception $e) {
+                    // skip
+                }
+            }
+
             return ApiResponseHelper::authError('Rol no autorizado', null, 403, 'UNAUTHORIZED_ROLE');
             
         } catch (\Exception $e) {

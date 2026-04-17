@@ -1,139 +1,115 @@
-<div class="container">
-    <div class="row">
-        <div class="col-12 mt-5 mb-5">
-            <div class="row">
-                <div class="col-12">
-                    <div class="row">
-                        <div class="col-12 text-center">
-                            <h1 class=fw-bold>Editar Usuario</h1>
-                            <span>Por favor, edite los campos que deseados...</span>
-                            <hr />
-                        </div>
-                    </div>
-                    <ng-container *ngIf="spinner; else elseTemplate">
-                        <app-sk-cube></app-sk-cube>
-                    </ng-container>
-                    <ng-template #elseTemplate>
-                        <div class="row">
-                            <div class="col-12 mb-2">
-                                <form [formGroup]="form" (ngSubmit)="onSubmit()"> 
-                                        <div class="row">
-                                            <div class="col-6 col-md-6">
-                                                <mat-form-field appearance="outline">
-                                                    <mat-label>Nombre(s)</mat-label>
-                                                    <input matInput type="text" placeholder="Alfredo" formControlName="name">
-                                                    <mat-hint *ngIf="nameInvalid">Ingrese un nombre válido.</mat-hint>
-                                                </mat-form-field>
-                                            </div>
-                                            <div class="col-6 col-md-6">
-                                                <mat-form-field appearance="outline">
-                                                    <mat-label>Apellidos(s)</mat-label>
-                                                    <input matInput type="text" placeholder="Ortega" formControlName="last_name">
-                                                    <mat-hint *ngIf="last_nameInvalid">Ingrese apellidos válidos.</mat-hint>
-                                                </mat-form-field>
-                                            </div>
-                                            <div class="col-6 col-md-6">
-                                                <mat-form-field appearance="outline">
-                                                    <mat-label>Genero:</mat-label>
-                                                    <mat-select formControlName="gender">
-                                                        <mat-option value="M">Femenino</mat-option>
-                                                        <mat-option value="H">Masculino</mat-option>
-                                                    </mat-select>
-                                                    <mat-hint *ngIf="genderInvalid">Ingrese un número telefónico válido.</mat-hint>
-                                                </mat-form-field>
-                                            </div>
-                                            <div class="col-6 col-md-6">
-                                                <mat-form-field appearance="outline">
-                                                    <mat-label>Email</mat-label>
-                                                    <input matInput type="email" placeholder="example@gmail.com" formControlName="email">
-                                                    <mat-hint *ngIf="emailInvalid">Ingrese un número telefónico válido.</mat-hint>
-                                                </mat-form-field>
-                                            </div>
-                                            <div class="col-12 col-md-6">
-                                                <mat-form-field appearance="outline">
-                                                    <mat-label>Teléfono Principal</mat-label>
-                                                    <input matInput type="tel" placeholder="1234567890" formControlName="phone_1">
-                                                    <mat-hint *ngIf="phoneOneInvalid">Ingrese un número telefónico válido.</mat-hint>
-                                                </mat-form-field>
-                                            </div>
-                                            <div class="col-12 col-md-6">
-                                                <mat-form-field appearance="outline">
-                                                    <mat-label>Teléfono Secundario</mat-label>
-                                                    <input matInput type="tel" placeholder="1234567890" formControlName="phone_2">
-                                                    <mat-hint *ngIf="phoneTwoInvalid">Ingrese un número telefónico válido.</mat-hint>
-                                                </mat-form-field>
-                                            </div>
-                                            <div class="col-12 col-md-6 paddingInputs">
-                                                <mat-form-field appearance="outline" class="example-full-width">
-                                                    <mat-label>Sucursal:</mat-label>
-                                                    <mat-select formControlName="location">
-                                                        <mat-option *ngFor="let location of filteredLocation | async" [value]="location.name">
-                                                            {{ location.name }}
-                                                        </mat-option>
-                                                    </mat-select>
-                                                    <!-- <input type="text" matInput formControlName="location" [matAutocomplete]="autoLocation">
-    
-                                                    <mat-autocomplete #autoLocation="matAutocomplete" (optionSelected)="onLocationSelected($event)">
-                                                        <mat-option *ngFor="let location of filteredLocation | async" [value]="location.name">
-                                                            {{ location.name }}
-                                                        </mat-option>
-                                                    </mat-autocomplete> -->
-                                                </mat-form-field>
-                                            </div>
-                                            <div class="col-12 col-md-6 paddingInputs">
-                                                <mat-form-field appearance="outline" class="example-full-width">
-                                                    <mat-label>Rol:</mat-label>
-                                                    <mat-select formControlName="role_name">
-                                                        <mat-option *ngFor="let rol of filteredRoles | async" [value]="rol.name">
-                                                            {{ rol.name }}
-                                                        </mat-option>
-                                                    </mat-select>
-                                                    <!-- <input type="text" matInput formControlName="role_name" [matAutocomplete]="autoRoles">
-    
-                                                    <mat-autocomplete #autoRoles="matAutocomplete" (optionSelected)="onRolesSelected($event)">
-                                                        <mat-option *ngFor="let rol of filteredRoles | async" [value]="rol.name">
-                                                            {{ rol.name }}
-                                                        </mat-option>
-                                                    </mat-autocomplete> -->
-                                                </mat-form-field>
-                                            </div>
-                                            <div class="col-6 col-md-6">
-                                                <mat-form-field appearance="outline">
-                                                    <mat-label>Password</mat-label>
-                                                    <input matInput type="text" placeholder="*****" formControlName="password">
-                                                    <mat-hint *ngIf="passwordInvalid">Escribe la contraseña del usuario. </mat-hint>
-                                                </mat-form-field>
-                                            </div>
-                                            <div class="col-6 col-md-6">
-                                                <label for=""><h3>Foto de perfil</h3></label><br>
-                                                <div class="d-flex justify-content-center">
-                                                    <img [src]="foto" alt="Foto de perfil" width="200px" height="200px">
-                                                </div>
-                                                <label for="picture" class="drop-container mt-3">
-                                                    <span class="drop-title">Drop files here</span>
-                                                    or
-                                                    <input type="file" id="picture" (change)="assignImagePromo($event)" accept=".png, .jpg, .jpeg, .webp" required> 
-                                                </label>
-                                            </div>
-                                            <div class="row mt-5">
-                                                <div class="col-12 text-end">
-                                                    <button mat-raised-button type="submit" class="marginButtons btn abcars-background-color-blue  mx-3 px-3" [disabled]="form.invalid || spinner">                                    
-                                                        <span >Actualizar</span>
-                                                    </button>                                            
-            
-                                                    <button mat-raised-button type="button"class="marginButtons btn  mx-3 px-3" (click)="close()">                                    
-                                                        Cancelar
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                </form>
-                            </div>
-                        </div>
-                    </ng-template>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<div class="user-form-sheet">
+  <header class="user-form-head">
+    <h2 class="user-form-title">Editar usuario</h2>
+    <p class="user-form-lead">Modifica los datos que necesites y pulsa <strong>Actualizar</strong>.</p>
+  </header>
 
+  <ng-container *ngIf="spinner; else formBlock">
+    <div class="user-form-loading">
+      <app-sk-cube></app-sk-cube>
+    </div>
+  </ng-container>
+
+  <ng-template #formBlock>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="user-form">
+      <div class="user-form-grid">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Nombre(s)</mat-label>
+          <input matInput type="text" autocomplete="given-name" formControlName="name" />
+          <mat-hint *ngIf="nameInvalid">Ingresa un nombre válido.</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Apellido(s)</mat-label>
+          <input matInput type="text" autocomplete="family-name" formControlName="last_name" />
+          <mat-hint *ngIf="last_nameInvalid">Ingresa apellidos válidos.</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Género</mat-label>
+          <mat-select formControlName="gender">
+            <mat-option value="M">Mujer</mat-option>
+            <mat-option value="H">Hombre</mat-option>
+          </mat-select>
+          <mat-hint *ngIf="genderInvalid">Selecciona una opción.</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Correo electrónico</mat-label>
+          <input matInput type="email" autocomplete="email" formControlName="email" />
+          <mat-hint *ngIf="emailInvalid">Ingresa un correo válido.</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Teléfono principal</mat-label>
+          <input matInput type="tel" inputmode="numeric" maxlength="10" autocomplete="tel" formControlName="phone_1" />
+          <mat-hint *ngIf="phoneOneInvalid">10 dígitos numéricos.</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Teléfono secundario</mat-label>
+          <input matInput type="tel" inputmode="numeric" maxlength="10" autocomplete="tel-national" formControlName="phone_2" />
+          <mat-hint *ngIf="phoneTwoInvalid">10 dígitos numéricos u opcional vacío.</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Sucursal</mat-label>
+          <mat-select formControlName="location">
+            <mat-option *ngFor="let location of filteredLocation | async" [value]="location.name">
+              {{ location.name }}
+            </mat-option>
+          </mat-select>
+          <mat-hint *ngIf="locationInvalid">Selecciona sucursal.</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Rol</mat-label>
+          <mat-select formControlName="role_name">
+            <mat-option *ngFor="let rol of filteredRoles | async" [value]="rol.name">
+              {{ rol.name }}
+            </mat-option>
+          </mat-select>
+          <mat-hint *ngIf="role_nameInvalid">Selecciona un rol.</mat-hint>
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="user-form-field-full">
+        <mat-label>Nueva contraseña</mat-label>
+        <input
+          matInput
+          type="password"
+          autocomplete="new-password"
+          formControlName="password"
+          placeholder="Vacío = sin cambio"
+        />
+        <mat-hint>Si la dejas vacía, no se modifica la contraseña.</mat-hint>
+      </mat-form-field>
+
+      <section class="user-form-photo" aria-labelledby="photo-heading">
+        <h3 id="photo-heading" class="user-form-section-title">Foto de perfil</h3>
+        <div class="user-form-photo-row">
+          <div class="user-form-photo-preview">
+            <img [src]="foto" alt="Vista previa de la foto de perfil" width="120" height="120" />
+          </div>
+          <label class="user-form-drop" for="picture">
+            <span class="material-icons user-form-drop-icon">cloud_upload</span>
+            <span class="user-form-drop-title">Arrastra una imagen aquí</span>
+            <span class="user-form-drop-sub">o haz clic para elegir archivo (PNG, JPG, WebP)</span>
+            <input
+              type="file"
+              id="picture"
+              class="user-form-file-input"
+              (change)="assignImagePromo($event)"
+              accept=".png,.jpg,.jpeg,.webp"
+            />
+          </label>
+        </div>
+      </section>
+
+      <footer class="user-form-actions">
+        <button mat-stroked-button type="button" class="user-form-cancel" (click)="close()">Cancelar</button>
+        <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || spinner">Actualizar</button>
+      </footer>
+    </form>
+  </ng-template>
+</div>
