@@ -6,11 +6,29 @@ import { AuthService } from 'src/app/auth/services/auth.service';
 import { adminDashboardUrl } from 'src/app/admin/utils/admin-route.util';
 
 /**
- * Inventario de vehículos: permiso dedicado `access vehicle_inventory`
- * o compatibilidad con `access marketing` (misma pantalla que antes en /admin/marketing/vehicles).
+ * Inventario de vehículos:
+ * - `access vehicle_inventory` o `access marketing`
+ * - permisos Spatie de vehículos (p. ej. gestor con `list all vehicles` sin módulos `access_*`)
+ * - rol `marketing`: en muchos entornos el rol existe pero el rol no tiene filas `access marketing` en `/me`
  */
 @Injectable({ providedIn: 'root' })
 export class VehicleInventoryGuard implements CanMatch {
+  private static readonly permissionAllowList = [
+    'access vehicle_inventory',
+    'access marketing',
+    'list all vehicles',
+    'create vehicles',
+    'update vehicles',
+    'delete vehicles',
+  ];
+
+  private static readonly roleAllowList = [
+    'developer',
+    'administrator',
+    'gerente',
+    'marketing',
+  ];
+
   constructor(
     private router: Router,
     private auth: AuthService,
@@ -27,11 +45,11 @@ export class VehicleInventoryGuard implements CanMatch {
       this.router.navigateByUrl('/auth/login');
       return false;
     }
-    if (perms.includes('access vehicle_inventory') || perms.includes('access marketing')) {
+    if (VehicleInventoryGuard.permissionAllowList.some((p) => perms.includes(p))) {
       return true;
     }
     const role = (localStorage.getItem('role') || '').trim().toLowerCase();
-    if (role === 'developer' || role === 'administrator' || role === 'gerente') {
+    if (VehicleInventoryGuard.roleAllowList.includes(role)) {
       return true;
     }
     const home = role ? adminDashboardUrl(role) : '/';
