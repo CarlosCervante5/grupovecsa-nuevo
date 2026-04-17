@@ -22,6 +22,7 @@ class DeveloperUserSeeder extends Seeder
             'access valuator', 'access appointment_manager', 'access staff',
             'access bodywork_paint_technician', 'access spare_parts',
             'access marketing',
+            'access vehicle_inventory',
             'access gestor_promotions', 'access gestor_scheduled_events', 'access gestor_rewards',
         ];
         foreach ($permissions as $perm) {

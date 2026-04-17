@@ -53,6 +53,7 @@ class ProductionDeveloperSeeder extends Seeder
             'access valuator', 'access appointment_manager', 'access staff',
             'access bodywork_paint_technician', 'access spare_parts',
             'access marketing',
+            'access vehicle_inventory',
             'access administrator', 'access developer',
             'access gestor_promotions', 'access gestor_scheduled_events', 'access gestor_rewards',
         ];
@@ -83,6 +84,7 @@ class ProductionDeveloperSeeder extends Seeder
             'access gestor_promotions',
             'access gestor_scheduled_events',
             'access gestor_rewards',
+            'access vehicle_inventory',
         ];
         foreach ($gestorNav as $navPerm) {
             $roles['gestor']->givePermissionTo($navPerm);
