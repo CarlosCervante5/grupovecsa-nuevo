@@ -31,7 +31,25 @@
 .panel-logout .material-icons { font-size: 18px; }
 .panel-main { flex: 1; margin-left: 250px; min-height: 100vh; overflow-x: hidden; padding: 24px 0 0 24px; }
 @media (max-width: 768px) {
-  .panel-sidebar { width: 100%; height: auto; position: static; flex-direction: row; flex-wrap: wrap; padding: 12px; }
-  .panel-nav { display: none; }
+  .panel-sidebar {
+    width: 100%;
+    height: auto;
+    position: static;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    padding: 12px;
+    max-height: none;
+  }
+  .panel-nav {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    flex: 0 1 auto;
+    max-height: min(55vh, 420px);
+    overflow-y: auto;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #334155;
+  }
   .panel-main { margin-left: 0; padding: 16px; }
 }

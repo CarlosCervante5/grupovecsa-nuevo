@@ -86,7 +86,10 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
       { perm: 'access strega-administrator', label: 'Strega admin', icon: 'admin_panel_settings', route: '/admin/strega-administrator' },
     ];
 
-    const fullAccess = this.role === 'administrator' || this.role === 'developer';
+    const roleNorm = (this.role || '').trim().toLowerCase();
+    /** `admin` es alias legacy del rol Spatie `administrator` (ver admin-route.util). */
+    const fullAccess =
+      roleNorm === 'administrator' || roleNorm === 'admin' || roleNorm === 'developer';
 
     for (const link of panelLinks) {
       if (fullAccess || this.permissions.includes(link.perm)) {
@@ -123,7 +126,7 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
       }
     }
 
-    if (this.role === 'administrator') {
+    if (roleNorm === 'administrator' || roleNorm === 'admin') {
       this.dynamicItems.push({
         label: 'Panel Developer',
         icon: 'code',
