@@ -26,6 +26,7 @@ export class VehicleInventoryGuard implements CanMatch {
   private static readonly roleAllowList = [
     'developer',
     'administrator',
+    'admin',
     'gerente',
     'marketing',
     'gestor',
