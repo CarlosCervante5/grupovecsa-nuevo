@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { PageEvent } from '@angular/material/paginator';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { Router } from '@angular/router';
@@ -23,7 +23,7 @@ import { UpdateVehicleComponent } from '../../components/update-vehicle/update-v
     styleUrls: ['./vehicles.component.css'],
     standalone: false
 })
-export class VehiclesComponent {
+export class VehiclesComponent implements OnInit {
   // MatPaginator Inputs
   public length: number = 0;
   public pageSize: number = 12;
@@ -55,9 +55,11 @@ export class VehiclesComponent {
     private _bottomSheet: MatBottomSheet,
     private _snackBar: MatSnackBar,
     private _router: Router
-  ) {
+  ) {}
+
+  ngOnInit(): void {
     this.getVehicles(1);
-  }    
+  }
 
 
     /**
