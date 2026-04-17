@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { PromotionsComponent } from './pages/promotions/promotions.component';
-import { ScheduleEventsComponent } from './pages/schedule-events/schedule-events.component';
+import { ExperienceStoriesComponent } from '../marketing/pages/experience-stories/experience-stories.component';
 import { RewardsComponent } from './pages/rewards/rewards.component';
 import { GestorLayoutComponent } from './pages/layout/gestor-layout.component';
 import { GestorFeatureGuard } from './guards/gestor-feature.guard';
@@ -22,7 +22,7 @@ const routes: Routes = [
       },
       {
         path: 'scheduled-events',
-        component: ScheduleEventsComponent,
+        component: ExperienceStoriesComponent,
         canActivate: [GestorFeatureGuard],
         data: { requiredPermission: GESTOR_FEATURE_PERMISSIONS.scheduledEvents },
       },

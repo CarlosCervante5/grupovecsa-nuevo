@@ -72,7 +72,7 @@ export class GestorLayoutComponent implements OnInit, OnDestroy {
 
     const main: { perm: string; label: string; icon: string; path: string }[] = [
       { perm: GESTOR_FEATURE_PERMISSIONS.promotions, label: 'Promociones', icon: 'campaign', path: 'promotions' },
-      { perm: GESTOR_FEATURE_PERMISSIONS.scheduledEvents, label: 'Eventos', icon: 'event', path: 'scheduled-events' },
+      { perm: GESTOR_FEATURE_PERMISSIONS.scheduledEvents, label: 'Experience', icon: 'auto_stories', path: 'scheduled-events' },
       { perm: GESTOR_FEATURE_PERMISSIONS.rewards, label: 'Recompensas', icon: 'emoji_events', path: 'rewards' },
     ];
     for (const item of main) {

@@ -32,16 +32,18 @@
   <!-- SCAN TAB -->
   @if (tab === 'scan') {
     <div class="bench-controls">
-      <select class="bench-select" [(ngModel)]="method">
-        <option value="scraper">🌐 Web Scraper (sin API key)</option>
-        <option value="api">🔑 Meta API (requiere token)</option>
-      </select>
-      <button class="bench-btn-primary" (click)="startScan()" [disabled]="scanning">
-        @if (scanning) { <div class="bench-spinner-sm"></div> Escaneando... } @else {
-          <span class="material-icons">radar</span> Escanear Competidores
-        }
-      </button>
-      <button class="bench-btn-secondary" (click)="showCompetitors = !showCompetitors">
+      <div class="bench-controls-main">
+        <select class="bench-select" [(ngModel)]="method" aria-label="Método de escaneo">
+          <option value="scraper">Web Scraper (sin API key)</option>
+          <option value="api">Meta API (requiere token)</option>
+        </select>
+        <button type="button" class="bench-btn-primary" (click)="startScan()" [disabled]="scanning">
+          @if (scanning) { <div class="bench-spinner-sm"></div> Escaneando... } @else {
+            <span class="material-icons">radar</span> Escanear competidores
+          }
+        </button>
+      </div>
+      <button type="button" class="bench-btn-secondary bench-controls-side" (click)="showCompetitors = !showCompetitors">
         <span class="material-icons">group</span> Competidores ({{ competitors.length }})
       </button>
     </div>
@@ -73,6 +75,13 @@
 
     @if (loading) {
       <div class="bench-loading"><div class="bench-spinner"></div><span>Cargando...</span></div>
+    }
+
+    @if (!loading && !scanResults?.summary && !scanning) {
+      <div class="bench-scan-hint">
+        <span class="material-icons">touch_app</span>
+        <p>Elige el método, revisa la lista de competidores si hace falta y pulsa <strong>Escanear competidores</strong>. Los resultados aparecerán aquí.</p>
+      </div>
     }
 
     <!-- Scan results summary -->
