@@ -1,15 +1,16 @@
 import { Injectable } from '@angular/core';
 import { Router, CanMatch, Route, UrlSegment } from '@angular/router';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { AuthService } from 'src/app/auth/services/auth.service';
 import { adminDashboardUrl } from 'src/app/admin/utils/admin-route.util';
 
 /**
  * Inventario de vehículos:
  * - `access vehicle_inventory` o `access marketing`
- * - permisos Spatie de vehículos (p. ej. gestor con `list all vehicles` sin módulos `access_*`)
- * - rol `marketing`: en muchos entornos el rol existe pero el rol no tiene filas `access marketing` en `/me`
+ * - permisos Spatie de vehículos (list/create/update/delete)
+ * - roles que usan el panel y el inventario en la práctica: marketing, gestor, manager (+ admin/dev/gerente)
+ * Si GET /me falla, se reevalúa con permisos ya guardados en localStorage.
  */
 @Injectable({ providedIn: 'root' })
 export class VehicleInventoryGuard implements CanMatch {
@@ -27,6 +28,8 @@ export class VehicleInventoryGuard implements CanMatch {
     'administrator',
     'gerente',
     'marketing',
+    'gestor',
+    'manager',
   ];
 
   constructor(
@@ -37,6 +40,15 @@ export class VehicleInventoryGuard implements CanMatch {
   canMatch(_route: Route, _segments: UrlSegment[]): Observable<boolean> {
     return this.auth.refreshPermissionsForGuard().pipe(
       map((perms) => this.evaluate(perms)),
+      catchError(() => {
+        let cached: string[] = [];
+        try {
+          cached = JSON.parse(localStorage.getItem('permissions') || '[]');
+        } catch {
+          cached = [];
+        }
+        return of(this.evaluate(cached));
+      }),
     );
   }
 

@@ -88,9 +88,12 @@ export class GestorLayoutComponent implements OnInit, OnDestroy {
     if (this.permissions.includes('access benchmark')) {
       this.dynamicItems.push({ label: 'Benchmark ADS', icon: 'monitoring', route: '/admin/benchmark' });
     }
+    const r = (this.role || '').trim().toLowerCase();
     if (
       this.permissions.includes('access vehicle_inventory') ||
-      this.permissions.includes('access marketing')
+      this.permissions.includes('access marketing') ||
+      r === 'gestor' ||
+      r === 'manager'
     ) {
       this.dynamicItems.push({
         label: 'Inventario de vehículos',
