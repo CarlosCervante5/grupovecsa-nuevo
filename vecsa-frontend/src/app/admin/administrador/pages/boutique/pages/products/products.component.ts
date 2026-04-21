@@ -69,7 +69,7 @@ export class ProductsComponent implements OnInit {
   }
 
   loadCategories(): void {
-    this._categoryService.search({ per_page: 100 }).subscribe({
+    this._categoryService.search({ page: 1, per_page: 500 }).subscribe({
       next: (response) => {
         const wrapper = response.data as any;
         const categories = wrapper.categories || wrapper.data || wrapper;

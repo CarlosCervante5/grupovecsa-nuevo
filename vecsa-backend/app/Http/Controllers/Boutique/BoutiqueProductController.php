@@ -12,11 +12,16 @@ use App\Models\Boutique\BoutiqueProductAttribute;
 use App\Models\Boutique\BoutiqueProductAttributeValue;
 use App\Models\Boutique\BoutiqueProductVariant;
 use App\Models\Boutique\BoutiqueVariantAttributeValue;
+use App\Services\DealershipAccessService;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class BoutiqueProductController extends Controller
 {
+    public function __construct(protected DealershipAccessService $dealershipAccess) {}
+
     public function search(Request $request)
     {
         try {
@@ -24,10 +29,16 @@ class BoutiqueProductController extends Controller
                 $q->orderBy('sort_id')->limit(1);
             }]);
 
+            $scopeIds = $this->dealershipAccess->inventoryDealershipIds($request->user());
+            if ($scopeIds !== null) {
+                $query->whereIn('dealership_id', $scopeIds);
+            }
+
             if ($request->filled('category_uuid')) {
                 $category = BoutiqueCategory::findByUuid($request->input('category_uuid'));
                 if ($category) {
-                    $query->where('category_id', $category->id);
+                    $categoryIds = BoutiqueCategory::idsSelfAndDescendants((int) $category->id);
+                    $query->whereIn('category_id', $categoryIds);
                 }
             }
 
@@ -39,15 +50,20 @@ class BoutiqueProductController extends Controller
                 $search = $request->input('search');
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('sku', 'like', "%{$search}%")
-                      ->orWhere('description', 'like', "%{$search}%");
+                        ->orWhere('sku', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%");
                 });
             }
 
-            $products = $query->orderBy('created_at', 'desc')->paginate($request->input('per_page', 15));
+            $perPage = (int) $request->input('per_page', 15);
+            $perPage = max(1, min($perPage, 100));
+            $page = max(1, (int) $request->input('page', 1));
+
+            $products = $query->orderBy('created_at', 'desc')->paginate($perPage, ['*'], 'page', $page);
 
             $products->getCollection()->transform(function ($product) {
                 $product->low_stock = $product->stock <= 5;
+
                 return $product;
             });
 
@@ -63,7 +79,7 @@ class BoutiqueProductController extends Controller
             $data = $request->validated();
 
             $category = BoutiqueCategory::findByUuid($data['category_uuid']);
-            if (!$category) {
+            if (! $category) {
                 return ApiResponseHelper::apiError('La categoría no existe', null, 404, 'CATEGORY_NOT_FOUND');
             }
 
@@ -76,12 +92,15 @@ class BoutiqueProductController extends Controller
                 return ApiResponseHelper::apiError('El SKU ya existe en otro producto activo', null, 400, 'SKU_ALREADY_EXISTS');
             }
 
+            $dealershipId = $this->dealershipAccess->resolveDealershipIdForNewBoutiqueProduct($request);
+
             $product = BoutiqueProduct::create([
                 'name' => $data['name'],
                 'description' => $data['description'] ?? null,
                 'price' => $data['price'],
                 'sku' => $data['sku'],
                 'category_id' => $category->id,
+                'dealership_id' => $dealershipId,
                 'stock' => $data['stock'] ?? 0,
                 'active' => $data['active'] ?? true,
             ]);
@@ -92,6 +111,10 @@ class BoutiqueProductController extends Controller
             }
 
             return ApiResponseHelper::apiSuccess(201, 'Producto creado exitosamente', ['product' => $product]);
+        } catch (ValidationException $e) {
+            return ApiResponseHelper::validationError($e);
+        } catch (AuthorizationException $e) {
+            return ApiResponseHelper::apiError($e->getMessage(), null, 403, 'INVENTORY_FORBIDDEN');
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al crear el producto', $e->getMessage(), 500, 'CREATE_PRODUCT_ERROR');
         }
@@ -104,12 +127,14 @@ class BoutiqueProductController extends Controller
             $uuid = $request->input('uuid');
 
             $product = BoutiqueProduct::findByUuid($uuid);
-            if (!$product) {
-                return ApiResponseHelper::apiError('El producto no existe', 'No existe el uuid: ' . $uuid, 404, 'PRODUCT_NOT_FOUND');
+            if (! $product) {
+                return ApiResponseHelper::apiError('El producto no existe', 'No existe el uuid: '.$uuid, 404, 'PRODUCT_NOT_FOUND');
             }
 
+            $this->dealershipAccess->assertProductDealershipAccessible($request->user(), $product->dealership_id);
+
             $category = BoutiqueCategory::findByUuid($data['category_uuid']);
-            if (!$category) {
+            if (! $category) {
                 return ApiResponseHelper::apiError('La categoría no existe', null, 404, 'CATEGORY_NOT_FOUND');
             }
 
@@ -123,12 +148,18 @@ class BoutiqueProductController extends Controller
                 return ApiResponseHelper::apiError('El SKU ya existe en otro producto activo', null, 400, 'SKU_ALREADY_EXISTS');
             }
 
+            $dealershipId = $product->dealership_id;
+            if ($this->dealershipAccess->inventoryDealershipIds($request->user()) === null && array_key_exists('dealership_id', $data)) {
+                $dealershipId = $data['dealership_id'] ?? null;
+            }
+
             $product->update([
                 'name' => $data['name'],
                 'description' => $data['description'] ?? null,
                 'price' => $data['price'],
                 'sku' => $data['sku'],
                 'category_id' => $category->id,
+                'dealership_id' => $dealershipId,
                 'stock' => $data['stock'] ?? $product->stock,
                 'active' => $data['active'] ?? $product->active,
             ]);
@@ -139,6 +170,8 @@ class BoutiqueProductController extends Controller
             }
 
             return ApiResponseHelper::apiSuccess(200, 'Producto actualizado exitosamente', ['product' => $product]);
+        } catch (AuthorizationException $e) {
+            return ApiResponseHelper::apiError($e->getMessage(), null, 403, 'INVENTORY_FORBIDDEN');
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al actualizar el producto', $e->getMessage(), 500, 'UPDATE_PRODUCT_ERROR');
         }
@@ -151,13 +184,17 @@ class BoutiqueProductController extends Controller
 
             $product = BoutiqueProduct::findByUuid($data['uuid']);
 
-            if (!$product) {
-                return ApiResponseHelper::apiError('El producto no existe', 'No existe el uuid: ' . $data['uuid'], 404, 'PRODUCT_NOT_FOUND');
+            if (! $product) {
+                return ApiResponseHelper::apiError('El producto no existe', 'No existe el uuid: '.$data['uuid'], 404, 'PRODUCT_NOT_FOUND');
             }
+
+            $this->dealershipAccess->assertProductDealershipAccessible($request->user(), $product->dealership_id);
 
             $product->delete();
 
             return ApiResponseHelper::apiSuccess(200, 'Producto eliminado exitosamente');
+        } catch (AuthorizationException $e) {
+            return ApiResponseHelper::apiError($e->getMessage(), null, 403, 'INVENTORY_FORBIDDEN');
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al eliminar el producto', $e->getMessage(), 500, 'DELETE_PRODUCT_ERROR');
         }
@@ -170,9 +207,11 @@ class BoutiqueProductController extends Controller
             $attributeConfigs = $request->input('attributes', []);
 
             $product = BoutiqueProduct::findByUuid($productUuid);
-            if (!$product) {
+            if (! $product) {
                 return ApiResponseHelper::apiError('El producto no existe', null, 404, 'PRODUCT_NOT_FOUND');
             }
+
+            $this->dealershipAccess->assertProductDealershipAccessible($request->user(), $product->dealership_id);
 
             // Resolve attribute IDs and sync product-attribute pivot
             $attributeIds = [];
@@ -180,7 +219,7 @@ class BoutiqueProductController extends Controller
 
             foreach ($attributeConfigs as $config) {
                 $attribute = BoutiqueProductAttribute::findByUuid($config['attribute_uuid']);
-                if (!$attribute) {
+                if (! $attribute) {
                     return ApiResponseHelper::apiError('El atributo no existe', null, 404, 'ATTRIBUTE_NOT_FOUND');
                 }
                 $attributeIds[] = $attribute->id;
@@ -206,6 +245,7 @@ class BoutiqueProductController extends Controller
                     BoutiqueVariantAttributeValue::where('variant_id', $variant->id)->delete();
                     $variant->delete();
                 }
+
                 return ApiResponseHelper::apiSuccess(200, 'Variantes generadas exitosamente', ['variants' => []]);
             }
 
@@ -253,8 +293,8 @@ class BoutiqueProductController extends Controller
                     $resultVariants[] = $existingMap[$key];
                 } else {
                     // Create new variant with auto-generated SKU
-                    $skuParts = collect($combo)->pluck('value')->map(fn($v) => Str::slug($v));
-                    $sku = $product->sku . '-' . $skuParts->implode('-');
+                    $skuParts = collect($combo)->pluck('value')->map(fn ($v) => Str::slug($v));
+                    $sku = $product->sku.'-'.$skuParts->implode('-');
 
                     $variant = BoutiqueProductVariant::create([
                         'product_id' => $product->id,
@@ -278,7 +318,7 @@ class BoutiqueProductController extends Controller
 
             // Delete variants whose combination no longer applies
             foreach ($existingMap as $key => $variant) {
-                if (!in_array($key, $newValueIdKeys)) {
+                if (! in_array($key, $newValueIdKeys)) {
                     BoutiqueVariantAttributeValue::where('variant_id', $variant->id)->delete();
                     $variant->delete();
                 }
@@ -288,6 +328,8 @@ class BoutiqueProductController extends Controller
             $variants = $product->allVariants()->with('attributeValues.attribute')->get();
 
             return ApiResponseHelper::apiSuccess(200, 'Variantes generadas exitosamente', ['variants' => $variants]);
+        } catch (AuthorizationException $e) {
+            return ApiResponseHelper::apiError($e->getMessage(), null, 403, 'INVENTORY_FORBIDDEN');
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al generar variantes', $e->getMessage(), 500, 'GENERATE_VARIANTS_ERROR');
         }
@@ -299,8 +341,13 @@ class BoutiqueProductController extends Controller
             $variantUuid = $request->input('variant_uuid');
 
             $variant = BoutiqueProductVariant::where('uuid', $variantUuid)->first();
-            if (!$variant) {
+            if (! $variant) {
                 return ApiResponseHelper::apiError('La variante no existe', null, 404, 'VARIANT_NOT_FOUND');
+            }
+
+            $product = BoutiqueProduct::find($variant->product_id);
+            if ($product) {
+                $this->dealershipAccess->assertProductDealershipAccessible($request->user(), $product->dealership_id);
             }
 
             // Validate SKU uniqueness among active variants of same product
@@ -340,6 +387,8 @@ class BoutiqueProductController extends Controller
             $variant->load('attributeValues.attribute');
 
             return ApiResponseHelper::apiSuccess(200, 'Variante actualizada exitosamente', ['variant' => $variant]);
+        } catch (AuthorizationException $e) {
+            return ApiResponseHelper::apiError($e->getMessage(), null, 403, 'INVENTORY_FORBIDDEN');
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al actualizar la variante', $e->getMessage(), 500, 'UPDATE_VARIANT_ERROR');
         }
@@ -351,14 +400,21 @@ class BoutiqueProductController extends Controller
             $variantUuid = $request->input('variant_uuid');
 
             $variant = BoutiqueProductVariant::where('uuid', $variantUuid)->first();
-            if (!$variant) {
+            if (! $variant) {
                 return ApiResponseHelper::apiError('La variante no existe', null, 404, 'VARIANT_NOT_FOUND');
+            }
+
+            $product = BoutiqueProduct::find($variant->product_id);
+            if ($product) {
+                $this->dealershipAccess->assertProductDealershipAccessible($request->user(), $product->dealership_id);
             }
 
             // Delete variant (FK cascade handles pivot records)
             $variant->delete();
 
             return ApiResponseHelper::apiSuccess(200, 'Variante eliminada exitosamente');
+        } catch (AuthorizationException $e) {
+            return ApiResponseHelper::apiError($e->getMessage(), null, 403, 'INVENTORY_FORBIDDEN');
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al eliminar la variante', $e->getMessage(), 500, 'DELETE_VARIANT_ERROR');
         }

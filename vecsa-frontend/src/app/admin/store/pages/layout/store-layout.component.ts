@@ -88,6 +88,8 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   productPage = 1;
   productLastPage = 1;
   productTotal = 0;
+  /** Tamaño de página en la tabla de productos (store). */
+  productPageSize = 50;
   selectedProduct: any = null;
   productDetailLoading = false;
   productEditing = false;
@@ -96,9 +98,15 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   productSaveError = '';
   productSaveSuccess = '';
   categoryOptions: { uuid: string; name: string }[] = [];
-  /** Listado completo de categorías (con parent) para gestión y selects. */
+  /** Página actual de la tabla de categorías (sección Categorías). */
   categoryAdminRows: any[] = [];
+  categoryPage = 1;
+  categoryLastPage = 1;
+  categoryTotal = 0;
+  readonly categoryPageSize = 15;
   categorySectionLoading = false;
+  /** Hasta 500 categorías para selects (padre en modal, filtro productos). */
+  categorySelectorRows: any[] = [];
   categoryModalOpen = false;
   categoryModalMode: 'create' | 'edit' = 'create';
   categoryModalSaving = false;
@@ -192,12 +200,16 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     } else if (key === 'orders') {
       this.loadOrders();
     } else if (key === 'categories') {
-      this.refreshCategoryListsFromApi();
+      this.categoryPage = 1;
+      this.loadCategorySelectorsFromApi();
+      this.loadCategoryTableFromApi();
     } else if (key === 'attributes') {
       this.storePanelDebug('selectSection:attributes');
       this.loadCatalogAttributesList();
     } else if (key === 'products') {
-      this.refreshCategoryListsFromApi();
+      if (this.categorySelectorRows.length === 0) {
+        this.loadCategorySelectorsFromApi();
+      }
       this.loadProducts();
     } else if (key === 'shipping') {
       this.loadShipments();
@@ -632,7 +644,7 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', Authorization: `Bearer ${token}` });
     const body: Record<string, unknown> = {
       page: this.productPage,
-      per_page: 15,
+      per_page: this.productPageSize,
     };
     if (this.productSearch?.trim()) {
       body['search'] = this.productSearch.trim();
@@ -643,9 +655,21 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     this.http.post(`${environment.baseUrl}/api/boutique/admin/products/search`, body, { headers }).subscribe({
       next: (res: any) => {
         const d = res?.data?.products || res?.data || {};
-        this.productRows = d.data || [];
-        this.productLastPage = d.last_page || 1;
-        this.productTotal = d.total || 0;
+        const rows = Array.isArray(d) ? d : (d.data || []);
+        const total = Number(Array.isArray(d) ? d.length : (d.total ?? 0)) || 0;
+        const per = this.productPageSize;
+        let last = Number(Array.isArray(d) ? 1 : (d.last_page ?? 0));
+        if (!last || last < 1) {
+          last = total > 0 ? Math.max(1, Math.ceil(total / per)) : 1;
+        }
+        if (rows.length === 0 && this.productPage > 1 && total > 0) {
+          this.productPage = last;
+          this.loadProducts();
+          return;
+        }
+        this.productRows = rows;
+        this.productTotal = total;
+        this.productLastPage = last;
         this.productLoading = false;
       },
       error: () => { this.productRows = []; this.productLoading = false; },
@@ -655,6 +679,11 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   onProductSearch(): void { this.productPage = 1; this.loadProducts(); }
 
   onProductCategoryFilter(): void {
+    this.productPage = 1;
+    this.loadProducts();
+  }
+
+  onProductPageSizeChange(): void {
     this.productPage = 1;
     this.loadProducts();
   }
@@ -696,7 +725,7 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     this.modifiedVariantUuids = new Set();
     this.productSaveError = '';
     this.productSaveSuccess = '';
-    if (this.categoryOptions.length === 0) this.refreshCategoryListsFromApi();
+    if (this.categorySelectorRows.length === 0) this.loadCategorySelectorsFromApi();
   }
 
   startEditProduct(): void {
@@ -720,7 +749,7 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     this.modifiedVariantUuids = new Set();
     this.productSaveError = '';
     this.productSaveSuccess = '';
-    if (this.categoryOptions.length === 0) this.refreshCategoryListsFromApi();
+    if (this.categorySelectorRows.length === 0) this.loadCategorySelectorsFromApi();
 
     // Load attributes and set selected from product
     this.loadAttributes();
@@ -749,7 +778,7 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     if (editing) {
       exclude.add(editing);
       const addDescendants = (parentUuid: string) => {
-        for (const row of this.categoryAdminRows) {
+        for (const row of this.categorySelectorRows) {
           const puuid = row.parent?.uuid || '';
           if (puuid === parentUuid) {
             exclude.add(row.uuid);
@@ -759,21 +788,31 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
       };
       addDescendants(editing);
     }
-    return this.categoryAdminRows
+    return this.categorySelectorRows
       .filter((c: any) => !exclude.has(c.uuid))
       .map((c: any) => ({ uuid: c.uuid, label: this.categoryTreeLabel(c) }));
   }
 
-  private refreshCategoryListsFromApi(): void {
+  /** Tabla paginada en la sección Categorías. */
+  loadCategoryTableFromApi(): void {
     this.categorySectionLoading = true;
     const token = localStorage.getItem('user_token') || '';
     const headers = new HttpHeaders({ 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', Authorization: `Bearer ${token}` });
-    this.http.post(`${environment.baseUrl}/api/boutique/admin/categories/search`, {}, { headers }).subscribe({
+    const body = { page: this.categoryPage, per_page: this.categoryPageSize };
+    this.http.post(`${environment.baseUrl}/api/boutique/admin/categories/search`, body, { headers }).subscribe({
       next: (res: any) => {
-        const cats = res?.data?.categories?.data || res?.data?.categories || res?.data || [];
-        const list = Array.isArray(cats) ? cats : [];
-        this.categoryAdminRows = list;
-        this.categoryOptions = list.map((c: any) => ({ uuid: c.uuid, name: this.categoryTreeLabel(c) }));
+        const d = res?.data?.categories || res?.data || {};
+        const rows = d.data || [];
+        const last = d.last_page || 1;
+        const total = d.total || 0;
+        if (rows.length === 0 && this.categoryPage > last && last >= 1) {
+          this.categoryPage = last;
+          this.loadCategoryTableFromApi();
+          return;
+        }
+        this.categoryAdminRows = rows;
+        this.categoryLastPage = last;
+        this.categoryTotal = total;
         this.categorySectionLoading = false;
       },
       error: () => {
@@ -781,6 +820,40 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
         this.categorySectionLoading = false;
       },
     });
+  }
+
+  /** Opciones de categoría para filtro de productos y modal (hasta 500). */
+  private loadCategorySelectorsFromApi(): void {
+    const token = localStorage.getItem('user_token') || '';
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', Authorization: `Bearer ${token}` });
+    this.http
+      .post(`${environment.baseUrl}/api/boutique/admin/categories/search`, { page: 1, per_page: 500 }, { headers })
+      .subscribe({
+        next: (res: any) => {
+          const d = res?.data?.categories || res?.data || {};
+          const list = d.data || [];
+          this.categorySelectorRows = list;
+          this.categoryOptions = list.map((c: any) => ({ uuid: c.uuid, name: this.categoryTreeLabel(c) }));
+        },
+        error: () => {
+          this.categorySelectorRows = [];
+          this.categoryOptions = [];
+        },
+      });
+  }
+
+  prevCategoryPage(): void {
+    if (this.categoryPage > 1) {
+      this.categoryPage--;
+      this.loadCategoryTableFromApi();
+    }
+  }
+
+  nextCategoryPage(): void {
+    if (this.categoryPage < this.categoryLastPage) {
+      this.categoryPage++;
+      this.loadCategoryTableFromApi();
+    }
   }
 
   openCategoryCreateModal(): void {
@@ -840,7 +913,8 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
       next: () => {
         this.categoryModalSaving = false;
         this.categoryModalOpen = false;
-        this.refreshCategoryListsFromApi();
+        this.loadCategorySelectorsFromApi();
+        this.loadCategoryTableFromApi();
       },
       error: (err: any) => {
         this.categoryModalSaving = false;
@@ -860,7 +934,10 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
         { headers: this.getHeaders() }
       )
       .subscribe({
-        next: () => this.refreshCategoryListsFromApi(),
+        next: () => {
+          this.loadCategorySelectorsFromApi();
+          this.loadCategoryTableFromApi();
+        },
         error: (err: any) => {
           alert(err?.error?.message || 'No se pudo eliminar');
         },

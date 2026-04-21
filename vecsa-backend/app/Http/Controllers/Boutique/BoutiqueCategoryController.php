@@ -7,13 +7,30 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Boutique\DeleteBoutiqueCategoryRequest;
 use App\Http\Requests\Boutique\StoreBoutiqueCategoryRequest;
 use App\Models\Boutique\BoutiqueCategory;
+use Illuminate\Http\Request;
 
 class BoutiqueCategoryController extends Controller
 {
-    public function search()
+    public function search(Request $request)
     {
         try {
-            $categories = BoutiqueCategory::with('parent')->orderBy('name')->get();
+            $query = BoutiqueCategory::with('parent');
+
+            if ($request->filled('search')) {
+                $search = $request->input('search');
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%");
+                });
+            }
+
+            $perPage = (int) $request->input('per_page', 10);
+            $perPage = max(1, min($perPage, 500));
+
+            $page = (int) $request->input('page', 1);
+            $page = max(1, $page);
+
+            $categories = $query->orderBy('name')->paginate($perPage, ['*'], 'page', $page);
 
             return ApiResponseHelper::apiSuccess(200, 'Categorías obtenidas exitosamente', ['categories' => $categories]);
         } catch (\Exception $e) {
