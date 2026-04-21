@@ -38,6 +38,7 @@ export class BoutiqueAdminCategoryService {
     name: string;
     description?: string;
     active?: boolean;
+    parent_uuid?: string | null;
   }): Observable<ApiResponse<BoutiqueCategory>> {
     return this._http.post<ApiResponse<BoutiqueCategory>>(
       `${this.url}/api/boutique/admin/categories/store`,
@@ -51,6 +52,7 @@ export class BoutiqueAdminCategoryService {
     name?: string;
     description?: string;
     active?: boolean;
+    parent_uuid?: string | null;
   }): Observable<ApiResponse<BoutiqueCategory>> {
     return this._http.post<ApiResponse<BoutiqueCategory>>(
       `${this.url}/api/boutique/admin/categories/update`,

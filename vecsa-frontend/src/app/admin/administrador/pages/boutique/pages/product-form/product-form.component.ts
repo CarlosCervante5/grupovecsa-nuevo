@@ -295,6 +295,13 @@ export class ProductFormComponent implements OnInit {
     return this.isEditMode ? 'Editar producto' : 'Nuevo producto';
   }
 
+  categoryOptionLabel(cat: BoutiqueCategory): string {
+    if (cat.parent?.name) {
+      return `${cat.parent.name} › ${cat.name}`;
+    }
+    return cat.name;
+  }
+
   private showSnackBar(message: string, isError = false): void {
     this._snackBar.open(message, 'Cerrar', {
       duration: 3000,

@@ -86,6 +86,144 @@
       </div>
     }
 
+    <!-- ═══ CATEGORÍAS (jerarquía) ═══ -->
+    @if (activeSection === 'categories') {
+      <div class="section-header">
+        <div class="section-header-left">
+          <h1 class="store-title">Categorías y subcategorías</h1>
+          <span class="section-total">{{ categoryAdminRows.length }} registros</span>
+        </div>
+        <button class="filter-btn" (click)="openCategoryCreateModal()">
+          <span class="material-icons">add</span> Nueva categoría
+        </button>
+      </div>
+      <p class="store-subtitle" style="margin-top:-8px;">Asigna una categoría padre para crear subcategorías. Los productos pueden asociarse a cualquier nivel.</p>
+
+      @if (categorySectionLoading) {
+        <div class="loading-state"><div class="spinner"></div><span>Cargando...</span></div>
+      }
+
+      @if (!categorySectionLoading && categoryAdminRows.length === 0) {
+        <div class="empty-state"><span class="material-icons">category</span><p>No hay categorías</p></div>
+      }
+
+      @if (!categorySectionLoading && categoryAdminRows.length > 0) {
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Jerarquía</th>
+                <th>Activa</th>
+                <th style="width:120px;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of categoryAdminRows; track row.uuid) {
+                <tr>
+                  <td style="font-weight:600;">{{ row.name }}</td>
+                  <td style="font-size:0.85rem;color:#64748b;">{{ categoryTreeLabel(row) }}</td>
+                  <td>
+                    @if (row.active) { <span style="color:#059669;font-weight:600;">Sí</span> }
+                    @else { <span style="color:#94a3b8;">No</span> }
+                  </td>
+                  <td>
+                    <button class="filter-btn" style="height:32px;font-size:0.75rem;margin-right:6px;" (click)="openCategoryEditModal(row)">Editar</button>
+                    <button class="filter-btn" style="height:32px;font-size:0.75rem;background:#fef2f2;color:#b91c1c;border-color:#fecaca;" (click)="deleteCategoryRow(row)">Eliminar</button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+
+    <!-- ═══ ATRIBUTOS (catálogo global) ═══ -->
+    @if (activeSection === 'attributes') {
+      <div class="section-header">
+        <div class="section-header-left">
+          <h1 class="store-title">Atributos y valores</h1>
+          <span class="section-total">{{ catalogAdminAttributes.length }} atributos</span>
+        </div>
+      </div>
+      <p class="store-subtitle" style="margin-top:-8px;">Define aquí color, talla, material, etc. Luego, en <strong>Productos</strong>, marca «Producto con variantes» para combinar valores y generar SKUs por variante.</p>
+
+      @if (catalogAttrMessage) {
+        <div style="background:#f0fdf4;color:#166534;padding:10px 16px;border-radius:10px;margin-bottom:12px;font-size:0.85rem;">{{ catalogAttrMessage }}</div>
+      }
+      @if (catalogAttrError) {
+        <div style="background:#fef2f2;color:#991b1b;padding:10px 16px;border-radius:10px;margin-bottom:12px;font-size:0.85rem;">{{ catalogAttrError }}</div>
+      }
+
+      <div class="filters-bar" style="margin-bottom:16px;">
+        <input type="text" class="filter-input" [(ngModel)]="newCatalogAttrName" placeholder="Nombre del nuevo atributo (ej. Talla)" style="flex:1;max-width:320px;" (keyup.enter)="createCatalogAttributeInline()" />
+        <button class="filter-btn" (click)="createCatalogAttributeInline()" style="background:#059669;">
+          <span class="material-icons">add</span> Crear atributo
+        </button>
+        <button class="filter-btn" (click)="loadCatalogAttributesList()">
+          <span class="material-icons">refresh</span> Actualizar
+        </button>
+      </div>
+
+      @if (catalogAttributesLoading) {
+        <div class="loading-state"><div class="spinner"></div><span>Cargando...</span></div>
+      }
+
+      @if (!catalogAttributesLoading) {
+        @for (attr of catalogAdminAttributes; track attr.uuid) {
+          <div class="detail-card" style="margin-bottom:14px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+              <h3 class="detail-card-title" style="margin:0;"><span class="material-icons">tune</span> {{ attr.name }}</h3>
+              <div>
+                <button class="filter-btn" style="height:34px;font-size:0.78rem;" (click)="openAttrCatalogEdit(attr)">Renombrar</button>
+                <button class="filter-btn" style="height:34px;font-size:0.78rem;background:#fef2f2;color:#b91c1c;border-color:#fecaca;" (click)="deleteAttrCatalog(attr)">Eliminar</button>
+                <button class="filter-btn" style="height:34px;font-size:0.78rem;background:#7c3aed;" (click)="openValueCatalogCreate(attr.uuid)">
+                  <span class="material-icons" style="font-size:16px;">add</span> Valor
+                </button>
+              </div>
+            </div>
+            @if ((attr.values || []).length === 0) {
+              <p style="font-size:0.82rem;color:#94a3b8;margin:0;">Sin valores. Agrega al menos uno para usar en variantes.</p>
+            } @else {
+              <div class="table-wrap">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Valor</th>
+                      <th>Color (hex)</th>
+                      <th>Orden</th>
+                      <th style="width:100px;"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (val of attr.values; track val.uuid) {
+                      <tr>
+                        <td style="font-weight:600;">{{ val.value }}</td>
+                        <td>
+                          @if (val.color_hex) {
+                            <span style="display:inline-flex;align-items:center;gap:6px;">
+                              <span style="width:18px;height:18px;border-radius:4px;border:1px solid #e2e8f0;" [style.backgroundColor]="val.color_hex"></span>
+                              {{ val.color_hex }}
+                            </span>
+                          } @else { — }
+                        </td>
+                        <td>{{ val.sort_order ?? 0 }}</td>
+                        <td>
+                          <button class="filter-btn" style="height:30px;font-size:0.72rem;padding:0 8px;" (click)="openValueCatalogEdit(val, attr.uuid)">Editar</button>
+                          <button class="filter-btn" style="height:30px;font-size:0.72rem;padding:0 8px;background:#fef2f2;color:#b91c1c;border-color:#fecaca;" (click)="deleteValueCatalog(val)">×</button>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </div>
+        }
+      }
+    }
+
     <!-- ═══ PRODUCTS ═══ -->
     @if (activeSection === 'products' && !selectedProduct) {
       <div class="section-header">
@@ -101,6 +239,13 @@
       <div class="filters-bar">
         <input type="text" class="filter-input" placeholder="Buscar por nombre o SKU..."
           [(ngModel)]="productSearch" (keyup.enter)="onProductSearch()" style="flex:1;max-width:400px;" />
+        <select class="filter-input" [(ngModel)]="productCategoryFilter" (change)="onProductCategoryFilter()"
+          title="Filtrar por categoría" style="max-width:240px;min-width:160px;cursor:pointer;">
+          <option value="">Todas las categorías</option>
+          @for (cat of categoryOptions; track cat.uuid) {
+            <option [value]="cat.uuid">{{ cat.name }}</option>
+          }
+        </select>
         <button class="filter-btn" (click)="onProductSearch()">
           <span class="material-icons">search</span> Buscar
         </button>
@@ -122,6 +267,7 @@
                 <th>#</th>
                 <th>Imagen</th>
                 <th>Nombre</th>
+                <th>Categoría</th>
                 <th>SKU</th>
                 <th>Precio</th>
                 <th>Stock</th>
@@ -139,7 +285,8 @@
                       <span class="material-icons" style="color:#cbd5e1;font-size:28px;">image</span>
                     }
                   </td>
-                  <td style="font-weight:600;max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ row.name || '—' }}</td>
+                  <td style="font-weight:600;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ row.name || '—' }}</td>
+                  <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.85rem;color:#64748b;">{{ row.category?.name || '—' }}</td>
                   <td>{{ row.sku || '—' }}</td>
                   <td>{{ formatCurrency(row.price) }}</td>
                   <td [style.color]="(row.stock || 0) <= 5 ? '#ef4444' : '#059669'" style="font-weight:600;">{{ row.stock ?? 0 }}</td>
@@ -1391,6 +1538,98 @@
 
   </main>
 </div>
+
+@if (categoryModalOpen) {
+  <div class="modal-overlay" (click)="closeCategoryModal()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ categoryModalMode === 'create' ? 'Nueva categoría' : 'Editar categoría' }}</h2>
+        <button class="modal-close" type="button" (click)="closeCategoryModal()"><span class="material-icons">close</span></button>
+      </div>
+      <div class="modal-body">
+        @if (categoryModalError) {
+          <div class="modal-error">{{ categoryModalError }}</div>
+        }
+        <div class="modal-field">
+          <label class="modal-label">Nombre <span class="req">*</span></label>
+          <input type="text" class="modal-input" [(ngModel)]="categoryForm.name" placeholder="Nombre" />
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Categoría padre (subcategoría)</label>
+          <select class="modal-input" [(ngModel)]="categoryForm.parent_uuid">
+            <option value="">— Raíz (sin padre) —</option>
+            @for (opt of categoryParentSelectOptions(); track opt.uuid) {
+              <option [value]="opt.uuid">{{ opt.label }}</option>
+            }
+          </select>
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Descripción</label>
+          <textarea class="modal-input modal-textarea" [(ngModel)]="categoryForm.description" rows="3" placeholder="Opcional"></textarea>
+        </div>
+        <div class="modal-field">
+          <label class="modal-label"><input type="checkbox" [(ngModel)]="categoryForm.active" /> Activa</label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn cancel" type="button" (click)="closeCategoryModal()">Cancelar</button>
+        <button class="modal-btn save" type="button" (click)="submitCategoryModal()" [disabled]="categoryModalSaving">
+          @if (categoryModalSaving) { <span>Guardando...</span> } @else { <span>Guardar</span> }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (attrCatalogModal) {
+  <div class="modal-overlay" (click)="closeAttrCatalogModal()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Renombrar atributo</h2>
+        <button class="modal-close" type="button" (click)="closeAttrCatalogModal()"><span class="material-icons">close</span></button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-field">
+          <label class="modal-label">Nombre <span class="req">*</span></label>
+          <input type="text" class="modal-input" [(ngModel)]="attrCatalogName" placeholder="Ej. Color, Talla" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn cancel" type="button" (click)="closeAttrCatalogModal()">Cancelar</button>
+        <button class="modal-btn save" type="button" (click)="submitAttrCatalogModal()" [disabled]="attrCatalogSaving">Guardar</button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (valueCatalogModal) {
+  <div class="modal-overlay" (click)="closeValueCatalogModal()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ valueCatalogEditUuid ? 'Editar valor' : 'Nuevo valor' }}</h2>
+        <button class="modal-close" type="button" (click)="closeValueCatalogModal()"><span class="material-icons">close</span></button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-field">
+          <label class="modal-label">Valor <span class="req">*</span></label>
+          <input type="text" class="modal-input" [(ngModel)]="valueCatalogText" placeholder="Ej. Rojo, M" />
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Color hex (opcional)</label>
+          <input type="text" class="modal-input" [(ngModel)]="valueCatalogColor" placeholder="#e11d48" />
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Orden</label>
+          <input type="number" class="modal-input" [(ngModel)]="valueCatalogSort" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn cancel" type="button" (click)="closeValueCatalogModal()">Cancelar</button>
+        <button class="modal-btn save" type="button" (click)="submitValueCatalogModal()" [disabled]="valueCatalogSaving">Guardar</button>
+      </div>
+    </div>
+  </div>
+}
 
 <!-- ═══ POINTS ADJUST MODAL ═══ -->
 @if (pointsAdjustModal) {
