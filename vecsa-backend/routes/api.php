@@ -844,6 +844,7 @@ Route::prefix('boutique/admin/incadea')->middleware(['bandwidth_usage', 'auth:sa
 Route::prefix('boutique/admin/wc-import')->middleware(['auth:sanctum'])->group(function () {
     Route::post('/upload', [WcImportController::class, 'upload']);
     Route::post('/sync-images', [WcImportController::class, 'syncImages']);
+    Route::post('/sync-variant-attributes', [WcImportController::class, 'syncVariantAttributes']);
     Route::post('/cleanup', [WcImportController::class, 'cleanup']);
 });
 

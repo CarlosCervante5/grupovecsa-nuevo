@@ -8,13 +8,18 @@ use App\Models\Boutique\BoutiqueCategory;
 use App\Models\Boutique\BoutiqueProduct;
 use App\Models\Boutique\BoutiqueProductImage;
 use App\Models\Boutique\BoutiqueProductVariant;
+use App\Services\Boutique\BoutiqueVariantAttributeCatalogSync;
 use Illuminate\Http\Request;
 use Ramsey\Uuid\Uuid;
 
 class WcImportController extends Controller
 {
     private $categoryCache = [];
+
     private $parentSkuToId = [];
+
+    /** @var array<int, true> productos padre (variables) tocados en esta importación para sincronizar atributos */
+    private array $syncAttributeParentIds = [];
 
     /**
      * Import products from uploaded WooCommerce CSV.
@@ -74,6 +79,12 @@ class WcImportController extends Controller
                 }
             }
 
+            $catalogStats = ['products_touched' => 0, 'variant_links_added' => 0, 'attribute_values_created' => 0];
+            $parentIdsForCatalog = array_map('intval', array_keys($this->syncAttributeParentIds));
+            if ($parentIdsForCatalog !== []) {
+                $catalogStats = (new BoutiqueVariantAttributeCatalogSync)->sync($parentIdsForCatalog);
+            }
+
             // Cleanup temp file
             @unlink($fullPath);
 
@@ -86,6 +97,7 @@ class WcImportController extends Controller
                 'skipped' => $stats['skipped'],
                 'errors' => $stats['errors'],
                 'error_details' => array_slice($errors, 0, 20),
+                'attribute_catalog_sync' => $catalogStats,
             ]);
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error en la importación', $e->getMessage(), 500, 'IMPORT_ERROR');
@@ -148,6 +160,33 @@ class WcImportController extends Controller
             return ApiResponseHelper::apiSuccess(200, 'Sincronización de imágenes completada', $stats);
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error en sync de imágenes', $e->getMessage(), 500, 'SYNC_IMAGES_ERROR');
+        }
+    }
+
+    /**
+     * Crea atributos Color/Talla y vínculos a partir de variantes ya importadas (p. ej. tras WC sin pasar por upload).
+     * POST /api/boutique/admin/wc-import/sync-variant-attributes
+     * Body opcional: { "product_ids": [1,2,3] } — si se omite, procesa todas las variantes activas (por lotes).
+     */
+    public function syncVariantAttributes(Request $request)
+    {
+        try {
+            $user = $request->user();
+            if (! $user || (! $user->hasRole('developer') && ! $user->hasRole('administrator'))) {
+                return ApiResponseHelper::apiError('No autorizado', null, 403, 'UNAUTHORIZED');
+            }
+
+            $rawIds = $request->input('product_ids');
+            $ids = null;
+            if (is_array($rawIds) && $rawIds !== []) {
+                $ids = array_values(array_unique(array_filter(array_map('intval', $rawIds))));
+            }
+
+            $stats = (new BoutiqueVariantAttributeCatalogSync)->sync($ids);
+
+            return ApiResponseHelper::apiSuccess(200, 'Catálogo de atributos sincronizado', $stats);
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al sincronizar atributos', $e->getMessage(), 500, 'SYNC_ATTRIBUTES_ERROR');
         }
     }
 
@@ -244,6 +283,7 @@ class WcImportController extends Controller
         $product->save();
 
         $this->parentSkuToId[$sku] = $product->id;
+        $this->syncAttributeParentIds[(int) $product->id] = true;
         $this->createImages($product, $row['Imágenes'] ?? '', $stats);
         $stats['products']++;
     }
@@ -278,6 +318,7 @@ class WcImportController extends Controller
             'product_id' => $productId, 'color' => $color ?: null, 'size' => $size ?: null,
             'sku' => $sku, 'stock' => (int)($row['Inventario'] ?? 0), 'active' => true,
         ]);
+        $this->syncAttributeParentIds[(int) $productId] = true;
         $stats['variants']++;
     }
 
