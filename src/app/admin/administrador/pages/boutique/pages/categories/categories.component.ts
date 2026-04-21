@@ -73,10 +73,9 @@ export class CategoriesComponent implements OnInit {
     }).subscribe({
       next: (response) => {
         const wrapper = response.data as any;
-        // Backend returns { categories: [...] } (flat array, not paginated)
-        const categories = wrapper.categories || wrapper.data || wrapper;
-        this.categories = Array.isArray(categories) ? categories : (categories.data || []);
-        this.totalItems = wrapper.total ?? (Array.isArray(categories) ? categories.length : 0);
+        const paginated = wrapper.categories || wrapper;
+        this.categories = paginated.data || paginated || [];
+        this.totalItems = paginated.total ?? 0;
         this.loading = false;
       },
       error: (error) => {
@@ -222,12 +221,14 @@ export class CategoriesComponent implements OnInit {
     mat-dialog-content { padding-top: 12px; }
   `]
 })
-export class CategoryDialogComponent {
+export class CategoryDialogComponent implements OnInit {
   name = '';
   description = '';
   active = true;
   parentUuid = '';
   saving = false;
+  /** Listado amplio para el select de padre (la tabla admin va paginada). */
+  private allForParent: BoutiqueCategory[] = [];
 
   constructor(
     private _dialogRef: MatDialogRef<CategoryDialogComponent>,
@@ -243,8 +244,21 @@ export class CategoryDialogComponent {
     }
   }
 
+  ngOnInit(): void {
+    this._categoryService.search({ page: 1, per_page: 500 }).subscribe({
+      next: (response) => {
+        const wrapper = response.data as any;
+        const paginated = wrapper.categories || wrapper;
+        this.allForParent = paginated.data || paginated || [];
+      },
+      error: () => {
+        this.allForParent = this.data.allCategories || [];
+      },
+    });
+  }
+
   get parentSelectOptions(): { uuid: string; label: string }[] {
-    const all = this.data.allCategories || [];
+    const all = this.allForParent.length ? this.allForParent : (this.data.allCategories || []);
     const editingUuid = this.data.category?.uuid;
     const exclude = new Set<string>();
     if (editingUuid) {

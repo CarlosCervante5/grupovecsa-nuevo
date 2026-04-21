@@ -91,7 +91,7 @@
       <div class="section-header">
         <div class="section-header-left">
           <h1 class="store-title">Categorías y subcategorías</h1>
-          <span class="section-total">{{ categoryAdminRows.length }} registros</span>
+          <span class="section-total">{{ categoryTotal }} categorías</span>
         </div>
         <button class="filter-btn" (click)="openCategoryCreateModal()">
           <span class="material-icons">add</span> Nueva categoría
@@ -135,6 +135,11 @@
               }
             </tbody>
           </table>
+        </div>
+        <div class="pagination-bar" style="display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-top:12px;">
+          <button class="page-btn" type="button" [disabled]="categoryPage <= 1" (click)="prevCategoryPage()"><span class="material-icons">chevron_left</span></button>
+          <span class="page-info">{{ categoryPage }} / {{ categoryLastPage }}</span>
+          <button class="page-btn" type="button" [disabled]="categoryPage >= categoryLastPage" (click)="nextCategoryPage()"><span class="material-icons">chevron_right</span></button>
         </div>
       }
     }
@@ -246,6 +251,12 @@
             <option [value]="cat.uuid">{{ cat.name }}</option>
           }
         </select>
+        <select class="filter-input" [(ngModel)]="productPageSize" (change)="onProductPageSizeChange()"
+          title="Productos por página" style="max-width:120px;min-width:100px;cursor:pointer;">
+          <option [ngValue]="25">25 / página</option>
+          <option [ngValue]="50">50 / página</option>
+          <option [ngValue]="100">100 / página</option>
+        </select>
         <button class="filter-btn" (click)="onProductSearch()">
           <span class="material-icons">search</span> Buscar
         </button>
@@ -277,7 +288,7 @@
             <tbody>
               @for (row of productRows; track row.uuid; let i = $index) {
                 <tr (click)="viewProductDetail(row)" style="cursor:pointer;">
-                  <td class="row-num">{{ (productPage - 1) * 15 + i + 1 }}</td>
+                  <td class="row-num">{{ (productPage - 1) * productPageSize + i + 1 }}</td>
                   <td>
                     @if (row.images?.length) {
                       <img [src]="row.images[0].image_path" alt="" style="width:40px;height:40px;object-fit:cover;border-radius:8px;" />
@@ -303,11 +314,11 @@
           </table>
         </div>
 
-        @if (productLastPage > 1) {
+        @if (productLastPage > 1 || productPage > 1) {
           <div class="pagination">
-            <button class="page-btn" [disabled]="productPage <= 1" (click)="prevProductPage()"><span class="material-icons">chevron_left</span></button>
-            <span class="page-info">{{ productPage }} / {{ productLastPage }}</span>
-            <button class="page-btn" [disabled]="productPage >= productLastPage" (click)="nextProductPage()"><span class="material-icons">chevron_right</span></button>
+            <button type="button" class="page-btn" [disabled]="productPage <= 1" (click)="prevProductPage()"><span class="material-icons">chevron_left</span></button>
+            <span class="page-info">Pág. {{ productPage }} / {{ productLastPage }} · {{ productTotal }} en total</span>
+            <button type="button" class="page-btn" [disabled]="productPage >= productLastPage" (click)="nextProductPage()"><span class="material-icons">chevron_right</span></button>
           </div>
         }
       }

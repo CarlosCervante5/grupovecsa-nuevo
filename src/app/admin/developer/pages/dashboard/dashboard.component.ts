@@ -1,5 +1,6 @@
 import { Component, OnInit, AfterViewInit, ElementRef, ViewChild, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
+import { adminBenchmarkUrl } from 'src/app/admin/utils/admin-route.util';
 import { DevCrudService, CrudSection } from '../../services/dev-crud.service';
 import * as echarts from 'echarts';
 
@@ -163,6 +164,7 @@ export class DeveloperDashboardComponent implements OnInit, AfterViewInit, OnDes
       columns: [
         { key: 'uuid', label: 'UUID' }, { key: 'name', label: 'Nombre' }, { key: 'active', label: 'Activo' },
       ],
+      searchable: true, paginated: true,
       storeEndpoint: 'boutique/admin/categories/store', updateEndpoint: 'boutique/admin/categories/update',
       deleteEndpoint: 'boutique/admin/categories/delete', idKey: 'uuid',
       formFields: [
@@ -1071,6 +1073,10 @@ export class DeveloperDashboardComponent implements OnInit, AfterViewInit, OnDes
   toggleOpenpayMode(): void {
     this.openpayConfig['openpay_mode'] =
       this.openpayConfig['openpay_mode'] === 'production' ? 'sandbox' : 'production';
+  }
+
+  get benchmarkPanelUrl(): string {
+    return adminBenchmarkUrl(this.role) ?? '/admin/benchmark';
   }
 
   navigate(route: string): void { this.router.navigateByUrl(route); }
