@@ -26,6 +26,7 @@ use App\Services\UserService;
 use App\Services\ValuationService;
 use App\Services\VehicleService;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Validation\ValidationException;
 
 class ValuationController extends Controller
@@ -533,7 +534,7 @@ class ValuationController extends Controller
             }
 
             if(!$valuation->vehicle_id) {
-                $vehicle = $this->vehicleService->createOrUpdateVehicle($data, $user->id);
+                $vehicle = $this->vehicleService->createOrUpdateVehicle($data, $user);
                 $valuation->vehicle_id = $vehicle->id;
                 $valuation->save();
             }
@@ -542,6 +543,8 @@ class ValuationController extends Controller
 
             return ApiResponseHelper::apiSuccess(200, 'Vehiculo actualizado exitosamente');
 
+        } catch (AuthorizationException $e) {
+            return ApiResponseHelper::apiError($e->getMessage(), null, 403, 'INVENTORY_FORBIDDEN');
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al actualizar la valuacion', $e->getMessage(), 500, 'GET_VEHICLE_VALUATION_ERROR');
         }

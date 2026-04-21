@@ -387,9 +387,21 @@ class ExperienceController extends Controller
         ]);
 
         try {
+            if ($schemaMsg = $this->marketingPostsTableReadyForExperienceAdmin()) {
+                return ApiResponseHelper::apiError(
+                    'Base de datos incompleta para historias Experience',
+                    $schemaMsg,
+                    503,
+                    'EXPERIENCE_STORIES_SCHEMA_MISSING'
+                );
+            }
+
             $title = $data['title'];
             $slug = $data['url_name'] ?? Str::slug(Str::limit($title, 80, ''));
             $slug = strtolower(preg_replace('/[^a-z0-9-]/', '', str_replace(' ', '-', $slug)));
+            if ($slug === '') {
+                $slug = 'experience-' . bin2hex(random_bytes(4));
+            }
 
             $eventBegin = $data['event_begin_date'] ?? null;
             $explicitLabel = array_key_exists('wp_category_label', $data)
@@ -422,7 +434,14 @@ class ExperienceController extends Controller
             }
 
             return ApiResponseHelper::apiSuccess(201, 'Historia creada exitosamente', ['post' => $post]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            Log::error('CREATE_EXPERIENCE_STORY_ERROR', [
+                'message' => $e->getMessage(),
+                'exception' => $e::class,
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
             return ApiResponseHelper::apiError('Error al crear la historia', $e->getMessage(), 500, 'CREATE_EXPERIENCE_STORY_ERROR');
         }
     }
@@ -447,6 +466,15 @@ class ExperienceController extends Controller
         ]);
 
         try {
+            if ($schemaMsg = $this->marketingPostsTableReadyForExperienceAdmin()) {
+                return ApiResponseHelper::apiError(
+                    'Base de datos incompleta para historias Experience',
+                    $schemaMsg,
+                    503,
+                    'EXPERIENCE_STORIES_SCHEMA_MISSING'
+                );
+            }
+
             $post = MarketingPost::where('uuid', $data['uuid'])->where('category', 'experience')->first();
             if (! $post) {
                 return ApiResponseHelper::apiError('Historia no encontrada', null, 404, 'EXPERIENCE_STORY_NOT_FOUND');
@@ -505,7 +533,14 @@ class ExperienceController extends Controller
             }
 
             return ApiResponseHelper::apiSuccess(200, 'Historia actualizada exitosamente', ['post' => $post->fresh()]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            Log::error('UPDATE_EXPERIENCE_STORY_ERROR', [
+                'message' => $e->getMessage(),
+                'exception' => $e::class,
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
             return ApiResponseHelper::apiError('Error al actualizar la historia', $e->getMessage(), 500, 'UPDATE_EXPERIENCE_STORY_ERROR');
         }
     }
@@ -518,6 +553,15 @@ class ExperienceController extends Controller
         $request->validate(['uuid' => 'required|string']);
 
         try {
+            if ($schemaMsg = $this->marketingPostsTableReadyForExperienceAdmin()) {
+                return ApiResponseHelper::apiError(
+                    'Base de datos incompleta para historias Experience',
+                    $schemaMsg,
+                    503,
+                    'EXPERIENCE_STORIES_SCHEMA_MISSING'
+                );
+            }
+
             $post = MarketingPost::where('uuid', $request->uuid)->where('category', 'experience')->first();
             if (! $post) {
                 return ApiResponseHelper::apiError('Historia no encontrada', null, 404, 'EXPERIENCE_STORY_NOT_FOUND');
@@ -525,7 +569,14 @@ class ExperienceController extends Controller
             $post->delete();
 
             return ApiResponseHelper::apiSuccess(200, 'Historia eliminada exitosamente');
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            Log::error('DELETE_EXPERIENCE_STORY_ERROR', [
+                'message' => $e->getMessage(),
+                'exception' => $e::class,
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
             return ApiResponseHelper::apiError('Error al eliminar la historia', $e->getMessage(), 500, 'DELETE_EXPERIENCE_STORY_ERROR');
         }
     }
@@ -550,6 +601,27 @@ class ExperienceController extends Controller
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error en importación WordPress', $e->getMessage(), 500, 'IMPORT_WORDPRESS_EXPERIENCE_ERROR');
         }
+    }
+
+    /**
+     * Comprueba que exista la tabla y columnas mínimas para CRUD admin de historias Experience.
+     * Devuelve mensaje humano si falta algo; null si está listo.
+     */
+    private function marketingPostsTableReadyForExperienceAdmin(): ?string
+    {
+        $table = (new MarketingPost)->getTable();
+
+        if (! Schema::hasTable($table)) {
+            return "La tabla `{$table}` no existe. En el servidor sandbox ejecuta `php artisan migrate` (o despliega las migraciones que crean marketing_posts).";
+        }
+
+        foreach (['title', 'url_name', 'status', 'category'] as $col) {
+            if (! Schema::hasColumn($table, $col)) {
+                return "La tabla `{$table}` no tiene la columna `{$col}`. Ejecuta las migraciones pendientes del backend.";
+            }
+        }
+
+        return null;
     }
 
     /**

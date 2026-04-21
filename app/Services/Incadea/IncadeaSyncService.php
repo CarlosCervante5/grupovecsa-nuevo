@@ -6,6 +6,7 @@ use App\Models\Boutique\BoutiqueProduct;
 use App\Models\Boutique\IncadeaSyncLog;
 use App\Models\SystemSetting;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Ramsey\Uuid\Uuid;
 
 class IncadeaSyncService
@@ -23,14 +24,34 @@ class IncadeaSyncService
     public function fetchSpareParts(): array
     {
         $url = config('services.incadea.api_url');
+        if (! is_string($url) || trim($url) === '') {
+            throw new \RuntimeException(
+                'INCADEA_API_URL no está definida. Configura la variable en Railway (Settings → Variables) o en .env.'
+            );
+        }
 
         $response = Http::timeout(30)->get($url);
 
-        if (!$response->successful()) {
-            throw new \Exception('Incadea API returned status: ' . $response->status());
+        if (! $response->successful()) {
+            throw new \RuntimeException(
+                'Incadea API respondió HTTP '.$response->status().'. Comprueba INCADEA_API_URL y conectividad desde el servidor.'
+            );
         }
 
-        return $response->json('data.spare_parts') ?? [];
+        $raw = $response->json('data.spare_parts');
+        if (is_object($raw)) {
+            $raw = json_decode(json_encode($raw), true);
+        }
+        if (! is_array($raw)) {
+            Log::warning('INCADEA_UNEXPECTED_PAYLOAD', [
+                'body_preview' => substr($response->body(), 0, 500),
+            ]);
+            throw new \RuntimeException(
+                'Incadea API: la respuesta no contiene un arreglo data.spare_parts. Revisa el formato del servicio externo.'
+            );
+        }
+
+        return $raw;
     }
 
     /**
@@ -38,8 +59,14 @@ class IncadeaSyncService
      */
     public function filterParts(array $parts, array $filters): array
     {
-        $excludedBrands     = $filters['excluded_brands'] ?? [];
+        $excludedBrands = $filters['excluded_brands'] ?? [];
         $excludedCategories = $filters['excluded_categories'] ?? [];
+        if (! is_array($excludedBrands)) {
+            $excludedBrands = [];
+        }
+        if (! is_array($excludedCategories)) {
+            $excludedCategories = [];
+        }
 
         return array_values(array_filter($parts, function ($part) use ($excludedBrands, $excludedCategories) {
             if (in_array($part['brand'] ?? '', $excludedBrands)) {
@@ -58,7 +85,8 @@ class IncadeaSyncService
      */
     public function syncPart(array $part): string
     {
-        $categoryId = $this->categoryMapper->resolve($part['category'] ?? '');
+        $part = is_array($part) ? $part : (array) $part;
+        $categoryId = $this->categoryMapper->resolve((string) ($part['category'] ?? ''));
 
         if ($categoryId === null) {
             return 'skipped';
@@ -113,7 +141,7 @@ class IncadeaSyncService
                 'started_at'      => now(),
                 'filters_applied' => $filters,
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             // Log table may not exist yet — continue without logging
         }
 
@@ -130,10 +158,10 @@ class IncadeaSyncService
                 try {
                     $result = $this->syncPart($part);
                     $stats[$result]++;
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     $stats['errors']++;
                     $errorDetails[] = [
-                        'no_part' => $part['no_part'] ?? 'unknown',
+                        'no_part' => is_array($part) ? ($part['no_part'] ?? 'unknown') : 'unknown',
                         'error'   => $e->getMessage(),
                     ];
                 }
@@ -162,13 +190,16 @@ class IncadeaSyncService
                 'log_uuid'         => $log ? $log->uuid : null,
             ];
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             if ($log) {
-                $log->update([
-                    'status'        => 'failed',
-                    'error_details' => [['error' => $e->getMessage()]],
-                    'finished_at'   => now(),
-                ]);
+                try {
+                    $log->update([
+                        'status'        => 'failed',
+                        'error_details' => [['error' => $e->getMessage()]],
+                        'finished_at'   => now(),
+                    ]);
+                } catch (\Throwable $ignored) {
+                }
             }
             throw $e;
         }

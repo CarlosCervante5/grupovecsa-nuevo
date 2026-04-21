@@ -2,6 +2,7 @@
 
 namespace App\Models\Boutique;
 
+use App\Models\Dealership;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -31,6 +32,7 @@ class BoutiqueProduct extends Model
 
     protected $fillable = [
         'category_id',
+        'dealership_id',
         'name',
         'description',
         'price',
@@ -76,6 +78,11 @@ class BoutiqueProduct extends Model
     public function category()
     {
         return $this->belongsTo(BoutiqueCategory::class, 'category_id');
+    }
+
+    public function dealership()
+    {
+        return $this->belongsTo(Dealership::class, 'dealership_id');
     }
 
     public function images()

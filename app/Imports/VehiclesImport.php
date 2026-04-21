@@ -3,33 +3,36 @@
 namespace App\Imports;
 
 use App\Http\Requests\Vehicles\StoreVehicleRequest;
+use App\Models\User;
 use App\Services\VehicleService;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
-use Maatwebsite\Excel\Concerns\ToModel;
-use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\SkipsFailures;
 use Maatwebsite\Excel\Concerns\SkipsOnFailure;
+use Maatwebsite\Excel\Concerns\ToModel;
+use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Validators\Failure;
 
-class VehiclesImport implements ToModel, WithHeadingRow, SkipsOnFailure
+class VehiclesImport implements SkipsOnFailure, ToModel, WithHeadingRow
 {
     use SkipsFailures;
 
     protected $vehicleService;
-    protected $user_id;
+
+    protected User $user;
+
     protected $failures = [];
+
     protected $rowIndex = 1;
 
-    public function __construct(VehicleService $vehicleService, $user_id)
+    public function __construct(VehicleService $vehicleService, User $user)
     {
         $this->vehicleService = $vehicleService;
-        $this->user_id = $user_id;
+        $this->user = $user;
     }
 
     public function model(array $row)
     {
-        $request = new StoreVehicleRequest();
+        $request = new StoreVehicleRequest;
         $rules = $request->rules();
 
         $validator = Validator::make($row, $rules);
@@ -47,7 +50,7 @@ class VehiclesImport implements ToModel, WithHeadingRow, SkipsOnFailure
             return null;
         }
 
-        $this->vehicleService->createOrUpdateVehicle($row, $this->user_id);
+        $this->vehicleService->createOrUpdateVehicle($row, $this->user);
 
         $this->rowIndex++;
     }
