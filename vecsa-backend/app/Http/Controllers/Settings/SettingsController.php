@@ -264,6 +264,74 @@ class SettingsController extends Controller
         }
     }
 
+    /**
+     * Checkout boutique público: qué métodos de pago están habilitados (sin auth).
+     * Contrato esperado por el front: data.methods + data.openpay.
+     */
+    public function boutiquePaymentMethodsPublic(Request $request)
+    {
+        try {
+            $stripeMode = SystemSetting::get('stripe_mode', 'test');
+            if (! in_array($stripeMode, ['test', 'live'], true)) {
+                $stripeMode = 'test';
+            }
+            $pkStripe = trim((string) SystemSetting::get("stripe_{$stripeMode}_publishable_key", ''));
+            $stripeOn = $pkStripe !== '';
+
+            $openpayMode = SystemSetting::get('openpay_mode', 'sandbox');
+            $suffixOp = $openpayMode === 'production' ? 'production' : 'sandbox';
+            $merchantId = trim((string) SystemSetting::get("openpay_{$suffixOp}_merchant_id", ''));
+            $publicKey = trim((string) SystemSetting::get("openpay_{$suffixOp}_public_key", ''));
+            $openpayOn = $merchantId !== '' && $publicKey !== '';
+
+            $transferencia = filter_var(SystemSetting::get('boutique_checkout_transferencia', '1'), FILTER_VALIDATE_BOOLEAN);
+            $sucursal = filter_var(SystemSetting::get('boutique_checkout_sucursal', '1'), FILTER_VALIDATE_BOOLEAN);
+
+            $openpayPayload = [
+                'merchant_id' => $merchantId,
+                'public_key' => $publicKey,
+                'sandbox' => $openpayMode !== 'production',
+                'available' => $openpayOn,
+            ];
+
+            return ApiResponseHelper::apiSuccess(200, 'Métodos de pago boutique', [
+                'methods' => [
+                    'stripe' => $stripeOn,
+                    'openpay' => $openpayOn,
+                    'transferencia' => $transferencia,
+                    'sucursal' => $sucursal,
+                ],
+                'openpay' => $openpayPayload,
+            ]);
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al leer métodos de pago boutique', $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Checkout boutique público: tipos de embalaje para cotización (sin auth).
+     * Si no hay catálogo en BD, se devuelve un tipo por defecto compatible con el checkout.
+     */
+    public function boutiqueShippingPackageTypesPublic(Request $request)
+    {
+        try {
+            $types = [[
+                'id' => 'default',
+                'label' => 'Embalaje estándar',
+                'package_kind' => 'box',
+                'weight' => 1.0,
+                'length' => 30.0,
+                'width' => 30.0,
+                'height' => 20.0,
+                'extra_cost' => 0.0,
+            ]];
+
+            return ApiResponseHelper::apiSuccess(200, 'Tipos de embalaje boutique', ['types' => $types]);
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al leer tipos de embalaje', $e->getMessage(), 500);
+        }
+    }
+
     private function mask(string $value): string
     {
         if (empty($value) || strlen($value) <= 4) {
