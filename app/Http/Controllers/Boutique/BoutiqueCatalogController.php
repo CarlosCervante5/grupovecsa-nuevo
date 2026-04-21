@@ -21,7 +21,8 @@ class BoutiqueCatalogController extends Controller
             if ($request->filled('category_uuid')) {
                 $category = BoutiqueCategory::findByUuid($request->input('category_uuid'));
                 if ($category) {
-                    $query->where('category_id', $category->id);
+                    $categoryIds = BoutiqueCategory::idsSelfAndDescendants((int) $category->id);
+                    $query->whereIn('category_id', $categoryIds);
                 }
             }
 
@@ -124,9 +125,26 @@ class BoutiqueCatalogController extends Controller
     public function categories()
     {
         try {
+            $productCategoryIds = BoutiqueProduct::query()
+                ->where('active', true)
+                ->whereNotNull('category_id')
+                ->distinct()
+                ->pluck('category_id')
+                ->map(fn ($id) => (int) $id)
+                ->all();
+
+            $qualifiedIds = $this->categoryIdsWithProductsOrAncestors($productCategoryIds);
+
+            if ($qualifiedIds === []) {
+                return ApiResponseHelper::apiSuccess(200, 'Categorías obtenidas exitosamente', ['categories' => collect()]);
+            }
+
             $categories = BoutiqueCategory::where('active', true)
-                ->with(['children' => function ($q) {
-                    $q->where('active', true)->orderBy('name');
+                ->whereIn('id', $qualifiedIds)
+                ->with(['children' => function ($q) use ($qualifiedIds) {
+                    $q->where('active', true)
+                        ->whereIn('id', $qualifiedIds)
+                        ->orderBy('name');
                 }])
                 ->whereNull('parent_id')
                 ->orderBy('name')
@@ -136,5 +154,35 @@ class BoutiqueCatalogController extends Controller
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al obtener las categorías', $e->getMessage(), 500, 'GET_CATEGORIES_ERROR');
         }
+    }
+
+    /**
+     * IDs de categorías visibles en el catálogo público: toda categoría con al menos un producto
+     * activo, más sus ancestros activos (para conservar la jerarquía en el menú).
+     *
+     * @param  int[]  $productCategoryIds  category_id distintos de productos activos
+     * @return int[]
+     */
+    private function categoryIdsWithProductsOrAncestors(array $productCategoryIds): array
+    {
+        if ($productCategoryIds === []) {
+            return [];
+        }
+
+        $qualified = [];
+        foreach ($productCategoryIds as $cid) {
+            $qualified[(int) $cid] = true;
+        }
+
+        foreach (array_keys($qualified) as $cid) {
+            $walker = BoutiqueCategory::query()->where('active', true)->where('id', $cid)->first();
+            while ($walker && $walker->parent_id) {
+                $pid = (int) $walker->parent_id;
+                $qualified[$pid] = true;
+                $walker = BoutiqueCategory::query()->where('active', true)->where('id', $pid)->first();
+            }
+        }
+
+        return array_values(array_map('intval', array_keys($qualified)));
     }
 }
