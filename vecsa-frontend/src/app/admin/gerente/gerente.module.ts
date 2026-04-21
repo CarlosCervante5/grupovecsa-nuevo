@@ -6,6 +6,7 @@ import { GerenteRoutingModule } from './gerente-routing.module';
 import { GerenteDashboardComponent } from './pages/dashboard/gerente-dashboard.component';
 import { GerenteLayoutComponent } from './pages/layout/gerente-layout.component';
 import { VehicleStockModule } from '../shared/vehicle-stock/vehicle-stock.module';
+import { BenchmarkModule } from '../shared/benchmark/benchmark.module';
 
 @NgModule({
   declarations: [
@@ -17,6 +18,7 @@ import { VehicleStockModule } from '../shared/vehicle-stock/vehicle-stock.module
     GerenteRoutingModule,
     FormsModule,
     VehicleStockModule,
+    BenchmarkModule,
   ]
 })
 export class GerenteModule { }

@@ -15,7 +15,7 @@ class CreateBoutiqueOrderRequest extends FormRequest
     {
         return [
             'delivery_method' => 'required|in:envio_domicilio,recoleccion_sucursal',
-            'payment_method' => 'required|in:stripe,transferencia,sucursal',
+            'payment_method' => 'required|in:stripe,transferencia,sucursal,openpay',
             'shipping_name' => 'required_if:delivery_method,envio_domicilio|string',
             'shipping_address' => 'required_if:delivery_method,envio_domicilio|string',
             'shipping_city' => 'required_if:delivery_method,envio_domicilio|string',

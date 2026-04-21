@@ -1,3 +1,12 @@
+/** Respuesta de POST /api/boutique/checkout/openpay_public_config */
+export interface BoutiqueOpenPayPublicConfig {
+  merchant_id: string;
+  public_key: string;
+  sandbox: boolean;
+  /** true si hay merchant_id y public_key configurados para el modo actual (sandbox/producción). */
+  available: boolean;
+}
+
 export interface BoutiqueCategory {
   uuid: string;
   name: string;
@@ -71,7 +80,7 @@ export interface BoutiqueOrderItem {
 
 export interface BoutiquePayment {
   uuid: string;
-  method: 'stripe' | 'transferencia' | 'sucursal';
+  method: 'stripe' | 'transferencia' | 'sucursal' | 'openpay';
   amount: number;
   status: 'pendiente' | 'completado' | 'fallido' | 'reembolsado';
   stripe_payment_intent_id: string | null;

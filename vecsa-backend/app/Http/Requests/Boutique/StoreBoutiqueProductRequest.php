@@ -19,6 +19,7 @@ class StoreBoutiqueProductRequest extends FormRequest
             'price' => 'required|numeric|min:0',
             'sku' => 'required|string|max:100',
             'category_uuid' => 'required|string',
+            'dealership_id' => 'nullable|integer|min:1',
             'stock' => 'nullable|integer|min:0',
             'active' => 'nullable|boolean',
         ];

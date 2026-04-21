@@ -9,6 +9,8 @@ import { GestorFeatureGuard } from './guards/gestor-feature.guard';
 import { GESTOR_FEATURE_PERMISSIONS } from 'src/app/admin/utils/gestor-feature-permissions';
 import { VehiclesComponent } from '../shared/vehicle-stock/pages/vehicles/vehicles.component';
 import { VehicleInventoryGuard } from '../vehicle-inventory/guards/vehicle-inventory.guard';
+import { BenchmarkComponent } from '../shared/benchmark/benchmark.component';
+import { BenchmarkGuard } from '../shared/benchmark/benchmark.guard';
 
 const routes: Routes = [
   {
@@ -38,6 +40,11 @@ const routes: Routes = [
         path: 'vehicle-inventory',
         component: VehiclesComponent,
         canActivate: [VehicleInventoryGuard],
+      },
+      {
+        path: 'benchmark',
+        component: BenchmarkComponent,
+        canActivate: [BenchmarkGuard],
       },
     ]
   },

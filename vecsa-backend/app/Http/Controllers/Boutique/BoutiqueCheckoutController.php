@@ -80,7 +80,7 @@ class BoutiqueCheckoutController extends Controller
                 'guest_name'       => 'required|string|max:255',
                 'guest_email'      => 'required|email|max:255',
                 'delivery_method'  => 'required|in:envio_domicilio,recoleccion_sucursal',
-                'payment_method'   => 'required|in:stripe,transferencia,sucursal',
+                'payment_method'   => 'required|in:stripe,transferencia,sucursal,openpay',
                 'shipping_name'    => 'nullable|string|max:255',
                 'shipping_address' => 'nullable|string|max:500',
                 'shipping_city'    => 'nullable|string|max:100',

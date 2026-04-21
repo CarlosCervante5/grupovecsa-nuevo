@@ -1,6 +1,7 @@
 import { Component, OnInit, AfterViewInit, ElementRef, ViewChild, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { GerenteDashboardService } from '../../services/gerente-dashboard.service';
+import { adminBenchmarkUrl } from 'src/app/admin/utils/admin-route.util';
 import * as echarts from 'echarts';
 
 @Component({
@@ -68,7 +69,11 @@ export class GerenteDashboardComponent implements OnInit, AfterViewInit, OnDestr
     { label: 'Técnico HyP', icon: 'handyman', route: '/admin/technician' },
     { label: 'Hojalatería y pintura', icon: 'build', route: '/admin/bodywork_paint_technician' },
     { label: 'Refacciones', icon: 'settings', route: '/admin/spare_parts' },
-    { label: 'Benchmark ADS', icon: 'analytics', route: '/admin/benchmark' },
+    {
+      label: 'Benchmark ADS',
+      icon: 'analytics',
+      route: adminBenchmarkUrl(localStorage.getItem('role')) ?? '/admin/benchmark',
+    },
   ];
 
   constructor(private router: Router, private dashboardService: GerenteDashboardService) {}

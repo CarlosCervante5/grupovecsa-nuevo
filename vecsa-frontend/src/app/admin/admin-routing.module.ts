@@ -116,10 +116,11 @@ const routes: Routes = [
     canActivate: [DeveloperGuard],
     canLoad: [DeveloperGuard],
   },
-  { path: 'benchmark',
-    loadChildren: () => import('./shared/benchmark/benchmark.module').then(m => m.BenchmarkModule),
-    canActivate: [BenchmarkGuard],
-    canLoad: [BenchmarkGuard],
+  {
+    path: 'benchmark',
+    canMatch: [BenchmarkGuard],
+    loadComponent: () =>
+      import('./shared/benchmark/benchmark-redirect.component').then((m) => m.BenchmarkRedirectComponent),
   },
   { path: 'store',
     loadChildren: () => import('./store/store.module').then(m => m.StoreModule),

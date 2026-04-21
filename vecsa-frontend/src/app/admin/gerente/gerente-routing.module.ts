@@ -4,6 +4,8 @@ import { GerenteDashboardComponent } from './pages/dashboard/gerente-dashboard.c
 import { GerenteLayoutComponent } from './pages/layout/gerente-layout.component';
 import { VehiclesComponent } from '../shared/vehicle-stock/pages/vehicles/vehicles.component';
 import { VehicleInventoryGuard } from '../vehicle-inventory/guards/vehicle-inventory.guard';
+import { BenchmarkComponent } from '../shared/benchmark/benchmark.component';
+import { BenchmarkGuard } from '../shared/benchmark/benchmark.guard';
 
 const routes: Routes = [
   {
@@ -15,6 +17,11 @@ const routes: Routes = [
         path: 'vehicle-inventory',
         component: VehiclesComponent,
         canActivate: [VehicleInventoryGuard],
+      },
+      {
+        path: 'benchmark',
+        component: BenchmarkComponent,
+        canActivate: [BenchmarkGuard],
       },
     ]
   },

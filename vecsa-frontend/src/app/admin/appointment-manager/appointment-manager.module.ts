@@ -9,6 +9,7 @@ import { AdminModule } from '../admin.module';
 import { AngularMaterialModule } from 'src/app/angular-material/angular-material.module';
 import { FormsModule } from '@angular/forms';
 import { NewNavComponent } from 'src/app/shared/versiones-nav/new-nav/new-nav.component';
+import { BenchmarkModule } from '../shared/benchmark/benchmark.module';
 
 
 @NgModule({
@@ -23,7 +24,8 @@ import { NewNavComponent } from 'src/app/shared/versiones-nav/new-nav/new-nav.co
     CommonModule,
     AppointmentManagerRoutingModule,
     FormsModule,
-    NewNavComponent
+    NewNavComponent,
+    BenchmarkModule
   ]
 })
 export class AppointmentManagerModule { }

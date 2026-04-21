@@ -69,6 +69,30 @@ class BoutiqueCategory extends Model
         return self::where('uuid', $uuid)->first();
     }
 
+    /**
+     * IDs de la categoría y todas sus descendientes (por parent_id), para filtros de productos/catálogo.
+     *
+     * @return int[]
+     */
+    public static function idsSelfAndDescendants(int $categoryId): array
+    {
+        $ids = [$categoryId];
+        $queue = [$categoryId];
+        while ($queue !== []) {
+            $parentId = (int) array_shift($queue);
+            $childIds = self::query()->where('parent_id', $parentId)->pluck('id')->all();
+            foreach ($childIds as $cid) {
+                $cid = (int) $cid;
+                if (! in_array($cid, $ids, true)) {
+                    $ids[] = $cid;
+                    $queue[] = $cid;
+                }
+            }
+        }
+
+        return array_values(array_unique($ids));
+    }
+
     public function parent()
     {
         return $this->belongsTo(BoutiqueCategory::class, 'parent_id');

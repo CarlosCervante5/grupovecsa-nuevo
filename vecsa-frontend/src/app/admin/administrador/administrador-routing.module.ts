@@ -7,6 +7,8 @@ import { AdminPermisosComponent } from './pages/admin-permisos/admin-permisos.co
 import { ExperienceStoriesComponent } from '../marketing/pages/experience-stories/experience-stories.component';
 import { VehiclesComponent } from '../shared/vehicle-stock/pages/vehicles/vehicles.component';
 import { VehicleInventoryGuard } from '../vehicle-inventory/guards/vehicle-inventory.guard';
+import { BenchmarkComponent } from '../shared/benchmark/benchmark.component';
+import { BenchmarkGuard } from '../shared/benchmark/benchmark.guard';
 
 const routes: Routes = [
   {
@@ -26,6 +28,11 @@ const routes: Routes = [
         path: 'vehicle-inventory',
         component: VehiclesComponent,
         canActivate: [VehicleInventoryGuard],
+      },
+      {
+        path: 'benchmark',
+        component: BenchmarkComponent,
+        canActivate: [BenchmarkGuard],
       },
     ]
   },

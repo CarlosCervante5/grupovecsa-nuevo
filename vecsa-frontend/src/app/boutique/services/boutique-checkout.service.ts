@@ -6,7 +6,8 @@ import {
   ApiResponse,
   BoutiqueOrder,
   ShippingQuote,
-  PaymentIntentResponse
+  PaymentIntentResponse,
+  BoutiqueOpenPayPublicConfig,
 } from '../interfaces/boutique.interfaces';
 
 @Injectable({
@@ -84,6 +85,14 @@ export class BoutiqueCheckoutService {
       `${this.url}/api/boutique/checkout/payment_intent`,
       { order_uuid },
       { headers: this.getHeaders() }
+    );
+  }
+
+  /** Sin auth: datos públicos para mostrar OpenPay en checkout cuando la tienda está configurada. */
+  public getOpenPayPublicConfig(): Observable<ApiResponse<BoutiqueOpenPayPublicConfig>> {
+    return this._http.post<ApiResponse<BoutiqueOpenPayPublicConfig>>(
+      `${this.url}/api/boutique/checkout/openpay_public_config`,
+      {}
     );
   }
 }

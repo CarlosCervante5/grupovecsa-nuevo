@@ -2,7 +2,11 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/auth/services/auth.service';
-import { adminDashboardUrl, adminVehicleInventoryUrl } from 'src/app/admin/utils/admin-route.util';
+import {
+  adminBenchmarkUrl,
+  adminDashboardUrl,
+  adminVehicleInventoryUrl,
+} from 'src/app/admin/utils/admin-route.util';
 
 @Component({
   selector: 'app-gerente-layout',
@@ -91,7 +95,12 @@ export class GerenteLayoutComponent implements OnInit, OnDestroy {
       extraPerms?: string[];
     }[] = [
       { perm: 'access store_management', label: 'Tienda', icon: 'storefront', route: '/admin/store' },
-      { perm: 'access benchmark', label: 'Benchmark ADS', icon: 'analytics', route: '/admin/benchmark' },
+      {
+        perm: 'access benchmark',
+        label: 'Benchmark ADS',
+        icon: 'analytics',
+        route: adminBenchmarkUrl(this.role) ?? '/admin/benchmark',
+      },
       { perm: 'access marketing', label: 'Marketing', icon: 'campaign', route: '/admin/marketing' },
       {
         perm: 'access vehicle_inventory',

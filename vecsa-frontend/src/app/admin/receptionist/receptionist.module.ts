@@ -10,6 +10,7 @@ import { AdminModule } from '../admin.module';
 import { AngularMaterialModule } from '../../angular-material/angular-material.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SkCubeComponent } from '@components/sk-cube/sk-cube.component';
+import { BenchmarkModule } from '../shared/benchmark/benchmark.module';
 
 @NgModule({
   declarations: [
@@ -25,7 +26,8 @@ import { SkCubeComponent } from '@components/sk-cube/sk-cube.component';
     AdminModule,
     DragDropModule,
     ReactiveFormsModule,
-    SkCubeComponent
+        SkCubeComponent,
+        BenchmarkModule
   ]
 })
 export class ReceptionistModule { }

@@ -45,6 +45,8 @@ export class BoutiqueAdminProductService {
     sku: string;
     stock: number;
     active?: boolean;
+    /** Obligatorio vía API si el usuario tiene varias sucursales asignadas */
+    dealership_id?: number;
   }): Observable<ApiResponse<BoutiqueProduct>> {
     return this._http.post<ApiResponse<BoutiqueProduct>>(
       `${this.url}/api/boutique/admin/products/store`,
@@ -62,6 +64,7 @@ export class BoutiqueAdminProductService {
     sku?: string;
     stock?: number;
     active?: boolean;
+    dealership_id?: number | null;
   }): Observable<ApiResponse<BoutiqueProduct>> {
     return this._http.post<ApiResponse<BoutiqueProduct>>(
       `${this.url}/api/boutique/admin/products/update`,

@@ -250,13 +250,14 @@ class SettingsController extends Controller
             $mode = SystemSetting::get('openpay_mode', 'sandbox');
             $suffix = $mode === 'production' ? 'production' : 'sandbox';
 
-            $merchantId = SystemSetting::get("openpay_{$suffix}_merchant_id", '');
-            $publicKey = SystemSetting::get("openpay_{$suffix}_public_key", '');
+            $merchantId = trim((string) SystemSetting::get("openpay_{$suffix}_merchant_id", ''));
+            $publicKey = trim((string) SystemSetting::get("openpay_{$suffix}_public_key", ''));
 
             return ApiResponseHelper::apiSuccess(200, 'Configuración pública OpenPay', [
                 'merchant_id' => $merchantId,
                 'public_key' => $publicKey,
                 'sandbox' => $mode !== 'production',
+                'available' => $merchantId !== '' && $publicKey !== '',
             ]);
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al leer OpenPay', $e->getMessage(), 500);

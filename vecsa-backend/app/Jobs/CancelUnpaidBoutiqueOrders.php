@@ -23,7 +23,7 @@ class CancelUnpaidBoutiqueOrders implements ShouldQueue
 
             $orders = BoutiqueOrder::where('status', 'pendiente')
                 ->whereHas('payment', function ($q) {
-                    $q->whereIn('method', ['transferencia', 'sucursal'])
+                    $q->whereIn('method', ['transferencia', 'sucursal', 'openpay'])
                       ->where('status', 'pendiente');
                 })
                 ->where('created_at', '<', $cutoff)

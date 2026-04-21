@@ -19,23 +19,6 @@ constructor(
     private _http: HttpClient
 ) { }
 
-    /**
-     * Login clásico guarda `user`; AuthService.login guarda `user_data` con forma { user, role, ... }.
-     */
-    private sessionUserEmail(): string {
-        try {
-            const raw = localStorage.getItem('user') ?? localStorage.getItem('user_data');
-            if (!raw) {
-                return '';
-            }
-            const parsed = JSON.parse(raw) as { user?: { email?: string }; email?: string };
-            const email = parsed?.user?.email ?? parsed?.email;
-            return typeof email === 'string' ? email : '';
-        } catch {
-            return '';
-        }
-    }
-
     public getVehicle( uuid:string ):Observable<FullDetailResponse>{
 
         let user_token = localStorage.getItem('user_token');
@@ -106,10 +89,13 @@ constructor(
     
 
     public getVehicles( page:number, word:string, paginate: number, relationshipNames: string[]):Observable<SearchResponse>{
-        
-        const userMail = this.sessionUserEmail();
+        const token = localStorage.getItem('user_token');
+        let headers = new HttpHeaders();
+        if (token) {
+            headers = headers.set('Authorization', `Bearer ${token}`);
+        }
 
-        let params = new HttpParams(); 
+        let params = new HttpParams();
 
         if (word) {
             params = params.set('keyword', word);
@@ -131,10 +117,6 @@ constructor(
 
         params = params.set('has_images', false);
 
-        if (userMail === 'vecsapuebla@grupovecsa.com') {
-            params = params.set('location_names', 'vecsa puebla');
-        }
-
-        return this._http.get<SearchResponse>(`${ this.baseUrl }/api/vehicles/search`, {params} );
+        return this._http.get<SearchResponse>(`${ this.baseUrl }/api/vehicles/search`, { params, headers } );
     }
 }

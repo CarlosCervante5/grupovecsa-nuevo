@@ -8,14 +8,18 @@ use App\Http\Requests\Boutique\UpdateInventoryRequest;
 use App\Models\Boutique\BoutiqueInventoryMovement;
 use App\Models\Boutique\BoutiqueProduct;
 use App\Services\Boutique\BoutiqueInventoryService;
+use App\Services\DealershipAccessService;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 
 class BoutiqueInventoryController extends Controller
 {
     protected BoutiqueInventoryService $inventoryService;
 
-    public function __construct(BoutiqueInventoryService $inventoryService)
-    {
+    public function __construct(
+        BoutiqueInventoryService $inventoryService,
+        protected DealershipAccessService $dealershipAccess,
+    ) {
         $this->inventoryService = $inventoryService;
     }
 
@@ -25,9 +29,11 @@ class BoutiqueInventoryController extends Controller
             $data = $request->validated();
 
             $product = BoutiqueProduct::findByUuid($data['product_uuid']);
-            if (!$product) {
+            if (! $product) {
                 return ApiResponseHelper::apiError('El producto no existe', null, 404, 'PRODUCT_NOT_FOUND');
             }
+
+            $this->dealershipAccess->assertProductDealershipAccessible($request->user(), $product->dealership_id);
 
             $movement = $this->inventoryService->manualAdjust($product, $data['new_stock'], $data['reason']);
 
@@ -35,6 +41,8 @@ class BoutiqueInventoryController extends Controller
                 'product' => $product->fresh(),
                 'movement' => $movement,
             ]);
+        } catch (AuthorizationException $e) {
+            return ApiResponseHelper::apiError($e->getMessage(), null, 403, 'INVENTORY_FORBIDDEN');
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al actualizar el inventario', $e->getMessage(), 500, 'UPDATE_INVENTORY_ERROR');
         }
@@ -46,9 +54,11 @@ class BoutiqueInventoryController extends Controller
             $productUuid = $request->input('product_uuid');
 
             $product = BoutiqueProduct::findByUuid($productUuid);
-            if (!$product) {
+            if (! $product) {
                 return ApiResponseHelper::apiError('El producto no existe', null, 404, 'PRODUCT_NOT_FOUND');
             }
+
+            $this->dealershipAccess->assertProductDealershipAccessible($request->user(), $product->dealership_id);
 
             $movements = BoutiqueInventoryMovement::where('product_id', $product->id)
                 ->orderBy('created_at', 'desc')
@@ -57,6 +67,8 @@ class BoutiqueInventoryController extends Controller
             return ApiResponseHelper::apiSuccess(200, 'Movimientos de inventario obtenidos exitosamente', [
                 'movements' => $movements,
             ]);
+        } catch (AuthorizationException $e) {
+            return ApiResponseHelper::apiError($e->getMessage(), null, 403, 'INVENTORY_FORBIDDEN');
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al obtener los movimientos de inventario', $e->getMessage(), 500, 'GET_MOVEMENTS_ERROR');
         }

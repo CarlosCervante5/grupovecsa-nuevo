@@ -8,6 +8,7 @@ import { StregaAppointmentsComponent } from './pages/appointments/strega-appoint
 import { AdminModule } from '../admin.module';
 import { AngularMaterialModule } from '../../angular-material/angular-material.module';
 import { MatTableModule } from '@angular/material/table';
+import { BenchmarkModule } from '../shared/benchmark/benchmark.module';
 
 @NgModule({
   declarations: [StregaLayoutComponent, StregaLeadsComponent, StregaAppointmentsComponent],
@@ -18,6 +19,7 @@ import { MatTableModule } from '@angular/material/table';
     AdminModule,
     AngularMaterialModule,
     MatTableModule,
+    BenchmarkModule,
   ],
 })
 export class StregaPanelModule {}
