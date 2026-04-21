@@ -11,6 +11,7 @@ import { BodyworkLayoutComponent } from './pages/layout/bodywork-layout.componen
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { BodyworkPaintFormComponent } from './components/bodywork-paint-form/bodywork-paint-form.component';
 import { NewNavComponent } from 'src/app/shared/versiones-nav/new-nav/new-nav.component';
+import { BenchmarkModule } from '../shared/benchmark/benchmark.module';
 
 
 @NgModule({
@@ -26,7 +27,8 @@ import { NewNavComponent } from 'src/app/shared/versiones-nav/new-nav/new-nav.co
     BodyworkPaintTechnicianRoutingModule,
     CommonModule,
     FormsModule,
-    NewNavComponent
+    NewNavComponent,
+    BenchmarkModule
   ]
 })
 export class BodyworkPaintTechnicianModule { }

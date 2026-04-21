@@ -14,6 +14,7 @@ import { UpdateUserComponent } from './components/update-user/update-user.compon
 import { AdminLayoutComponent } from './pages/layout/admin-layout.component';
 import { ExperienceStoriesSharedModule } from '../shared/experience-stories/experience-stories-shared.module';
 import { VehicleStockModule } from '../shared/vehicle-stock/vehicle-stock.module';
+import { BenchmarkModule } from '../shared/benchmark/benchmark.module';
 
 @NgModule({
     declarations: [
@@ -35,6 +36,7 @@ import { VehicleStockModule } from '../shared/vehicle-stock/vehicle-stock.module
         FormsModule,
         ExperienceStoriesSharedModule,
         VehicleStockModule,
+        BenchmarkModule,
     ]
   })
   export class AdministradorModule { }

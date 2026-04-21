@@ -8,6 +8,8 @@ import { MarketingLayoutComponent } from './pages/layout/marketing-layout.compon
 import { ExperienceStoriesComponent } from './pages/experience-stories/experience-stories.component';
 import { VehiclesComponent } from '../shared/vehicle-stock/pages/vehicles/vehicles.component';
 import { VehicleInventoryGuard } from '../vehicle-inventory/guards/vehicle-inventory.guard';
+import { BenchmarkComponent } from '../shared/benchmark/benchmark.component';
+import { BenchmarkGuard } from '../shared/benchmark/benchmark.guard';
 
 const routes: Routes = [
   {
@@ -24,6 +26,11 @@ const routes: Routes = [
       { path: 'home-testimonials', component: HomeTestimonialsComponent },
       { path: 'boutique-banners', component: BoutiqueBannersComponent },
       { path: 'experience-stories', component: ExperienceStoriesComponent },
+      {
+        path: 'benchmark',
+        component: BenchmarkComponent,
+        canActivate: [BenchmarkGuard],
+      },
     ]
   },
 ];

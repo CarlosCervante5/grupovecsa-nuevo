@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/auth/services/auth.service';
-import { adminDashboardUrl } from 'src/app/admin/utils/admin-route.util';
+import { adminBenchmarkUrl, adminDashboardUrl } from 'src/app/admin/utils/admin-route.util';
 
 @Component({
   selector: 'app-seller-layout',
@@ -83,7 +83,11 @@ export class SellerLayoutComponent implements OnInit, OnDestroy {
       this.dynamicItems.push({ label: 'Tienda', icon: 'storefront', route: '/admin/store' });
     }
     if (this.permissions.includes('access benchmark')) {
-      this.dynamicItems.push({ label: 'Benchmark ADS', icon: 'monitoring', route: '/admin/benchmark' });
+      this.dynamicItems.push({
+        label: 'Benchmark ADS',
+        icon: 'monitoring',
+        route: adminBenchmarkUrl(this.role) ?? '/admin/benchmark',
+      });
     }
   }
 

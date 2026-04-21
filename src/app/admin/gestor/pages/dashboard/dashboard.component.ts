@@ -2,7 +2,7 @@ import { Component, OnInit, AfterViewInit, ElementRef, ViewChild, OnDestroy } fr
 import { Router } from '@angular/router';
 import { AdminDashboardService } from '../../../shared/services/admin-dashboard.service';
 import * as echarts from 'echarts';
-import { adminDashboardUrl } from 'src/app/admin/utils/admin-route.util';
+import { adminBenchmarkUrl, adminDashboardUrl } from 'src/app/admin/utils/admin-route.util';
 import { expandLegacyGestorPermissions, GESTOR_FEATURE_PERMISSIONS } from 'src/app/admin/utils/gestor-feature-permissions';
 
 @Component({
@@ -90,7 +90,11 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
       this.quickLinks.push({ label: 'Tienda', icon: 'storefront', route: '/admin/store' });
     }
     if (raw.includes('access benchmark')) {
-      this.quickLinks.push({ label: 'Benchmark ADS', icon: 'monitoring', route: '/admin/benchmark' });
+      this.quickLinks.push({
+        label: 'Benchmark ADS',
+        icon: 'monitoring',
+        route: adminBenchmarkUrl(role) ?? '/admin/benchmark',
+      });
     }
   }
 

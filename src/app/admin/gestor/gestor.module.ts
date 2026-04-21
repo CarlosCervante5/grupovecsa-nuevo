@@ -25,6 +25,7 @@ import { NewNavComponent } from 'src/app/shared/versiones-nav/new-nav/new-nav.co
 import { GestorLayoutComponent } from './pages/layout/gestor-layout.component';
 import { ExperienceStoriesSharedModule } from '../shared/experience-stories/experience-stories-shared.module';
 import { VehicleStockModule } from '../shared/vehicle-stock/vehicle-stock.module';
+import { BenchmarkModule } from '../shared/benchmark/benchmark.module';
 
 @NgModule({
   declarations: [
@@ -55,6 +56,7 @@ import { VehicleStockModule } from '../shared/vehicle-stock/vehicle-stock.module
     NewNavComponent,
     ExperienceStoriesSharedModule,
     VehicleStockModule,
+    BenchmarkModule,
   ]
 })
 export class GestorModule { }

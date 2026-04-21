@@ -14,6 +14,7 @@ import { BoutiqueBannersComponent } from './pages/boutique-banners/boutique-bann
 import { MarketingLayoutComponent } from './pages/layout/marketing-layout.component';
 import { ExperienceStoriesSharedModule } from '../shared/experience-stories/experience-stories-shared.module';
 import { VehicleStockModule } from '../shared/vehicle-stock/vehicle-stock.module';
+import { BenchmarkModule } from '../shared/benchmark/benchmark.module';
 
 @NgModule({
   declarations: [
@@ -34,6 +35,7 @@ import { VehicleStockModule } from '../shared/vehicle-stock/vehicle-stock.module
     SkCubeComponent,
     ExperienceStoriesSharedModule,
     VehicleStockModule,
+    BenchmarkModule,
   ],
 })
 export class MarketingModule {}

@@ -110,6 +110,7 @@ export class OrderDetailComponent implements OnInit {
     if (!this.order?.payment) return '—';
     const methods: Record<string, string> = {
       stripe: 'Tarjeta (Stripe)',
+      openpay: 'Tarjeta (OpenPay)',
       transferencia: 'Transferencia bancaria',
       sucursal: 'Pago en sucursal'
     };
@@ -119,7 +120,9 @@ export class OrderDetailComponent implements OnInit {
   canConfirmPayment(): boolean {
     if (!this.order?.payment) return false;
     return this.order.payment.status === 'pendiente' &&
-           (this.order.payment.method === 'transferencia' || this.order.payment.method === 'sucursal');
+           (this.order.payment.method === 'transferencia' ||
+            this.order.payment.method === 'sucursal' ||
+            this.order.payment.method === 'openpay');
   }
 
   canGenerateLabel(): boolean {

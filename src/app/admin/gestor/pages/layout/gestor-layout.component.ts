@@ -2,7 +2,11 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/auth/services/auth.service';
-import { adminDashboardUrl, adminVehicleInventoryUrl } from 'src/app/admin/utils/admin-route.util';
+import {
+  adminBenchmarkUrl,
+  adminDashboardUrl,
+  adminVehicleInventoryUrl,
+} from 'src/app/admin/utils/admin-route.util';
 import { expandLegacyGestorPermissions, GESTOR_FEATURE_PERMISSIONS } from 'src/app/admin/utils/gestor-feature-permissions';
 
 @Component({
@@ -86,7 +90,11 @@ export class GestorLayoutComponent implements OnInit, OnDestroy {
       this.dynamicItems.push({ label: 'Tienda', icon: 'storefront', route: '/admin/store' });
     }
     if (this.permissions.includes('access benchmark')) {
-      this.dynamicItems.push({ label: 'Benchmark ADS', icon: 'monitoring', route: '/admin/benchmark' });
+      this.dynamicItems.push({
+        label: 'Benchmark ADS',
+        icon: 'monitoring',
+        route: adminBenchmarkUrl(this.role) ?? '/admin/benchmark',
+      });
     }
     const r = (this.role || '').trim().toLowerCase();
     if (

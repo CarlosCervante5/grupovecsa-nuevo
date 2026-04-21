@@ -18,6 +18,7 @@ import { QuoteSellCarRequestComponent } from './pages/quote-sell-car-request/quo
 import { DocumentationVehicleComponent } from './components/documentation-vehicle/documentation-vehicle.component';
 import { ValuatorLayoutComponent } from './pages/layout/valuator-layout.component';
 import { SkCubeComponent } from "@components/sk-cube/sk-cube.component";
+import { BenchmarkModule } from '../shared/benchmark/benchmark.module';
 
 
 @NgModule({
@@ -42,7 +43,8 @@ import { SkCubeComponent } from "@components/sk-cube/sk-cube.component";
     FormsModule,
     ReactiveFormsModule,
     NewNavComponent,
-    SkCubeComponent
+    SkCubeComponent,
+    BenchmarkModule
   ]
 })
 // export class AppointmentValuationsModule { }

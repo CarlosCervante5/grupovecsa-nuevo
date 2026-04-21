@@ -8,6 +8,7 @@ import { SellerValuationsComponent } from './pages/valuations/seller-valuations.
 import { AdminModule } from '../admin.module';
 import { AngularMaterialModule } from '../../angular-material/angular-material.module';
 import { MatTableModule } from '@angular/material/table';
+import { BenchmarkModule } from '../shared/benchmark/benchmark.module';
 
 @NgModule({
   declarations: [SellerLayoutComponent, SellerValuationsComponent],
@@ -19,6 +20,7 @@ import { MatTableModule } from '@angular/material/table';
     AdminModule,
     AngularMaterialModule,
     MatTableModule,
+    BenchmarkModule,
   ],
 })
 export class SellerPanelModule {}

@@ -288,9 +288,17 @@
             <mat-radio-button value="stripe" class="payment-radio">
               <div class="radio-content">
                 <mat-icon class="payment-icon">credit_card</mat-icon>
-                <span class="radio-label">Tarjeta de crédito / débito</span>
+                <span class="radio-label">Tarjeta de crédito / débito (Stripe)</span>
               </div>
             </mat-radio-button>
+            @if (openPayAvailable) {
+              <mat-radio-button value="openpay" class="payment-radio">
+                <div class="radio-content">
+                  <mat-icon class="payment-icon">credit_card</mat-icon>
+                  <span class="radio-label">Tarjeta (OpenPay)</span>
+                </div>
+              </mat-radio-button>
+            }
             <mat-radio-button value="transferencia" class="payment-radio">
               <div class="radio-content">
                 <mat-icon class="payment-icon">account_balance</mat-icon>
@@ -315,6 +323,12 @@
             <div class="payment-note">
               <mat-icon>info</mat-icon>
               <span>Podrás realizar el pago en cualquiera de nuestras sucursales. Tu pedido se reservará por 72 horas.</span>
+            </div>
+          }
+          @if (paymentMethod === 'openpay') {
+            <div class="payment-note">
+              <mat-icon>info</mat-icon>
+              <span>Tu pedido se creará con pago pendiente por OpenPay. Podrás ver el detalle en “Mis pedidos” y el equipo aplicará el cargo según el flujo de la tienda.</span>
             </div>
           }
         </section>

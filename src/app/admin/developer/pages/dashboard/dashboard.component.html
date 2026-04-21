@@ -35,7 +35,7 @@
       <span class="material-icons">grid_on</span>
       Matriz Rol-Permisos
     </button>
-    <button class="dev-nav-item" [class.active]="activeSection === 'benchmark'" (click)="navigate('/admin/benchmark')">
+    <button class="dev-nav-item" [class.active]="activeSection === 'benchmark'" (click)="navigate(benchmarkPanelUrl)">
       <span class="material-icons">monitoring</span>
       Benchmark ADS
     </button>
@@ -319,7 +319,7 @@
       }
     }
 
-    <!-- BENCHMARK VIEW - Now at /admin/benchmark -->
+    <!-- BENCHMARK VIEW - Ruta con layout: /admin/{panel}/benchmark -->
 
     <!-- STRIPE CONFIG VIEW -->
     @if (activeSection === 'stripe_config') {

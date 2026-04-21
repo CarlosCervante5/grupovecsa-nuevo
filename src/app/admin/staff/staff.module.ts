@@ -22,6 +22,7 @@ import { NewSaleComponent } from './components/new-sale/new-sale.component';
 import { NewRiderkmComponent } from './components/new-riderkm/new-riderkm.component';
 import { RedeemCouponsComponent } from './components/redeem-coupons/redeem-coupons.component';
 import { TableCouponsComponent } from './components/table-coupons/table-coupons.component';
+import { BenchmarkModule } from '../shared/benchmark/benchmark.module';
 
 
 @NgModule({
@@ -51,6 +52,7 @@ import { TableCouponsComponent } from './components/table-coupons/table-coupons.
         MatInputModule,
         SkCubeComponent,
         MatChipsModule,
+        BenchmarkModule,
     ],
     exports: [
         TableComponent,

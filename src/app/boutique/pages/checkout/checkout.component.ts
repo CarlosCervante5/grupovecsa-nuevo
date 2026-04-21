@@ -69,7 +69,9 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   loadingDealerships = false;
 
   // Payment
-  paymentMethod: 'stripe' | 'transferencia' | 'sucursal' = 'stripe';
+  paymentMethod: 'stripe' | 'transferencia' | 'sucursal' | 'openpay' = 'stripe';
+  /** OpenPay visible solo si el backend expone merchant + llave pública para el modo actual. */
+  openPayAvailable = false;
 
   // Order creation
   creatingOrder = false;
@@ -106,6 +108,28 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       shipping_phone: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
     });
     this.loadCart();
+    this.loadOpenPayAvailability();
+  }
+
+  private loadOpenPayAvailability(): void {
+    const sub = this.checkoutService.getOpenPayPublicConfig().subscribe({
+      next: (res) => {
+        const d = res.data as any;
+        if (!d) {
+          this.openPayAvailable = false;
+          return;
+        }
+        if (typeof d.available === 'boolean') {
+          this.openPayAvailable = d.available;
+        } else {
+          this.openPayAvailable = !!(String(d.merchant_id || '').trim() && String(d.public_key || '').trim());
+        }
+      },
+      error: () => {
+        this.openPayAvailable = false;
+      },
+    });
+    this.subs.push(sub);
   }
 
   ngOnDestroy(): void {

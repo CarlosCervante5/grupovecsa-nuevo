@@ -4,6 +4,8 @@ import { SparePartsLayoutComponent } from './pages/layout/spare-parts-layout.com
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { SparePartsAdministrationComponent } from './pages/spare-parts-administration/spare-parts-administration.component';
 import { SparePartsViewComponent } from './pages/spare-parts-view/spare-parts-view.component';
+import { BenchmarkComponent } from '../shared/benchmark/benchmark.component';
+import { BenchmarkGuard } from '../shared/benchmark/benchmark.guard';
 
 const routes: Routes = [
   {
@@ -13,6 +15,11 @@ const routes: Routes = [
       { path: '', component: DashboardComponent },
       { path: 'administration', component: SparePartsAdministrationComponent },
       { path: 'administration/view/:uuid', component: SparePartsViewComponent },
+      {
+        path: 'benchmark',
+        component: BenchmarkComponent,
+        canActivate: [BenchmarkGuard],
+      },
     ],
   },
 ];
