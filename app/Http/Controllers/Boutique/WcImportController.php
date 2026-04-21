@@ -160,10 +160,14 @@ class WcImportController extends Controller
         $headers = fgetcsv($handle, 0, ',', '"', '\\');
         if ($headers) $headers[0] = preg_replace('/^\xEF\xBB\xBF/', '', $headers[0]);
         $headers = array_map('trim', $headers);
+        $nHeaders = count($headers);
         while (($data = fgetcsv($handle, 0, ',', '"', '\\')) !== false) {
-            if (count($data) >= count($headers)) {
-                $rows[] = array_combine($headers, array_slice($data, 0, count($headers)));
+            // WooCommerce CSV omite columnas vacías al final: fgetcsv devuelve menos celdas que cabeceras.
+            $data = array_slice($data, 0, $nHeaders);
+            if (count($data) < $nHeaders) {
+                $data = array_pad($data, $nHeaders, '');
             }
+            $rows[] = array_combine($headers, $data);
         }
         fclose($handle);
         return $rows;
