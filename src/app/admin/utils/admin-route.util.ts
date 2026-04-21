@@ -84,3 +84,17 @@ export function adminVehicleInventoryUrl(role: string | null | undefined): strin
   }
   return null;
 }
+
+/**
+ * Benchmark ADS bajo el layout del panel del rol. Developer usa el panel administrador.
+ */
+export function adminBenchmarkUrl(role: string | null | undefined): string | null {
+  let seg = adminRouteSegmentForRole(role);
+  if (!seg) {
+    return null;
+  }
+  if (seg === 'developer') {
+    seg = 'administrator';
+  }
+  return `/admin/${seg}/benchmark`;
+}
