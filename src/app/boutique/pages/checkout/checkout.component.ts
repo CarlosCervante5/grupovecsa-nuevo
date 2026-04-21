@@ -1,9 +1,10 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -91,7 +92,8 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     private cartService: BoutiqueCartService,
     private checkoutService: BoutiqueCheckoutService,
     private snackBar: MatSnackBar,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -110,6 +112,19 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       shipping_zip: ['', [Validators.required, Validators.pattern(/^\d{5}$/)]],
       shipping_phone: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
     });
+    const shippingAutoSub = this.shippingForm.valueChanges
+      .pipe(
+        debounceTime(400),
+        map(() => {
+          const v = this.shippingForm.getRawValue() as Record<string, string>;
+          const sig = `${v.shipping_address ?? ''}|${v.shipping_city ?? ''}|${v.shipping_state ?? ''}|${v.shipping_zip ?? ''}`;
+          return { sig, valid: this.shippingForm.valid };
+        }),
+        distinctUntilChanged((a, b) => a.sig === b.sig && a.valid === b.valid),
+      )
+      .subscribe(() => this.maybeAutoRefreshShippingQuote());
+    this.subs.push(shippingAutoSub);
+
     this.loadCart();
     this.loadOpenPayAvailability();
   }
@@ -174,6 +189,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       return;
     }
     this.guestConfirmed = true;
+    this.maybeAutoRefreshShippingQuote();
   }
 
   onDeliveryMethodChange(): void {
@@ -185,6 +201,55 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     if (this.deliveryMethod === 'recoleccion_sucursal' && this.dealerships.length === 0) {
       this.loadDealerships();
     }
+    this.maybeAutoRefreshShippingQuote();
+  }
+
+  /** Cotización al vuelo cuando la dirección de envío es válida (sin botón manual). */
+  private maybeAutoRefreshShippingQuote(): void {
+    if (!this.guestConfirmed || this.deliveryMethod !== 'envio_domicilio') {
+      return;
+    }
+    if (this.shippingForm.invalid) {
+      this.shippingQuotes = [];
+      this.selectedQuote = null;
+      this.quotesLoaded = false;
+      return;
+    }
+    this.refreshShippingQuoteFromForm();
+  }
+
+  private refreshShippingQuoteFromForm(): void {
+    this.loadingQuotes = true;
+    this.shippingQuotes = [];
+    this.selectedQuote = null;
+    this.quotesLoaded = false;
+
+    const formVal = this.shippingForm.value;
+    const sub = this.checkoutService
+      .shippingQuote({
+        shipping_address: formVal.shipping_address,
+        shipping_city: formVal.shipping_city,
+        shipping_state: formVal.shipping_state,
+        shipping_zip: formVal.shipping_zip,
+      })
+      .subscribe({
+        next: (res: any) => {
+          const data = res.data;
+          this.shippingQuotes = Array.isArray(data) ? data : (data?.shipping_options || []);
+          this.quotesLoaded = true;
+          this.loadingQuotes = false;
+          if (this.shippingQuotes.length > 0) {
+            this.selectedQuote = this.shippingQuotes[0];
+          }
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.loadingQuotes = false;
+          this.snackBar.open('Error al obtener cotizaciones de envío', 'Cerrar', { duration: 3000 });
+          this.cdr.detectChanges();
+        },
+      });
+    this.subs.push(sub);
   }
 
   loadDealerships(): void {
@@ -205,36 +270,13 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     this.subs.push(sub);
   }
 
+  /** Por si en el futuro se expone un botón «Recotizar»; hoy la cotización es automática. */
   getShippingQuotes(): void {
     if (this.shippingForm.invalid) {
       this.shippingForm.markAllAsTouched();
       return;
     }
-    this.loadingQuotes = true;
-    this.shippingQuotes = [];
-    this.selectedQuote = null;
-    this.quotesLoaded = false;
-
-    const formVal = this.shippingForm.value;
-    const sub = this.checkoutService.shippingQuote({
-      shipping_address: formVal.shipping_address,
-      shipping_city: formVal.shipping_city,
-      shipping_state: formVal.shipping_state,
-      shipping_zip: formVal.shipping_zip,
-    }).subscribe({
-      next: (res: any) => {
-        // Backend returns { data: { shipping_options: [...] } }
-        const data = res.data;
-        this.shippingQuotes = Array.isArray(data) ? data : (data?.shipping_options || []);
-        this.quotesLoaded = true;
-        this.loadingQuotes = false;
-      },
-      error: () => {
-        this.loadingQuotes = false;
-        this.snackBar.open('Error al obtener cotizaciones de envío', 'Cerrar', { duration: 3000 });
-      },
-    });
-    this.subs.push(sub);
+    this.refreshShippingQuoteFromForm();
   }
 
   selectQuote(quote: ShippingQuote): void {
