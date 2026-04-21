@@ -1,0 +1,79 @@
+.thanks-wrap {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+  min-height: 70vh;
+  background: #fff;
+  color: #0f172a;
+}
+
+.thanks-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 32px 28px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  text-align: center;
+}
+
+.thanks-icon {
+  font-size: 56px;
+  width: 56px;
+  height: 56px;
+  color: #16a34a;
+  margin-bottom: 12px;
+}
+
+h1 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin: 0 0 16px;
+  letter-spacing: -0.3px;
+}
+
+.thanks-lead {
+  font-size: 1.05rem;
+  margin: 0 0 12px;
+  line-height: 1.5;
+}
+
+.thanks-hint {
+  font-size: 0.95rem;
+  color: #475569;
+  margin: 0 0 20px;
+  line-height: 1.5;
+}
+
+.thanks-ref {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  word-break: break-all;
+  margin: -8px 0 16px;
+}
+
+.thanks-note {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0 0 24px;
+  line-height: 1.5;
+}
+
+.thanks-note a {
+  color: #1c69d4;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.thanks-note a:hover {
+  text-decoration: underline;
+}
+
+.thanks-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.thanks-actions a mat-icon {
+  margin-right: 6px;
+  vertical-align: middle;
+}
