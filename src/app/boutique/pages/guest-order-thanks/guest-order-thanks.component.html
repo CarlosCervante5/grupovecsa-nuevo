@@ -1,0 +1,32 @@
+<div class="thanks-wrap">
+  <div class="thanks-card">
+    <mat-icon class="thanks-icon">check_circle</mat-icon>
+    <h1>¡Pedido registrado!</h1>
+    @if (orderNumber) {
+      <p class="thanks-lead">Tu número de pedido es <strong>{{ orderNumber }}</strong>.</p>
+    } @else {
+      <p class="thanks-lead">Tu compra quedó registrada correctamente.</p>
+    }
+    @if (guestEmail) {
+      <p class="thanks-hint">
+        Enviaremos actualizaciones al correo <strong>{{ guestEmail }}</strong>.
+      </p>
+    } @else {
+      <p class="thanks-hint">Revisa tu correo para los siguientes pasos (pago, envío o recolección).</p>
+    }
+    @if (orderReferenceUuid && !orderNumber) {
+      <p class="thanks-ref">Referencia de pedido: {{ orderReferenceUuid }}</p>
+    }
+    <p class="thanks-note">
+      Para ver el historial en la tienda puedes
+      <a routerLink="/auth/login" [queryParams]="{ returnUrl: '/boutique/orders' }">iniciar sesión</a>
+      con el mismo correo si creaste cuenta o te registras después.
+    </p>
+    <div class="thanks-actions">
+      <a mat-flat-button color="primary" routerLink="/boutique">
+        <mat-icon>storefront</mat-icon>
+        Seguir comprando
+      </a>
+    </div>
+  </div>
+</div>

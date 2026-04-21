@@ -80,6 +80,9 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   showStripePayment = false;
   createdOrderUuid: string | null = null;
 
+  /** Si el pedido con Stripe fue como invitado, al terminar pago ir a /boutique/gracias (no /orders con guard). */
+  private guestThanksAfterStripe: { orderNumber: string; guestEmail: string } | null = null;
+
   private subs: Subscription[] = [];
 
   constructor(
@@ -318,9 +321,26 @@ export class CheckoutComponent implements OnInit, OnDestroy {
         const order = wrapper.order || wrapper;
         this.snackBar.open(`Pedido ${order.order_number} creado exitosamente`, 'Cerrar', { duration: 4000 });
 
+        const asGuest = !this.isLoggedIn;
+
         if (this.paymentMethod === 'stripe') {
+          if (asGuest) {
+            this.guestThanksAfterStripe = {
+              orderNumber: String(order.order_number ?? ''),
+              guestEmail: String(this.guestForm.value.guest_email ?? ''),
+            };
+          } else {
+            this.guestThanksAfterStripe = null;
+          }
           this.createdOrderUuid = order.uuid;
           this.showStripePayment = true;
+        } else if (asGuest) {
+          this.router.navigate(['/boutique/gracias', order.uuid], {
+            state: {
+              orderNumber: order.order_number,
+              guestEmail: this.guestForm.value.guest_email,
+            },
+          });
         } else {
           this.router.navigate(['/boutique/orders', order.uuid]);
         }
@@ -343,6 +363,14 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
   onPaymentSuccess(orderUuid: string): void {
     this.snackBar.open('Pago realizado exitosamente', 'Cerrar', { duration: 4000 });
-    this.router.navigate(['/boutique/orders', orderUuid]);
+    if (this.guestThanksAfterStripe) {
+      const st = this.guestThanksAfterStripe;
+      this.guestThanksAfterStripe = null;
+      this.router.navigate(['/boutique/gracias', orderUuid], {
+        state: { orderNumber: st.orderNumber, guestEmail: st.guestEmail },
+      });
+    } else {
+      this.router.navigate(['/boutique/orders', orderUuid]);
+    }
   }
 }

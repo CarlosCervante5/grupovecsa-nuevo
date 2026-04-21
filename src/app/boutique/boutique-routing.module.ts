@@ -9,6 +9,11 @@ const routes: Routes = [
   { path: 'product/:uuid', loadComponent: () => import('./pages/product-detail/product-detail.component').then(m => m.ProductDetailComponent) },
   { path: 'cart', loadComponent: () => import('./pages/cart/cart.component').then(m => m.CartComponent) },
   { path: 'checkout', loadComponent: () => import('./pages/checkout/checkout.component').then(m => m.CheckoutComponent) },
+  {
+    path: 'gracias/:uuid',
+    loadComponent: () =>
+      import('./pages/guest-order-thanks/guest-order-thanks.component').then((m) => m.GuestOrderThanksComponent),
+  },
   { path: 'orders', loadComponent: () => import('./pages/order-history/order-history.component').then(m => m.OrderHistoryComponent), canActivate: [BoutiqueAuthGuard] },
   { path: 'orders/:uuid', loadComponent: () => import('./pages/order-detail/order-detail.component').then(m => m.OrderDetailComponent), canActivate: [BoutiqueAuthGuard] },
 ];
