@@ -631,6 +631,8 @@ Route::prefix('boutique')->middleware('bandwidth_usage')->group(function () {
     Route::post('/checkout/create_guest_order', [BoutiqueCheckoutController::class, 'createGuestOrder']);
     Route::post('/checkout/shipping_quote_public', [BoutiqueCheckoutController::class, 'shippingQuote']);
     Route::post('/checkout/openpay_public_config', [SettingsController::class, 'openpayCheckoutPublic']);
+    Route::post('/checkout/payment_methods_public', [SettingsController::class, 'boutiquePaymentMethodsPublic']);
+    Route::post('/checkout/shipping_package_types_public', [SettingsController::class, 'boutiqueShippingPackageTypesPublic']);
 });
 
 // Boutique Cliente Autenticado
