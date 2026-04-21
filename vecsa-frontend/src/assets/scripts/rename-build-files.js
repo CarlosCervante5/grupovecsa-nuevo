@@ -1,6 +1,8 @@
 /**
  * Postbuild: renombra chunks legacy `src_app_*` y copia serve.json al output `browser/`
  * (Angular 19 + serve -s: index en caché + chunks viejos → MIME text/html en .js).
+ * Tras 401 en /auth/me el guard puede navegar a /auth/login y cargar un chunk lazy; si ese .js
+ * devuelve HTML (404/fallback), el navegador muestra "Failed to fetch dynamically imported module".
  */
 const fs = require('fs');
 const path = require('path');
