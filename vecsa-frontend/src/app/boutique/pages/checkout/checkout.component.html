@@ -205,20 +205,13 @@
                 </div>
               </form>
 
-              <button
-                type="button"
-                mat-flat-button
-                color="primary"
-                class="quote-btn"
-                (click)="getShippingQuotes()"
-                [disabled]="shippingForm.invalid || loadingQuotes"
-              >
+              <p class="shipping-auto-hint">
                 @if (loadingQuotes) {
-                  <div class="spinner spinner-sm spinner-white"></div>
+                  <span class="loading-inline"><span class="spinner spinner-sm"></span> Calculando envío…</span>
                 } @else {
-                  Cotizar envío
+                  El envío se cotiza automáticamente al completar dirección, ciudad, estado y CP válidos.
                 }
-              </button>
+              </p>
 
               <!-- Shipping options -->
               @if (quotesLoaded) {

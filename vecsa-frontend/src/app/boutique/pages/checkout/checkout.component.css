@@ -199,6 +199,20 @@
   min-height: 44px;
 }
 
+.shipping-auto-hint {
+  margin-top: 12px;
+  font-size: 0.85rem;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+.shipping-auto-hint .loading-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #475569;
+}
+
 /* Shipping options */
 .shipping-options { margin-top: 20px; }
 
