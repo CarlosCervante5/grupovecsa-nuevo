@@ -194,6 +194,7 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     } else if (key === 'categories') {
       this.refreshCategoryListsFromApi();
     } else if (key === 'attributes') {
+      this.storePanelDebug('selectSection:attributes');
       this.loadCatalogAttributesList();
     } else if (key === 'products') {
       this.refreshCategoryListsFromApi();
@@ -890,15 +891,30 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     this.catalogAttributesLoading = true;
     this.catalogAttrMessage = '';
     this.catalogAttrError = '';
-    this.http.post(`${environment.baseUrl}/api/boutique/admin/attributes/list`, {}, { headers: this.getHeaders() }).subscribe({
+    const listUrl = `${environment.baseUrl}/api/boutique/admin/attributes/list`;
+    this.storePanelDebug('loadCatalogAttributesList:start', {
+      url: listUrl,
+      hasToken: !!localStorage.getItem('user_token'),
+    });
+    this.http.post(listUrl, {}, { headers: this.getHeaders() }).subscribe({
       next: (res: any) => {
         this.catalogAdminAttributes = this.normalizeAttributesListResponse(res);
         this.catalogAttributesLoading = false;
+        this.storePanelDebug('loadCatalogAttributesList:success', {
+          count: this.catalogAdminAttributes.length,
+          dataKeys: res?.data && typeof res.data === 'object' ? Object.keys(res.data) : [],
+          sample: this.catalogAdminAttributes[0] ? { uuid: this.catalogAdminAttributes[0].uuid, name: this.catalogAdminAttributes[0].name } : null,
+        });
       },
       error: (err: any) => {
         this.catalogAttrError = err?.error?.message || 'Error al cargar atributos';
         this.catalogAdminAttributes = [];
         this.catalogAttributesLoading = false;
+        this.storePanelDebug('loadCatalogAttributesList:error', {
+          status: err?.status,
+          statusText: err?.statusText,
+          body: err?.error,
+        });
       },
     });
   }
@@ -1041,16 +1057,31 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   createCatalogAttributeInline(): void {
-    const name = (this.newCatalogAttrName || '').trim();
+    const rawInput = this.newCatalogAttrName;
+    const name = (rawInput || '').trim();
+    this.storePanelDebug('createCatalogAttributeInline:enter', {
+      rawInputLength: rawInput == null ? null : String(rawInput).length,
+      trimmedName: name,
+      catalogAttrCreating: this.catalogAttrCreating,
+      activeSection: this.activeSection,
+    });
     if (!name) {
+      this.storePanelDebug('createCatalogAttributeInline:abort-empty-name');
       this.catalogAttrError = 'Escribe un nombre para el atributo';
       setTimeout(() => (this.catalogAttrError = ''), 4000);
       return;
     }
+    if (this.catalogAttrCreating) {
+      this.storePanelDebug('createCatalogAttributeInline:abort-already-creating');
+      return;
+    }
     this.catalogAttrCreating = true;
     this.catalogAttrError = '';
-    this.http.post(`${environment.baseUrl}/api/boutique/admin/attributes/store`, { name }, { headers: this.getHeaders() }).subscribe({
-      next: () => {
+    const storeUrl = `${environment.baseUrl}/api/boutique/admin/attributes/store`;
+    this.storePanelDebug('createCatalogAttributeInline:request', { url: storeUrl, body: { name } });
+    this.http.post(storeUrl, { name }, { headers: this.getHeaders() }).subscribe({
+      next: (res: unknown) => {
+        this.storePanelDebug('createCatalogAttributeInline:success', res);
         this.catalogAttrCreating = false;
         this.newCatalogAttrName = '';
         this.catalogAttrMessage = 'Atributo creado';
@@ -1059,6 +1090,13 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
         setTimeout(() => (this.catalogAttrMessage = ''), 3000);
       },
       error: (err: any) => {
+        this.storePanelDebug('createCatalogAttributeInline:error', {
+          status: err?.status,
+          statusText: err?.statusText,
+          url: err?.url,
+          errorBody: err?.error,
+          formatted: this.formatBoutiqueAdminHttpError(err),
+        });
         this.catalogAttrCreating = false;
         this.catalogAttrError = this.formatBoutiqueAdminHttpError(err);
         setTimeout(() => (this.catalogAttrError = ''), 8000);
@@ -1068,8 +1106,21 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /** Al activar «Producto con variantes», carga el catálogo (el evento native `change` corre antes que ngModel). */
   onProductVariantsToggle(enabled: boolean): void {
+    this.storePanelDebug('onProductVariantsToggle', { enabled });
     if (enabled) {
       this.loadAttributes();
+    }
+  }
+
+  /**
+   * Logs de depuración del panel tienda. En DevTools → Consola filtra por `StorePanel`.
+   * Quitar o reducir cuando ya no haga falta diagnosticar.
+   */
+  private storePanelDebug(phase: string, detail?: unknown): void {
+    try {
+      console.log(`[StorePanel] ${phase}`, detail === undefined ? '' : detail);
+    } catch {
+      /* noop */
     }
   }
 
@@ -1184,12 +1235,19 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   loadAttributes(): void {
-    this.http.post(`${environment.baseUrl}/api/boutique/admin/attributes/list`, {}, { headers: this.getHeaders() }).subscribe({
+    const listUrl = `${environment.baseUrl}/api/boutique/admin/attributes/list`;
+    this.storePanelDebug('loadAttributes:start', { url: listUrl, hasToken: !!localStorage.getItem('user_token') });
+    this.http.post(listUrl, {}, { headers: this.getHeaders() }).subscribe({
       next: (res: any) => {
         this.availableAttributes = this.normalizeAttributesListResponse(res);
+        this.storePanelDebug('loadAttributes:success', {
+          count: this.availableAttributes.length,
+          dataKeys: res?.data && typeof res.data === 'object' ? Object.keys(res.data) : [],
+        });
       },
-      error: () => {
+      error: (err: any) => {
         this.availableAttributes = [];
+        this.storePanelDebug('loadAttributes:error', { status: err?.status, body: err?.error });
       },
     });
   }
@@ -1226,17 +1284,27 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
 
   createAttributeInline(): void {
     const name = (this.newAttributeName || '').trim();
+    this.storePanelDebug('createAttributeInline:enter', { nameLength: name.length, hasVariants: this.hasVariants });
     if (!name) {
+      this.storePanelDebug('createAttributeInline:abort-empty-name');
       this.productSaveError = 'Escribe un nombre para el nuevo atributo';
       return;
     }
-    this.http.post(`${environment.baseUrl}/api/boutique/admin/attributes/store`, { name }, { headers: this.getHeaders() }).subscribe({
-      next: () => {
+    const storeUrl = `${environment.baseUrl}/api/boutique/admin/attributes/store`;
+    this.storePanelDebug('createAttributeInline:request', { url: storeUrl, body: { name } });
+    this.http.post(storeUrl, { name }, { headers: this.getHeaders() }).subscribe({
+      next: (res: unknown) => {
+        this.storePanelDebug('createAttributeInline:success', res);
         this.newAttributeName = '';
         this.productSaveError = '';
         this.loadAttributes();
       },
       error: (err: any) => {
+        this.storePanelDebug('createAttributeInline:error', {
+          status: err?.status,
+          errorBody: err?.error,
+          formatted: this.formatBoutiqueAdminHttpError(err),
+        });
         this.productSaveError = this.formatBoutiqueAdminHttpError(err);
       },
     });
