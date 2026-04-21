@@ -1468,6 +1468,20 @@
             <div class="stat-icon" style="background:#fef2f2;color:#ef4444;"><span class="material-icons">error_outline</span></div>
             <div class="stat-info"><span class="stat-value">{{ wcResult.errors }}</span><span class="stat-label">Errores</span></div>
           </div>
+          @if (wcResult.attribute_catalog_sync) {
+            <div class="stat-card">
+              <div class="stat-icon" style="background:#e0e7ff;color:#4338ca;"><span class="material-icons">tune</span></div>
+              <div class="stat-info"><span class="stat-value">{{ wcResult.attribute_catalog_sync.variant_links_added }}</span><span class="stat-label">Enlaces atributo→variante</span></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon" style="background:#ecfdf5;color:#047857;"><span class="material-icons">palette</span></div>
+              <div class="stat-info"><span class="stat-value">{{ wcResult.attribute_catalog_sync.attribute_values_created }}</span><span class="stat-label">Valores Color/Talla nuevos</span></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon" style="background:#f8fafc;color:#475569;"><span class="material-icons">inventory</span></div>
+              <div class="stat-info"><span class="stat-value">{{ wcResult.attribute_catalog_sync.products_touched }}</span><span class="stat-label">Productos con catálogo actualizado</span></div>
+            </div>
+          }
         </div>
       }
 
@@ -1487,6 +1501,39 @@
           <div class="alert-error" style="margin-top:12px;"><span class="material-icons">error</span> {{ wcImageError }}</div>
         }
       </div>
+
+      <!-- Atributos Color/Talla (catálogo admin) -->
+      <div class="store-card" style="margin-bottom: 18px;">
+        <h3 class="card-title"><span class="material-icons" style="color:#047857;font-size:20px;">tune</span> Sincronizar atributos desde variantes</h3>
+        <p style="font-size:0.82rem;color:#64748b;margin:0 0 12px;">Crea los atributos globales <strong>Color</strong> y <strong>Talla</strong>, sus valores y los vínculos con cada variante (lo que usa el panel de productos con variantes). Úsalo tras importar CSV o si ya tenías variantes sin catálogo.</p>
+        <button type="button" class="store-action-btn" (click)="runWcAttributeCatalogSync()" [disabled]="wcAttrSyncing" style="background:#059669;">
+          @if (wcAttrSyncing) {
+            <div class="spinner-sm"></div> Sincronizando...
+          } @else {
+            <span class="material-icons">sync</span> Ejecutar sincronización de atributos
+          }
+        </button>
+        @if (wcAttrError) {
+          <div class="alert-error" style="margin-top:12px;"><span class="material-icons">error</span> {{ wcAttrError }}</div>
+        }
+      </div>
+
+      @if (wcAttrResult) {
+        <div class="stats-grid" style="margin-bottom: 18px;">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#e0e7ff;color:#4338ca;"><span class="material-icons">link</span></div>
+            <div class="stat-info"><span class="stat-value">{{ wcAttrResult.variant_links_added }}</span><span class="stat-label">Enlaces variante↔valor</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#ecfdf5;color:#047857;"><span class="material-icons">add_circle_outline</span></div>
+            <div class="stat-info"><span class="stat-value">{{ wcAttrResult.attribute_values_created }}</span><span class="stat-label">Valores nuevos</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#f8fafc;color:#475569;"><span class="material-icons">shopping_bag</span></div>
+            <div class="stat-info"><span class="stat-value">{{ wcAttrResult.products_touched }}</span><span class="stat-label">Productos tocados</span></div>
+          </div>
+        </div>
+      }
 
       @if (wcImageResult) {
         <div class="stats-grid" style="margin-bottom: 18px;">
