@@ -871,6 +871,8 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   catalogAttributesLoading = false;
   catalogAttrMessage = '';
   catalogAttrError = '';
+  /** Evita doble envío al crear atributo desde la sección Atributos. */
+  catalogAttrCreating = false;
   attrCatalogModal = false;
   attrCatalogSaving = false;
   attrCatalogName = '';
@@ -890,7 +892,7 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     this.catalogAttrError = '';
     this.http.post(`${environment.baseUrl}/api/boutique/admin/attributes/list`, {}, { headers: this.getHeaders() }).subscribe({
       next: (res: any) => {
-        this.catalogAdminAttributes = res?.data?.attributes || res?.data || [];
+        this.catalogAdminAttributes = this.normalizeAttributesListResponse(res);
         this.catalogAttributesLoading = false;
       },
       error: (err: any) => {
@@ -1041,10 +1043,15 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   createCatalogAttributeInline(): void {
     const name = (this.newCatalogAttrName || '').trim();
     if (!name) {
+      this.catalogAttrError = 'Escribe un nombre para el atributo';
+      setTimeout(() => (this.catalogAttrError = ''), 4000);
       return;
     }
+    this.catalogAttrCreating = true;
+    this.catalogAttrError = '';
     this.http.post(`${environment.baseUrl}/api/boutique/admin/attributes/store`, { name }, { headers: this.getHeaders() }).subscribe({
       next: () => {
+        this.catalogAttrCreating = false;
         this.newCatalogAttrName = '';
         this.catalogAttrMessage = 'Atributo creado';
         this.loadCatalogAttributesList();
@@ -1052,10 +1059,55 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
         setTimeout(() => (this.catalogAttrMessage = ''), 3000);
       },
       error: (err: any) => {
-        this.catalogAttrError = err?.error?.message || 'Error';
-        setTimeout(() => (this.catalogAttrError = ''), 4000);
+        this.catalogAttrCreating = false;
+        this.catalogAttrError = this.formatBoutiqueAdminHttpError(err);
+        setTimeout(() => (this.catalogAttrError = ''), 8000);
       },
     });
+  }
+
+  /** Al activar «Producto con variantes», carga el catálogo (el evento native `change` corre antes que ngModel). */
+  onProductVariantsToggle(enabled: boolean): void {
+    if (enabled) {
+      this.loadAttributes();
+    }
+  }
+
+  /** Lista de atributos desde distintas formas de respuesta de la API. */
+  private normalizeAttributesListResponse(res: any): any[] {
+    const d = res?.data;
+    if (!d) {
+      return [];
+    }
+    if (Array.isArray(d.attributes)) {
+      return d.attributes;
+    }
+    if (Array.isArray(d)) {
+      return d;
+    }
+    if (d.attributes && typeof d.attributes === 'object' && !Array.isArray(d.attributes)) {
+      return Object.values(d.attributes);
+    }
+    return [];
+  }
+
+  private formatBoutiqueAdminHttpError(err: any): string {
+    const e = err?.error;
+    if (!e) {
+      return err?.message || 'Error de red o del servidor';
+    }
+    if (e.errors && typeof e.errors === 'object') {
+      const parts: string[] = [];
+      for (const v of Object.values(e.errors) as unknown[]) {
+        if (Array.isArray(v)) {
+          parts.push(...v.map(String));
+        }
+      }
+      if (parts.length) {
+        return parts.join(' ');
+      }
+    }
+    return e.message || 'Error al procesar la solicitud';
   }
 
   cancelEditProduct(): void { this.productEditing = false; }
@@ -1134,9 +1186,11 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   loadAttributes(): void {
     this.http.post(`${environment.baseUrl}/api/boutique/admin/attributes/list`, {}, { headers: this.getHeaders() }).subscribe({
       next: (res: any) => {
-        this.availableAttributes = res?.data?.attributes || res?.data || [];
+        this.availableAttributes = this.normalizeAttributesListResponse(res);
       },
-      error: () => { this.availableAttributes = []; },
+      error: () => {
+        this.availableAttributes = [];
+      },
     });
   }
 
@@ -1171,14 +1225,19 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   createAttributeInline(): void {
-    if (!this.newAttributeName.trim()) return;
-    this.http.post(`${environment.baseUrl}/api/boutique/admin/attributes/store`, { name: this.newAttributeName.trim() }, { headers: this.getHeaders() }).subscribe({
+    const name = (this.newAttributeName || '').trim();
+    if (!name) {
+      this.productSaveError = 'Escribe un nombre para el nuevo atributo';
+      return;
+    }
+    this.http.post(`${environment.baseUrl}/api/boutique/admin/attributes/store`, { name }, { headers: this.getHeaders() }).subscribe({
       next: () => {
         this.newAttributeName = '';
+        this.productSaveError = '';
         this.loadAttributes();
       },
       error: (err: any) => {
-        this.productSaveError = err?.error?.message || 'Error al crear atributo';
+        this.productSaveError = this.formatBoutiqueAdminHttpError(err);
       },
     });
   }

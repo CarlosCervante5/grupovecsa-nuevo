@@ -158,7 +158,7 @@
 
       <div class="filters-bar" style="margin-bottom:16px;">
         <input type="text" class="filter-input" [(ngModel)]="newCatalogAttrName" placeholder="Nombre del nuevo atributo (ej. Talla)" style="flex:1;max-width:320px;" (keyup.enter)="createCatalogAttributeInline()" />
-        <button class="filter-btn" (click)="createCatalogAttributeInline()" style="background:#059669;">
+        <button class="filter-btn" (click)="createCatalogAttributeInline()" [disabled]="catalogAttrCreating || !((newCatalogAttrName || '').trim())" style="background:#059669;">
           <span class="material-icons">add</span> Crear atributo
         </button>
         <button class="filter-btn" (click)="loadCatalogAttributesList()">
@@ -171,7 +171,7 @@
       }
 
       @if (!catalogAttributesLoading) {
-        @for (attr of catalogAdminAttributes; track attr.uuid) {
+        @for (attr of catalogAdminAttributes; track attr.uuid || $index) {
           <div class="detail-card" style="margin-bottom:14px;">
             <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
               <h3 class="detail-card-title" style="margin:0;"><span class="material-icons">tune</span> {{ attr.name }}</h3>
@@ -503,7 +503,7 @@
               <div style="display:flex;align-items:center;justify-content:space-between;">
                 <h3 class="detail-card-title" style="margin:0;"><span class="material-icons">style</span> Variantes</h3>
                 <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:0.8rem;color:#475569;">
-                  <input type="checkbox" [(ngModel)]="hasVariants" (change)="hasVariants && loadAttributes()" />
+                  <input type="checkbox" [(ngModel)]="hasVariants" (ngModelChange)="onProductVariantsToggle($event)" />
                   Producto con variantes
                 </label>
               </div>
@@ -525,7 +525,7 @@
                   <!-- Inline create attribute -->
                   <div class="attr-add-row" style="margin-top:8px;">
                     <input class="field-input" [(ngModel)]="newAttributeName" placeholder="Nuevo atributo (ej: Material)" style="flex:1;height:38px;font-size:0.82rem;" (keyup.enter)="createAttributeInline()" />
-                    <button class="filter-btn" (click)="createAttributeInline()" [disabled]="!newAttributeName.trim()" style="height:38px;font-size:0.8rem;background:#059669;">
+                    <button class="filter-btn" (click)="createAttributeInline()" [disabled]="!((newAttributeName || '').trim())" style="height:38px;font-size:0.8rem;background:#059669;">
                       <span class="material-icons" style="font-size:16px;">add</span> Crear
                     </button>
                   </div>
