@@ -1728,6 +1728,11 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   wcImageError = '';
   wcMode: 'full' | 'images' = 'full';
 
+  /** Sincronizar catálogo Color/Talla desde variantes (POST wc-import/sync-variant-attributes). */
+  wcAttrSyncing = false;
+  wcAttrError = '';
+  wcAttrResult: any = null;
+
   // Cleanup
   wcCleaning = false;
   wcCleanResult: any = null;
@@ -1751,7 +1756,10 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
       this.wcError = '';
       this.wcResult = null;
       this.http.post(`${environment.baseUrl}/api/boutique/admin/wc-import/upload`, formData, { headers }).subscribe({
-        next: (res: any) => { this.wcResult = res.data; this.wcImporting = false; },
+        next: (res: any) => {
+          this.wcResult = res.data;
+          this.wcImporting = false;
+        },
         error: (err: any) => { this.wcError = err?.error?.message || 'Error en importación'; this.wcImporting = false; },
       });
     } else {
@@ -1765,6 +1773,24 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     input.value = '';
+  }
+
+  runWcAttributeCatalogSync(): void {
+    this.wcAttrSyncing = true;
+    this.wcAttrError = '';
+    this.wcAttrResult = null;
+    this.http
+      .post(`${environment.baseUrl}/api/boutique/admin/wc-import/sync-variant-attributes`, {}, { headers: this.getHeaders() })
+      .subscribe({
+        next: (res: any) => {
+          this.wcAttrResult = res.data;
+          this.wcAttrSyncing = false;
+        },
+        error: (err: any) => {
+          this.wcAttrError = err?.error?.message || 'Error al sincronizar atributos';
+          this.wcAttrSyncing = false;
+        },
+      });
   }
 
   runCleanup(): void {
