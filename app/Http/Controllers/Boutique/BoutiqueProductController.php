@@ -15,6 +15,7 @@ use App\Models\Boutique\BoutiqueVariantAttributeValue;
 use App\Services\DealershipAccessService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -30,7 +31,8 @@ class BoutiqueProductController extends Controller
             }]);
 
             $scopeIds = $this->dealershipAccess->inventoryDealershipIds($request->user());
-            if ($scopeIds !== null) {
+            $productsTable = (new BoutiqueProduct)->getTable();
+            if ($scopeIds !== null && Schema::hasColumn($productsTable, 'dealership_id')) {
                 $query->whereIn('dealership_id', $scopeIds);
             }
 
