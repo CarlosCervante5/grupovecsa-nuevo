@@ -4,6 +4,8 @@ export interface BoutiqueCategory {
   description: string | null;
   active: boolean;
   created_at: string;
+  /** Categoría padre cuando es subcategoría (API admin). */
+  parent?: { uuid: string; name: string } | null;
   children?: BoutiqueCategory[];
 }
 
@@ -31,6 +33,8 @@ export interface BoutiqueProductVariant {
 
 export interface BoutiqueProduct {
   uuid: string;
+  /** Sucursal (admin); null en productos legacy o globales */
+  dealership_id?: number | null;
   category: BoutiqueCategory;
   name: string;
   description: string | null;

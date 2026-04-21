@@ -10,6 +10,7 @@ import { MatDialogModule, MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angu
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -35,13 +36,14 @@ import { reload } from '@helpers/session.helper';
     MatSnackBarModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
+    MatSelectModule,
   ],
   templateUrl: './categories.component.html',
   styleUrls: ['./categories.component.css']
 })
 export class CategoriesComponent implements OnInit {
 
-  displayedColumns: string[] = ['name', 'description', 'active', 'actions'];
+  displayedColumns: string[] = ['name', 'hierarchy', 'description', 'active', 'actions'];
   categories: BoutiqueCategory[] = [];
   loading = true;
   search = '';
@@ -98,7 +100,7 @@ export class CategoriesComponent implements OnInit {
   openCreateDialog(): void {
     const dialogRef = this._dialog.open(CategoryDialogComponent, {
       width: '500px',
-      data: { category: null }
+      data: { category: null, allCategories: this.categories }
     });
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
@@ -110,7 +112,7 @@ export class CategoriesComponent implements OnInit {
   openEditDialog(category: BoutiqueCategory): void {
     const dialogRef = this._dialog.open(CategoryDialogComponent, {
       width: '500px',
-      data: { category }
+      data: { category, allCategories: this.categories }
     });
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
@@ -148,6 +150,13 @@ export class CategoriesComponent implements OnInit {
     return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
   }
 
+  categoryHierarchyLabel(c: BoutiqueCategory): string {
+    if (c.parent?.name) {
+      return `${c.parent.name} › ${c.name}`;
+    }
+    return c.name;
+  }
+
   private showSnackBar(message: string, isError = false): void {
     this._snackBar.open(message, 'Cerrar', {
       duration: 3000,
@@ -172,6 +181,7 @@ export class CategoriesComponent implements OnInit {
     MatButtonModule,
     MatSlideToggleModule,
     MatProgressSpinnerModule,
+    MatSelectModule,
   ],
   template: `
     <h2 mat-dialog-title>{{ data.category ? 'Editar categoría' : 'Nueva categoría' }}</h2>
@@ -179,6 +189,14 @@ export class CategoriesComponent implements OnInit {
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Nombre</mat-label>
         <input matInput [(ngModel)]="name" required placeholder="Nombre de la categoría">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Categoría padre (subcategoría)</mat-label>
+        <mat-select [(ngModel)]="parentUuid">
+          <mat-option [value]="''">(Raíz — sin padre)</mat-option>
+          <mat-option *ngFor="let opt of parentSelectOptions" [value]="opt.uuid">{{ opt.label }}</mat-option>
+        </mat-select>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
@@ -208,11 +226,12 @@ export class CategoryDialogComponent {
   name = '';
   description = '';
   active = true;
+  parentUuid = '';
   saving = false;
 
   constructor(
     private _dialogRef: MatDialogRef<CategoryDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { category: BoutiqueCategory | null },
+    @Inject(MAT_DIALOG_DATA) public data: { category: BoutiqueCategory | null; allCategories?: BoutiqueCategory[] },
     private _categoryService: BoutiqueAdminCategoryService,
     private _snackBar: MatSnackBar
   ) {
@@ -220,7 +239,33 @@ export class CategoryDialogComponent {
       this.name = data.category.name;
       this.description = data.category.description || '';
       this.active = data.category.active;
+      this.parentUuid = data.category.parent?.uuid || '';
     }
+  }
+
+  get parentSelectOptions(): { uuid: string; label: string }[] {
+    const all = this.data.allCategories || [];
+    const editingUuid = this.data.category?.uuid;
+    const exclude = new Set<string>();
+    if (editingUuid) {
+      exclude.add(editingUuid);
+      const addDescendants = (parentUuid: string) => {
+        for (const c of all) {
+          const pid = c.parent?.uuid || '';
+          if (pid === parentUuid) {
+            exclude.add(c.uuid);
+            addDescendants(c.uuid);
+          }
+        }
+      };
+      addDescendants(editingUuid);
+    }
+    return all
+      .filter((c: BoutiqueCategory) => !exclude.has(c.uuid))
+      .map((c: BoutiqueCategory) => ({
+        uuid: c.uuid,
+        label: c.parent?.name ? `${c.parent.name} › ${c.name}` : c.name,
+      }));
   }
 
   onCancel(): void {
@@ -232,12 +277,14 @@ export class CategoryDialogComponent {
     this.saving = true;
 
     if (this.data.category) {
-      this._categoryService.update({
+      const upd: Parameters<BoutiqueAdminCategoryService['update']>[0] = {
         uuid: this.data.category.uuid,
         name: this.name.trim(),
         description: this.description.trim() || undefined,
-        active: this.active
-      }).subscribe({
+        active: this.active,
+        parent_uuid: this.parentUuid ? this.parentUuid : null,
+      };
+      this._categoryService.update(upd).subscribe({
         next: () => {
           this._snackBar.open('Categoría actualizada correctamente', 'Cerrar', {
             duration: 3000, horizontalPosition: 'end', verticalPosition: 'top', panelClass: ['snack-success']
@@ -252,11 +299,15 @@ export class CategoryDialogComponent {
         }
       });
     } else {
-      this._categoryService.store({
+      const st: Parameters<BoutiqueAdminCategoryService['store']>[0] = {
         name: this.name.trim(),
         description: this.description.trim() || undefined,
-        active: this.active
-      }).subscribe({
+        active: this.active,
+      };
+      if (this.parentUuid) {
+        st.parent_uuid = this.parentUuid;
+      }
+      this._categoryService.store(st).subscribe({
         next: () => {
           this._snackBar.open('Categoría creada correctamente', 'Cerrar', {
             duration: 3000, horizontalPosition: 'end', verticalPosition: 'top', panelClass: ['snack-success']

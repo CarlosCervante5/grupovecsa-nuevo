@@ -96,6 +96,22 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   productSaveError = '';
   productSaveSuccess = '';
   categoryOptions: { uuid: string; name: string }[] = [];
+  /** Listado completo de categorías (con parent) para gestión y selects. */
+  categoryAdminRows: any[] = [];
+  categorySectionLoading = false;
+  categoryModalOpen = false;
+  categoryModalMode: 'create' | 'edit' = 'create';
+  categoryModalSaving = false;
+  categoryModalError = '';
+  categoryForm: { uuid: string; name: string; description: string; active: boolean; parent_uuid: string } = {
+    uuid: '',
+    name: '',
+    description: '',
+    active: true,
+    parent_uuid: '',
+  };
+  /** Filtro de listado de productos por categoría (uuid vacío = todas). */
+  productCategoryFilter = '';
   editVariants: any[] = [];
   productMode: 'edit' | 'create' = 'edit';
   hasVariants = false;
@@ -118,6 +134,8 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
 
   readonly navItems = [
     { key: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
+    { key: 'categories', label: 'Categorías', icon: 'category' },
+    { key: 'attributes', label: 'Atributos', icon: 'tune' },
     { key: 'products', label: 'Productos', icon: 'inventory_2' },
     { key: 'orders', label: 'Pedidos', icon: 'receipt_long' },
     { key: 'shipping', label: 'Envíos', icon: 'local_shipping' },
@@ -164,6 +182,7 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     this.couponModal = false;
     this.pointsAdjustModal = false;
     this.deleteConfirmOpen = false;
+    this.categoryModalOpen = false;
 
     if (key === 'dashboard') {
       this.loadDashboard();
@@ -172,7 +191,12 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
       setTimeout(() => this.initCharts(), 400);
     } else if (key === 'orders') {
       this.loadOrders();
+    } else if (key === 'categories') {
+      this.refreshCategoryListsFromApi();
+    } else if (key === 'attributes') {
+      this.loadCatalogAttributesList();
     } else if (key === 'products') {
+      this.refreshCategoryListsFromApi();
       this.loadProducts();
     } else if (key === 'shipping') {
       this.loadShipments();
@@ -605,9 +629,17 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     this.productLoading = true;
     const token = localStorage.getItem('user_token') || '';
     const headers = new HttpHeaders({ 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', Authorization: `Bearer ${token}` });
-    this.http.post(`${environment.baseUrl}/api/boutique/admin/products/search`, {
-      page: this.productPage, search: this.productSearch || undefined, per_page: 15,
-    }, { headers }).subscribe({
+    const body: Record<string, unknown> = {
+      page: this.productPage,
+      per_page: 15,
+    };
+    if (this.productSearch?.trim()) {
+      body['search'] = this.productSearch.trim();
+    }
+    if (this.productCategoryFilter?.trim()) {
+      body['category_uuid'] = this.productCategoryFilter.trim();
+    }
+    this.http.post(`${environment.baseUrl}/api/boutique/admin/products/search`, body, { headers }).subscribe({
       next: (res: any) => {
         const d = res?.data?.products || res?.data || {};
         this.productRows = d.data || [];
@@ -620,6 +652,11 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onProductSearch(): void { this.productPage = 1; this.loadProducts(); }
+
+  onProductCategoryFilter(): void {
+    this.productPage = 1;
+    this.loadProducts();
+  }
   prevProductPage(): void { if (this.productPage > 1) { this.productPage--; this.loadProducts(); } }
   nextProductPage(): void { if (this.productPage < this.productLastPage) { this.productPage++; this.loadProducts(); } }
 
@@ -658,7 +695,7 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     this.modifiedVariantUuids = new Set();
     this.productSaveError = '';
     this.productSaveSuccess = '';
-    if (this.categoryOptions.length === 0) this.loadCategories();
+    if (this.categoryOptions.length === 0) this.refreshCategoryListsFromApi();
   }
 
   startEditProduct(): void {
@@ -682,7 +719,7 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     this.modifiedVariantUuids = new Set();
     this.productSaveError = '';
     this.productSaveSuccess = '';
-    if (this.categoryOptions.length === 0) this.loadCategories();
+    if (this.categoryOptions.length === 0) this.refreshCategoryListsFromApi();
 
     // Load attributes and set selected from product
     this.loadAttributes();
@@ -696,13 +733,327 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  private loadCategories(): void {
+  /** Etiqueta jerárquica para selects y tablas de categorías. */
+  categoryTreeLabel(c: any): string {
+    if (c?.parent?.name) {
+      return `${c.parent.name} › ${c.name}`;
+    }
+    return c?.name || '—';
+  }
+
+  /** Opciones de categoría padre al editar (excluye la propia rama). */
+  categoryParentSelectOptions(): { uuid: string; label: string }[] {
+    const editing = this.categoryForm.uuid;
+    const exclude = new Set<string>();
+    if (editing) {
+      exclude.add(editing);
+      const addDescendants = (parentUuid: string) => {
+        for (const row of this.categoryAdminRows) {
+          const puuid = row.parent?.uuid || '';
+          if (puuid === parentUuid) {
+            exclude.add(row.uuid);
+            addDescendants(row.uuid);
+          }
+        }
+      };
+      addDescendants(editing);
+    }
+    return this.categoryAdminRows
+      .filter((c: any) => !exclude.has(c.uuid))
+      .map((c: any) => ({ uuid: c.uuid, label: this.categoryTreeLabel(c) }));
+  }
+
+  private refreshCategoryListsFromApi(): void {
+    this.categorySectionLoading = true;
     const token = localStorage.getItem('user_token') || '';
     const headers = new HttpHeaders({ 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', Authorization: `Bearer ${token}` });
     this.http.post(`${environment.baseUrl}/api/boutique/admin/categories/search`, {}, { headers }).subscribe({
       next: (res: any) => {
         const cats = res?.data?.categories?.data || res?.data?.categories || res?.data || [];
-        this.categoryOptions = (Array.isArray(cats) ? cats : []).map((c: any) => ({ uuid: c.uuid, name: c.name }));
+        const list = Array.isArray(cats) ? cats : [];
+        this.categoryAdminRows = list;
+        this.categoryOptions = list.map((c: any) => ({ uuid: c.uuid, name: this.categoryTreeLabel(c) }));
+        this.categorySectionLoading = false;
+      },
+      error: () => {
+        this.categoryAdminRows = [];
+        this.categorySectionLoading = false;
+      },
+    });
+  }
+
+  openCategoryCreateModal(): void {
+    this.categoryModalMode = 'create';
+    this.categoryModalError = '';
+    this.categoryForm = { uuid: '', name: '', description: '', active: true, parent_uuid: '' };
+    this.categoryModalOpen = true;
+  }
+
+  openCategoryEditModal(row: any): void {
+    this.categoryModalMode = 'edit';
+    this.categoryModalError = '';
+    this.categoryForm = {
+      uuid: row.uuid,
+      name: row.name || '',
+      description: row.description || '',
+      active: !!row.active,
+      parent_uuid: row.parent?.uuid || '',
+    };
+    this.categoryModalOpen = true;
+  }
+
+  closeCategoryModal(): void {
+    if (this.categoryModalSaving) {
+      return;
+    }
+    this.categoryModalOpen = false;
+  }
+
+  submitCategoryModal(): void {
+    const name = (this.categoryForm.name || '').trim();
+    if (!name) {
+      this.categoryModalError = 'El nombre es obligatorio';
+      return;
+    }
+    this.categoryModalSaving = true;
+    this.categoryModalError = '';
+    const headers = this.getHeaders();
+    const body: any = {
+      name,
+      description: (this.categoryForm.description || '').trim() || null,
+      active: this.categoryForm.active,
+    };
+    if (this.categoryForm.parent_uuid) {
+      body.parent_uuid = this.categoryForm.parent_uuid;
+    } else if (this.categoryModalMode === 'edit') {
+      body.parent_uuid = null;
+    }
+    if (this.categoryModalMode === 'edit') {
+      body.uuid = this.categoryForm.uuid;
+    }
+    const url =
+      this.categoryModalMode === 'create'
+        ? `${environment.baseUrl}/api/boutique/admin/categories/store`
+        : `${environment.baseUrl}/api/boutique/admin/categories/update`;
+    this.http.post(url, body, { headers }).subscribe({
+      next: () => {
+        this.categoryModalSaving = false;
+        this.categoryModalOpen = false;
+        this.refreshCategoryListsFromApi();
+      },
+      error: (err: any) => {
+        this.categoryModalSaving = false;
+        this.categoryModalError = err?.error?.message || 'Error al guardar';
+      },
+    });
+  }
+
+  deleteCategoryRow(row: any): void {
+    if (!confirm(`¿Eliminar la categoría «${row.name}»?`)) {
+      return;
+    }
+    this.http
+      .post(
+        `${environment.baseUrl}/api/boutique/admin/categories/delete`,
+        { uuid: row.uuid },
+        { headers: this.getHeaders() }
+      )
+      .subscribe({
+        next: () => this.refreshCategoryListsFromApi(),
+        error: (err: any) => {
+          alert(err?.error?.message || 'No se pudo eliminar');
+        },
+      });
+  }
+
+  // ── Catálogo de atributos (tienda) ──
+  catalogAdminAttributes: any[] = [];
+  catalogAttributesLoading = false;
+  catalogAttrMessage = '';
+  catalogAttrError = '';
+  attrCatalogModal = false;
+  attrCatalogSaving = false;
+  attrCatalogName = '';
+  attrCatalogEditUuid = '';
+  newCatalogAttrName = '';
+  valueCatalogModal = false;
+  valueCatalogSaving = false;
+  valueCatalogAttrUuid = '';
+  valueCatalogEditUuid = '';
+  valueCatalogText = '';
+  valueCatalogColor = '';
+  valueCatalogSort = 0;
+
+  loadCatalogAttributesList(): void {
+    this.catalogAttributesLoading = true;
+    this.catalogAttrMessage = '';
+    this.catalogAttrError = '';
+    this.http.post(`${environment.baseUrl}/api/boutique/admin/attributes/list`, {}, { headers: this.getHeaders() }).subscribe({
+      next: (res: any) => {
+        this.catalogAdminAttributes = res?.data?.attributes || res?.data || [];
+        this.catalogAttributesLoading = false;
+      },
+      error: (err: any) => {
+        this.catalogAttrError = err?.error?.message || 'Error al cargar atributos';
+        this.catalogAdminAttributes = [];
+        this.catalogAttributesLoading = false;
+      },
+    });
+  }
+
+  openAttrCatalogEdit(attr: any): void {
+    this.attrCatalogEditUuid = attr.uuid;
+    this.attrCatalogName = attr.name || '';
+    this.attrCatalogModal = true;
+  }
+
+  closeAttrCatalogModal(): void {
+    if (this.attrCatalogSaving) {
+      return;
+    }
+    this.attrCatalogModal = false;
+  }
+
+  submitAttrCatalogModal(): void {
+    const name = (this.attrCatalogName || '').trim();
+    if (!name) {
+      return;
+    }
+    this.attrCatalogSaving = true;
+    const headers = this.getHeaders();
+    const req = this.http.post(`${environment.baseUrl}/api/boutique/admin/attributes/update`, { uuid: this.attrCatalogEditUuid, name }, { headers });
+    req.subscribe({
+      next: () => {
+        this.attrCatalogSaving = false;
+        this.attrCatalogModal = false;
+        this.catalogAttrMessage = 'Atributo guardado';
+        this.loadCatalogAttributesList();
+        this.loadAttributes();
+        setTimeout(() => (this.catalogAttrMessage = ''), 3000);
+      },
+      error: (err: any) => {
+        this.attrCatalogSaving = false;
+        this.catalogAttrError = err?.error?.message || 'Error al guardar';
+        setTimeout(() => (this.catalogAttrError = ''), 4000);
+      },
+    });
+  }
+
+  deleteAttrCatalog(attr: any): void {
+    if (!confirm(`¿Eliminar el atributo «${attr.name}»? No debe estar asignado a productos.`)) {
+      return;
+    }
+    this.http.post(`${environment.baseUrl}/api/boutique/admin/attributes/delete`, { uuid: attr.uuid }, { headers: this.getHeaders() }).subscribe({
+      next: () => {
+        this.catalogAttrMessage = 'Atributo eliminado';
+        this.loadCatalogAttributesList();
+        this.loadAttributes();
+        setTimeout(() => (this.catalogAttrMessage = ''), 3000);
+      },
+      error: (err: any) => {
+        this.catalogAttrError = err?.error?.message || 'Error al eliminar';
+        setTimeout(() => (this.catalogAttrError = ''), 4000);
+      },
+    });
+  }
+
+  openValueCatalogCreate(attributeUuid: string): void {
+    this.valueCatalogModal = true;
+    this.valueCatalogAttrUuid = attributeUuid;
+    this.valueCatalogEditUuid = '';
+    this.valueCatalogText = '';
+    this.valueCatalogColor = '';
+    this.valueCatalogSort = 0;
+  }
+
+  openValueCatalogEdit(val: any, attributeUuid: string): void {
+    this.valueCatalogModal = true;
+    this.valueCatalogAttrUuid = attributeUuid;
+    this.valueCatalogEditUuid = val.uuid;
+    this.valueCatalogText = val.value || '';
+    this.valueCatalogColor = val.color_hex || '';
+    this.valueCatalogSort = val.sort_order ?? 0;
+  }
+
+  closeValueCatalogModal(): void {
+    if (this.valueCatalogSaving) {
+      return;
+    }
+    this.valueCatalogModal = false;
+  }
+
+  submitValueCatalogModal(): void {
+    const v = (this.valueCatalogText || '').trim();
+    if (!v) {
+      return;
+    }
+    this.valueCatalogSaving = true;
+    const headers = this.getHeaders();
+    const base = `${environment.baseUrl}/api/boutique/admin/attribute-values`;
+    const req = this.valueCatalogEditUuid
+      ? this.http.post(`${base}/update`, {
+          uuid: this.valueCatalogEditUuid,
+          value: v,
+          color_hex: this.valueCatalogColor.trim() || null,
+          sort_order: Number(this.valueCatalogSort) || 0,
+        }, { headers })
+      : this.http.post(`${base}/store`, {
+          attribute_uuid: this.valueCatalogAttrUuid,
+          value: v,
+          color_hex: this.valueCatalogColor.trim() || null,
+          sort_order: Number(this.valueCatalogSort) || 0,
+        }, { headers });
+    req.subscribe({
+      next: () => {
+        this.valueCatalogSaving = false;
+        this.valueCatalogModal = false;
+        this.catalogAttrMessage = 'Valor guardado';
+        this.loadCatalogAttributesList();
+        this.loadAttributes();
+        setTimeout(() => (this.catalogAttrMessage = ''), 3000);
+      },
+      error: (err: any) => {
+        this.valueCatalogSaving = false;
+        this.catalogAttrError = err?.error?.message || 'Error al guardar valor';
+        setTimeout(() => (this.catalogAttrError = ''), 4000);
+      },
+    });
+  }
+
+  deleteValueCatalog(val: any): void {
+    if (!confirm(`¿Eliminar el valor «${val.value}»?`)) {
+      return;
+    }
+    this.http.post(`${environment.baseUrl}/api/boutique/admin/attribute-values/delete`, { uuid: val.uuid }, { headers: this.getHeaders() }).subscribe({
+      next: () => {
+        this.catalogAttrMessage = 'Valor eliminado';
+        this.loadCatalogAttributesList();
+        this.loadAttributes();
+        setTimeout(() => (this.catalogAttrMessage = ''), 3000);
+      },
+      error: (err: any) => {
+        this.catalogAttrError = err?.error?.message || 'Error al eliminar';
+        setTimeout(() => (this.catalogAttrError = ''), 4000);
+      },
+    });
+  }
+
+  createCatalogAttributeInline(): void {
+    const name = (this.newCatalogAttrName || '').trim();
+    if (!name) {
+      return;
+    }
+    this.http.post(`${environment.baseUrl}/api/boutique/admin/attributes/store`, { name }, { headers: this.getHeaders() }).subscribe({
+      next: () => {
+        this.newCatalogAttrName = '';
+        this.catalogAttrMessage = 'Atributo creado';
+        this.loadCatalogAttributesList();
+        this.loadAttributes();
+        setTimeout(() => (this.catalogAttrMessage = ''), 3000);
+      },
+      error: (err: any) => {
+        this.catalogAttrError = err?.error?.message || 'Error';
+        setTimeout(() => (this.catalogAttrError = ''), 4000);
       },
     });
   }

@@ -57,7 +57,7 @@
           <mat-form-field appearance="outline">
             <mat-label>Categoría</mat-label>
             <mat-select formControlName="category_uuid">
-              <mat-option *ngFor="let cat of categories" [value]="cat.uuid">{{ cat.name }}</mat-option>
+              <mat-option *ngFor="let cat of categories" [value]="cat.uuid">{{ categoryOptionLabel(cat) }}</mat-option>
             </mat-select>
             <mat-error *ngIf="form.get('category_uuid')?.hasError('required')">La categoría es requerida</mat-error>
           </mat-form-field>
