@@ -18,6 +18,7 @@ use App\Services\Boutique\StripeService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class BoutiqueCheckoutController extends Controller
 {
@@ -41,6 +42,8 @@ class BoutiqueCheckoutController extends Controller
             $data = $request->validated();
 
             $destination = [
+                'name' => 'Cliente',
+                'street' => (string) ($data['shipping_address'] ?? ''),
                 'city' => $data['city'],
                 'state' => $data['state'],
                 'zip' => $data['zip_code'],
@@ -65,12 +68,48 @@ class BoutiqueCheckoutController extends Controller
                 ],
             ];
 
-            $quotes = $this->enviacomService->getShippingQuotes($destination, $packages);
+            $quotes = [];
+
+            $useEnviacom = filter_var(env('BOUTIQUE_SHIPPING_USE_ENVIACOM', false), FILTER_VALIDATE_BOOLEAN)
+                && trim((string) env('ENVIACOM_API_KEY', '')) !== '';
+
+            if ($useEnviacom) {
+                try {
+                    $raw = $this->enviacomService->getShippingQuotes($destination, $packages);
+                    $quotes = is_array($raw) ? $raw : [];
+                } catch (\Throwable $e) {
+                    Log::warning('Boutique shippingQuote: Enviacom falló, se usa tarifa automática', [
+                        'error' => $e->getMessage(),
+                    ]);
+                    $quotes = [];
+                }
+            }
+
+            if ($quotes === []) {
+                $quotes = $this->boutiqueAutomaticShippingQuotes();
+            }
 
             return ApiResponseHelper::apiSuccess(200, 'Cotizaciones de envío obtenidas', ['shipping_options' => $quotes]);
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al obtener cotizaciones de envío', $e->getMessage(), 500, 'SHIPPING_QUOTE_ERROR');
         }
+    }
+
+    /**
+     * Cotización local cuando Enviacom no está activo o falla (p. ej. sandbox sin ENVIACOM_API_KEY).
+     */
+    private function boutiqueAutomaticShippingQuotes(): array
+    {
+        $flat = (float) env('BOUTIQUE_SHIPPING_FALLBACK_FLAT_MXN', 99);
+        $days = (int) env('BOUTIQUE_SHIPPING_FALLBACK_DAYS', 5);
+
+        return [[
+            'carrier' => 'Tienda',
+            'service' => 'Envío estándar',
+            'price' => round(max(0, $flat), 2),
+            'estimated_days' => max(1, $days),
+            'package_type_id' => 'default',
+        ]];
     }
 
     public function createGuestOrder(Request $request)
