@@ -14,6 +14,7 @@ use App\Models\Boutique\BoutiqueShipment;
 use App\Models\Dealership;
 use App\Services\Boutique\BoutiqueInventoryService;
 use App\Services\Boutique\EnviacomService;
+use App\Services\Boutique\OpenPayService;
 use App\Services\Boutique\StripeService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -26,14 +27,18 @@ class BoutiqueCheckoutController extends Controller
     protected EnviacomService $enviacomService;
     protected StripeService $stripeService;
 
+    protected OpenPayService $openPayService;
+
     public function __construct(
         BoutiqueInventoryService $inventoryService,
         EnviacomService $enviacomService,
-        StripeService $stripeService
+        StripeService $stripeService,
+        OpenPayService $openPayService
     ) {
         $this->inventoryService = $inventoryService;
         $this->enviacomService = $enviacomService;
         $this->stripeService = $stripeService;
+        $this->openPayService = $openPayService;
     }
 
     public function shippingQuote(ShippingQuoteRequest $request)
@@ -414,6 +419,120 @@ class BoutiqueCheckoutController extends Controller
             ]);
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al crear el PaymentIntent', $e->getMessage(), 500, 'PAYMENT_INTENT_ERROR');
+        }
+    }
+
+    /**
+     * Confirma el cobro OpenPay con token (OpenPay.js) + device_session_id.
+     * Ruta pública para permitir checkout de invitados.
+     *
+     * TODO (fase posterior): webhook OpenPay para notificaciones asíncronas (p. ej. verificación
+     * de cargos, estados distintos de completed en la misma respuesta, reconciliación).
+     * Por ahora el flujo queda cerrado con la respuesta síncrona del API de cargos.
+     */
+    public function confirmOpenPayCharge(Request $request)
+    {
+        try {
+            $data = $request->validate([
+                'order_uuid' => 'required|string|max:64',
+                'source_id' => 'required|string|max:45',
+                'device_session_id' => 'required|string|size:32',
+            ]);
+
+            $order = BoutiqueOrder::findByUuid($data['order_uuid']);
+            if (! $order) {
+                return ApiResponseHelper::apiError('El pedido no existe', null, 404, 'ORDER_NOT_FOUND');
+            }
+
+            $payment = $order->payment;
+            if (! $payment || $payment->method !== 'openpay') {
+                return ApiResponseHelper::apiError('Este pedido no usa OpenPay', null, 400, 'OPENPAY_NOT_APPLICABLE');
+            }
+
+            if ($payment->status === 'completado') {
+                return ApiResponseHelper::apiError('El pago ya fue registrado', null, 409, 'PAYMENT_ALREADY_COMPLETED');
+            }
+
+            $creds = $this->openPayService->getActiveCredentials();
+            if ($creds['merchant_id'] === '' || $creds['private_key'] === '') {
+                return ApiResponseHelper::apiError('OpenPay no está configurado en el servidor', null, 503, 'OPENPAY_NOT_CONFIGURED');
+            }
+
+            $fullName = trim((string) ($order->shipping_name ?: $order->guest_name ?: 'Cliente'));
+            $nameParts = preg_split('/\s+/', $fullName, 2) ?: ['Cliente', ''];
+            $firstName = $nameParts[0] !== '' ? $nameParts[0] : 'Cliente';
+            $lastName = isset($nameParts[1]) && $nameParts[1] !== '' ? $nameParts[1] : $firstName;
+
+            $email = trim((string) ($order->guest_email ?: ''));
+            if ($email === '' && $order->user_id) {
+                $order->loadMissing('user');
+                $email = trim((string) ($order->user?->email ?? ''));
+            }
+            if ($email === '') {
+                $email = 'no-email@boutique.local';
+            }
+
+            $phone = preg_replace('/\D+/', '', (string) ($order->shipping_phone ?? ''));
+            if (strlen($phone) > 10) {
+                $phone = substr($phone, -10);
+            }
+            if ($phone === '') {
+                $phone = '5555555555';
+            }
+
+            $customer = [
+                'name' => mb_substr($firstName, 0, 100),
+                'last_name' => mb_substr($lastName, 0, 100),
+                'phone_number' => $phone,
+                'email' => mb_substr($email, 0, 100),
+            ];
+
+            $amount = (float) $order->total;
+            $charge = $this->openPayService->createMerchantCardCharge(
+                $creds['merchant_id'],
+                $creds['private_key'],
+                $creds['sandbox'],
+                $data['source_id'],
+                $data['device_session_id'],
+                $amount,
+                'Pedido boutique ' . $order->order_number,
+                $order->order_number,
+                $customer,
+                $request->ip(),
+                $request->userAgent()
+            );
+
+            if (! $this->openPayService->chargeIsSuccessful($charge)) {
+                $st = $charge['status'] ?? 'unknown';
+
+                return ApiResponseHelper::apiError(
+                    'El cargo no se completó. Estado: ' . $st,
+                    ['openpay_status' => $st],
+                    402,
+                    'OPENPAY_CHARGE_INCOMPLETE'
+                );
+            }
+
+            $chargeId = $charge['id'] ?? null;
+            $payment->update([
+                'status' => 'completado',
+                'transaction_reference' => is_string($chargeId) ? $chargeId : null,
+                'confirmed_at' => now(),
+            ]);
+            $order->update(['status' => 'pagado']);
+
+            $order->load(['orderItems', 'payment', 'shipment']);
+
+            return ApiResponseHelper::apiSuccess(200, 'Pago con OpenPay confirmado', [
+                'order' => $order,
+                'openpay_charge_id' => $chargeId,
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            Log::error('OpenPay confirm charge', ['message' => $e->getMessage()]);
+
+            return ApiResponseHelper::apiError('Error al confirmar el pago OpenPay', $e->getMessage(), 500, 'OPENPAY_CHARGE_ERROR');
         }
     }
 }
