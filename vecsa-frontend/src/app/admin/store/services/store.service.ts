@@ -125,6 +125,8 @@ export class StoreService {
   }
 
   updateCheckoutPaymentMethods(payload: {
+    boutique_checkout_stripe: boolean;
+    boutique_checkout_openpay: boolean;
     boutique_checkout_transferencia: boolean;
     boutique_checkout_sucursal: boolean;
   }): Observable<any> {
