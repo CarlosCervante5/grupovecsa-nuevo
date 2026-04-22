@@ -15,8 +15,16 @@ import { MatSelectModule } from '@angular/material/select';
 import { environment } from '@environments/environment';
 import { BoutiqueCartService } from '../../services/boutique-cart.service';
 import { BoutiqueCheckoutService } from '../../services/boutique-checkout.service';
-import { BoutiqueCart, ShippingQuote } from '../../interfaces/boutique.interfaces';
+import {
+  BoutiqueCart,
+  BoutiqueOpenPayPublicConfig,
+  ShippingQuote,
+} from '../../interfaces/boutique.interfaces';
 import { StripePaymentComponent } from '../../components/stripe-payment/stripe-payment.component';
+import {
+  OpenpayPaymentComponent,
+  OpenPayBillingContext,
+} from '../../components/openpay-payment/openpay-payment.component';
 
 interface Dealership {
   id?: number;
@@ -41,6 +49,7 @@ interface Dealership {
     MatRadioModule,
     MatSelectModule,
     StripePaymentComponent,
+    OpenpayPaymentComponent,
   ],
   templateUrl: './checkout.component.html',
   styleUrls: ['./checkout.component.css'],
@@ -73,6 +82,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   paymentMethod: 'stripe' | 'transferencia' | 'sucursal' | 'openpay' = 'stripe';
   /** OpenPay visible solo si el backend expone merchant + llave pública para el modo actual. */
   openPayAvailable = false;
+  openPayPublicConfig: BoutiqueOpenPayPublicConfig | null = null;
 
   // Order creation
   creatingOrder = false;
@@ -81,8 +91,13 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   showStripePayment = false;
   createdOrderUuid: string | null = null;
 
-  /** Si el pedido con Stripe fue como invitado, al terminar pago ir a /boutique/gracias (no /orders con guard). */
-  private guestThanksAfterStripe: { orderNumber: string; guestEmail: string } | null = null;
+  // OpenPay (tarjeta)
+  showOpenPayPayment = false;
+  openPayBilling: OpenPayBillingContext | null = null;
+  openPayOrderTotal = 0;
+
+  /** Si el pedido con tarjeta en línea (Stripe/OpenPay) fue como invitado, al terminar pago ir a /boutique/gracias. */
+  private guestThanksAfterOnlinePayment: { orderNumber: string; guestEmail: string } | null = null;
 
   private subs: Subscription[] = [];
 
@@ -132,11 +147,13 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   private loadOpenPayAvailability(): void {
     const sub = this.checkoutService.getOpenPayPublicConfig().subscribe({
       next: (res) => {
-        const d = res.data as any;
+        const d = res.data as BoutiqueOpenPayPublicConfig | null;
         if (!d) {
           this.openPayAvailable = false;
+          this.openPayPublicConfig = null;
           return;
         }
+        this.openPayPublicConfig = d;
         if (typeof d.available === 'boolean') {
           this.openPayAvailable = d.available;
         } else {
@@ -145,6 +162,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.openPayAvailable = false;
+        this.openPayPublicConfig = null;
       },
     });
     this.subs.push(sub);
@@ -317,6 +335,13 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
   confirmOrder(): void {
     if (!this.canConfirm || this.creatingOrder) return;
+    if (
+      this.paymentMethod === 'openpay' &&
+      (!this.openPayPublicConfig?.merchant_id || !this.openPayPublicConfig?.public_key)
+    ) {
+      this.snackBar.open('OpenPay no está disponible. Elige otro método de pago.', 'Cerrar', { duration: 5000 });
+      return;
+    }
     this.creatingOrder = true;
 
     const formVal = this.shippingForm.value;
@@ -367,15 +392,39 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
         if (this.paymentMethod === 'stripe') {
           if (asGuest) {
-            this.guestThanksAfterStripe = {
+            this.guestThanksAfterOnlinePayment = {
               orderNumber: String(order.order_number ?? ''),
               guestEmail: String(this.guestForm.value.guest_email ?? ''),
             };
           } else {
-            this.guestThanksAfterStripe = null;
+            this.guestThanksAfterOnlinePayment = null;
           }
           this.createdOrderUuid = order.uuid;
           this.showStripePayment = true;
+        } else if (this.paymentMethod === 'openpay') {
+          this.openPayOrderTotal = Number(order.total ?? this.total);
+          this.openPayBilling = {
+            holder_name: String(order.shipping_name || order.guest_name || 'Cliente'),
+            line1: String(order.shipping_address || 'N/A').slice(0, 200),
+            line2: '',
+            city: String(order.shipping_city || '').trim() || 'Ciudad',
+            state: String(order.shipping_state || '').trim() || 'MX',
+            postal_code:
+              String(order.shipping_zip || '00000')
+                .replace(/\D/g, '')
+                .slice(0, 5) || '00000',
+            country_code: 'MX',
+          };
+          if (asGuest) {
+            this.guestThanksAfterOnlinePayment = {
+              orderNumber: String(order.order_number ?? ''),
+              guestEmail: String(this.guestForm.value.guest_email ?? ''),
+            };
+          } else {
+            this.guestThanksAfterOnlinePayment = null;
+          }
+          this.createdOrderUuid = order.uuid;
+          this.showOpenPayPayment = true;
         } else if (asGuest) {
           this.router.navigate(['/boutique/gracias', order.uuid], {
             state: {
@@ -405,9 +454,12 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
   onPaymentSuccess(orderUuid: string): void {
     this.snackBar.open('Pago realizado exitosamente', 'Cerrar', { duration: 4000 });
-    if (this.guestThanksAfterStripe) {
-      const st = this.guestThanksAfterStripe;
-      this.guestThanksAfterStripe = null;
+    this.showStripePayment = false;
+    this.showOpenPayPayment = false;
+    this.createdOrderUuid = null;
+    if (this.guestThanksAfterOnlinePayment) {
+      const st = this.guestThanksAfterOnlinePayment;
+      this.guestThanksAfterOnlinePayment = null;
       this.router.navigate(['/boutique/gracias', orderUuid], {
         state: { orderNumber: st.orderNumber, guestEmail: st.guestEmail },
       });

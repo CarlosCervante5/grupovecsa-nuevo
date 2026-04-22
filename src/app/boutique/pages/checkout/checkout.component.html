@@ -322,7 +322,7 @@
           @if (paymentMethod === 'openpay') {
             <div class="payment-note">
               <mat-icon>info</mat-icon>
-              <span>Tu pedido se creará con pago pendiente por OpenPay. Podrás ver el detalle en “Mis pedidos” y el equipo aplicará el cargo según el flujo de la tienda.</span>
+              <span>Al confirmar el pedido podrás ingresar los datos de tu tarjeta de forma segura (OpenPay). El cargo se aplicará de inmediato.</span>
             </div>
           }
         </section>
@@ -398,6 +398,16 @@
         [order_uuid]="createdOrderUuid"
         (paymentSuccess)="onPaymentSuccess($event)"
       ></app-stripe-payment>
+    }
+
+    @if (showOpenPayPayment && createdOrderUuid && openPayPublicConfig && openPayBilling) {
+      <app-openpay-payment
+        [order_uuid]="createdOrderUuid"
+        [openPayConfig]="openPayPublicConfig"
+        [billing]="openPayBilling"
+        [amount]="openPayOrderTotal"
+        (paymentSuccess)="onPaymentSuccess($event)"
+      ></app-openpay-payment>
     }
     } <!-- end guestConfirmed -->
   }
