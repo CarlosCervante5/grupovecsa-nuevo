@@ -424,16 +424,26 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       baseParams.dealership_uuid = this.selectedDealership.uuid || String(this.selectedDealership.id);
     }
 
+    if (!this.isLoggedIn) {
+      const guestItems = this.buildGuestOrderItems();
+      if (guestItems.length === 0) {
+        this.creatingOrder = false;
+        this.snackBar.open(
+          'El carrito no tiene productos con UUID válido. Vuelve a agregar productos al carrito o recarga la página.',
+          'Cerrar',
+          { duration: 6000 }
+        );
+        return;
+      }
+    }
+
     const order$ = this.isLoggedIn
       ? this.checkoutService.createOrder(baseParams)
       : this.checkoutService.createGuestOrder({
           ...baseParams,
           guest_name: this.guestForm.value.guest_name,
           guest_email: this.guestForm.value.guest_email,
-          items: (this.cart!.items || []).map(i => ({
-            product_uuid: i.product.uuid,
-            quantity: i.quantity,
-          })),
+          items: this.buildGuestOrderItems(),
         });
 
     const sub = order$.subscribe({
@@ -493,11 +503,49 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.creatingOrder = false;
-        const msg = err?.error?.message || 'Error al crear el pedido';
-        this.snackBar.open(msg, 'Cerrar', { duration: 4000 });
+        this.snackBar.open(this.formatCreateOrderError(err), 'Cerrar', { duration: 7000 });
       },
     });
     this.subs.push(sub);
+  }
+
+  private buildGuestOrderItems(): { product_uuid: string; quantity: number }[] {
+    return (this.cart?.items || [])
+      .map((i) => {
+        const row = i as { product?: { uuid?: string }; product_uuid?: string; quantity: number };
+        const productUuid = String(row.product?.uuid || row.product_uuid || '').trim();
+        if (!productUuid) {
+          return null;
+        }
+        return { product_uuid: productUuid, quantity: i.quantity };
+      })
+      .filter((x): x is { product_uuid: string; quantity: number } => x !== null);
+  }
+
+  private formatCreateOrderError(err: any): string {
+    const e = err?.error;
+    if (!e) {
+      return 'Error al crear el pedido';
+    }
+    if (e.error_code === 'INSUFFICIENT_STOCK' && Array.isArray(e.data?.items) && e.data.items.length) {
+      const parts = (e.data.items as { product: string; available: number; requested: number }[]).map(
+        (r) => `${r.product}: pides ${r.requested}, disponible ${r.available}`,
+      );
+      return 'Stock insuficiente — ' + parts.join(' · ');
+    }
+    if (e.error_code === 'PAYMENT_METHOD_DISABLED') {
+      return 'Ese método de pago no está habilitado. Elige otro o revisa Métodos de pago (checkout) en el panel tienda.';
+    }
+    if (e.errors && typeof e.errors === 'object') {
+      const vals = Object.values(e.errors) as string[][];
+      if (vals[0]?.[0]) {
+        return String(vals[0][0]);
+      }
+    }
+    if (e.message) {
+      return String(e.message);
+    }
+    return 'Error al crear el pedido';
   }
 
   getItemImage(item: any): string {
