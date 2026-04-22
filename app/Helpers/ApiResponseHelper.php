@@ -37,13 +37,27 @@ class ApiResponseHelper
         return response()->json(['status' => $status, 'message' => $message, 'data' => $data], $status);
     }
 
-    public static function apiError($userMessage, $error = null, $status = 500, $errorCode = null)
+    /**
+     * @param  mixed  $error  Detalle para logs (no siempre se expone al cliente)
+     * @param  string|null  $errorCode  Código estable para el front (p. ej. INSUFFICIENT_STOCK)
+     * @param  mixed  $responseData  Cuerpo en `data` de la respuesta JSON (p. ej. detalle de stock)
+     */
+    public static function apiError($userMessage, $error = null, $status = 500, $errorCode = null, $responseData = null)
     {
         $logMessage = $errorCode ? "[Error Code: $errorCode] $userMessage" : $userMessage;
         self::resourceError($logMessage, $error);
 
         $genericMessage = 'Hubo un problema con su solicitud: ' . $userMessage;
-        return response()->json(['status' => $status, 'message' => $genericMessage, 'data' => null], $status);
+        $body = [
+            'status' => $status,
+            'message' => $genericMessage,
+            'data' => $responseData,
+        ];
+        if ($errorCode !== null) {
+            $body['error_code'] = $errorCode;
+        }
+
+        return response()->json($body, $status);
     }
 
     public static function imageSuccess($status = 200, $message, $data = null)

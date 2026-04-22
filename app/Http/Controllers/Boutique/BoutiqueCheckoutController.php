@@ -19,6 +19,7 @@ use App\Services\Boutique\StripeService;
 use App\Support\BoutiqueCheckoutPaymentMethods;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -162,7 +163,13 @@ class BoutiqueCheckoutController extends Controller
             }
 
             if (!empty($insufficientStock)) {
-                return ApiResponseHelper::apiError('Stock insuficiente para algunos productos', json_encode($insufficientStock), 400, 'INSUFFICIENT_STOCK');
+                return ApiResponseHelper::apiError(
+                    'Stock insuficiente para algunos productos',
+                    json_encode($insufficientStock),
+                    400,
+                    'INSUFFICIENT_STOCK',
+                    ['items' => $insufficientStock]
+                );
             }
 
             if (! BoutiqueCheckoutPaymentMethods::isMethodEnabled($data['payment_method'])) {
@@ -256,6 +263,8 @@ class BoutiqueCheckoutController extends Controller
             $order->load(['orderItems', 'payment', 'shipment']);
 
             return ApiResponseHelper::apiSuccess(201, 'Pedido creado exitosamente', ['order' => $order]);
+        } catch (ValidationException $e) {
+            return ApiResponseHelper::validationError($e);
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al crear el pedido', $e->getMessage(), 500, 'CREATE_ORDER_ERROR');
         }
@@ -289,7 +298,13 @@ class BoutiqueCheckoutController extends Controller
             }
 
             if (!empty($insufficientStock)) {
-                return ApiResponseHelper::apiError('Stock insuficiente para algunos productos', json_encode($insufficientStock), 400, 'INSUFFICIENT_STOCK');
+                return ApiResponseHelper::apiError(
+                    'Stock insuficiente para algunos productos',
+                    json_encode($insufficientStock),
+                    400,
+                    'INSUFFICIENT_STOCK',
+                    ['items' => $insufficientStock]
+                );
             }
 
             if (! BoutiqueCheckoutPaymentMethods::isMethodEnabled($data['payment_method'])) {
