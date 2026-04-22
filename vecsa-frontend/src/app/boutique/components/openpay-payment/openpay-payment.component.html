@@ -1,0 +1,65 @@
+<div class="openpay-payment-container">
+  <h3 class="openpay-title">
+    <mat-icon class="openpay-icon">credit_card</mat-icon>
+    Pago con tarjeta (OpenPay)
+  </h3>
+
+  <!-- Debe existir siempre en el DOM para OpenPay.deviceData.setup antes de quitar el loading -->
+  <form id="openpayChargeForm" class="openpay-device-host" aria-hidden="true"></form>
+
+  @if (isLoading) {
+    <div class="openpay-loading">
+      <mat-spinner diameter="32"></mat-spinner>
+      <span>Cargando formulario de pago...</span>
+    </div>
+  }
+
+  @if (!isLoading) {
+    <div class="openpay-form">
+      <div class="field-group">
+        <label class="field-label">Número de tarjeta</label>
+        <input class="field-input" type="text" inputmode="numeric" autocomplete="cc-number" [(ngModel)]="cardNumber" name="op_card" placeholder="0000 0000 0000 0000" />
+      </div>
+      <div class="row-2">
+        <div class="field-group">
+          <label class="field-label">Mes (MM)</label>
+          <input class="field-input" type="text" inputmode="numeric" maxlength="2" [(ngModel)]="expirationMonth" name="op_m" placeholder="12" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">Año (AA o AAAA)</label>
+          <input class="field-input" type="text" inputmode="numeric" maxlength="4" [(ngModel)]="expirationYear" name="op_y" placeholder="28" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">CVV</label>
+          <input class="field-input" type="password" inputmode="numeric" maxlength="4" [(ngModel)]="cvv2" name="op_cvv" placeholder="123" />
+        </div>
+      </div>
+      <p class="amount-hint">Total a cobrar: <strong>{{ amount | currency:'MXN':'symbol-narrow' }}</strong></p>
+    </div>
+  }
+
+  @if (errorMessage) {
+    <div class="openpay-error">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ errorMessage }}</span>
+    </div>
+  }
+
+  @if (formReady && !isLoading) {
+    <button
+      type="button"
+      mat-flat-button
+      color="primary"
+      class="pay-btn"
+      [disabled]="isProcessing"
+      (click)="pay()"
+    >
+      @if (isProcessing) {
+        <mat-spinner diameter="20" class="btn-spinner"></mat-spinner>
+        Procesando...
+      } @else {
+        Pagar ahora
+      }
+    </button>
+  }
+</div>

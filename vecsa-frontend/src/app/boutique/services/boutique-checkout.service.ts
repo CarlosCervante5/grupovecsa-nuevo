@@ -95,4 +95,16 @@ export class BoutiqueCheckoutService {
       {}
     );
   }
+
+  /** Sin auth: confirma cargo OpenPay tras tokenizar en el navegador (invitados y sesión iniciada). */
+  public confirmOpenPayCharge(params: {
+    order_uuid: string;
+    source_id: string;
+    device_session_id: string;
+  }): Observable<ApiResponse<{ order: BoutiqueOrder }>> {
+    return this._http.post<ApiResponse<{ order: BoutiqueOrder }>>(
+      `${this.url}/api/boutique/checkout/openpay_confirm_charge`,
+      params
+    );
+  }
 }
