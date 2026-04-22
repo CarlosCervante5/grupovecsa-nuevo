@@ -414,13 +414,37 @@
     }
 
     @if (showOpenPayPayment && createdOrderUuid && openPayPublicConfig && openPayBilling) {
-      <app-openpay-payment
-        [order_uuid]="createdOrderUuid"
-        [openPayConfig]="openPayPublicConfig"
-        [billing]="openPayBilling"
-        [amount]="openPayOrderTotal"
-        (paymentSuccess)="onPaymentSuccess($event)"
-      ></app-openpay-payment>
+      <div
+        class="checkout-modal-backdrop"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="openpay-modal-title"
+        (click)="closeOpenPayModal()"
+      >
+        <div class="checkout-modal-panel" (click)="$event.stopPropagation()">
+          <div class="checkout-modal-toolbar">
+            <h2 id="openpay-modal-title" class="checkout-modal-heading">Pago con tarjeta (OpenPay)</h2>
+            <button
+              type="button"
+              class="checkout-modal-close"
+              (click)="closeOpenPayModal()"
+              aria-label="Cerrar"
+            >
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+          <div class="checkout-modal-openpay-wrap">
+            <app-openpay-payment
+              [inModal]="true"
+              [order_uuid]="createdOrderUuid"
+              [openPayConfig]="openPayPublicConfig"
+              [billing]="openPayBilling"
+              [amount]="openPayOrderTotal"
+              (paymentSuccess)="onPaymentSuccess($event)"
+            ></app-openpay-payment>
+          </div>
+        </div>
+      </div>
     }
     } <!-- end guestConfirmed -->
   }

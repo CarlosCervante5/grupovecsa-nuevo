@@ -45,6 +45,8 @@ export class OpenpayPaymentComponent implements OnInit, OnDestroy {
   @Input({ required: true }) openPayConfig!: BoutiqueOpenPayPublicConfig;
   @Input({ required: true }) billing!: OpenPayBillingContext;
   @Input({ required: true }) amount!: number;
+  /** Cuando se muestra dentro de un modal, se oculta el título duplicado y se suavizan bordes. */
+  @Input() inModal = false;
 
   @Output() paymentSuccess = new EventEmitter<string>();
 
@@ -236,6 +238,7 @@ export class OpenpayPaymentComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           const msg =
+            err?.error?.data?.openpay_error ||
             err?.error?.message ||
             err?.error?.data?.description ||
             'No se pudo completar el pago.';

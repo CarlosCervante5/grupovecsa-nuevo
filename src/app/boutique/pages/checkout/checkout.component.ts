@@ -570,4 +570,24 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       this.router.navigate(['/boutique/orders', orderUuid]);
     }
   }
+
+  /** Cerrar modal de OpenPay sin completar pago: el pedido ya existe como pendiente. */
+  closeOpenPayModal(): void {
+    this.showOpenPayPayment = false;
+    const orderUuid = this.createdOrderUuid;
+    this.createdOrderUuid = null;
+    if (!orderUuid) {
+      return;
+    }
+    this.snackBar.open('Pedido creado. Puedes completar el pago con la tienda si lo necesitas.', 'Cerrar', { duration: 5000 });
+    if (this.guestThanksAfterOnlinePayment) {
+      const st = this.guestThanksAfterOnlinePayment;
+      this.guestThanksAfterOnlinePayment = null;
+      this.router.navigate(['/boutique/gracias', orderUuid], {
+        state: { orderNumber: st.orderNumber, guestEmail: st.guestEmail },
+      });
+    } else {
+      this.router.navigate(['/boutique/orders', orderUuid]);
+    }
+  }
 }

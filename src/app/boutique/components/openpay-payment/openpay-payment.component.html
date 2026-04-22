@@ -1,8 +1,10 @@
-<div class="openpay-payment-container">
-  <h3 class="openpay-title">
-    <mat-icon class="openpay-icon">credit_card</mat-icon>
-    Pago con tarjeta (OpenPay)
-  </h3>
+<div class="openpay-payment-container" [class.openpay-in-modal]="inModal">
+  @if (!inModal) {
+    <h3 class="openpay-title">
+      <mat-icon class="openpay-icon">credit_card</mat-icon>
+      Pago con tarjeta (OpenPay)
+    </h3>
+  }
 
   <!-- Debe existir siempre en el DOM para OpenPay.deviceData.setup antes de quitar el loading -->
   <form id="openpayChargeForm" class="openpay-device-host" aria-hidden="true"></form>

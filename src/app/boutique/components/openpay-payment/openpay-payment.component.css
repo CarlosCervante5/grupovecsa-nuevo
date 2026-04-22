@@ -10,6 +10,18 @@
   border: 0;
 }
 
+.openpay-payment-container.openpay-in-modal {
+  margin-top: 0;
+  border: none;
+  box-shadow: none;
+  background: transparent;
+  padding: 0;
+}
+
+.openpay-in-modal .openpay-form {
+  margin-top: 0;
+}
+
 .openpay-payment-container {
   position: relative;
   background: #1f2937;
