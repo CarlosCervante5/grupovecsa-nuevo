@@ -140,15 +140,24 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   openpayError = '';
   openpaySuccess = '';
 
-  /** Toggles checkout: transferencia / sucursal (Stripe/OpenPay solo lectura). */
+  /** Toggles y estado efectivo (checkout boutique). */
   checkoutPayLoading = false;
   checkoutPaySaving = false;
   checkoutPayError = '';
   checkoutPaySuccess = '';
+  /** Lo que el cliente ve en el checkout (tras llaves + flags). */
+  checkoutPayShowStripe = false;
+  checkoutPayShowOpenpay = false;
+  checkoutPayShowTransferencia = false;
+  checkoutPayShowSucursal = false;
+  /** Si existen credenciales (puede activar el switch). */
+  checkoutPayKeysStripe = false;
+  checkoutPayKeysOpenpay = false;
+  /** Preferencias guardadas (flags en BD). */
+  checkoutPayFlagStripe = true;
+  checkoutPayFlagOpenpay = true;
   checkoutPayTransferencia = true;
   checkoutPaySucursal = true;
-  checkoutPayStripeOn = false;
-  checkoutPayOpenpayOn = false;
 
   readonly navItems = [
     { key: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
@@ -1553,10 +1562,28 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
       next: (res: any) => {
         const d = res?.data || {};
         const m = d.methods || {};
-        this.checkoutPayTransferencia = !!m.transferencia;
-        this.checkoutPaySucursal = !!m.sucursal;
-        this.checkoutPayStripeOn = !!m.stripe;
-        this.checkoutPayOpenpayOn = !!m.openpay;
+        this.checkoutPayShowStripe = !!m.stripe;
+        this.checkoutPayShowOpenpay = !!m.openpay;
+        this.checkoutPayShowTransferencia = !!m.transferencia;
+        this.checkoutPayShowSucursal = !!m.sucursal;
+        const admin = d.admin;
+        if (admin?.flags && admin?.keys_configured) {
+          const kc = admin.keys_configured;
+          this.checkoutPayKeysStripe = !!kc.stripe;
+          this.checkoutPayKeysOpenpay = !!kc.openpay;
+          const f = admin.flags;
+          this.checkoutPayFlagStripe = !!f.boutique_checkout_stripe;
+          this.checkoutPayFlagOpenpay = !!f.boutique_checkout_openpay;
+          this.checkoutPayTransferencia = !!f.boutique_checkout_transferencia;
+          this.checkoutPaySucursal = !!f.boutique_checkout_sucursal;
+        } else {
+          this.checkoutPayKeysStripe = false;
+          this.checkoutPayKeysOpenpay = false;
+          this.checkoutPayFlagStripe = !!m.stripe;
+          this.checkoutPayFlagOpenpay = !!m.openpay;
+          this.checkoutPayTransferencia = !!m.transferencia;
+          this.checkoutPaySucursal = !!m.sucursal;
+        }
         this.checkoutPayLoading = false;
       },
       error: (err: any) => {
@@ -1564,6 +1591,20 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
         this.checkoutPayLoading = false;
       },
     });
+  }
+
+  toggleCheckoutPayFlagStripe(): void {
+    if (!this.checkoutPayKeysStripe) {
+      return;
+    }
+    this.checkoutPayFlagStripe = !this.checkoutPayFlagStripe;
+  }
+
+  toggleCheckoutPayFlagOpenpay(): void {
+    if (!this.checkoutPayKeysOpenpay) {
+      return;
+    }
+    this.checkoutPayFlagOpenpay = !this.checkoutPayFlagOpenpay;
   }
 
   toggleCheckoutPayTransferencia(): void {
@@ -1580,6 +1621,8 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     this.checkoutPaySuccess = '';
     this.storeService
       .updateCheckoutPaymentMethods({
+        boutique_checkout_stripe: this.checkoutPayKeysStripe ? this.checkoutPayFlagStripe : false,
+        boutique_checkout_openpay: this.checkoutPayKeysOpenpay ? this.checkoutPayFlagOpenpay : false,
         boutique_checkout_transferencia: this.checkoutPayTransferencia,
         boutique_checkout_sucursal: this.checkoutPaySucursal,
       })
