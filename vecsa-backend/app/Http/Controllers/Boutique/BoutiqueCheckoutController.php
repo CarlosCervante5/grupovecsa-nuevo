@@ -553,10 +553,19 @@ class BoutiqueCheckoutController extends Controller
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             throw $e;
-        } catch (\Exception $e) {
-            Log::error('OpenPay confirm charge', ['message' => $e->getMessage()]);
+        } catch (\Throwable $e) {
+            Log::error('OpenPay confirm charge', [
+                'message' => $e->getMessage(),
+                'exception' => $e::class,
+            ]);
 
-            return ApiResponseHelper::apiError('Error al confirmar el pago OpenPay', $e->getMessage(), 500, 'OPENPAY_CHARGE_ERROR');
+            return ApiResponseHelper::apiError(
+                'Error al confirmar el pago OpenPay',
+                $e->getMessage(),
+                500,
+                'OPENPAY_CHARGE_ERROR',
+                ['openpay_error' => $e->getMessage()]
+            );
         }
     }
 }
