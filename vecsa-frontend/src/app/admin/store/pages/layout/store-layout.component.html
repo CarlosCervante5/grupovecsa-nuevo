@@ -1222,6 +1222,62 @@
       }
     }
 
+    <!-- ═══ CHECKOUT PAYMENT METHODS ═══ -->
+    @if (activeSection === 'checkout_payments') {
+      <h1 class="store-title">Métodos de pago en checkout</h1>
+      <p class="store-subtitle">
+        Activa o desactiva <strong>transferencia</strong> y <strong>pago en sucursal</strong> en el checkout público de la boutique.
+        <strong>Stripe</strong> y <strong>OpenPay</strong> se muestran solo si hay llaves configuradas (Stripe en ajustes globales; OpenPay en la sección siguiente).
+      </p>
+
+      @if (checkoutPayLoading) {
+        <div class="crud-loading"><div class="spinner"></div><span>Cargando...</span></div>
+      }
+
+      @if (checkoutPayError) {
+        <div class="alert-error" style="margin-bottom:12px;"><span class="material-icons">error</span> {{ checkoutPayError }}</div>
+      }
+      @if (checkoutPaySuccess) {
+        <div class="alert-success" style="margin-bottom:12px;"><span class="material-icons">check_circle</span> {{ checkoutPaySuccess }}</div>
+      }
+
+      @if (!checkoutPayLoading) {
+        <div class="store-card" style="margin-bottom:16px;">
+          <h3 class="card-title"><span class="material-icons" style="color:#64748b;">info</span> Estado actual (solo lectura)</h3>
+          <p style="font-size:0.9rem;color:#475569;margin:0 0 8px;">
+            Stripe: <span class="badge" [class.badge-available]="checkoutPayStripeOn" [class.badge-sold]="!checkoutPayStripeOn">{{ checkoutPayStripeOn ? 'Disponible' : 'No configurado' }}</span>
+            &nbsp;·&nbsp; OpenPay: <span class="badge" [class.badge-available]="checkoutPayOpenpayOn" [class.badge-sold]="!checkoutPayOpenpayOn">{{ checkoutPayOpenpayOn ? 'Disponible' : 'No configurado' }}</span>
+          </p>
+        </div>
+
+        <div class="store-card" style="margin-bottom:16px;">
+          <h3 class="card-title"><span class="material-icons" style="color:#1c69d4;">toggle_on</span> Opciones en checkout</h3>
+          <div style="display:flex;flex-direction:column;gap:20px;max-width:420px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;">
+              <span style="font-weight:600;">Transferencia bancaria</span>
+              <label class="store-switch">
+                <input type="checkbox" [checked]="checkoutPayTransferencia" (change)="toggleCheckoutPayTransferencia()" />
+                <span class="store-switch-slider"></span>
+              </label>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;">
+              <span style="font-weight:600;">Pago en sucursal</span>
+              <label class="store-switch">
+                <input type="checkbox" [checked]="checkoutPaySucursal" (change)="toggleCheckoutPaySucursal()" />
+                <span class="store-switch-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <button class="store-action-btn" (click)="saveCheckoutPaymentMethods()" [disabled]="checkoutPaySaving">
+            @if (checkoutPaySaving) { <div class="spinner-sm"></div> Guardando... } @else { <span class="material-icons">save</span> Guardar cambios }
+          </button>
+        </div>
+      }
+    }
+
     <!-- ═══ OPENPAY ═══ -->
     @if (activeSection === 'openpay') {
       <h1 class="store-title">Pagos OpenPay (Boutique)</h1>

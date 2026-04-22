@@ -8,6 +8,7 @@ import {
   ShippingQuote,
   PaymentIntentResponse,
   BoutiqueOpenPayPublicConfig,
+  BoutiquePaymentMethodsPublicPayload,
 } from '../interfaces/boutique.interfaces';
 
 @Injectable({
@@ -92,6 +93,14 @@ export class BoutiqueCheckoutService {
   public getOpenPayPublicConfig(): Observable<ApiResponse<BoutiqueOpenPayPublicConfig>> {
     return this._http.post<ApiResponse<BoutiqueOpenPayPublicConfig>>(
       `${this.url}/api/boutique/checkout/openpay_public_config`,
+      {}
+    );
+  }
+
+  /** Sin auth: métodos habilitados (Stripe/OpenPay por llaves; transferencia/sucursal por admin). */
+  public getPaymentMethodsPublic(): Observable<ApiResponse<BoutiquePaymentMethodsPublicPayload>> {
+    return this._http.post<ApiResponse<BoutiquePaymentMethodsPublicPayload>>(
+      `${this.url}/api/boutique/checkout/payment_methods_public`,
       {}
     );
   }

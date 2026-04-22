@@ -140,6 +140,16 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   openpayError = '';
   openpaySuccess = '';
 
+  /** Toggles checkout: transferencia / sucursal (Stripe/OpenPay solo lectura). */
+  checkoutPayLoading = false;
+  checkoutPaySaving = false;
+  checkoutPayError = '';
+  checkoutPaySuccess = '';
+  checkoutPayTransferencia = true;
+  checkoutPaySucursal = true;
+  checkoutPayStripeOn = false;
+  checkoutPayOpenpayOn = false;
+
   readonly navItems = [
     { key: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
     { key: 'categories', label: 'Categorías', icon: 'category' },
@@ -151,6 +161,7 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     { key: 'points', label: 'Puntos', icon: 'stars' },
     { key: 'coupons', label: 'Cupones', icon: 'confirmation_number' },
     { key: 'redemptions', label: 'Redenciones', icon: 'redeem' },
+    { key: 'checkout_payments', label: 'Métodos de pago (checkout)', icon: 'payments' },
     { key: 'openpay', label: 'Pagos OpenPay', icon: 'account_balance' },
     { key: 'incadea', label: 'Sync Incadea', icon: 'sync' },
     { key: 'wc_import', label: 'WC Import', icon: 'upload_file' },
@@ -221,6 +232,8 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
       this.loadCoupons();
     } else if (key === 'redemptions') {
       this.loadRedemptions();
+    } else if (key === 'checkout_payments') {
+      this.loadCheckoutPaymentMethodsConfig();
     } else if (key === 'openpay') {
       this.loadOpenpayConfig();
     } else if (key === 'incadea') {
@@ -634,6 +647,7 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     else if (this.activeSection === 'points') this.loadPoints();
     else if (this.activeSection === 'coupons') this.loadCoupons();
     else if (this.activeSection === 'redemptions') this.loadRedemptions();
+    else if (this.activeSection === 'checkout_payments') this.loadCheckoutPaymentMethodsConfig();
     else if (this.activeSection === 'openpay') this.loadOpenpayConfig();
   }
 
@@ -1529,6 +1543,63 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   formatDate(val: any): string {
     if (!val) return '—';
     return new Date(val).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' });
+  }
+
+  loadCheckoutPaymentMethodsConfig(): void {
+    this.checkoutPayLoading = true;
+    this.checkoutPayError = '';
+    this.checkoutPaySuccess = '';
+    this.storeService.getCheckoutPaymentMethodsConfig().subscribe({
+      next: (res: any) => {
+        const d = res?.data || {};
+        const m = d.methods || {};
+        this.checkoutPayTransferencia = !!m.transferencia;
+        this.checkoutPaySucursal = !!m.sucursal;
+        this.checkoutPayStripeOn = !!m.stripe;
+        this.checkoutPayOpenpayOn = !!m.openpay;
+        this.checkoutPayLoading = false;
+      },
+      error: (err: any) => {
+        this.checkoutPayError = err?.error?.message || 'Error al cargar métodos de pago';
+        this.checkoutPayLoading = false;
+      },
+    });
+  }
+
+  toggleCheckoutPayTransferencia(): void {
+    this.checkoutPayTransferencia = !this.checkoutPayTransferencia;
+  }
+
+  toggleCheckoutPaySucursal(): void {
+    this.checkoutPaySucursal = !this.checkoutPaySucursal;
+  }
+
+  saveCheckoutPaymentMethods(): void {
+    this.checkoutPaySaving = true;
+    this.checkoutPayError = '';
+    this.checkoutPaySuccess = '';
+    this.storeService
+      .updateCheckoutPaymentMethods({
+        boutique_checkout_transferencia: this.checkoutPayTransferencia,
+        boutique_checkout_sucursal: this.checkoutPaySucursal,
+      })
+      .subscribe({
+        next: () => {
+          this.checkoutPaySuccess = 'Preferencias guardadas';
+          this.checkoutPaySaving = false;
+          this.loadCheckoutPaymentMethodsConfig();
+          setTimeout(() => (this.checkoutPaySuccess = ''), 4000);
+        },
+        error: (err: any) => {
+          const e = err?.error;
+          this.checkoutPayError =
+            (e?.errors
+              ? ([] as string[]).concat(...(Object.values(e.errors) as string[][])).join(' ')
+              : '') || e?.message || 'Error al guardar';
+          this.checkoutPaySaving = false;
+          this.loadCheckoutPaymentMethodsConfig();
+        },
+      });
   }
 
   loadOpenpayConfig(): void {

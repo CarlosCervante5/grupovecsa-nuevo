@@ -118,4 +118,16 @@ export class StoreService {
   updateOpenpayConfig(payload: Record<string, unknown>): Observable<any> {
     return this.boutiquePost('openpay/update', payload);
   }
+
+  /** Métodos de pago del checkout boutique (transferencia / sucursal; Stripe/OpenPay según llaves). */
+  getCheckoutPaymentMethodsConfig(): Observable<any> {
+    return this.boutiquePost('checkout_payment_methods/config');
+  }
+
+  updateCheckoutPaymentMethods(payload: {
+    boutique_checkout_transferencia: boolean;
+    boutique_checkout_sucursal: boolean;
+  }): Observable<any> {
+    return this.boutiquePost('checkout_payment_methods/update', payload);
+  }
 }

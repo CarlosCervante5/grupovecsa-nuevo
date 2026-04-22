@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Settings;
 use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Models\SystemSetting;
+use App\Support\BoutiqueCheckoutPaymentMethods;
 use Illuminate\Http\Request;
 
 class SettingsController extends Controller
@@ -247,18 +248,9 @@ class SettingsController extends Controller
     public function openpayCheckoutPublic(Request $request)
     {
         try {
-            $mode = SystemSetting::get('openpay_mode', 'sandbox');
-            $suffix = $mode === 'production' ? 'production' : 'sandbox';
+            $openpay = BoutiqueCheckoutPaymentMethods::publicPayload()['openpay'];
 
-            $merchantId = trim((string) SystemSetting::get("openpay_{$suffix}_merchant_id", ''));
-            $publicKey = trim((string) SystemSetting::get("openpay_{$suffix}_public_key", ''));
-
-            return ApiResponseHelper::apiSuccess(200, 'Configuración pública OpenPay', [
-                'merchant_id' => $merchantId,
-                'public_key' => $publicKey,
-                'sandbox' => $mode !== 'production',
-                'available' => $merchantId !== '' && $publicKey !== '',
-            ]);
+            return ApiResponseHelper::apiSuccess(200, 'Configuración pública OpenPay', $openpay);
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al leer OpenPay', $e->getMessage(), 500);
         }
@@ -271,40 +263,55 @@ class SettingsController extends Controller
     public function boutiquePaymentMethodsPublic(Request $request)
     {
         try {
-            $stripeMode = SystemSetting::get('stripe_mode', 'test');
-            if (! in_array($stripeMode, ['test', 'live'], true)) {
-                $stripeMode = 'test';
-            }
-            $pkStripe = trim((string) SystemSetting::get("stripe_{$stripeMode}_publishable_key", ''));
-            $stripeOn = $pkStripe !== '';
-
-            $openpayMode = SystemSetting::get('openpay_mode', 'sandbox');
-            $suffixOp = $openpayMode === 'production' ? 'production' : 'sandbox';
-            $merchantId = trim((string) SystemSetting::get("openpay_{$suffixOp}_merchant_id", ''));
-            $publicKey = trim((string) SystemSetting::get("openpay_{$suffixOp}_public_key", ''));
-            $openpayOn = $merchantId !== '' && $publicKey !== '';
-
-            $transferencia = filter_var(SystemSetting::get('boutique_checkout_transferencia', '1'), FILTER_VALIDATE_BOOLEAN);
-            $sucursal = filter_var(SystemSetting::get('boutique_checkout_sucursal', '1'), FILTER_VALIDATE_BOOLEAN);
-
-            $openpayPayload = [
-                'merchant_id' => $merchantId,
-                'public_key' => $publicKey,
-                'sandbox' => $openpayMode !== 'production',
-                'available' => $openpayOn,
-            ];
-
-            return ApiResponseHelper::apiSuccess(200, 'Métodos de pago boutique', [
-                'methods' => [
-                    'stripe' => $stripeOn,
-                    'openpay' => $openpayOn,
-                    'transferencia' => $transferencia,
-                    'sucursal' => $sucursal,
-                ],
-                'openpay' => $openpayPayload,
-            ]);
+            return ApiResponseHelper::apiSuccess(200, 'Métodos de pago boutique', BoutiqueCheckoutPaymentMethods::publicPayload());
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al leer métodos de pago boutique', $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Admin tienda: lectura de métodos de pago del checkout (misma carga que el endpoint público).
+     */
+    public function boutiqueCheckoutPaymentMethodsConfig(Request $request)
+    {
+        try {
+            return ApiResponseHelper::apiSuccess(200, 'Métodos de pago checkout', BoutiqueCheckoutPaymentMethods::publicPayload());
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al leer métodos de pago', $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Admin tienda: activar/desactivar transferencia y pago en sucursal en el checkout boutique.
+     */
+    public function updateBoutiqueCheckoutPaymentMethods(Request $request)
+    {
+        try {
+            $data = $request->validate([
+                'boutique_checkout_transferencia' => 'required|boolean',
+                'boutique_checkout_sucursal' => 'required|boolean',
+            ]);
+
+            SystemSetting::set('boutique_checkout_transferencia', $data['boutique_checkout_transferencia'] ? '1' : '0');
+            SystemSetting::set('boutique_checkout_sucursal', $data['boutique_checkout_sucursal'] ? '1' : '0');
+
+            if (! BoutiqueCheckoutPaymentMethods::hasAnyEnabledMethod()) {
+                SystemSetting::set('boutique_checkout_transferencia', '1');
+                SystemSetting::set('boutique_checkout_sucursal', '1');
+
+                return ApiResponseHelper::apiError(
+                    'Debe quedar al menos un método de pago habilitado (Stripe, OpenPay, transferencia o sucursal). Se revirtieron los cambios.',
+                    null,
+                    422,
+                    'CHECKOUT_PAYMENT_NONE_ENABLED'
+                );
+            }
+
+            return ApiResponseHelper::apiSuccess(200, 'Métodos de pago actualizados', BoutiqueCheckoutPaymentMethods::publicPayload());
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al guardar métodos de pago', $e->getMessage(), 500);
         }
     }
 

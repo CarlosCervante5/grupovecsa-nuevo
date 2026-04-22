@@ -16,6 +16,7 @@ use App\Services\Boutique\BoutiqueInventoryService;
 use App\Services\Boutique\EnviacomService;
 use App\Services\Boutique\OpenPayService;
 use App\Services\Boutique\StripeService;
+use App\Support\BoutiqueCheckoutPaymentMethods;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -164,6 +165,10 @@ class BoutiqueCheckoutController extends Controller
                 return ApiResponseHelper::apiError('Stock insuficiente para algunos productos', json_encode($insufficientStock), 400, 'INSUFFICIENT_STOCK');
             }
 
+            if (! BoutiqueCheckoutPaymentMethods::isMethodEnabled($data['payment_method'])) {
+                return ApiResponseHelper::apiError('El método de pago seleccionado no está habilitado', null, 422, 'PAYMENT_METHOD_DISABLED');
+            }
+
             // Calculate totals
             $subtotal = 0;
             foreach ($data['items'] as $item) {
@@ -285,6 +290,10 @@ class BoutiqueCheckoutController extends Controller
 
             if (!empty($insufficientStock)) {
                 return ApiResponseHelper::apiError('Stock insuficiente para algunos productos', json_encode($insufficientStock), 400, 'INSUFFICIENT_STOCK');
+            }
+
+            if (! BoutiqueCheckoutPaymentMethods::isMethodEnabled($data['payment_method'])) {
+                return ApiResponseHelper::apiError('El método de pago seleccionado no está habilitado', null, 422, 'PAYMENT_METHOD_DISABLED');
             }
 
             // Calculate totals
