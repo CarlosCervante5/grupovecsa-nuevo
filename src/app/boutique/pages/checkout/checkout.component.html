@@ -279,12 +279,14 @@
           </h2>
 
           <mat-radio-group [(ngModel)]="paymentMethod" class="payment-radio-group">
-            <mat-radio-button value="stripe" class="payment-radio">
-              <div class="radio-content">
-                <mat-icon class="payment-icon">credit_card</mat-icon>
-                <span class="radio-label">Tarjeta de crédito / débito (Stripe)</span>
-              </div>
-            </mat-radio-button>
+            @if (stripeAvailable) {
+              <mat-radio-button value="stripe" class="payment-radio">
+                <div class="radio-content">
+                  <mat-icon class="payment-icon">credit_card</mat-icon>
+                  <span class="radio-label">Tarjeta de crédito / débito (Stripe)</span>
+                </div>
+              </mat-radio-button>
+            }
             @if (openPayAvailable) {
               <mat-radio-button value="openpay" class="payment-radio">
                 <div class="radio-content">
@@ -293,19 +295,30 @@
                 </div>
               </mat-radio-button>
             }
-            <mat-radio-button value="transferencia" class="payment-radio">
-              <div class="radio-content">
-                <mat-icon class="payment-icon">account_balance</mat-icon>
-                <span class="radio-label">Transferencia bancaria</span>
-              </div>
-            </mat-radio-button>
-            <mat-radio-button value="sucursal" class="payment-radio">
-              <div class="radio-content">
-                <mat-icon class="payment-icon">storefront</mat-icon>
-                <span class="radio-label">Pago en sucursal</span>
-              </div>
-            </mat-radio-button>
+            @if (transferenciaAvailable) {
+              <mat-radio-button value="transferencia" class="payment-radio">
+                <div class="radio-content">
+                  <mat-icon class="payment-icon">account_balance</mat-icon>
+                  <span class="radio-label">Transferencia bancaria</span>
+                </div>
+              </mat-radio-button>
+            }
+            @if (sucursalAvailable) {
+              <mat-radio-button value="sucursal" class="payment-radio">
+                <div class="radio-content">
+                  <mat-icon class="payment-icon">storefront</mat-icon>
+                  <span class="radio-label">Pago en sucursal</span>
+                </div>
+              </mat-radio-button>
+            }
           </mat-radio-group>
+
+          @if (!hasAnyPaymentMethod) {
+            <div class="payment-note payment-note--warn">
+              <mat-icon>warning</mat-icon>
+              <span>No hay métodos de pago habilitados. Contacta a la tienda.</span>
+            </div>
+          }
 
           @if (paymentMethod === 'transferencia') {
             <div class="payment-note">

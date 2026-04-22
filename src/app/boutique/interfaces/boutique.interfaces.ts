@@ -7,6 +7,17 @@ export interface BoutiqueOpenPayPublicConfig {
   available: boolean;
 }
 
+/** Respuesta de POST /api/boutique/checkout/payment_methods_public */
+export interface BoutiquePaymentMethodsPublicPayload {
+  methods: {
+    stripe: boolean;
+    openpay: boolean;
+    transferencia: boolean;
+    sucursal: boolean;
+  };
+  openpay: BoutiqueOpenPayPublicConfig;
+}
+
 export interface BoutiqueCategory {
   uuid: string;
   name: string;

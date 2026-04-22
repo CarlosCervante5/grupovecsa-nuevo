@@ -18,6 +18,7 @@ import { BoutiqueCheckoutService } from '../../services/boutique-checkout.servic
 import {
   BoutiqueCart,
   BoutiqueOpenPayPublicConfig,
+  BoutiquePaymentMethodsPublicPayload,
   ShippingQuote,
 } from '../../interfaces/boutique.interfaces';
 import { StripePaymentComponent } from '../../components/stripe-payment/stripe-payment.component';
@@ -80,6 +81,9 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
   // Payment
   paymentMethod: 'stripe' | 'transferencia' | 'sucursal' | 'openpay' = 'stripe';
+  stripeAvailable = true;
+  transferenciaAvailable = true;
+  sucursalAvailable = true;
   /** OpenPay visible solo si el backend expone merchant + llave pública para el modo actual. */
   openPayAvailable = false;
   openPayPublicConfig: BoutiqueOpenPayPublicConfig | null = null;
@@ -141,31 +145,81 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     this.subs.push(shippingAutoSub);
 
     this.loadCart();
-    this.loadOpenPayAvailability();
+    this.loadCheckoutPaymentMethods();
   }
 
-  private loadOpenPayAvailability(): void {
-    const sub = this.checkoutService.getOpenPayPublicConfig().subscribe({
+  private loadCheckoutPaymentMethods(): void {
+    const sub = this.checkoutService.getPaymentMethodsPublic().subscribe({
       next: (res) => {
-        const d = res.data as BoutiqueOpenPayPublicConfig | null;
-        if (!d) {
-          this.openPayAvailable = false;
-          this.openPayPublicConfig = null;
+        const d = res.data as BoutiquePaymentMethodsPublicPayload | null;
+        if (!d?.methods) {
+          this.applyPaymentMethodsFallback();
           return;
         }
-        this.openPayPublicConfig = d;
-        if (typeof d.available === 'boolean') {
-          this.openPayAvailable = d.available;
+        this.stripeAvailable = !!d.methods.stripe;
+        this.transferenciaAvailable = !!d.methods.transferencia;
+        this.sucursalAvailable = !!d.methods.sucursal;
+        const op = d.openpay;
+        if (op) {
+          this.openPayPublicConfig = {
+            merchant_id: String(op.merchant_id ?? ''),
+            public_key: String(op.public_key ?? ''),
+            sandbox: !!op.sandbox,
+            available: typeof op.available === 'boolean' ? op.available : !!(String(op.merchant_id || '').trim() && String(op.public_key || '').trim()),
+          };
+          this.openPayAvailable = this.openPayPublicConfig.available;
         } else {
-          this.openPayAvailable = !!(String(d.merchant_id || '').trim() && String(d.public_key || '').trim());
+          this.openPayPublicConfig = null;
+          this.openPayAvailable = false;
         }
+        this.ensureValidSelectedPaymentMethod();
       },
-      error: () => {
-        this.openPayAvailable = false;
-        this.openPayPublicConfig = null;
-      },
+      error: () => this.applyPaymentMethodsFallback(),
     });
     this.subs.push(sub);
+  }
+
+  /** Si falla el endpoint, no bloquear checkout: mostrar todos salvo OpenPay sin credenciales. */
+  private applyPaymentMethodsFallback(): void {
+    this.stripeAvailable = true;
+    this.transferenciaAvailable = true;
+    this.sucursalAvailable = true;
+    this.openPayAvailable = false;
+    this.openPayPublicConfig = null;
+    this.ensureValidSelectedPaymentMethod();
+  }
+
+  private ensureValidSelectedPaymentMethod(): void {
+    const order: Array<{ id: 'stripe' | 'openpay' | 'transferencia' | 'sucursal'; on: boolean }> = [
+      { id: 'stripe', on: this.stripeAvailable },
+      { id: 'openpay', on: this.openPayAvailable },
+      { id: 'transferencia', on: this.transferenciaAvailable },
+      { id: 'sucursal', on: this.sucursalAvailable },
+    ];
+    if (order.some(o => o.id === this.paymentMethod && o.on)) {
+      return;
+    }
+    const first = order.find(o => o.on);
+    this.paymentMethod = first ? first.id : 'stripe';
+  }
+
+  private selectedPaymentMethodAllowed(): boolean {
+    switch (this.paymentMethod) {
+      case 'stripe':
+        return this.stripeAvailable;
+      case 'openpay':
+        return this.openPayAvailable;
+      case 'transferencia':
+        return this.transferenciaAvailable;
+      case 'sucursal':
+        return this.sucursalAvailable;
+      default:
+        return false;
+    }
+  }
+
+  get hasAnyPaymentMethod(): boolean {
+    return this.stripeAvailable || this.openPayAvailable || this.transferenciaAvailable || this.sucursalAvailable;
   }
 
   ngOnDestroy(): void {
@@ -330,6 +384,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     }
 
     if (!this.paymentMethod) return false;
+    if (!this.hasAnyPaymentMethod || !this.selectedPaymentMethodAllowed()) return false;
     return true;
   }
 

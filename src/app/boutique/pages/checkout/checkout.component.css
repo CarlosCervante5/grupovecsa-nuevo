@@ -359,6 +359,12 @@
   margin-top: 1px;
 }
 
+.payment-note--warn {
+  background: #fffbeb;
+  border-color: #fcd34d;
+  color: #92400e;
+}
+
 /* Order Summary */
 .order-summary {
   background: #fff;
