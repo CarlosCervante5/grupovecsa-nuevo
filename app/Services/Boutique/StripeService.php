@@ -6,6 +6,7 @@ use App\Models\Boutique\BoutiqueOrder;
 use App\Models\Boutique\BoutiquePayment;
 use App\Models\SystemSetting;
 use Exception;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class StripeService
@@ -13,8 +14,9 @@ class StripeService
     protected string $secretKey;
     protected string $webhookSecret;
 
-    public function __construct()
-    {
+    public function __construct(
+        protected BoutiqueInventoryService $inventoryService
+    ) {
         $mode = SystemSetting::get('stripe_mode', 'test');
         $this->secretKey = SystemSetting::getEncrypted("stripe_{$mode}_secret_key")
             ?? env('STRIPE_SECRET_KEY', '');
@@ -68,31 +70,66 @@ class StripeService
     {
         $paymentIntentId = $event['data']['object']['id'] ?? null;
 
-        if (!$paymentIntentId) {
+        if (! $paymentIntentId) {
             Log::error('Stripe webhook: payment_intent_id not found in event');
             return;
         }
 
-        $payment = BoutiquePayment::where('stripe_payment_intent_id', $paymentIntentId)->first();
+        DB::transaction(function () use ($paymentIntentId) {
+            $payment = BoutiquePayment::query()
+                ->lockForUpdate()
+                ->where('stripe_payment_intent_id', $paymentIntentId)
+                ->first();
 
-        if (!$payment) {
-            Log::error('Stripe webhook: Payment not found for intent: ' . $paymentIntentId);
-            return;
-        }
+            if (! $payment) {
+                Log::error('Stripe webhook: Payment not found for intent: ' . $paymentIntentId);
+                return;
+            }
 
-        $payment->update([
-            'status' => 'completado',
-            'confirmed_at' => now(),
-        ]);
+            if ($payment->status === 'completado') {
+                return;
+            }
 
-        $order = $payment->order;
-        if ($order) {
+            if ($payment->method !== 'stripe') {
+                return;
+            }
+
+            $order = BoutiqueOrder::query()
+                ->lockForUpdate()
+                ->find($payment->order_id);
+
+            if (! $order) {
+                Log::error('Stripe webhook: order not found for payment id ' . (string) $payment->id);
+                return;
+            }
+
+            if ($this->inventoryService->orderLacksStockForItems($order)) {
+                Log::critical('Stripe: pago capturado pero stock insuficiente; requiere revisión o reembolso', [
+                    'payment_intent_id' => $paymentIntentId,
+                    'order_uuid' => $order->uuid,
+                ]);
+                return;
+            }
+
+            $this->inventoryService->applySaleForEntireOrder($order, (string) $order->uuid, 'venta');
+
+            $payment->update([
+                'status' => 'completado',
+                'confirmed_at' => now(),
+            ]);
+
             $order->update(['status' => 'pagado']);
-        }
+        });
 
-        Log::info('Stripe payment processed successfully', [
-            'payment_intent_id' => $paymentIntentId,
-            'order_uuid' => $order?->uuid,
-        ]);
+        $paymentForLog = BoutiquePayment::query()
+            ->where('stripe_payment_intent_id', $paymentIntentId)
+            ->first();
+        $order = $paymentForLog?->order;
+        if ($order && $paymentForLog?->status === 'completado') {
+            Log::info('Stripe payment processed successfully', [
+                'payment_intent_id' => $paymentIntentId,
+                'order_uuid' => $order->uuid,
+            ]);
+        }
     }
 }
