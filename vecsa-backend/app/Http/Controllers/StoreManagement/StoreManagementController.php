@@ -177,16 +177,15 @@ class StoreManagementController extends Controller
                 );
             }
 
-            // Restore inventory on cancellation
+            // Restore inventory on cancellation (incl. variantes)
             if ($newStatus === 'cancelado') {
                 $order->load('orderItems.product');
                 foreach ($order->orderItems as $orderItem) {
                     if ($orderItem->product) {
-                        $this->inventoryService->restoreStock(
-                            $orderItem->product,
-                            $orderItem->quantity,
+                        $this->inventoryService->restoreSaleForOrderItem(
+                            $orderItem,
                             'cancelacion',
-                            $order->uuid
+                            (string) $order->uuid
                         );
                     }
                 }

@@ -10,6 +10,8 @@ use App\Models\Boutique\BoutiqueCart;
 use App\Models\Boutique\BoutiqueOrder;
 use App\Models\Boutique\BoutiqueOrderItem;
 use App\Models\Boutique\BoutiquePayment;
+use App\Models\Boutique\BoutiqueProduct;
+use App\Models\Boutique\BoutiqueProductVariant;
 use App\Models\Boutique\BoutiqueShipment;
 use App\Models\Dealership;
 use App\Services\Boutique\BoutiqueInventoryService;
@@ -144,25 +146,58 @@ class BoutiqueCheckoutController extends Controller
 
             // Resolve products from UUIDs
             $productUuids = collect($data['items'])->pluck('product_uuid')->unique()->toArray();
-            $products = \App\Models\Boutique\BoutiqueProduct::whereIn('uuid', $productUuids)->get()->keyBy('uuid');
+            $products = BoutiqueProduct::whereIn('uuid', $productUuids)->get()->keyBy('uuid');
 
-            // Verify stock
-            $insufficientStock = [];
-            foreach ($data['items'] as $item) {
-                $product = $products[$item['product_uuid']] ?? null;
-                if (!$product) {
-                    return ApiResponseHelper::apiError("Producto no encontrado: {$item['product_uuid']}", null, 404, 'PRODUCT_NOT_FOUND');
-                }
-                if ($product->stock < $item['quantity']) {
-                    $insufficientStock[] = [
-                        'product' => $product->name,
-                        'available' => $product->stock,
-                        'requested' => $item['quantity'],
-                    ];
-                }
+            if (! BoutiqueCheckoutPaymentMethods::isMethodEnabled($data['payment_method'])) {
+                return ApiResponseHelper::apiError('El método de pago seleccionado no está habilitado', null, 422, 'PAYMENT_METHOD_DISABLED');
             }
 
-            if (!empty($insufficientStock)) {
+            // Verificar productos, variante, stock, armar líneas y subtotal
+            $insufficientStock = [];
+            $subtotal = 0;
+            $guestLines = [];
+            foreach ($data['items'] as $item) {
+                $product = $products[$item['product_uuid']] ?? null;
+                if (! $product) {
+                    return ApiResponseHelper::apiError("Producto no encontrado: {$item['product_uuid']}", null, 404, 'PRODUCT_NOT_FOUND');
+                }
+                $variant = null;
+                if (! empty($item['variant_uuid'])) {
+                    $variant = BoutiqueProductVariant::query()
+                        ->where('uuid', $item['variant_uuid'])
+                        ->where('product_id', $product->id)
+                        ->first();
+                    if (! $variant) {
+                        return ApiResponseHelper::apiError(
+                            'La variante no existe o no corresponde al producto',
+                            null,
+                            400,
+                            'PRODUCT_VARIANT_NOT_FOUND'
+                        );
+                    }
+                }
+                $available = $variant ? (int) $variant->stock : (int) $product->stock;
+                if ($available < (int) $item['quantity']) {
+                    $insufficientStock[] = [
+                        'product' => $product->name,
+                        'available' => $available,
+                        'requested' => (int) $item['quantity'],
+                    ];
+                }
+                $unit = $variant && $variant->price !== null
+                    ? (float) $variant->price
+                    : (float) $product->price;
+                $qty = (int) $item['quantity'];
+                $subtotal += $qty * $unit;
+                $guestLines[] = [
+                    'product' => $product,
+                    'variant' => $variant,
+                    'quantity' => $qty,
+                    'unit_price' => $unit,
+                ];
+            }
+
+            if (! empty($insufficientStock)) {
                 return ApiResponseHelper::apiError(
                     'Stock insuficiente para algunos productos',
                     json_encode($insufficientStock),
@@ -170,16 +205,6 @@ class BoutiqueCheckoutController extends Controller
                     'INSUFFICIENT_STOCK',
                     ['items' => $insufficientStock]
                 );
-            }
-
-            if (! BoutiqueCheckoutPaymentMethods::isMethodEnabled($data['payment_method'])) {
-                return ApiResponseHelper::apiError('El método de pago seleccionado no está habilitado', null, 422, 'PAYMENT_METHOD_DISABLED');
-            }
-
-            // Calculate totals
-            $subtotal = 0;
-            foreach ($data['items'] as $item) {
-                $subtotal += $item['quantity'] * $products[$item['product_uuid']]->price;
             }
 
             $shippingCost = 0;
@@ -193,7 +218,9 @@ class BoutiqueCheckoutController extends Controller
             $dailyCount = BoutiqueOrder::whereDate('created_at', Carbon::today())->count() + 1;
             $orderNumber = 'BOUT-' . $today . '-' . str_pad($dailyCount, 4, '0', STR_PAD_LEFT);
 
-            $order = DB::transaction(function () use ($data, $products, $subtotal, $shippingCost, $total, $orderNumber) {
+            $deferInventory = in_array($data['payment_method'], ['stripe', 'openpay'], true);
+
+            $order = DB::transaction(function () use ($data, $guestLines, $subtotal, $shippingCost, $total, $orderNumber, $deferInventory) {
                 $order = BoutiqueOrder::create([
                     'user_id'          => null,
                     'guest_name'       => $data['guest_name'],
@@ -213,19 +240,52 @@ class BoutiqueCheckoutController extends Controller
                     'notes'            => $data['notes'] ?? null,
                 ]);
 
-                foreach ($data['items'] as $item) {
-                    $product = $products[$item['product_uuid']];
+                foreach ($guestLines as $row) {
+                    /** @var BoutiqueProduct $product */
+                    $product = $row['product'];
+                    $variant = $row['variant'];
+                    $q = (int) $row['quantity'];
+                    $up = (float) $row['unit_price'];
+                    $sku = $variant ? (string) $variant->sku : (string) $product->sku;
+
                     BoutiqueOrderItem::create([
-                        'order_id'     => $order->id,
-                        'product_id'   => $product->id,
-                        'product_name' => $product->name,
-                        'product_sku'  => $product->sku,
-                        'quantity'     => $item['quantity'],
-                        'unit_price'   => $product->price,
-                        'subtotal'     => round($item['quantity'] * $product->price, 2),
+                        'order_id'            => $order->id,
+                        'product_id'          => $product->id,
+                        'product_variant_id'  => $variant ? $variant->id : null,
+                        'product_name'        => $product->name,
+                        'product_sku'         => $sku,
+                        'quantity'            => $q,
+                        'unit_price'          => $up,
+                        'subtotal'            => round($q * $up, 2),
                     ]);
 
-                    $this->inventoryService->reduceStock($product, $item['quantity'], 'venta', $order->uuid);
+                    if (! $deferInventory) {
+                        if ($variant) {
+                            $v = BoutiqueProductVariant::query()
+                                ->lockForUpdate()
+                                ->find($variant->id);
+                            if ($v) {
+                                $this->inventoryService->reduceVariantStock(
+                                    $v,
+                                    $q,
+                                    'venta',
+                                    $order->uuid
+                                );
+                            }
+                        } else {
+                            $p = BoutiqueProduct::query()
+                                ->lockForUpdate()
+                                ->find($product->id);
+                            if ($p) {
+                                $this->inventoryService->reduceStock(
+                                    $p,
+                                    $q,
+                                    'venta',
+                                    $order->uuid
+                                );
+                            }
+                        }
+                    }
                 }
 
                 BoutiquePayment::create([
@@ -329,7 +389,9 @@ class BoutiqueCheckoutController extends Controller
             $dailyCount = BoutiqueOrder::whereDate('created_at', Carbon::today())->count() + 1;
             $orderNumber = 'BOUT-' . $today . '-' . str_pad($dailyCount, 4, '0', STR_PAD_LEFT);
 
-            $order = DB::transaction(function () use ($data, $user, $cart, $subtotal, $shippingCost, $total, $orderNumber) {
+            $deferInventory = in_array($data['payment_method'], ['stripe', 'openpay'], true);
+
+            $order = DB::transaction(function () use ($data, $user, $cart, $subtotal, $shippingCost, $total, $orderNumber, $deferInventory) {
                 // Create Order
                 $order = BoutiqueOrder::create([
                     'user_id' => $user->id,
@@ -360,13 +422,19 @@ class BoutiqueCheckoutController extends Controller
                         'subtotal' => round($item->quantity * $item->product->price, 2),
                     ]);
 
-                    // Reduce stock
-                    $this->inventoryService->reduceStock(
-                        $item->product,
-                        $item->quantity,
-                        'venta',
-                        $order->uuid
-                    );
+                    if (! $deferInventory) {
+                        $p = BoutiqueProduct::query()
+                            ->lockForUpdate()
+                            ->find($item->product->id);
+                        if ($p) {
+                            $this->inventoryService->reduceStock(
+                                $p,
+                                (int) $item->quantity,
+                                'venta',
+                                $order->uuid
+                            );
+                        }
+                    }
                 }
 
                 // Create Payment
@@ -477,6 +545,17 @@ class BoutiqueCheckoutController extends Controller
                 return ApiResponseHelper::apiError('El pago ya fue registrado', null, 409, 'PAYMENT_ALREADY_COMPLETED');
             }
 
+            $order->load(['orderItems.product', 'orderItems']);
+            if ($this->inventoryService->orderLacksStockForItems($order)) {
+                return ApiResponseHelper::apiError(
+                    'Ya no hay stock para completar el pedido. Ajusta cantidades o reintenta más tarde.',
+                    null,
+                    409,
+                    'INSUFFICIENT_STOCK_AT_CHECKOUT',
+                    $this->stockSnapshotForResponse($order)
+                );
+            }
+
             $creds = $this->openPayService->getActiveCredentials();
             if ($creds['merchant_id'] === '' || $creds['private_key'] === '') {
                 return ApiResponseHelper::apiError('OpenPay no está configurado en el servidor', null, 503, 'OPENPAY_NOT_CONFIGURED');
@@ -512,6 +591,11 @@ class BoutiqueCheckoutController extends Controller
             ];
 
             $amount = (float) $order->total;
+            $openPayOrderId = mb_substr(
+                $order->order_number . '-' . str_replace('-', '', (string) $order->uuid),
+                0,
+                100
+            );
             $charge = $this->openPayService->createMerchantCardCharge(
                 $creds['merchant_id'],
                 $creds['private_key'],
@@ -520,7 +604,7 @@ class BoutiqueCheckoutController extends Controller
                 $data['device_session_id'],
                 $amount,
                 'Pedido boutique ' . $order->order_number,
-                $order->order_number,
+                $openPayOrderId,
                 $customer,
                 $request->ip(),
                 $request->userAgent()
@@ -538,12 +622,40 @@ class BoutiqueCheckoutController extends Controller
             }
 
             $chargeId = $charge['id'] ?? null;
-            $payment->update([
-                'status' => 'completado',
-                'transaction_reference' => is_string($chargeId) ? $chargeId : null,
-                'confirmed_at' => now(),
-            ]);
-            $order->update(['status' => 'pagado']);
+            try {
+                DB::transaction(function () use ($order, $payment, $chargeId) {
+                    $p = BoutiquePayment::query()
+                        ->lockForUpdate()
+                        ->find($payment->id);
+                    if (! $p || $p->status === 'completado') {
+                        return;
+                    }
+                    $o = BoutiqueOrder::query()
+                        ->lockForUpdate()
+                        ->find($order->id);
+                    if (! $o) {
+                        throw new \RuntimeException('Pedido no encontrado al aplicar venta');
+                    }
+                    if ($this->inventoryService->orderLacksStockForItems($o)) {
+                        throw new \RuntimeException('Stock insuficiente al confirmar el pago. Requiere revisión y posible reembolso (cargo OpenPay ya creado).');
+                    }
+                    $o->load('orderItems.product', 'orderItems');
+                    $this->inventoryService->applySaleForEntireOrder($o, $o->uuid, 'venta');
+                    $p->update([
+                        'status' => 'completado',
+                        'transaction_reference' => is_string($chargeId) ? $chargeId : null,
+                        'confirmed_at' => now(),
+                    ]);
+                    $o->update(['status' => 'pagado']);
+                });
+            } catch (\RuntimeException $e) {
+                Log::critical('OpenPay: incoherencia pago/cargo vs inventario', [
+                    'order_uuid' => $order->uuid,
+                    'openpay_id' => $chargeId,
+                    'message' => $e->getMessage(),
+                ]);
+                throw $e;
+            }
 
             $order->load(['orderItems', 'payment', 'shipment']);
 
@@ -567,5 +679,27 @@ class BoutiqueCheckoutController extends Controller
                 ['openpay_error' => $e->getMessage()]
             );
         }
+    }
+
+    private function stockSnapshotForResponse(BoutiqueOrder $order): array
+    {
+        $items = [];
+        $order->loadMissing('orderItems.product');
+        foreach ($order->orderItems as $line) {
+            $av = 0;
+            if ($line->product_variant_id) {
+                $v = BoutiqueProductVariant::query()->find($line->product_variant_id);
+                $av = $v ? (int) $v->stock : 0;
+            } elseif ($line->product) {
+                $av = (int) $line->product->stock;
+            }
+            $items[] = [
+                'product' => $line->product_name,
+                'available' => $av,
+                'requested' => (int) $line->quantity,
+            ];
+        }
+
+        return ['items' => $items];
     }
 }

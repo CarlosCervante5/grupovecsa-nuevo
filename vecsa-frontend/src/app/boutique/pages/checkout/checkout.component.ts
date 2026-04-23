@@ -509,17 +509,28 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     this.subs.push(sub);
   }
 
-  private buildGuestOrderItems(): { product_uuid: string; quantity: number }[] {
+  private buildGuestOrderItems(): { product_uuid: string; quantity: number; variant_uuid?: string }[] {
     return (this.cart?.items || [])
       .map((i) => {
-        const row = i as { product?: { uuid?: string }; product_uuid?: string; quantity: number };
+        const row = i as {
+          product?: { uuid?: string };
+          product_uuid?: string;
+          quantity: number;
+          variant_uuid?: string;
+        };
         const productUuid = String(row.product?.uuid || row.product_uuid || '').trim();
         if (!productUuid) {
           return null;
         }
-        return { product_uuid: productUuid, quantity: i.quantity };
+        return {
+          product_uuid: productUuid,
+          quantity: i.quantity,
+          ...(row.variant_uuid ? { variant_uuid: String(row.variant_uuid) } : {}),
+        };
       })
-      .filter((x): x is { product_uuid: string; quantity: number } => x !== null);
+      .filter(
+        (x): x is { product_uuid: string; quantity: number; variant_uuid?: string } => x !== null
+      );
   }
 
   private formatCreateOrderError(err: any): string {
@@ -535,6 +546,15 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     }
     if (e.error_code === 'PAYMENT_METHOD_DISABLED') {
       return 'Ese método de pago no está habilitado. Elige otro o revisa Métodos de pago (checkout) en el panel tienda.';
+    }
+    if (e.error_code === 'PRODUCT_VARIANT_NOT_FOUND') {
+      return 'La variante del producto ya no es válida. Actualiza el carrito y vuelve a elegir color/talla.';
+    }
+    if (e.error_code === 'INSUFFICIENT_STOCK_AT_CHECKOUT' && Array.isArray(e.data?.items) && e.data.items.length) {
+      const parts = (e.data.items as { product: string; available: number; requested: number }[]).map(
+        (r) => `${r.product}: pides ${r.requested}, disponible ${r.available}`,
+      );
+      return 'Stock insuficiente al confirmar pago — ' + parts.join(' · ');
     }
     if (e.errors && typeof e.errors === 'object') {
       const vals = Object.values(e.errors) as string[][];
