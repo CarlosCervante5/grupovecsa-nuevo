@@ -24,7 +24,7 @@ return new class extends Migration
                   ->on(env('DB_TABLE_PREFIX', '') . 'boutique_product_attributes')
                   ->onDelete('cascade');
 
-            $table->unique(['product_id', 'attribute_id']);
+            $table->unique(['product_id', 'attribute_id'], 'bpap_product_attr_uq');
         });
     }
 

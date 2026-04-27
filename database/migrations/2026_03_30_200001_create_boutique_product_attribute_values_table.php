@@ -23,7 +23,8 @@ return new class extends Migration
                   ->on(env('DB_TABLE_PREFIX', '') . 'boutique_product_attributes')
                   ->onDelete('cascade');
 
-            $table->unique(['attribute_id', 'value']);
+            // Nombre explícito: el nombre auto-generado supera el límite de 64 caracteres de MySQL
+            $table->unique(['attribute_id', 'value'], 'bpa_v_attr_id_value_uq');
         });
     }
 
