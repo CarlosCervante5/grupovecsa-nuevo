@@ -84,9 +84,6 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
       { perm: 'access staff', label: 'Staff', icon: 'badge', route: '/admin/staff' },
       { perm: 'access spare_parts', label: 'Refacciones', icon: 'settings', route: '/admin/spare_parts' },
       { perm: 'access seller', label: 'Vendedor', icon: 'sell', route: '/admin/seller' },
-      { perm: 'access strega-seller', label: 'Strega vendedor', icon: 'storefront', route: '/admin/strega-seller' },
-      { perm: 'access strega-manager', label: 'Strega vendedor', icon: 'storefront', route: '/admin/strega-manager' },
-      { perm: 'access strega-administrator', label: 'Strega vendedor', icon: 'storefront', route: '/admin/strega-administrator' },
     ];
 
     const roleNorm = (this.role || '').trim().toLowerCase();

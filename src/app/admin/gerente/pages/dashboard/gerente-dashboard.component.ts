@@ -68,7 +68,6 @@ export class GerenteDashboardComponent implements OnInit, AfterViewInit, OnDestr
     { label: 'Staff', icon: 'badge', route: '/admin/staff' },
     { label: 'Refacciones', icon: 'settings', route: '/admin/spare_parts' },
     { label: 'Vendedor', icon: 'sell', route: '/admin/seller' },
-    { label: 'Strega vendedor', icon: 'storefront', route: '/admin/strega-seller' },
     {
       label: 'Benchmark ADS',
       icon: 'analytics',
