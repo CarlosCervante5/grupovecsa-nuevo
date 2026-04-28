@@ -15,6 +15,8 @@ import { AdminLayoutComponent } from './pages/layout/admin-layout.component';
 import { ExperienceStoriesSharedModule } from '../shared/experience-stories/experience-stories-shared.module';
 import { VehicleStockModule } from '../shared/vehicle-stock/vehicle-stock.module';
 import { BenchmarkModule } from '../shared/benchmark/benchmark.module';
+import { AdminManualsComponent } from './pages/manuales/admin-manuals.component';
+import { AdminManualDetailComponent } from './pages/manuales/admin-manual-detail.component';
 
 @NgModule({
     declarations: [
@@ -23,7 +25,9 @@ import { BenchmarkModule } from '../shared/benchmark/benchmark.module';
         AdminPermisosComponent,
         AddUserComponent,
         UpdateUserComponent,
-        AdminLayoutComponent
+        AdminLayoutComponent,
+        AdminManualsComponent,
+        AdminManualDetailComponent
     ],
     imports: [
         CommonModule,

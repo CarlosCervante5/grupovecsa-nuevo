@@ -9,6 +9,8 @@ import { VehiclesComponent } from '../shared/vehicle-stock/pages/vehicles/vehicl
 import { VehicleInventoryGuard } from '../vehicle-inventory/guards/vehicle-inventory.guard';
 import { BenchmarkComponent } from '../shared/benchmark/benchmark.component';
 import { BenchmarkGuard } from '../shared/benchmark/benchmark.guard';
+import { AdminManualsComponent } from './pages/manuales/admin-manuals.component';
+import { AdminManualDetailComponent } from './pages/manuales/admin-manual-detail.component';
 
 const routes: Routes = [
   {
@@ -18,6 +20,8 @@ const routes: Routes = [
       { path: '', component: DashboardAdminComponent },
       { path: 'users', component: AdminUsersComponent },
       { path: 'permissions', component: AdminPermisosComponent },
+      { path: 'manuales', component: AdminManualsComponent },
+      { path: 'manuales/:panel', component: AdminManualDetailComponent },
       {
         path: 'experience-wordpress',
         component: ExperienceStoriesComponent,

@@ -1,0 +1,19 @@
+<div class="manuals-page">
+  <h1 class="title">Manuales por panel</h1>
+  <p class="subtitle">Consulta operativa rapida por rol y herramienta.</p>
+
+  <div class="cards">
+    <article class="card" *ngFor="let manual of manuals">
+      <div class="card-head">
+        <span class="material-icons">{{ manual.icon }}</span>
+        <h2>{{ manual.title }}</h2>
+      </div>
+      <p>{{ manual.summary }}</p>
+      <div class="actions">
+        <a mat-stroked-button color="primary" [routerLink]="['/admin/administrator/manuales', manual.slug]">Ver manual</a>
+        <a mat-button [routerLink]="manual.route">Ir al panel</a>
+      </div>
+    </article>
+  </div>
+</div>
+

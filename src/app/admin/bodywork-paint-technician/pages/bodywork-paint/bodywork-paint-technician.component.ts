@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { reload } from 'src/app/shared/helpers/session.helper';
@@ -22,14 +22,14 @@ import { adminBodyworkPanelBaseFromRouterUrl } from 'src/app/admin/utils/admin-r
     styleUrls: ['./bodywork-paint-technician.component.css'],
     standalone: false
 })
-export class BodyworkPaintTechnicianComponent implements OnInit {
+export class BodyworkPaintTechnicianComponent implements OnInit, AfterViewInit {
 
   public length: number = 0;
   public page: number = 1;
   public tempUuid: string = '';
   public tempRepairs!: Repair[];
 
-  dataSource!: MatTableDataSource<VehicleValuations>
+  dataSource: MatTableDataSource<VehicleValuations> = new MatTableDataSource<VehicleValuations>([]);
   displayedColumns: string[] = ['id', 'name', 'lastName', 'brand', 'model', 'vin', 'year', 'status', 'actions'];
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -53,6 +53,10 @@ export class BodyworkPaintTechnicianComponent implements OnInit {
     this.scrollTop();
   }
 
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
+  }
+
   scrollTop() {
     let scrollElement = document.querySelector('#moveTop');
     scrollElement?.scrollIntoView();
@@ -63,8 +67,11 @@ export class BodyworkPaintTechnicianComponent implements OnInit {
       .subscribe({
         next: ( response: ValuationAppointments) => {
           console.log(response.data.data);
-          this.paginator.length = response.data.data.length;
+          this.length = response.data.total ?? response.data.data.length;
           this.dataSource = new MatTableDataSource(response.data.data);
+          if (this.paginator) {
+            this.dataSource.paginator = this.paginator;
+          }
         },
         error: (error:any) => {
           reload(error, this._router);

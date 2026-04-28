@@ -41,7 +41,7 @@ export class SellerLayoutComponent implements OnInit, OnDestroy {
     if (merged['panelIcon']) {
       this.panelIcon = merged['panelIcon'] as string;
     }
-    this.navItems = [{ label: 'Mis valuaciones', icon: 'price_check', route: this.basePath }];
+    this.navItems = [{ label: 'Dashboard y citas', icon: 'dashboard', route: this.basePath }];
     this.permSub = this.auth.permissionsRevision$.subscribe(() => {
       try {
         this.permissions = JSON.parse(localStorage.getItem('permissions') || '[]');

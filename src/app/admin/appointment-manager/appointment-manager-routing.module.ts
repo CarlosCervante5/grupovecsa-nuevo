@@ -12,6 +12,7 @@ const routes: Routes = [
     component: AppointmentManagerLayoutComponent,
     children: [
       { path: '', component: DashboardComponent },
+      { path: 'assign-valuations', component: AppointmentManagerComponent },
       { path: 'assing-valuations', component: AppointmentManagerComponent },
       {
         path: 'benchmark',

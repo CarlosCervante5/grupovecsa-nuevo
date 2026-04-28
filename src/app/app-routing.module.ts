@@ -31,6 +31,42 @@ const routes: Routes = [
   { path: 'boutique', loadChildren: () => import('./boutique/boutique.module').then(m => m.BoutiqueModule) },
   { path: 'rewards', loadChildren: () => import('./rewards/rewards.module').then(m => m.RewardsModule) },
   { path: 'experience', loadChildren: () => import('./experience/experience.module').then(m => m.ExperienceModule) },
+  {
+    path: 'aviso-privacidad',
+    loadComponent: () => import('./legal/legal-page.component').then((m) => m.LegalPageComponent),
+    data: {
+      legalAsset: 'aviso-privacidad',
+      pageTitle: 'Aviso de Privacidad | Grupo VECSA',
+      metaDescription: 'Información sobre el tratamiento y protección de sus datos personales en Grupo VECSA.',
+    },
+  },
+  {
+    path: 'condiciones-uso',
+    loadComponent: () => import('./legal/legal-page.component').then((m) => m.LegalPageComponent),
+    data: {
+      legalAsset: 'condiciones-uso',
+      pageTitle: 'Condiciones de Uso | Grupo VECSA',
+      metaDescription: 'Términos y condiciones de uso de los sitios y servicios de Grupo VECSA.',
+    },
+  },
+  {
+    path: 'politicas-devolucion',
+    loadComponent: () => import('./legal/legal-page.component').then((m) => m.LegalPageComponent),
+    data: {
+      legalAsset: 'politicas-devolucion',
+      pageTitle: 'Políticas de Devolución | Grupo VECSA',
+      metaDescription: 'Políticas de devolución y reembolso de productos y servicios de Grupo VECSA.',
+    },
+  },
+  {
+    path: 'uso-cookies',
+    loadComponent: () => import('./legal/legal-page.component').then((m) => m.LegalPageComponent),
+    data: {
+      legalAsset: 'uso-cookies',
+      pageTitle: 'Uso de Cookies | Grupo VECSA',
+      metaDescription: 'Información sobre cookies y tecnologías de rastreo en el sitio de Grupo VECSA.',
+    },
+  },
   { path: '**', redirectTo: '404' },
 ];
 

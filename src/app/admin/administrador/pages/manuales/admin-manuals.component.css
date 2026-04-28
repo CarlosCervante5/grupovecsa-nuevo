@@ -1,0 +1,11 @@
+.manuals-page { max-width: 1200px; }
+.title { margin: 0 0 6px; font-size: 1.6rem; font-weight: 700; color: #0f172a; }
+.subtitle { margin: 0 0 16px; color: #64748b; }
+.cards { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; }
+.card-head { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
+.card-head .material-icons { color: #1c69d4; }
+.card-head h2 { margin: 0; font-size: 1rem; color: #0f172a; }
+.card p { margin: 0; color: #475569; min-height: 42px; }
+.actions { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
+
