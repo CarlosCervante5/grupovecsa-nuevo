@@ -24,6 +24,7 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
     { label: 'Dashboard', icon: 'dashboard', route: '/admin/administrator' },
     { label: 'Usuarios', icon: 'people', route: '/admin/administrator/users' },
     { label: 'Permisos', icon: 'vpn_key', route: '/admin/administrator/permissions' },
+    { label: 'Manuales', icon: 'menu_book', route: '/admin/administrator/manuales' },
     {
       label: 'Experience (WordPress)',
       icon: 'cloud_download',
@@ -81,13 +82,11 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
       { perm: 'access valuator', label: 'Valuador', icon: 'price_check', route: '/admin/valuator' },
       { perm: 'access appointment_manager', label: 'Citas', icon: 'event', route: '/admin/appointment_manager' },
       { perm: 'access staff', label: 'Staff', icon: 'badge', route: '/admin/staff' },
-      { perm: 'access technician', label: 'Técnico HyP', icon: 'handyman', route: '/admin/technician' },
-      { perm: 'access bodywork_paint_technician', label: 'Hojalatería y pintura', icon: 'build', route: '/admin/bodywork_paint_technician' },
       { perm: 'access spare_parts', label: 'Refacciones', icon: 'settings', route: '/admin/spare_parts' },
       { perm: 'access seller', label: 'Vendedor', icon: 'sell', route: '/admin/seller' },
       { perm: 'access strega-seller', label: 'Strega vendedor', icon: 'storefront', route: '/admin/strega-seller' },
-      { perm: 'access strega-manager', label: 'Strega gerente', icon: 'manage_accounts', route: '/admin/strega-manager' },
-      { perm: 'access strega-administrator', label: 'Strega admin', icon: 'admin_panel_settings', route: '/admin/strega-administrator' },
+      { perm: 'access strega-manager', label: 'Strega vendedor', icon: 'storefront', route: '/admin/strega-manager' },
+      { perm: 'access strega-administrator', label: 'Strega vendedor', icon: 'storefront', route: '/admin/strega-administrator' },
     ];
 
     const roleNorm = (this.role || '').trim().toLowerCase();

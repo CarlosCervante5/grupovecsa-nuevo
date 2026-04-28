@@ -18,7 +18,7 @@ export class AppointmentManagerLayoutComponent implements OnInit, OnDestroy {
 
   readonly navItems = [
     { label: 'Dashboard', icon: 'dashboard', route: '/admin/appointment_manager' },
-    { label: 'Asignar Citas', icon: 'assignment', route: '/admin/appointment_manager/assing-valuations' },
+    { label: 'Asignar Citas', icon: 'assignment', route: '/admin/appointment_manager/assign-valuations' },
   ];
 
   dynamicItems: { label: string; icon: string; route: string }[] = [];

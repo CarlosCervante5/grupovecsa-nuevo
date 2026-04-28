@@ -1,0 +1,10 @@
+.manual-detail { max-width: 900px; }
+.back-link { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 12px; color: #1d4ed8; text-decoration: none; }
+.head { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px; }
+.head .material-icons { color: #1c69d4; font-size: 30px; margin-top: 2px; }
+.head h1 { margin: 0; font-size: 1.5rem; color: #0f172a; }
+.head p { margin: 4px 0 0; color: #64748b; }
+.section { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-top: 12px; }
+.section h2 { margin: 0 0 6px; font-size: 1rem; color: #0f172a; }
+.section ul { margin: 0; padding-left: 18px; color: #334155; }
+

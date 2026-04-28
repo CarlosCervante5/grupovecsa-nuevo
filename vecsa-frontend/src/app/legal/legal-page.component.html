@@ -1,0 +1,15 @@
+<div class="legal-shell">
+  <header class="legal-top">
+    <a routerLink="/" class="legal-back">← Volver al inicio</a>
+  </header>
+
+  @if (loading()) {
+    <p class="legal-status">Cargando documento…</p>
+  } @else if (loadError()) {
+    <p class="legal-status legal-status--error">
+      No se pudo cargar el documento. Intenta de nuevo más tarde o contacta a atención a clientes.
+    </p>
+  } @else if (safeBody) {
+    <article class="legal-article" [innerHTML]="safeBody"></article>
+  }
+</div>

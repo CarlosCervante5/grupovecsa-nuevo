@@ -1,7 +1,36 @@
 <div class="page">
-  <h1 class="title">Valuaciones asignadas</h1>
-  <p class="subtitle">Vehículos en los que figuras como vendedor en el flujo de valuación.</p>
+  <h1 class="title">Panel vendedor</h1>
+  <p class="subtitle">Dashboard de citas, link de referidos e inventario para compartir unidades.</p>
 
+  <section class="metrics-grid">
+    <article class="metric-card">
+      <h3>Total citas</h3>
+      <p>{{ appointmentMetrics.total }}</p>
+    </article>
+    <article class="metric-card">
+      <h3>Pendientes</h3>
+      <p>{{ appointmentMetrics.pending }}</p>
+    </article>
+    <article class="metric-card">
+      <h3>En progreso</h3>
+      <p>{{ appointmentMetrics.inProgress }}</p>
+    </article>
+    <article class="metric-card">
+      <h3>Completadas</h3>
+      <p>{{ appointmentMetrics.completed }}</p>
+    </article>
+  </section>
+
+  <section class="referral-box">
+    <h2>Link de referidos</h2>
+    <p>Comparte este link para enviar tráfico atribuido a tu usuario vendedor.</p>
+    <div class="referral-actions">
+      <code>{{ referralLink }}</code>
+      <button mat-stroked-button (click)="copyToClipboard(referralLink)">Copiar link</button>
+    </div>
+  </section>
+
+  <h2 class="section-title">Dashboard de citas</h2>
   <div class="toolbar">
     <mat-form-field appearance="outline" class="search-field">
       <mat-label>Buscar cliente o vehículo</mat-label>
@@ -39,6 +68,52 @@
       <button mat-stroked-button (click)="goPage(page - 1)" [disabled]="page <= 1">Anterior</button>
       <span>Página {{ page }} de {{ lastPage }} ({{ total }})</span>
       <button mat-stroked-button (click)="goPage(page + 1)" [disabled]="page >= lastPage">Siguiente</button>
+    </div>
+  </div>
+
+  <h2 class="section-title">Inventario para compartir</h2>
+  <div class="toolbar">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar unidad en inventario</mat-label>
+      <input matInput [(ngModel)]="inventoryKeyword" (keyup.enter)="searchInventory()" />
+    </mat-form-field>
+    <button mat-flat-button color="primary" (click)="searchInventory()" [disabled]="inventoryLoading">Buscar</button>
+  </div>
+
+  <div class="loading" *ngIf="inventoryLoading">Cargando inventario…</div>
+  <div class="error" *ngIf="inventoryError && !inventoryLoading">No se pudo cargar el inventario.</div>
+
+  <div class="table-wrap" *ngIf="!inventoryLoading && !inventoryError">
+    <table mat-table [dataSource]="inventoryRows" class="mat-elevation-z1">
+      <ng-container matColumnDef="vehicle">
+        <th mat-header-cell *matHeaderCellDef>Vehículo</th>
+        <td mat-cell *matCellDef="let row">{{ inventoryVehicleLabel(row) }}</td>
+      </ng-container>
+      <ng-container matColumnDef="year">
+        <th mat-header-cell *matHeaderCellDef>Año</th>
+        <td mat-cell *matCellDef="let row">{{ inventoryYear(row) }}</td>
+      </ng-container>
+      <ng-container matColumnDef="price">
+        <th mat-header-cell *matHeaderCellDef>Precio</th>
+        <td mat-cell *matCellDef="let row">{{ inventoryPrice(row) }}</td>
+      </ng-container>
+      <ng-container matColumnDef="share">
+        <th mat-header-cell *matHeaderCellDef>Link referido por unidad</th>
+        <td mat-cell *matCellDef="let row">
+          <div class="share-cell">
+            <code class="uuid">{{ vehicleReferralLink(row) }}</code>
+            <button mat-stroked-button (click)="copyToClipboard(vehicleReferralLink(row))">Copiar</button>
+          </div>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="inventoryColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: inventoryColumns"></tr>
+    </table>
+    <p class="empty" *ngIf="inventoryRows.length === 0">No hay unidades en inventario para mostrar.</p>
+    <div class="pager" *ngIf="inventoryLastPage > 1">
+      <button mat-stroked-button (click)="goInventoryPage(inventoryPage - 1)" [disabled]="inventoryPage <= 1">Anterior</button>
+      <span>Página {{ inventoryPage }} de {{ inventoryLastPage }} ({{ inventoryTotal }})</span>
+      <button mat-stroked-button (click)="goInventoryPage(inventoryPage + 1)" [disabled]="inventoryPage >= inventoryLastPage">Siguiente</button>
     </div>
   </div>
 </div>

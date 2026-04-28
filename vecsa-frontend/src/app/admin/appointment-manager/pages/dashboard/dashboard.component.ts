@@ -25,7 +25,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   ];
 
   readonly quickLinks = [
-    { label: 'Asignar Citas', icon: 'assignment', route: '/admin/appointment_manager/assing-valuations' },
+    { label: 'Asignar Citas', icon: 'assignment', route: '/admin/appointment_manager/assign-valuations' },
   ];
 
   constructor(private router: Router, private dashboardService: AdminDashboardService) {}

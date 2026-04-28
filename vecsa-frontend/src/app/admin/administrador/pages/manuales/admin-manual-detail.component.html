@@ -1,0 +1,32 @@
+<div class="manual-detail" *ngIf="manual; else notFound">
+  <a class="back-link" [routerLink]="['/admin/administrator/manuales']">
+    <span class="material-icons">arrow_back</span>
+    Volver a manuales
+  </a>
+
+  <header class="head">
+    <span class="material-icons">{{ manual.icon }}</span>
+    <div>
+      <h1>{{ manual.title }}</h1>
+      <p>{{ manual.summary }}</p>
+    </div>
+  </header>
+
+  <a mat-flat-button color="primary" [routerLink]="manual.route">Ir al panel</a>
+
+  <section class="section" *ngFor="let section of manual.sections">
+    <h2>{{ section.title }}</h2>
+    <ul>
+      <li *ngFor="let bullet of section.bullets">{{ bullet }}</li>
+    </ul>
+  </section>
+</div>
+
+<ng-template #notFound>
+  <div class="manual-detail">
+    <h1>Manual no encontrado</h1>
+    <p>El panel solicitado no existe o ya no esta disponible.</p>
+    <a mat-stroked-button color="primary" [routerLink]="['/admin/administrator/manuales']">Volver al listado</a>
+  </div>
+</ng-template>
+

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
+import { AfterViewInit, Component, inject, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 
 // Angular Material
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
@@ -29,12 +29,12 @@ const THUMBUP_ICON =
     encapsulation: ViewEncapsulation.None,
     standalone: false
 })
-export class AppointmentsComponent implements OnInit {
+export class AppointmentsComponent implements OnInit, AfterViewInit {
 
   public length: number = 0;
   public page: number = 1;
 
-  dataSource!: MatTableDataSource<VehicleValuations>;
+  dataSource: MatTableDataSource<VehicleValuations> = new MatTableDataSource<VehicleValuations>([]);
   displayedColumns: string[] = ['id', 'name', 'lastName', 'brand', 'model', 'vin', 'year', 'status', 'statusParts', 'statusRepairs', 'actions'];
 
   public palabra_busqueda: string = '';
@@ -57,9 +57,15 @@ export class AppointmentsComponent implements OnInit {
     this.scrollTop();
   }
 
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
+  }
+
   scrollTop() {
     var scrollElem = document.querySelector('#moveTop');
-    scrollElem!.scrollIntoView();  
+    if (scrollElem) {
+      scrollElem.scrollIntoView();
+    }
   }
 
   public newAppointment(){
@@ -71,8 +77,11 @@ export class AppointmentsComponent implements OnInit {
       .subscribe({
         next: ( response: ValuationAppointments) => {
           console.log(response.data.data);
-          this.paginator.length = response.data.total;
+          this.length = response.data.total;
           this.dataSource = new MatTableDataSource(response.data.data);
+          if (this.paginator) {
+            this.dataSource.paginator = this.paginator;
+          }
         },
         error: (error:any) => {
           reload(error, this._router);
