@@ -72,31 +72,18 @@ class OpenPayService
             ->post($url, $payload);
 
         if (! $response->successful()) {
-            $raw = $response->body();
             $body = $response->json();
             $msg = is_array($body)
-                ? (string) ($body['description'] ?? $body['error_description'] ?? $raw)
-                : $raw;
-            if ($msg === '' || $msg === '0') {
-                $msg = 'Error al procesar el cargo en OpenPay (HTTP ' . $response->status() . ').';
-            }
+                ? ($body['description'] ?? $body['error_description'] ?? $response->body())
+                : $response->body();
             Log::warning('OpenPay charge error', [
-                'url' => $url,
-                'http_status' => $response->status(),
-                'body' => is_array($body) ? $body : $raw,
+                'status' => $response->status(),
+                'body' => $body,
             ]);
-            throw new Exception($msg);
+            throw new Exception(is_string($msg) ? $msg : 'Error al procesar el cargo en OpenPay.');
         }
 
-        $decoded = $response->json();
-        if (! is_array($decoded)) {
-            $snippet = mb_substr($response->body() ?: '', 0, 500);
-            throw new Exception(
-                'Respuesta inválida de OpenPay (esperado JSON con el cargo; fragmento: ' . $snippet . ').'
-            );
-        }
-
-        return $decoded;
+        return $response->json();
     }
 
     /**
