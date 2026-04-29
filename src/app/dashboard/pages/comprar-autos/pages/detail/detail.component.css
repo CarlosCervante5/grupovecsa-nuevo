@@ -176,14 +176,31 @@
     margin-left: 3rem;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
     border-radius: 10px;
+    /* Evita que al hacer scroll se vea el fondo de la página a través del panel */
+    background-color: #fff;
+    position: relative;
 }
 
-/* Sticky desktop: debajo del header/nav fijo del sitio (evita solaparse) */
+/*
+ * Sticky desktop (app-new-nav): #top-bar (~2.5rem en md+) + #main-header (h-16/h-20).
+ * z-index DEBE ser menor que el header (Tailwind z-50 = 50); antes 1010 tapaba nav y fondo.
+ */
 @media (min-width: 1200px) {
     .detail-sidebar-sticky {
-        top: 5.5rem;
-        z-index: 1010;
+        top: 7.25rem;
+        z-index: 35;
         align-self: flex-start;
+        max-height: calc(100vh - 7.25rem - 1rem);
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+@media (min-width: 1200px) and (max-width: 1399.98px) {
+    .detail-sidebar-sticky {
+        top: 7rem;
+        max-height: calc(100vh - 7rem - 1rem);
     }
 }
 .detail-content {
