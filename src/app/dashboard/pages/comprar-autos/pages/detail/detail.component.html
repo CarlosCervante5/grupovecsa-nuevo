@@ -210,17 +210,22 @@
                         </div>
                 
                         <div class="p-3">
-                                <div class="accordion col-12" id="accordionVehicleSpecs">
+                                <div class="accordion col-12" id="vehicleDetailAccordion">
                                     <div class="accordion-item">
                                         <h6 class="accordion-header fw-bold fs-5" id="headingSectionOne">
-                                            <button class="accordion-button collapsed fw-bold fs-5" type="button"
-                                                data-bs-toggle="collapse" data-bs-target="#collapseSectionOne"
-                                                aria-expanded="false" aria-controls="collapseSectionOne">
+                                            <button class="accordion-button fw-bold fs-5"
+                                                [class.collapsed]="!detailSections.details" 
+                                                type="button"
+                                                (click)="toggleDetailSection('details')"
+                                                [attr.aria-expanded]="detailSections.details"
+                                                aria-controls="collapseSectionOne">
                                                 <h2 class=" ">Detalles</h2>
                                             </button>
                                         </h6>
-                                        <div id="collapseSectionOne" class="accordion-collapse collapse"
-                                            aria-labelledby="headingSectionOne" data-bs-parent="#accordionVehicleSpecs">
+                                        <div id="collapseSectionOne" class="accordion-collapse"
+                                            [class.collapse]="!detailSections.details"
+                                            [class.show]="detailSections.details"
+                                            aria-labelledby="headingSectionOne">
                                             <div class="accordion-body">
                                                 <p style="margin: 0 0 0px; font-size: 15px;"
                                                     *ngFor="let description of descriptions"> {{ description }}
@@ -230,15 +235,20 @@
                                     </div>
                                     <div class="accordion-item">
                                         <h6 class="accordion-header fw-bold fs-5" id="headingSectionTwo">
-                                            <button class="accordion-button collapsed fw-bold fs-5" type="button"
-                                                data-bs-toggle="collapse" data-bs-target="#collapseSectionTwo"
-                                                aria-expanded="false" aria-controls="collapseSectionTwo">
+                                            <button class="accordion-button fw-bold fs-5"
+                                                [class.collapsed]="!detailSections.features"
+                                                type="button"
+                                                (click)="toggleDetailSection('features')"
+                                                [attr.aria-expanded]="detailSections.features"
+                                                aria-controls="collapseSectionTwo">
                                                 <h2 class=" ">Características</h2>
                 
                                             </button>
                                         </h6>
-                                        <div id="collapseSectionTwo" class="accordion-collapse collapse"
-                                            aria-labelledby="headingSectionTwo" data-bs-parent="#accordionVehicleSpecs">
+                                        <div id="collapseSectionTwo" class="accordion-collapse"
+                                            [class.collapse]="!detailSections.features"
+                                            [class.show]="detailSections.features"
+                                            aria-labelledby="headingSectionTwo">
                                             <div class="accordion-body">
                                                 <div class="row" style="margin-left: -10px;">
                                                     <div class=" ">

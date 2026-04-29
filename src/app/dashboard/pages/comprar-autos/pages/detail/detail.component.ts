@@ -79,6 +79,10 @@ export class DetailComponent implements OnInit{
   public recommended_vehicles: Vehicle[] = [];
 
   public textButton:string = 'AÑADIR A LISTA';
+  public detailSections = {
+    details: false,
+    features: false
+  };
 
   horizontalPosition: MatSnackBarHorizontalPosition = 'end';
   verticalPosition: MatSnackBarVerticalPosition = 'bottom';
@@ -280,6 +284,13 @@ export class DetailComponent implements OnInit{
     }
   }
 
+  public toggleDetailSection(section: 'details' | 'features'): void {
+    const isOpening = !this.detailSections[section];
+    this.detailSections.details = false;
+    this.detailSections.features = false;
+    this.detailSections[section] = isOpening;
+  }
+  
   goBack(): void {
     this.location.back();
   }
