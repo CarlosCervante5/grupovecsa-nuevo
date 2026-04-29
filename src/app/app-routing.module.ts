@@ -15,6 +15,11 @@ import { CarCareComponent } from './dashboard/pages/car-care/car-care.component'
 
 const routes: Routes = [
   { path: '', loadComponent: () => import('./home/home.component').then(m => m.HomeComponent) },
+  {
+    path: 'sucursales',
+    loadComponent: () =>
+      import('./home/pages/sucursales-page/sucursales-page.component').then((m) => m.SucursalesPageComponent),
+  },
   { path: 'compra-tu-auto', loadChildren: () => import('./dashboard/pages/comprar-autos/comprar-autos.module').then(m => m.ComprarAutosModule) },
   { path: 'promociones', component: EventsComponent },
   { path: 'riders', component: RidersComponent },
