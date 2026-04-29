@@ -32,7 +32,6 @@ class BoutiqueOrderItem extends Model
     protected $fillable = [
         'order_id',
         'product_id',
-        'product_variant_id',
         'product_name',
         'product_sku',
         'quantity',
@@ -82,10 +81,5 @@ class BoutiqueOrderItem extends Model
     public function product()
     {
         return $this->belongsTo(BoutiqueProduct::class, 'product_id');
-    }
-
-    public function variant()
-    {
-        return $this->belongsTo(BoutiqueProductVariant::class, 'product_variant_id');
     }
 }

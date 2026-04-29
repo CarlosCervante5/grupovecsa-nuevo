@@ -107,15 +107,16 @@ class BoutiqueAdminOrderController extends Controller
                 );
             }
 
-            // If cancelling, restore inventory (incl. variantes)
+            // If cancelling, restore inventory
             if ($newStatus === 'cancelado') {
                 $order->load('orderItems.product');
                 foreach ($order->orderItems as $orderItem) {
                     if ($orderItem->product) {
-                        $this->inventoryService->restoreSaleForOrderItem(
-                            $orderItem,
+                        $this->inventoryService->restoreStock(
+                            $orderItem->product,
+                            $orderItem->quantity,
                             'cancelacion',
-                            (string) $order->uuid
+                            $order->uuid
                         );
                     }
                 }

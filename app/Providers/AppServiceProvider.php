@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Services\DealershipAccessService;
 use App\Services\UserService;
 use App\Services\VehicleService;
 use Illuminate\Support\ServiceProvider;
@@ -18,7 +19,10 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(VehicleService::class, function ($app) {
-            return new VehicleService($app->make(UserService::class));
+            return new VehicleService(
+                $app->make(UserService::class),
+                $app->make(DealershipAccessService::class)
+            );
         });
     }
 

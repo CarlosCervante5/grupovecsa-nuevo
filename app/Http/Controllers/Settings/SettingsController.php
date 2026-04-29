@@ -275,46 +275,39 @@ class SettingsController extends Controller
     public function boutiqueCheckoutPaymentMethodsConfig(Request $request)
     {
         try {
-            return ApiResponseHelper::apiSuccess(200, 'Métodos de pago checkout', BoutiqueCheckoutPaymentMethods::publicPayload(true));
+            return ApiResponseHelper::apiSuccess(200, 'Métodos de pago checkout', BoutiqueCheckoutPaymentMethods::publicPayload());
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al leer métodos de pago', $e->getMessage(), 500);
         }
     }
 
     /**
-     * Admin tienda: activar/desactivar métodos en el checkout (Stripe, OpenPay, transferencia, sucursal).
-     * Stripe y OpenPay solo pueden mostrarse si además existen las llaves correspondientes.
+     * Admin tienda: activar/desactivar transferencia y pago en sucursal en el checkout boutique.
      */
     public function updateBoutiqueCheckoutPaymentMethods(Request $request)
     {
         try {
             $data = $request->validate([
-                'boutique_checkout_stripe' => 'required|boolean',
-                'boutique_checkout_openpay' => 'required|boolean',
                 'boutique_checkout_transferencia' => 'required|boolean',
                 'boutique_checkout_sucursal' => 'required|boolean',
             ]);
 
-            if (! BoutiqueCheckoutPaymentMethods::hasAnyWithFlags(
-                $data['boutique_checkout_stripe'],
-                $data['boutique_checkout_openpay'],
-                $data['boutique_checkout_transferencia'],
-                $data['boutique_checkout_sucursal']
-            )) {
+            SystemSetting::set('boutique_checkout_transferencia', $data['boutique_checkout_transferencia'] ? '1' : '0');
+            SystemSetting::set('boutique_checkout_sucursal', $data['boutique_checkout_sucursal'] ? '1' : '0');
+
+            if (! BoutiqueCheckoutPaymentMethods::hasAnyEnabledMethod()) {
+                SystemSetting::set('boutique_checkout_transferencia', '1');
+                SystemSetting::set('boutique_checkout_sucursal', '1');
+
                 return ApiResponseHelper::apiError(
-                    'Debe quedar al menos un método de pago disponible. Si Stripe y OpenPay están apagados o no tienen llaves, deja al menos transferencia o pago en sucursal.',
+                    'Debe quedar al menos un método de pago habilitado (Stripe, OpenPay, transferencia o sucursal). Se revirtieron los cambios.',
                     null,
                     422,
                     'CHECKOUT_PAYMENT_NONE_ENABLED'
                 );
             }
 
-            SystemSetting::set('boutique_checkout_stripe', $data['boutique_checkout_stripe'] ? '1' : '0');
-            SystemSetting::set('boutique_checkout_openpay', $data['boutique_checkout_openpay'] ? '1' : '0');
-            SystemSetting::set('boutique_checkout_transferencia', $data['boutique_checkout_transferencia'] ? '1' : '0');
-            SystemSetting::set('boutique_checkout_sucursal', $data['boutique_checkout_sucursal'] ? '1' : '0');
-
-            return ApiResponseHelper::apiSuccess(200, 'Métodos de pago actualizados', BoutiqueCheckoutPaymentMethods::publicPayload(true));
+            return ApiResponseHelper::apiSuccess(200, 'Métodos de pago actualizados', BoutiqueCheckoutPaymentMethods::publicPayload());
         } catch (\Illuminate\Validation\ValidationException $e) {
             throw $e;
         } catch (\Exception $e) {

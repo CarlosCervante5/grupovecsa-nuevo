@@ -23,7 +23,7 @@ class CancelUnpaidBoutiqueOrders implements ShouldQueue
 
             $orders = BoutiqueOrder::where('status', 'pendiente')
                 ->whereHas('payment', function ($q) {
-                    $q->whereIn('method', ['transferencia', 'sucursal', 'openpay', 'stripe'])
+                    $q->whereIn('method', ['transferencia', 'sucursal', 'openpay'])
                       ->where('status', 'pendiente');
                 })
                 ->where('created_at', '<', $cutoff)
@@ -31,17 +31,15 @@ class CancelUnpaidBoutiqueOrders implements ShouldQueue
                 ->get();
 
             foreach ($orders as $order) {
-                $m = $order->payment?->method;
-                // Con tarjeta (OpenPay/Stripe) el stock no se descuenta hasta pagar: no reponer nada
-                if (in_array($m, ['transferencia', 'sucursal'], true)) {
-                    foreach ($order->orderItems as $orderItem) {
-                        if ($orderItem->product) {
-                            $inventoryService->restoreSaleForOrderItem(
-                                $orderItem,
-                                'cancelacion',
-                                (string) $order->uuid
-                            );
-                        }
+                // Restore inventory
+                foreach ($order->orderItems as $orderItem) {
+                    if ($orderItem->product) {
+                        $inventoryService->restoreStock(
+                            $orderItem->product,
+                            $orderItem->quantity,
+                            'cancelacion',
+                            $order->uuid
+                        );
                     }
                 }
 
