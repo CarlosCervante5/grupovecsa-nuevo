@@ -295,9 +295,9 @@ export class DetailComponent implements OnInit{
 
   private setWhatsappDataByDealership(): void {
     const phoneByDealership: Record<string, string> = {
-      'Bmw Hub Serdán': '2223259998',
-      'Vecsa Angelopolis': '2212126115',
-      'Vecsa Hidalgo': '2225260943'
+      'Bmw Hub Serdán': '2226741647',
+      'Vecsa Angelopolis': '2225630318',
+      'Vecsa Hidalgo': '7717954749'
     };
 
     const dealershipName = this.vehicle?.dealership?.name || '';
