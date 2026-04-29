@@ -1,4 +1,8 @@
-.panel-layout { display: flex; min-height: 100vh; background: #f8fafc; }
+.panel-layout {
+  display: flex;
+  min-height: 100vh;
+  background: linear-gradient(165deg, #eef2f7 0%, #f8fafc 38%, #f8fafc 100%);
+}
 .panel-sidebar { width: 250px; background: #0f172a; display: flex; flex-direction: column; padding: 24px 12px; position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto; z-index: 10; }
 .panel-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding: 0 4px; }
 .panel-brand-icon { color: #1c69d4; font-size: 28px; }
@@ -26,7 +30,12 @@
 .panel-logout { display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 12px; border: none; background: none; color: #ef4444; font-size: 0.8rem; border-radius: 8px; cursor: pointer; text-align: left; margin-top: 4px; }
 .panel-logout:hover { background: rgba(239,68,68,0.1); }
 .panel-logout .material-icons { font-size: 18px; }
-.panel-main { flex: 1; margin-left: 250px; padding: 32px; min-height: 100vh; }
+.panel-main {
+  flex: 1;
+  margin-left: 250px;
+  padding: 28px 32px 40px;
+  min-height: 100vh;
+}
 @media (max-width: 768px) {
   .panel-sidebar { width: 100%; height: auto; position: static; flex-direction: row; flex-wrap: wrap; padding: 12px; }
   .panel-nav { display: none; }

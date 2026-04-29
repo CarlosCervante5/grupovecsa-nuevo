@@ -123,10 +123,10 @@
                             </div>
                         
                             <div *ngIf="!route" class="col-12 d-flex justify-content-center p-3">
-                                <div class="accordion col-12" id="accordionExample">
+                                <div class="accordion col-12" id="accordionActionsMobile">
     
                                     <div class="accordion-item" (click)="askInformation(vehicle)">
-                                        <h2 class="accordion-header" id="one">
+                                        <h2 class="accordion-header" id="mobHdrMoreInfo">
                                             <div class="accordion-button collapsed" type="button"
                                                 data-bs-toggle="collapse" aria-expanded="false">
                                                 <span class="acordiontext">MÁS INFORMACIÓN</span>
@@ -135,7 +135,7 @@
                                         </h2>
                                     </div>
                                     <div class="accordion-item" (click)="addToList()">
-                                        <h2 class="accordion-header" id="two">
+                                        <h2 class="accordion-header" id="mobHdrList">
                                             <div class="accordion-button collapsed" type="button"
                                                 data-bs-toggle="collapse" aria-expanded="false">
                                                 <span class="acordiontext" [ngStyle]="{'color': textButton === 'EN MI LISTA' ? '#008bcc' : '#000000'}">
@@ -144,24 +144,18 @@
                                             </div>
                                         </h2>
                                     </div>
-                                    <div class="accordion-item" >
-                                        <a target="_blank"
-                                        href="https://api.whatsapp.com/send?phone=7717954749&text=Me gustaría información de éste vehículo: {{ pageVehicle }}">
-                                            <h2 class="accordion-header" id="tree">
-                                                <div class="accordion-button collapsed" type="button"
-                                                    data-bs-toggle="collapse" aria-expanded="false">
-                                                    <a style="color: black;">
-                                                        <div class="containerss">
-                                                                <span class="acordiontext"><i class="fab fa-whatsapp"></i> WHATSAPP</span>
-                                                        </div>
-                                                    </a>
+                                    <div class="accordion-item">
+                                        <a class="text-decoration-none text-reset" target="_blank" rel="noopener noreferrer" [href]="whatsappInquiryHref">
+                                            <h2 class="accordion-header" id="mobHdrWhatsapp">
+                                                <div class="accordion-button collapsed" type="button" role="presentation">
+                                                    <span class="acordiontext text-dark"><i class="fab fa-whatsapp"></i> WHATSAPP</span>
                                                 </div>
                                             </h2>
                                         </a>
                                     </div>
                                     <div *ngIf="vehicle.type =='pre_owned'">
                                         <div class="accordion-item btn">
-                                            <h2 class="accordion-header" id="tree">
+                                            <h2 class="accordion-header" id="mobHdrOffer">
                                                 <div class="accordion-button collapsed" type="button"
                                                     data-bs-toggle="collapse" aria-expanded="false">
                                                     <a style="color: black;">
@@ -175,17 +169,17 @@
                                     </div>
     
                                     <div class="accordion-item">
-                                        <h2 class="accordion-header" id="headingFive">
-                                            <div [matMenuTriggerFor]="menu">
+                                        <h2 class="accordion-header" id="mobHdrShare">
+                                            <div [matMenuTriggerFor]="menuShareMobile">
                                                 <div class="accordion-button collapsed" type="button"
                                                     data-bs-toggle="collapse" aria-expanded="false">
                                                     <span class="acordiontext">COMPARTIR</span>
                                                 </div>
-                                                <mat-menu #menu="matMenu">
+                                                <mat-menu #menuShareMobile="matMenu">
                                                     <a mat-menu-item
                                                         class="text-decoration-none text-dark"
-                                                        href="https://api.whatsapp.com/send?text=Te comparto este vehículo en bmwvecsahidalgo.com {{ pageVehicle }}"
-                                                        target="_blank">
+                                                        [href]="whatsappShareHref"
+                                                        target="_blank" rel="noopener noreferrer">
                                                         <div class="containerss">
                                                             <span class="acordiontext"><i class="fab fa-whatsapp"></i> WhatsApp</span>
                                                         </div>
@@ -194,7 +188,7 @@
                                                     <a mat-menu-item
                                                         class="text-decoration-none text-dark"
                                                         href="https://www.facebook.com/sharer/sharer.php?u={{ pageVehicle }}"
-                                                        target="_blank">
+                                                        target="_blank" rel="noopener noreferrer">
                                                         
                                                         <span class="acordiontext"><i class="fab fa-facebook"></i> Facebook </span>
                                                     </a>
@@ -216,7 +210,7 @@
                         </div>
                 
                         <div class="p-3">
-                                <div class="accordion col-12" id="accordionExample">
+                                <div class="accordion col-12" id="accordionVehicleSpecs">
                                     <div class="accordion-item">
                                         <h6 class="accordion-header fw-bold fs-5" id="headingSectionOne">
                                             <button class="accordion-button collapsed fw-bold fs-5" type="button"
@@ -225,8 +219,8 @@
                                                 <h2 class=" ">Detalles</h2>
                                             </button>
                                         </h6>
-                                        <div id="collapseSectionOne" class="accordion-collapse collapse collapse"
-                                            aria-labelledby="headingSectionOne" data-bs-parent="#accordionSection">
+                                        <div id="collapseSectionOne" class="accordion-collapse collapse"
+                                            aria-labelledby="headingSectionOne" data-bs-parent="#accordionVehicleSpecs">
                                             <div class="accordion-body">
                                                 <p style="margin: 0 0 0px; font-size: 15px;"
                                                     *ngFor="let description of descriptions"> {{ description }}
@@ -244,7 +238,7 @@
                                             </button>
                                         </h6>
                                         <div id="collapseSectionTwo" class="accordion-collapse collapse"
-                                            aria-labelledby="headingSectionTwo" data-bs-parent="#accordionSection">
+                                            aria-labelledby="headingSectionTwo" data-bs-parent="#accordionVehicleSpecs">
                                             <div class="accordion-body">
                                                 <div class="row" style="margin-left: -10px;">
                                                     <div class=" ">
@@ -364,7 +358,7 @@
                                     </div>
                                     <div class="accordion-item" >
                                         <a target="_blank" [attr.href]="vehicle.spec_sheet || null">
-                                            <h2 class="accordion-header" id="tree">
+                                            <h2 class="accordion-header" id="mobHdrSpecSheet">
                                                 <div class="accordion-button collapsed" type="button"
                                                     data-bs-toggle="collapse" aria-expanded="false">
                                                     <h2  [ngClass]="{'text-gray': !vehicle.spec_sheet}" >FICHA DE CONFIGURACIÓN</h2>
@@ -420,8 +414,7 @@
                         </div>
                     </div>
                     <div class="d-none d-xl-block col-xl-4 ">
-                        <div class="row sticky-top style-div "
-                                    style="box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px; border-radius: 10px;">
+                        <div class="row sticky-top style-div detail-sidebar-sticky">
                                     <h1 class="titleCar p-3 m-3" style="width: 90%;">{{ vehicle != undefined ? (vehicle.name) : ''}}</h1>
 
                                     <div class="titles row p-3 m-3" *ngIf="!priceOffer" style="width: 90%;">
@@ -467,9 +460,9 @@
                                     </div> -->
 
                                     <div *ngIf="!route" class="col-12 mt-3 mb-4">
-                                        <div class="accordion col-12" id="accordionExample">       
+                                        <div class="accordion col-12" id="accordionActionsDesktop">
                                             <div class="accordion-item" (click)="askInformation(vehicle)">
-                                                <h2 class="accordion-header" id="one">
+                                                <h2 class="accordion-header" id="deskHdrMoreInfo">
                                                     <div class="accordion-button collapsed" type="button"
                                                         data-bs-toggle="collapse" aria-expanded="false">
                                                         <span class="acordiontext">MÁS INFORMACIÓN</span>
@@ -478,7 +471,7 @@
                                                 </h2>
                                             </div>
                                             <div class="accordion-item" (click)="addToList()">
-                                                <h2 class="accordion-header" id="two">
+                                                <h2 class="accordion-header" id="deskHdrList">
                                                     <div class="accordion-button collapsed" type="button"
                                                         data-bs-toggle="collapse" aria-expanded="false">
                                                         <span class="acordiontext" [ngStyle]="{'color': textButton === 'EN MI LISTA' ? '#008bcc' : '#000000'}">
@@ -487,24 +480,18 @@
                                                     </div>
                                                 </h2>
                                             </div>
-                                            <div class="accordion-item" >
-                                                <a target="_blank"
-                                                href="https://api.whatsapp.com/send?phone=7717954749&text=Me gustaría información de éste vehículo: {{ pageVehicle }}">
-                                                    <h2 class="accordion-header" id="tree">
-                                                        <div class="accordion-button collapsed" type="button"
-                                                            data-bs-toggle="collapse" aria-expanded="false">
-                                                            <a style="color: black;">
-                                                                <div class="containerss">
-                                                                        <span class="acordiontext"><i class="fab fa-whatsapp"></i> WHATSAPP</span>
-                                                                </div>
-                                                            </a>
+                                            <div class="accordion-item">
+                                                <a class="text-decoration-none text-reset" target="_blank" rel="noopener noreferrer" [href]="whatsappInquiryHref">
+                                                    <h2 class="accordion-header" id="deskHdrWhatsapp">
+                                                        <div class="accordion-button collapsed" type="button" role="presentation">
+                                                            <span class="acordiontext text-dark"><i class="fab fa-whatsapp"></i> WHATSAPP</span>
                                                         </div>
                                                     </h2>
                                                 </a>
                                             </div>
                                             <div *ngIf="vehicle.type =='pre_owned'">
                                                 <div class="accordion-item btn">
-                                                    <h2 class="accordion-header" id="tree">
+                                                    <h2 class="accordion-header" id="deskHdrOffer">
                                                         <div class="accordion-button collapsed" type="button"
                                                             data-bs-toggle="collapse" aria-expanded="false">
                                                             <a style="color: black;">
@@ -517,17 +504,17 @@
                                                 </div>
                                             </div>
                                             <div class="accordion-item">
-                                                <h2 class="accordion-header" id="headingFive">
-                                                    <div [matMenuTriggerFor]="menu">
+                                                <h2 class="accordion-header" id="deskHdrShare">
+                                                    <div [matMenuTriggerFor]="menuShareDesktop">
                                                         <div class="accordion-button collapsed" type="button"
                                                             data-bs-toggle="collapse" aria-expanded="false">
                                                             <span class="acordiontext">COMPARTIR</span>
                                                         </div>
-                                                        <mat-menu #menu="matMenu">
+                                                        <mat-menu #menuShareDesktop="matMenu">
                                                             <a mat-menu-item
                                                                 class="text-decoration-none text-dark"
-                                                                href="https://api.whatsapp.com/send?text=Te comparto este vehículo en bmwvecsahidalgo.com {{ pageVehicle }}"
-                                                                target="_blank">
+                                                                [href]="whatsappShareHref"
+                                                                target="_blank" rel="noopener noreferrer">
                                                                 <div class="containerss">
                                                                     <span class="acordiontext"><i class="fab fa-whatsapp"></i> WhatsApp</span>
                                                                 </div>
@@ -536,7 +523,7 @@
                                                             <a mat-menu-item
                                                                 class="text-decoration-none text-dark"
                                                                 href="https://www.facebook.com/sharer/sharer.php?u={{ pageVehicle }}"
-                                                                target="_blank">
+                                                                target="_blank" rel="noopener noreferrer">
                                                                 
                                                                 <span class="acordiontext"><i class="fab fa-facebook"></i> Facebook </span>
                                                             </a>
