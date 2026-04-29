@@ -83,6 +83,7 @@ export class DetailComponent implements OnInit{
     details: false,
     features: false
   };
+  public whatsappVehicleUrl: string = '';
 
   horizontalPosition: MatSnackBarHorizontalPosition = 'end';
   verticalPosition: MatSnackBarVerticalPosition = 'bottom';
@@ -150,6 +151,7 @@ export class DetailComponent implements OnInit{
       next: ( response: DetailResponse ) => {
         
         this.vehicle =  response.data;
+        this.setWhatsappDataByDealership();
         this.campaigns = this.vehicle.campaigns;
         this.getRecommended();
         this.existsInList(); 
@@ -290,7 +292,20 @@ export class DetailComponent implements OnInit{
     this.detailSections.features = false;
     this.detailSections[section] = isOpening;
   }
-  
+
+  private setWhatsappDataByDealership(): void {
+    const phoneByDealership: Record<string, string> = {
+      'Bmw Hub Serdán': '2223259998',
+      'Vecsa Angelopolis': '2212126115',
+      'Vecsa Hidalgo': '2225260943'
+    };
+
+    const dealershipName = this.vehicle?.dealership?.name || '';
+    const whatsappPhone = phoneByDealership[dealershipName] || '7717954749';
+    const message = `Me gustaría información de éste vehículo: ${this.pageVehicle}`;
+    this.whatsappVehicleUrl = `https://api.whatsapp.com/send?phone=${whatsappPhone}&text=${encodeURIComponent(message)}`;
+  }
+
   goBack(): void {
     this.location.back();
   }
@@ -299,27 +314,27 @@ export class DetailComponent implements OnInit{
    * Número para wa.me (solo dígitos, con prefijo país 52 si aplica).
    * Prioridad: API `dealership.whatsapp_phone` → nombre de agencia → fallback histórico.
    */
-  whatsappPhoneDigits(): string {
-    const d = this.vehicle?.dealership;
-    const raw = d?.whatsapp_phone;
-    if (raw != null && String(raw).trim() !== '') {
-      const digits = String(raw).replace(/\D/g, '');
-      if (digits.length >= 10) {
-        return digits.startsWith('52') ? digits : `52${digits}`;
-      }
-    }
-    const name = (d?.name || '').toLowerCase();
-    if (/hidalgo|vecsa\s*hidalgo|bmw\s*vecsa/i.test(name)) {
-      return '5217717954749';
-    }
-    return '5217717954749';
-  }
+  // whatsappPhoneDigits(): string {
+  //   const d = this.vehicle?.dealership;
+  //   const raw = d?.whatsapp_phone;
+  //   if (raw != null && String(raw).trim() !== '') {
+  //     const digits = String(raw).replace(/\D/g, '');
+  //     if (digits.length >= 10) {
+  //       return digits.startsWith('52') ? digits : `52${digits}`;
+  //     }
+  //   }
+  //   const name = (d?.name || '').toLowerCase();
+  //   if (/hidalgo|vecsa\s*hidalgo|bmw\s*vecsa/i.test(name)) {
+  //     return '5217717954749';
+  //   }
+  //   return '5217717954749';
+  // }
 
-  get whatsappInquiryHref(): string {
-    const phone = this.whatsappPhoneDigits();
-    const text = encodeURIComponent(`Me gustaría información de éste vehículo: ${this.pageVehicle}`);
-    return `https://api.whatsapp.com/send?phone=${phone}&text=${text}`;
-  }
+  // get whatsappInquiryHref(): string {
+  //   const phone = this.whatsappPhoneDigits();
+  //   const text = encodeURIComponent(`Me gustaría información de éste vehículo: ${this.pageVehicle}`);
+  //   return `https://api.whatsapp.com/send?phone=${phone}&text=${text}`;
+  // }
 
   get whatsappShareHref(): string {
     const text = encodeURIComponent(`Te comparto este vehículo en bmwvecsahidalgo.com ${this.pageVehicle}`);
