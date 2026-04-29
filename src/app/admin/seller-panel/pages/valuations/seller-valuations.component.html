@@ -1,119 +1,217 @@
-<div class="page">
-  <h1 class="title">Panel vendedor</h1>
-  <p class="subtitle">Dashboard de citas, link de referidos e inventario para compartir unidades.</p>
+<div class="seller-dashboard">
+  <header class="seller-hero">
+    <div class="seller-hero-text">
+      <h1 class="seller-title">Panel vendedor</h1>
+      <p class="seller-subtitle">
+        Citas asignadas, link de referidos e inventario para compartir unidades con tu código.
+      </p>
+    </div>
+  </header>
 
-  <section class="metrics-grid">
-    <article class="metric-card">
-      <h3>Total citas</h3>
-      <p>{{ appointmentMetrics.total }}</p>
+  <p class="section-label">Resumen de citas</p>
+  <div class="stats-grid">
+    <article class="stat-card">
+      <div class="stat-icon" style="background: rgba(28, 105, 212, 0.12); color: #1c69d4">
+        <span class="material-icons">event</span>
+      </div>
+      <div class="stat-info">
+        <div class="stat-value">{{ appointmentMetrics.total }}</div>
+        <div class="stat-label">Total citas</div>
+      </div>
     </article>
-    <article class="metric-card">
-      <h3>Pendientes</h3>
-      <p>{{ appointmentMetrics.pending }}</p>
+    <article class="stat-card">
+      <div class="stat-icon" style="background: rgba(217, 119, 6, 0.14); color: #d97706">
+        <span class="material-icons">pending_actions</span>
+      </div>
+      <div class="stat-info">
+        <div class="stat-value">{{ appointmentMetrics.pending }}</div>
+        <div class="stat-label">Pendientes</div>
+      </div>
     </article>
-    <article class="metric-card">
-      <h3>En progreso</h3>
-      <p>{{ appointmentMetrics.inProgress }}</p>
+    <article class="stat-card">
+      <div class="stat-icon" style="background: rgba(5, 150, 105, 0.12); color: #059669">
+        <span class="material-icons">autorenew</span>
+      </div>
+      <div class="stat-info">
+        <div class="stat-value">{{ appointmentMetrics.inProgress }}</div>
+        <div class="stat-label">En progreso</div>
+      </div>
     </article>
-    <article class="metric-card">
-      <h3>Completadas</h3>
-      <p>{{ appointmentMetrics.completed }}</p>
+    <article class="stat-card">
+      <div class="stat-icon" style="background: rgba(79, 70, 229, 0.12); color: #4f46e5">
+        <span class="material-icons">task_alt</span>
+      </div>
+      <div class="stat-info">
+        <div class="stat-value">{{ appointmentMetrics.completed }}</div>
+        <div class="stat-label">Completadas</div>
+      </div>
     </article>
-  </section>
+  </div>
 
-  <section class="referral-box">
-    <h2>Link de referidos</h2>
-    <p>Comparte este link para enviar tráfico atribuido a tu usuario vendedor.</p>
-    <div class="referral-actions">
-      <code>{{ referralLink }}</code>
-      <button mat-stroked-button (click)="copyToClipboard(referralLink)">Copiar link</button>
+  <section class="referral-card" aria-labelledby="referral-heading">
+    <div class="referral-card-accent" aria-hidden="true"></div>
+    <div class="referral-card-body">
+      <div class="referral-card-header">
+        <span class="material-icons referral-card-icon">link</span>
+        <div>
+          <h2 id="referral-heading" class="referral-card-title">Link de referidos</h2>
+          <p class="referral-card-desc">
+            Comparte este enlace para atribuir visitas y leads a tu usuario vendedor.
+          </p>
+        </div>
+      </div>
+      <div class="referral-input-row">
+        <code class="referral-code">{{ referralLink }}</code>
+        <button mat-flat-button color="primary" class="referral-copy-btn" (click)="copyToClipboard(referralLink)">
+          <span class="material-icons">content_copy</span>
+          Copiar
+        </button>
+      </div>
     </div>
   </section>
 
-  <h2 class="section-title">Dashboard de citas</h2>
-  <div class="toolbar">
-    <mat-form-field appearance="outline" class="search-field">
-      <mat-label>Buscar cliente o vehículo</mat-label>
-      <input matInput [(ngModel)]="keyword" (keyup.enter)="search()" />
-    </mat-form-field>
-    <button mat-flat-button color="primary" (click)="search()" [disabled]="loading">Buscar</button>
-  </div>
+  <div class="data-card">
+    <h2 class="data-card-title">Dashboard de citas</h2>
+    <div class="data-card-toolbar">
+      <div class="search-field-native">
+        <span class="material-icons search-field-native-icon" aria-hidden="true">search</span>
+        <input
+          type="search"
+          class="search-field-native-input"
+          [(ngModel)]="keyword"
+          (keyup.enter)="search()"
+          placeholder="Buscar cliente o vehículo"
+          aria-label="Buscar cliente o vehículo"
+        />
+      </div>
+      <button mat-flat-button color="primary" class="toolbar-action" (click)="search()" [disabled]="loading">
+        <span class="material-icons btn-icon">search</span>
+        Buscar
+      </button>
+    </div>
 
-  <div class="loading" *ngIf="loading">Cargando…</div>
-  <div class="error" *ngIf="error && !loading">No se pudieron cargar las valuaciones.</div>
+    <div class="loading-block" *ngIf="loading">
+      <div class="spinner"></div>
+      <p class="loading-text">Cargando valuaciones…</p>
+    </div>
 
-  <div class="table-wrap" *ngIf="!loading && !error">
-    <table mat-table [dataSource]="rows" class="mat-elevation-z1">
-      <ng-container matColumnDef="customer">
-        <th mat-header-cell *matHeaderCellDef>Cliente</th>
-        <td mat-cell *matCellDef="let row">{{ customerName(row) }}</td>
-      </ng-container>
-      <ng-container matColumnDef="vehicle">
-        <th mat-header-cell *matHeaderCellDef>Vehículo</th>
-        <td mat-cell *matCellDef="let row">{{ vehicleLabel(row) }}</td>
-      </ng-container>
-      <ng-container matColumnDef="year">
-        <th mat-header-cell *matHeaderCellDef>Año</th>
-        <td mat-cell *matCellDef="let row">{{ vehicleYear(row) }}</td>
-      </ng-container>
-      <ng-container matColumnDef="uuid">
-        <th mat-header-cell *matHeaderCellDef>UUID</th>
-        <td mat-cell *matCellDef="let row"><code class="uuid">{{ row.uuid || '—' }}</code></td>
-      </ng-container>
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-    </table>
-    <p class="empty" *ngIf="rows.length === 0">No hay valuaciones asignadas o no coinciden con el filtro.</p>
-    <div class="pager" *ngIf="lastPage > 1">
-      <button mat-stroked-button (click)="goPage(page - 1)" [disabled]="page <= 1">Anterior</button>
-      <span>Página {{ page }} de {{ lastPage }} ({{ total }})</span>
-      <button mat-stroked-button (click)="goPage(page + 1)" [disabled]="page >= lastPage">Siguiente</button>
+    <div class="error-banner" *ngIf="error && !loading">
+      <span class="material-icons">error_outline</span>
+      <span>No se pudieron cargar las valuaciones.</span>
+    </div>
+
+    <div class="table-panel" *ngIf="!loading && !error">
+      <div class="table-scroll">
+        <table mat-table [dataSource]="rows" class="seller-table">
+          <ng-container matColumnDef="customer">
+            <th mat-header-cell *matHeaderCellDef>Cliente</th>
+            <td mat-cell *matCellDef="let row">{{ customerName(row) }}</td>
+          </ng-container>
+          <ng-container matColumnDef="vehicle">
+            <th mat-header-cell *matHeaderCellDef>Vehículo</th>
+            <td mat-cell *matCellDef="let row">{{ vehicleLabel(row) }}</td>
+          </ng-container>
+          <ng-container matColumnDef="year">
+            <th mat-header-cell *matHeaderCellDef>Año</th>
+            <td mat-cell *matCellDef="let row">{{ vehicleYear(row) }}</td>
+          </ng-container>
+          <ng-container matColumnDef="uuid">
+            <th mat-header-cell *matHeaderCellDef>UUID</th>
+            <td mat-cell *matCellDef="let row"><code class="uuid">{{ row.uuid || '—' }}</code></td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      </div>
+      <p class="empty-state" *ngIf="rows.length === 0">
+        <span class="material-icons">inbox</span>
+        No hay valuaciones asignadas o no coinciden con el filtro.
+      </p>
+      <div class="pager" *ngIf="lastPage > 1">
+        <button mat-stroked-button (click)="goPage(page - 1)" [disabled]="page <= 1">Anterior</button>
+        <span class="pager-meta">Página {{ page }} de {{ lastPage }} · {{ total }} registros</span>
+        <button mat-stroked-button (click)="goPage(page + 1)" [disabled]="page >= lastPage">Siguiente</button>
+      </div>
     </div>
   </div>
 
-  <h2 class="section-title">Inventario para compartir</h2>
-  <div class="toolbar">
-    <mat-form-field appearance="outline" class="search-field">
-      <mat-label>Buscar unidad en inventario</mat-label>
-      <input matInput [(ngModel)]="inventoryKeyword" (keyup.enter)="searchInventory()" />
-    </mat-form-field>
-    <button mat-flat-button color="primary" (click)="searchInventory()" [disabled]="inventoryLoading">Buscar</button>
-  </div>
+  <div class="data-card">
+    <h2 class="data-card-title">Inventario para compartir</h2>
+    <div class="data-card-toolbar">
+      <div class="search-field-native">
+        <span class="material-icons search-field-native-icon" aria-hidden="true">inventory_2</span>
+        <input
+          type="search"
+          class="search-field-native-input"
+          [(ngModel)]="inventoryKeyword"
+          (keyup.enter)="searchInventory()"
+          placeholder="Buscar unidad en inventario"
+          aria-label="Buscar unidad en inventario"
+        />
+      </div>
+      <button mat-flat-button color="primary" class="toolbar-action" (click)="searchInventory()" [disabled]="inventoryLoading">
+        <span class="material-icons btn-icon">search</span>
+        Buscar
+      </button>
+    </div>
 
-  <div class="loading" *ngIf="inventoryLoading">Cargando inventario…</div>
-  <div class="error" *ngIf="inventoryError && !inventoryLoading">No se pudo cargar el inventario.</div>
+    <div class="loading-block" *ngIf="inventoryLoading">
+      <div class="spinner"></div>
+      <p class="loading-text">Cargando inventario…</p>
+    </div>
 
-  <div class="table-wrap" *ngIf="!inventoryLoading && !inventoryError">
-    <table mat-table [dataSource]="inventoryRows" class="mat-elevation-z1">
-      <ng-container matColumnDef="vehicle">
-        <th mat-header-cell *matHeaderCellDef>Vehículo</th>
-        <td mat-cell *matCellDef="let row">{{ inventoryVehicleLabel(row) }}</td>
-      </ng-container>
-      <ng-container matColumnDef="year">
-        <th mat-header-cell *matHeaderCellDef>Año</th>
-        <td mat-cell *matCellDef="let row">{{ inventoryYear(row) }}</td>
-      </ng-container>
-      <ng-container matColumnDef="price">
-        <th mat-header-cell *matHeaderCellDef>Precio</th>
-        <td mat-cell *matCellDef="let row">{{ inventoryPrice(row) }}</td>
-      </ng-container>
-      <ng-container matColumnDef="share">
-        <th mat-header-cell *matHeaderCellDef>Link referido por unidad</th>
-        <td mat-cell *matCellDef="let row">
-          <div class="share-cell">
-            <code class="uuid">{{ vehicleReferralLink(row) }}</code>
-            <button mat-stroked-button (click)="copyToClipboard(vehicleReferralLink(row))">Copiar</button>
-          </div>
-        </td>
-      </ng-container>
-      <tr mat-header-row *matHeaderRowDef="inventoryColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: inventoryColumns"></tr>
-    </table>
-    <p class="empty" *ngIf="inventoryRows.length === 0">No hay unidades en inventario para mostrar.</p>
-    <div class="pager" *ngIf="inventoryLastPage > 1">
-      <button mat-stroked-button (click)="goInventoryPage(inventoryPage - 1)" [disabled]="inventoryPage <= 1">Anterior</button>
-      <span>Página {{ inventoryPage }} de {{ inventoryLastPage }} ({{ inventoryTotal }})</span>
-      <button mat-stroked-button (click)="goInventoryPage(inventoryPage + 1)" [disabled]="inventoryPage >= inventoryLastPage">Siguiente</button>
+    <div class="error-banner" *ngIf="inventoryError && !inventoryLoading">
+      <span class="material-icons">error_outline</span>
+      <span>No se pudo cargar el inventario.</span>
+    </div>
+
+    <div class="table-panel" *ngIf="!inventoryLoading && !inventoryError">
+      <div class="table-scroll">
+        <table mat-table [dataSource]="inventoryRows" class="seller-table">
+          <ng-container matColumnDef="vehicle">
+            <th mat-header-cell *matHeaderCellDef>Vehículo</th>
+            <td mat-cell *matCellDef="let row">{{ inventoryVehicleLabel(row) }}</td>
+          </ng-container>
+          <ng-container matColumnDef="year">
+            <th mat-header-cell *matHeaderCellDef>Año</th>
+            <td mat-cell *matCellDef="let row">{{ inventoryYear(row) }}</td>
+          </ng-container>
+          <ng-container matColumnDef="price">
+            <th mat-header-cell *matHeaderCellDef>Precio</th>
+            <td mat-cell *matCellDef="let row">{{ inventoryPrice(row) }}</td>
+          </ng-container>
+          <ng-container matColumnDef="share">
+            <th mat-header-cell *matHeaderCellDef>Link referido por unidad</th>
+            <td mat-cell *matCellDef="let row">
+              <div class="share-cell">
+                <code class="uuid">{{ vehicleReferralLink(row) }}</code>
+                <button mat-stroked-button class="share-copy" (click)="copyToClipboard(vehicleReferralLink(row))">
+                  Copiar
+                </button>
+              </div>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="inventoryColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: inventoryColumns"></tr>
+        </table>
+      </div>
+      <p class="empty-state" *ngIf="inventoryRows.length === 0">
+        <span class="material-icons">inventory_2</span>
+        No hay unidades en inventario para mostrar.
+      </p>
+      <div class="pager" *ngIf="inventoryLastPage > 1">
+        <button mat-stroked-button (click)="goInventoryPage(inventoryPage - 1)" [disabled]="inventoryPage <= 1">
+          Anterior
+        </button>
+        <span class="pager-meta">Página {{ inventoryPage }} de {{ inventoryLastPage }} · {{ inventoryTotal }} registros</span>
+        <button
+          mat-stroked-button
+          (click)="goInventoryPage(inventoryPage + 1)"
+          [disabled]="inventoryPage >= inventoryLastPage"
+        >
+          Siguiente
+        </button>
+      </div>
     </div>
   </div>
 </div>

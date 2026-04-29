@@ -270,6 +270,8 @@ export interface Dealership {
     location:    string;
     description: string;
     created_at:  Date;
+    /** Si el backend envía número de WhatsApp (solo dígitos, con o sin prefijo 52). */
+    whatsapp_phone?: string | null;
 }
 
 export interface Specification {

@@ -282,7 +282,38 @@ export class DetailComponent implements OnInit{
 
   goBack(): void {
     this.location.back();
-  }  
+  }
+
+  /**
+   * Número para wa.me (solo dígitos, con prefijo país 52 si aplica).
+   * Prioridad: API `dealership.whatsapp_phone` → nombre de agencia → fallback histórico.
+   */
+  whatsappPhoneDigits(): string {
+    const d = this.vehicle?.dealership;
+    const raw = d?.whatsapp_phone;
+    if (raw != null && String(raw).trim() !== '') {
+      const digits = String(raw).replace(/\D/g, '');
+      if (digits.length >= 10) {
+        return digits.startsWith('52') ? digits : `52${digits}`;
+      }
+    }
+    const name = (d?.name || '').toLowerCase();
+    if (/hidalgo|vecsa\s*hidalgo|bmw\s*vecsa/i.test(name)) {
+      return '5217717954749';
+    }
+    return '5217717954749';
+  }
+
+  get whatsappInquiryHref(): string {
+    const phone = this.whatsappPhoneDigits();
+    const text = encodeURIComponent(`Me gustaría información de éste vehículo: ${this.pageVehicle}`);
+    return `https://api.whatsapp.com/send?phone=${phone}&text=${text}`;
+  }
+
+  get whatsappShareHref(): string {
+    const text = encodeURIComponent(`Te comparto este vehículo en bmwvecsahidalgo.com ${this.pageVehicle}`);
+    return `https://api.whatsapp.com/send?text=${text}`;
+  }
 
   showModal( src: string) {   
     let imagen = src;
