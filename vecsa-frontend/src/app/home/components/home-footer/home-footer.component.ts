@@ -1,5 +1,6 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 interface FooterLink { label: string; url: string; external: boolean; }
 interface SocialLink { name: string; url: string; }
@@ -7,7 +8,7 @@ interface SocialLink { name: string; url: string; }
 @Component({
   selector: 'app-home-footer',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './home-footer.component.html',
 })
@@ -23,6 +24,7 @@ export class HomeFooterComponent {
   ];
 
   serviceLinks: FooterLink[] = [
+    { label: 'Sucursales', url: '/sucursales', external: false },
     { label: 'VECSA Boutique', url: 'https://vecsaboutique.com/', external: true },
     { label: 'VECSA Rewards', url: 'https://grupovecsa.com/inventory/auth/login', external: true },
     { label: 'VECSA Experience', url: 'https://vecsaexperience.com/', external: true },

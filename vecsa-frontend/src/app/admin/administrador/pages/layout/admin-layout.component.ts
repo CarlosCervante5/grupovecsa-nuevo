@@ -22,6 +22,7 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
 
   readonly navItems = [
     { label: 'Dashboard', icon: 'dashboard', route: '/admin/administrator' },
+    { label: 'Sucursales', icon: 'store', route: '/admin/administrator/sucursales' },
     { label: 'Usuarios', icon: 'people', route: '/admin/administrator/users' },
     { label: 'Permisos', icon: 'vpn_key', route: '/admin/administrator/permissions' },
     { label: 'Manuales', icon: 'menu_book', route: '/admin/administrator/manuales' },

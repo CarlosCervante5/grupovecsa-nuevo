@@ -94,6 +94,9 @@ Route::prefix('dealerships')->middleware('bandwidth_usage')->group(function () {
 
     Route::post('/search', [DealershipController::class, 'search']);
     Route::post('/users', [DealershipController::class, 'users'])->middleware('auth:sanctum');
+    Route::post('/store', [DealershipController::class, 'store'])->middleware(['auth:sanctum', 'role:administrator|developer|admin']);
+    Route::post('/update', [DealershipController::class, 'update'])->middleware(['auth:sanctum', 'role:administrator|developer|admin']);
+    Route::post('/delete', [DealershipController::class, 'destroy'])->middleware(['auth:sanctum', 'role:administrator|developer|admin']);
 });
 
 // Fin Sucursales

@@ -73,7 +73,12 @@ class MarketingCampaign extends Model
 
     public function vehicles()
     {
-        return $this->belongsToMany(Vehicle::class, env('DB_TABLE_PREFIX', '') . 'vehicle_campaign', 'vehicle_id', 'campaign_id');
+        return $this->belongsToMany(
+            Vehicle::class,
+            env('DB_TABLE_PREFIX', '') . 'vehicle_campaign',
+            'campaign_id',
+            'vehicle_id'
+        );
     }
 
     public function promotions()

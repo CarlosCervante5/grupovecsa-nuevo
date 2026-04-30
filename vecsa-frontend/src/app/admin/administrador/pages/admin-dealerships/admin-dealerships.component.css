@@ -1,0 +1,368 @@
+.dealerships-page {
+  padding: 32px;
+  font-family: inherit;
+  background: #f8fafc;
+  min-height: 100vh;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.page-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.page-subtitle {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin: 6px 0 0;
+  max-width: 640px;
+  line-height: 1.45;
+}
+
+.page-subtitle code {
+  font-size: 0.78rem;
+  background: #e2e8f0;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.inline-link {
+  color: #1c69d4;
+  font-weight: 600;
+  text-decoration: none;
+}
+.inline-link:hover {
+  text-decoration: underline;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: #fff;
+  color: #334155;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.action-btn:hover {
+  background: #f1f5f9;
+}
+
+.action-btn .material-icons {
+  font-size: 18px;
+}
+
+.primary-btn {
+  background: #1c69d4;
+  color: #fff;
+  border-color: #1c69d4;
+}
+
+.primary-btn:hover:not(:disabled) {
+  background: #1554b0;
+}
+
+.primary-btn:disabled {
+  opacity: 0.65;
+  cursor: default;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 8px 14px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.search-icon {
+  color: #94a3b8;
+  font-size: 20px;
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 0.85rem;
+  color: #0f172a;
+  background: transparent;
+}
+
+.search-clear {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.search-clear .material-icons {
+  font-size: 18px;
+  color: #94a3b8;
+}
+
+.loading-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 48px;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.data-table th {
+  text-align: left;
+  padding: 10px 14px;
+  background: #f8fafc;
+  color: #475569;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid #e2e8f0;
+  white-space: nowrap;
+}
+
+.data-table td {
+  padding: 10px 14px;
+  color: #334155;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.th-wide {
+  min-width: 180px;
+}
+
+.td-wrap {
+  white-space: normal;
+  max-width: 280px;
+}
+
+.cell-strong {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.th-num {
+  width: 44px;
+  text-align: center;
+}
+
+.cell-num {
+  text-align: center;
+  font-weight: 700;
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+.data-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.row-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.act-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.act-btn .material-icons {
+  font-size: 16px;
+}
+
+.act-btn.edit {
+  background: #eff6ff;
+  color: #1c69d4;
+}
+
+.act-btn.delete {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 60px 0;
+  color: #94a3b8;
+}
+
+.empty-state .material-icons {
+  font-size: 48px;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+/* Modal */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.modal-card {
+  background: #fff;
+  border-radius: 12px;
+  max-width: 520px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+}
+
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.modal-head h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.icon-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: #64748b;
+  display: flex;
+}
+
+form {
+  padding: 20px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.field.full {
+  grid-column: 1 / -1;
+}
+
+.field .req {
+  color: #dc2626;
+}
+
+.field input,
+.field textarea {
+  font-size: 0.85rem;
+  padding: 8px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-family: inherit;
+}
+
+.field input:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: #1c69d4;
+  box-shadow: 0 0 0 2px rgba(28, 105, 212, 0.15);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #f1f5f9;
+}
+
+@media (max-width: 640px) {
+  .dealerships-page {
+    padding: 16px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .field.full {
+    grid-column: 1;
+  }
+}

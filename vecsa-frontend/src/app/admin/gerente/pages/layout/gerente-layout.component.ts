@@ -20,7 +20,10 @@ export class GerenteLayoutComponent implements OnInit, OnDestroy {
   name = '';
   permissions: string[] = [];
 
-  readonly navItems = [{ label: 'Dashboard', icon: 'dashboard', route: '/admin/gerente' }];
+  readonly navItems = [
+    { label: 'Dashboard', icon: 'dashboard', route: '/admin/gerente' },
+    { label: 'Sucursales', icon: 'store', route: '/admin/gerente/sucursales' },
+  ];
 
   panelItems: { label: string; icon: string; route: string }[] = [];
   dynamicItems: { label: string; icon: string; route: string }[] = [];

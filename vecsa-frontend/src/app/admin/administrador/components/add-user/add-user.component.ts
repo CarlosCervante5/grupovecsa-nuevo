@@ -1,12 +1,12 @@
-    import { Component } from '@angular/core';
-    import { AbstractControl, FormControl, FormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
+import { Component } from '@angular/core';
+import { AbstractControl, FormControl, FormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { MatBottomSheetRef } from '@angular/material/bottom-sheet';
-import { DealerShipResponse, roles, RolesResponse , Dealership} from '@interfaces/admin.interfaces';
+import { DealerShipResponse, roles, RolesResponse, Dealership } from '@interfaces/admin.interfaces';
 import { GralResponse } from '@interfaces/vehicle_data.interface';
 import { AdminService } from '@services/admin.service';
-import { Observable, of} from 'rxjs';
-import { map,startWith } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { map, startWith } from 'rxjs/operators';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -17,9 +17,11 @@ import Swal from 'sweetalert2';
 })
 export class AddUserComponent {
 
-    public form !: FormGroup;
+    public form!: FormGroup;
     public spinner = false;
-    public files!: File [];
+    public files: File[] = [];
+    /** Vista previa; placeholder hasta elegir archivo */
+    public foto = 'assets/img/user.jpeg';
     //variables para el select de roles
     public roles!: roles[];
     public rolesControl = new FormControl();
@@ -107,36 +109,49 @@ export class AddUserComponent {
         return this.form.get('password')!.invalid && (this.form.get('password')!.dirty || this.form.get('password')?.touched);
     }
 
-    public onSubmit(){
-        this._adminservice.addUser(this.form.get('name')!.value, this.form.get('last_name')!.value, this.form.get('phone_1')!.value, this.form.get('phone_2')!.value,
-        this.form.get('gender')!.value, this.form.get('email')!.value, this.form.get('location')!.value, this.form.get('role_name')!.value, this.files,
-        this.form.get('password')!.value,)
-        .subscribe({
-            next: (response : GralResponse) =>{
-                Swal.fire({                    
+    public onSubmit(): void {
+        const pics = this.files?.length ? this.files : [];
+        this._adminservice.addUser(
+            this.form.get('name')!.value,
+            this.form.get('last_name')!.value,
+            this.form.get('phone_1')!.value,
+            this.form.get('phone_2')!.value,
+            this.form.get('gender')!.value,
+            this.form.get('email')!.value,
+            this.form.get('location')!.value,
+            this.form.get('role_name')!.value,
+            pics,
+            this.form.get('password')!.value,
+        ).subscribe({
+            next: (response: GralResponse) => {
+                Swal.fire({
                     icon: 'success',
-                    title: 'Usuario actualizado con exito',
+                    title: 'Usuario creado',
                     text: response.message,
                     showConfirmButton: false,
-                    timer: 2000
-                    });
-                    this._bottomSheetRef.dismiss(
-                    {reload: true}
-                    );
+                    timer: 2000,
+                });
+                this._bottomSheetRef.dismiss({ reload: true });
             },
-            error:(error)=>{
+            error: (error) => {
                 console.log(error);
-            }
-        })
+            },
+        });
     }
 
-    assignImagePromo( event: Event){
+    assignImagePromo(event: Event): void {
         const element = event.currentTarget as HTMLInputElement;
-        let fileList: FileList | null = element.files;
-        if (fileList) {
-            //this.files = fileList[0];
-            this.files = Array.from(fileList);
+        const fileList = element.files;
+        if (!fileList?.length) {
+            return;
         }
+        this.files = Array.from(fileList);
+        const file = fileList[0];
+        const reader = new FileReader();
+        reader.onload = () => {
+            this.foto = reader.result as string;
+        };
+        reader.readAsDataURL(file);
     }
 
 

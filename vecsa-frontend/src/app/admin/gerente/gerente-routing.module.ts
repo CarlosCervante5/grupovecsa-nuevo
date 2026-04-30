@@ -14,6 +14,11 @@ const routes: Routes = [
     children: [
       { path: '', component: GerenteDashboardComponent },
       {
+        path: 'sucursales',
+        loadComponent: () =>
+          import('./pages/sucursales/gerente-sucursales.component').then((m) => m.GerenteSucursalesComponent),
+      },
+      {
         path: 'vehicle-inventory',
         component: VehiclesComponent,
         canActivate: [VehicleInventoryGuard],

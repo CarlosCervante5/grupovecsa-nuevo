@@ -11,6 +11,7 @@ import { BenchmarkComponent } from '../shared/benchmark/benchmark.component';
 import { BenchmarkGuard } from '../shared/benchmark/benchmark.guard';
 import { AdminManualsComponent } from './pages/manuales/admin-manuals.component';
 import { AdminManualDetailComponent } from './pages/manuales/admin-manual-detail.component';
+import { AdminDealershipsComponent } from './pages/admin-dealerships/admin-dealerships.component';
 
 const routes: Routes = [
   {
@@ -18,6 +19,7 @@ const routes: Routes = [
     component: AdminLayoutComponent,
     children: [
       { path: '', component: DashboardAdminComponent },
+      { path: 'sucursales', component: AdminDealershipsComponent },
       { path: 'users', component: AdminUsersComponent },
       { path: 'permissions', component: AdminPermisosComponent },
       { path: 'manuales', component: AdminManualsComponent },

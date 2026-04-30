@@ -251,8 +251,9 @@ export class DeveloperDashboardComponent implements OnInit, AfterViewInit, OnDes
       key: 'dealerships', label: 'Sucursales', icon: 'store',
       endpoint: 'dealerships/search', method: 'POST', dataKey: 'dealerships',
       columns: [
-        { key: 'uuid', label: 'UUID' }, { key: 'name', label: 'Nombre' },
-        { key: 'brand', label: 'Marca' }, { key: 'city', label: 'Ciudad' }, { key: 'state', label: 'Estado' },
+        { key: 'name', label: 'Nombre' },
+        { key: 'location', label: 'Ubicación' },
+        { key: 'description', label: 'Descripción' },
       ],
     },
     {
@@ -595,6 +596,17 @@ export class DeveloperDashboardComponent implements OnInit, AfterViewInit, OnDes
     if (key === 'active') return val ? 'Sí' : 'No';
     if (key === 'price' || key === 'sale_price' || key === 'total') return '$' + Number(val).toLocaleString();
     return String(val);
+  }
+
+  /** Identidad estable para filas CRUD (sucursales no envían uuid ni id en JSON). */
+  trackCrudRow(row: any, index: number): string {
+    return (
+      row?.uuid ||
+      row?.customer_uuid ||
+      (row?.id != null ? String(row.id) : '') ||
+      (row?.name != null && row?.location != null ? `${row.name}|${row.location}` : '') ||
+      `row-${index}`
+    );
   }
 
   get filteredRows(): any[] {

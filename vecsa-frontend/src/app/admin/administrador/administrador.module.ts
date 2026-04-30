@@ -17,6 +17,7 @@ import { VehicleStockModule } from '../shared/vehicle-stock/vehicle-stock.module
 import { BenchmarkModule } from '../shared/benchmark/benchmark.module';
 import { AdminManualsComponent } from './pages/manuales/admin-manuals.component';
 import { AdminManualDetailComponent } from './pages/manuales/admin-manual-detail.component';
+import { AdminDealershipsComponent } from './pages/admin-dealerships/admin-dealerships.component';
 
 @NgModule({
     declarations: [
@@ -27,7 +28,8 @@ import { AdminManualDetailComponent } from './pages/manuales/admin-manual-detail
         UpdateUserComponent,
         AdminLayoutComponent,
         AdminManualsComponent,
-        AdminManualDetailComponent
+        AdminManualDetailComponent,
+        AdminDealershipsComponent,
     ],
     imports: [
         CommonModule,
