@@ -1,0 +1,153 @@
+<div class="dealerships-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Sucursales</h1>
+      <p class="page-subtitle">
+        Alta y edición de agencias. Los vehículos usan <code>dealership_id</code>;
+        asigna usuarios en
+        <a routerLink="/admin/administrator/users" class="inline-link">Usuarios → Editar</a>.
+      </p>
+    </div>
+    <div class="header-actions">
+      <a routerLink="/sucursales" class="action-btn" target="_blank" rel="noopener noreferrer">
+        <span class="material-icons">map</span>
+        Ver mapa público
+      </a>
+      <button type="button" class="action-btn primary-btn" (click)="openCreate()">
+        <span class="material-icons">add</span>
+        Nueva sucursal
+      </button>
+    </div>
+  </div>
+
+  <div class="search-bar">
+    <span class="material-icons search-icon">search</span>
+    <input
+      type="text"
+      class="search-input"
+      placeholder="Buscar por nombre, ubicación o email…"
+      [(ngModel)]="searchTerm"
+      (keyup)="onSearch()"
+    />
+    <button type="button" class="search-clear" *ngIf="searchTerm" (click)="clearSearch()">
+      <span class="material-icons">close</span>
+    </button>
+  </div>
+
+  <div class="loading-box" *ngIf="loading">
+    <app-sk-cube></app-sk-cube>
+    <span>Cargando…</span>
+  </div>
+
+  <div class="table-wrap" *ngIf="!loading && filtered.length > 0">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th class="th-num">#</th>
+          <th>Nombre</th>
+          <th class="th-wide">Ubicación</th>
+          <th>Estado</th>
+          <th>Teléfono</th>
+          <th>WhatsApp</th>
+          <th>Vehículos</th>
+          <th>Usuarios</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of filtered; let i = index">
+          <td class="cell-num">{{ i + 1 }}</td>
+          <td class="cell-strong">{{ row.name }}</td>
+          <td class="td-wrap">{{ row.location || '—' }}</td>
+          <td>{{ row.state || '—' }}</td>
+          <td>{{ row.phone || '—' }}</td>
+          <td>{{ row.whatsapp_phone || '—' }}</td>
+          <td>{{ row.vehicles_count ?? '—' }}</td>
+          <td>{{ row.users_count ?? '—' }}</td>
+          <td>
+            <div class="row-actions">
+              <button type="button" class="act-btn edit" (click)="openEdit(row)" title="Editar">
+                <span class="material-icons">edit</span>
+              </button>
+              <button type="button" class="act-btn delete" (click)="deleteRow(row)" title="Eliminar">
+                <span class="material-icons">delete</span>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="empty-state" *ngIf="!loading && filtered.length === 0">
+    <span class="material-icons">storefront</span>
+    <p *ngIf="dealerships.length === 0">No hay sucursales registradas</p>
+    <p *ngIf="dealerships.length > 0">Ningún resultado con este filtro</p>
+  </div>
+
+  <!-- Modal form -->
+  <div class="modal-backdrop" *ngIf="formOpen" (click)="closeForm()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <h2>{{ editingId != null ? 'Editar sucursal' : 'Nueva sucursal' }}</h2>
+        <button type="button" class="icon-close" (click)="closeForm()" aria-label="Cerrar">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+      <form (ngSubmit)="submitForm()">
+        <div class="form-grid">
+          <label class="field">
+            <span>Nombre <span class="req">*</span></span>
+            <input type="text" name="name" [(ngModel)]="form.name" required maxlength="255" />
+          </label>
+          <label class="field full">
+            <span>Ubicación (dirección) <span class="req">*</span></span>
+            <input type="text" name="location" [(ngModel)]="form.location" required maxlength="500" />
+          </label>
+          <label class="field">
+            <span>Estado (badge y filtro en web)</span>
+            <input type="text" name="state" [(ngModel)]="form.state" maxlength="120" placeholder="Ej. Puebla" />
+          </label>
+          <label class="field">
+            <span>Horario (texto en web)</span>
+            <input type="text" name="opening_hours" [(ngModel)]="form.opening_hours" maxlength="255" placeholder="Lun - Sáb: 9:00 - 19:00" />
+          </label>
+          <label class="field full">
+            <span>Descripción</span>
+            <textarea name="description" rows="2" [(ngModel)]="form.description" maxlength="5000"></textarea>
+          </label>
+          <label class="field full">
+            <span>URL de imagen (miniatura en /sucursales)</span>
+            <input type="text" name="image_url" [(ngModel)]="form.image_url" maxlength="2048" placeholder="https://… o /storage/…" />
+          </label>
+          <label class="field">
+            <span>Latitud</span>
+            <input type="text" name="latitude" [(ngModel)]="form.latitude" inputmode="decimal" placeholder="19.0414" />
+          </label>
+          <label class="field">
+            <span>Longitud</span>
+            <input type="text" name="longitude" [(ngModel)]="form.longitude" inputmode="decimal" placeholder="-98.2063" />
+          </label>
+          <label class="field">
+            <span>Teléfono</span>
+            <input type="text" name="phone" [(ngModel)]="form.phone" maxlength="50" />
+          </label>
+          <label class="field">
+            <span>WhatsApp (10 dígitos o formato internacional)</span>
+            <input type="text" name="whatsapp_phone" [(ngModel)]="form.whatsapp_phone" maxlength="50" />
+          </label>
+          <label class="field full">
+            <span>Email</span>
+            <input type="email" name="email" [(ngModel)]="form.email" maxlength="255" />
+          </label>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="action-btn" (click)="closeForm()" [disabled]="saving">Cancelar</button>
+          <button type="submit" class="action-btn primary-btn" [disabled]="saving">
+            {{ saving ? 'Guardando…' : 'Guardar' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

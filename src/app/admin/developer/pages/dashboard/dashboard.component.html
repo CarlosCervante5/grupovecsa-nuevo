@@ -203,7 +203,7 @@
               </tr>
             </thead>
             <tbody>
-              @for (row of filteredRows; track row.uuid || row.id; let i = $index) {
+              @for (row of filteredRows; track trackCrudRow(row, i); let i = $index) {
                 <tr>
                   <td class="row-num">{{ (currentPage - 1) * 15 + i + 1 }}</td>
                   @for (col of currentSection.columns; track col.key) { <td>{{ getCellValue(row, col.key) }}</td> }
