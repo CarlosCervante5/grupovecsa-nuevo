@@ -14,21 +14,27 @@ use App\Jobs\UpdateCampaignPromotionImage;
 use App\Jobs\UploadCampaignImage;
 use App\Models\MarketingCampaign;
 use App\Models\Vehicle;
+use App\Services\DealershipAccessService;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class CampaignController extends Controller
 {
+    public function __construct(protected DealershipAccessService $dealershipAccess) {}
+
     /**
      * Obtener una lista de todas las campañas
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function search()
+    public function search(Request $request)
     {
         try {
-            
-            $campaigns = MarketingCampaign::with('promotions')->get();
+            $query = MarketingCampaign::with('promotions');
+            $this->dealershipAccess->scopeCampaignsForInventoryUser($query, $request->user());
+            $campaigns = $query->get();
 
             return ApiResponseHelper::apiSuccess(200, 'Campañas obtenidas exitosamente', ['campaigns' => $campaigns]);
         } catch (\Exception $e) {
@@ -41,13 +47,12 @@ class CampaignController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function searchCategory()
+    public function searchCategory(Request $request)
     {
         try {
-            
-            $campaigns = MarketingCampaign::with('promotions')
-                ->get()
-                ->groupBy(['category', 'segment_name']);
+            $query = MarketingCampaign::with('promotions');
+            $this->dealershipAccess->scopeCampaignsForInventoryUser($query, $request->user());
+            $campaigns = $query->get()->groupBy(['category', 'segment_name']);
 
             return ApiResponseHelper::apiSuccess(200, 'Campañas obtenidas exitosamente', ['campaigns' => $campaigns]);
         } catch (\Exception $e) {
@@ -168,13 +173,20 @@ class CampaignController extends Controller
      * @param  \App\Http\Requests\Campaigns\AttachVehicleRequest  $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function attachVehicle( AttachVehicleRequest $request)
+    public function attachVehicle(AttachVehicleRequest $request)
     {
         try {
 
             $data = $request->validated();
 
             $vehicle = Vehicle::findByUuid($data['vehicle_uuid']);
+
+            if (! $vehicle) {
+                return ApiResponseHelper::apiError('El vehículo no existe', null, 404, 'VEHICLE_NOT_FOUND');
+            }
+
+            $user = $request->user();
+            $this->dealershipAccess->assertDealershipAllowed($user, $vehicle->dealership_id);
 
             // Borrar campañas asociadas en caso de tenearlas
 
@@ -193,6 +205,8 @@ class CampaignController extends Controller
 
             return ApiResponseHelper::apiSuccess(200, 'Campañas vinculadas exitosamente');
 
+        } catch (AuthorizationException $e) {
+            return ApiResponseHelper::apiError($e->getMessage(), null, 403, 'INVENTORY_FORBIDDEN');
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al vincular promociones con vehículo', $e->getMessage(), 500, 'ATTACH_CAMPAIGN_ERROR');
         }

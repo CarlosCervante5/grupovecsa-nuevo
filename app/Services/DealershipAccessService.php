@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -101,5 +102,38 @@ class DealershipAccessService
         }
 
         return null;
+    }
+
+    /**
+     * Campañas de marketing visibles: con al menos un vehículo en las sucursales del usuario.
+     * Roles bypass (administrator, developer, gerente, admin) → sin filtro.
+     */
+    public function scopeCampaignsForInventoryUser(Builder $query, ?User $user): Builder
+    {
+        $scopeIds = $this->inventoryDealershipIds($user);
+        if ($scopeIds === null) {
+            return $query;
+        }
+
+        return $query->whereHas('vehicles', function (Builder $q) use ($scopeIds) {
+            $q->whereIn('dealership_id', $scopeIds);
+        });
+    }
+
+    /**
+     * Promociones ligadas a campañas que tienen inventario en las sucursales del usuario.
+     */
+    public function scopePromotionsForInventoryUser(Builder $query, ?User $user): Builder
+    {
+        $scopeIds = $this->inventoryDealershipIds($user);
+        if ($scopeIds === null) {
+            return $query;
+        }
+
+        return $query->whereHas('campaigns', function (Builder $q) use ($scopeIds) {
+            $q->whereHas('vehicles', function (Builder $vq) use ($scopeIds) {
+                $vq->whereIn('dealership_id', $scopeIds);
+            });
+        });
     }
 }
