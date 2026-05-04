@@ -28,7 +28,20 @@ class Dealership extends Model
     protected $fillable = [
         'name',
         'location',
+        'state',
         'description',
+        'phone',
+        'email',
+        'whatsapp_phone',
+        'latitude',
+        'longitude',
+        'image_url',
+        'opening_hours',
+    ];
+
+    protected $casts = [
+        'latitude' => 'float',
+        'longitude' => 'float',
     ];
 
     /**
@@ -37,9 +50,8 @@ class Dealership extends Model
      * @var array<int, string>
      */
     protected $hidden = [
-        'id',
         'updated_at',
-        'deleted_at'
+        'deleted_at',
     ];
 
     protected $dates = ['created_at', 'updated_at', 'deleted_at'];
@@ -58,29 +70,6 @@ class Dealership extends Model
     {
         return $value ? Carbon::parse($value)->format('Y-m-d H:i:s') : null;
     }
-
-    /**
-     * Set the name attribute to lowercase.
-     *
-     * @param  string  $value
-     * @return void
-     */
-    protected function setNameAttribute($value)
-    {
-        $this->attributes['name'] = strtolower($value);
-    }
-
-    /**
-     * Set the location attribute to lowercase.
-     *
-     * @param  string  $value
-     * @return void
-     */
-    protected function setLocationAttribute($value)
-    {
-        $this->attributes['location'] = strtolower($value);
-    }
-
 
     public function vehicles()
     {

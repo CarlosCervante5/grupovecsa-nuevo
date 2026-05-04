@@ -10,20 +10,25 @@ use App\Http\Requests\Promotions\UpdateSortPromotionRequest;
 use App\Jobs\UploadPromotionImage;
 use App\Models\MarketingCampaign;
 use App\Models\MarketingPromotion;
+use App\Services\DealershipAccessService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class PromotionController extends Controller
 {
+    public function __construct(protected DealershipAccessService $dealershipAccess) {}
+
     /**
-     * Obtener una lista de todas las campañas
+     * Lista de promociones (filtrada por sucursales del usuario si aplica).
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function search()
+    public function search(Request $request)
     {
         try {
-            
-            $promotions = MarketingPromotion::all();
+            $query = MarketingPromotion::query();
+            $this->dealershipAccess->scopePromotionsForInventoryUser($query, $request->user());
+            $promotions = $query->get();
 
             return ApiResponseHelper::apiSuccess(200, 'Promociones obtenidas exitosamente', ['promotions' => $promotions]);
         } catch (\Exception $e) {

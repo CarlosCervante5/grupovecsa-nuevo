@@ -22,6 +22,9 @@ return new class extends Migration
             $table->string('name');
             $table->string('location');
             $table->string('description')->nullable();
+            $table->string('phone', 50)->nullable();
+            $table->string('email', 255)->nullable();
+            $table->string('whatsapp_phone', 50)->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
