@@ -180,10 +180,11 @@
     @if (scanDetail.length > 0) {
       <h3 class="bench-section-title">Detalle de Anuncios</h3>
       @for (result of scanDetail; track result.competitor) {
-        @if (result.ads?.length > 0) {
-          <h4 class="bench-competitor-title">{{ result.competitor }} ({{ result.adsFound || result.ads.length }} anuncios)</h4>
+        @let ads = displayAds(result);
+        @if (ads.length > 0) {
+          <h4 class="bench-competitor-title">{{ result.competitor }} ({{ result.adsFound ?? ads.length }} anuncios)</h4>
           <div class="bench-ads-grid">
-            @for (ad of result.ads.slice(0, 10); track $index) {
+            @for (ad of ads.slice(0, 10); track $index) {
               <div class="bench-ad-card">
                 <div class="bench-ad-header">Anuncio #{{ $index + 1 }}</div>
                 @if (ad.images?.length > 0) {

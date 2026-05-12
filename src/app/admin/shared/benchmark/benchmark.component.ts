@@ -18,7 +18,7 @@ export class BenchmarkComponent implements OnInit {
   loading = false;
   scanning = false;
   error = '';
-  method: 'scraper' | 'api' = 'scraper';
+  method: 'scraper' | 'api' = 'api';
   newCompetitor = '';
   showCompetitors = false;
   tab: 'scan' | 'history' | 'reports' = 'scan';
@@ -46,6 +46,9 @@ export class BenchmarkComponent implements OnInit {
       next: (res: any) => {
         this.metaTokenConfigured = !!res?.configured;
         this.metaTokenSource = res?.source ?? null;
+        if (this.metaTokenConfigured) {
+          this.method = 'api';
+        }
       },
       error: () => {
         this.metaTokenConfigured = false;
@@ -112,7 +115,7 @@ export class BenchmarkComponent implements OnInit {
     this.error = '';
     this.scanResults = null;
     this.scanDetail = [];
-    this.crud.store('benchmark/scan', { method: this.method }).subscribe({
+    this.crud.store('benchmark/scan', { method: this.method }, { timeoutMs: 600_000 }).subscribe({
       next: (res: any) => {
         this.scanResults = res;
         this.scanning = false;
@@ -127,7 +130,21 @@ export class BenchmarkComponent implements OnInit {
           },
         });
       },
-      error: (err: any) => { this.error = err?.error?.error || 'Error al escanear'; this.scanning = false; },
+      error: (err: any) => {
+        if (err?.name === 'TimeoutError') {
+          this.error =
+            'Tiempo de espera agotado (10 minutos). Si escanea muchos competidores, puede agotarse el límite del navegador o del servidor; pruebe con menos filas o revise BENCHMARK_META_REQUEST_DELAY_US en el backend.';
+        } else {
+          const e = err?.error;
+          this.error =
+            (typeof e === 'string' ? e : null) ||
+            e?.error ||
+            e?.message ||
+            (Array.isArray(e?.errors) ? e.errors.join(' ') : '') ||
+            'Error al escanear';
+        }
+        this.scanning = false;
+      },
     });
   }
 
@@ -178,6 +195,26 @@ export class BenchmarkComponent implements OnInit {
       },
       error: () => { this.loading = false; },
     });
+  }
+
+  /** Anuncios para tarjetas: soporta JSON guardado solo con `data` (Meta API) o con `ads` (scraper). */
+  displayAds(result: any): any[] {
+    if (Array.isArray(result?.ads) && result.ads.length > 0) {
+      return result.ads;
+    }
+    const data = result?.data;
+    if (!Array.isArray(data) || data.length === 0) {
+      return [];
+    }
+    return data.map((row: any) => ({
+      text: Array.isArray(row?.ad_creative_bodies)
+        ? row.ad_creative_bodies.join('\n')
+        : String(row?.ad_creative_bodies ?? ''),
+      images:
+        row?.ad_snapshot_url && typeof row.ad_snapshot_url === 'string' ? [row.ad_snapshot_url] : [],
+      imageCount: row?.ad_snapshot_url ? 1 : 0,
+      videoCount: 0,
+    }));
   }
 
   goBack(): void {
