@@ -119,17 +119,44 @@ class BenchmarkAdsController extends Controller
     public function scan(Request $request)
     {
         $competitors = $request->input('competitors', $this->getCompetitors());
-        $token = $this->getMetaToken();
+        if (! is_array($competitors) || count($competitors) === 0) {
+            return response()->json(['error' => 'No hay competidores para escanear.'], 400);
+        }
 
-        if (!$token) {
-            return response()->json(['error' => 'No hay token de Meta. Configúralo en Benchmark ADS (Token de Meta) o define META_ACCESS_TOKEN en el .env del backend.'], 400);
+        $method = $request->input('method', 'api');
+        if (! in_array($method, ['api', 'scraper'], true)) {
+            $method = 'api';
         }
 
         try {
-            $results = [];
-            foreach ($competitors as $competitor) {
-                $results[] = $this->searchMetaAds($competitor, $token);
-                usleep(1000000); // 1s delay between requests
+            if (function_exists('set_time_limit')) {
+                @set_time_limit(0);
+            }
+
+            if ($method === 'scraper') {
+                $results = $this->runScraperViaRemoteService($competitors);
+                if ($results instanceof \Illuminate\Http\JsonResponse) {
+                    return $results;
+                }
+            } else {
+                $token = $this->getMetaToken();
+                if (! $token) {
+                    return response()->json(['error' => 'No hay token de Meta. Configúralo en Benchmark ADS (Token de Meta) o define META_ACCESS_TOKEN en el .env del backend.'], 400);
+                }
+
+                $delayUs = (int) env('BENCHMARK_META_REQUEST_DELAY_US', 250000);
+                if ($delayUs < 0) {
+                    $delayUs = 0;
+                }
+
+                $results = [];
+                foreach ($competitors as $competitor) {
+                    $raw = $this->searchMetaAds((string) $competitor, $token);
+                    $results[] = $this->enrichScanResultForUi($raw);
+                    if ($delayUs > 0) {
+                        usleep($delayUs);
+                    }
+                }
             }
 
             $timestamp = now()->format('Y-m-d\TH-i-s');
@@ -141,10 +168,11 @@ class BenchmarkAdsController extends Controller
 
             return response()->json([
                 'success' => true,
+                'method' => $method,
                 'summary' => collect($results)->map(function ($r) {
                     return [
-                        'competitor' => $r['competitor'],
-                        'adsCount' => count($r['data'] ?? []),
+                        'competitor' => $r['competitor'] ?? '',
+                        'adsCount' => (int) ($r['adsFound'] ?? count($r['ads'] ?? $r['data'] ?? [])),
                         'error' => $r['error'] ?? null,
                     ];
                 }),
@@ -170,7 +198,8 @@ class BenchmarkAdsController extends Controller
         }
 
         try {
-            $result = $this->searchMetaAds($q, $token);
+            $result = $this->enrichScanResultForUi($this->searchMetaAds($q, $token));
+
             return response()->json($result);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -272,42 +301,156 @@ class BenchmarkAdsController extends Controller
         return ($token !== '' && $token !== 'TU_ACCESS_TOKEN_AQUI') ? $token : null;
     }
 
-    private function searchMetaAds(string $searchTerm, string $token): array
+    /**
+     * @return array<int, mixed>|\Illuminate\Http\JsonResponse
+     */
+    private function runScraperViaRemoteService(array $competitors)
     {
-        try {
-            $response = Http::timeout(30)->get('https://graph.facebook.com/v21.0/ads_archive', [
-                'access_token' => $token,
-                'search_terms' => $searchTerm,
-                'ad_reached_countries' => 'MX',
-                'ad_active_status' => 'ACTIVE',
-                'ad_type' => 'ALL',
-                'fields' => implode(',', [
-                    'id', 'ad_creation_time', 'ad_creative_bodies',
-                    'ad_creative_link_captions', 'ad_creative_link_titles',
-                    'ad_delivery_start_time', 'ad_delivery_stop_time',
-                    'page_id', 'page_name', 'publisher_platforms',
-                    'estimated_audience_size', 'impressions',
-                    'spend', 'currency', 'languages',
-                ]),
-                'limit' => 50,
+        $base = rtrim((string) env('BENCHMARK_REPORT_ADS_URL', ''), '/');
+        if ($base === '') {
+            return response()->json([
+                'error' => 'El modo Web Scraper no está integrado en PHP. Configure BENCHMARK_REPORT_ADS_URL con la URL base del servicio reportADS (Node), o use Meta API con un token válido.',
+                'code' => 'SCRAPER_UNAVAILABLE',
+            ], 422);
+        }
+
+        $timeout = (int) env('BENCHMARK_REPORT_ADS_TIMEOUT', 900);
+        if ($timeout < 60) {
+            $timeout = 60;
+        }
+
+        $response = Http::timeout($timeout)
+            ->connectTimeout(30)
+            ->post($base.'/api/scan', [
+                'competitors' => array_values($competitors),
+                'method' => 'scraper',
+                'includeResults' => true,
             ]);
 
-            $data = $response->json();
+        $body = $response->json();
+        if ($response->failed()) {
+            $msg = is_array($body) ? ($body['error'] ?? json_encode($body)) : $response->body();
 
-            return [
-                'competitor' => $searchTerm,
-                'data' => $data['data'] ?? [],
-                'paging' => $data['paging'] ?? null,
-                'fetchedAt' => now()->toISOString(),
-            ];
-        } catch (\Exception $e) {
-            return [
-                'competitor' => $searchTerm,
-                'data' => [],
-                'error' => $e->getMessage(),
-                'fetchedAt' => now()->toISOString(),
+            return response()->json([
+                'error' => is_string($msg) ? $msg : 'Error al contactar el servicio de scraper.',
+            ], min($response->status() ?: 502, 599));
+        }
+
+        if (! ($body['success'] ?? false)) {
+            return response()->json([
+                'error' => is_array($body) ? ($body['error'] ?? 'Fallo del servicio de scraper') : 'Fallo del servicio de scraper',
+            ], 502);
+        }
+
+        $results = $body['results'] ?? null;
+        if (! is_array($results)) {
+            return response()->json([
+                'error' => 'El servicio reportADS no devolvió el cuerpo de resultados. Actualice reportADS (POST /api/scan con includeResults: true) o use Meta API.',
+                'code' => 'SCRAPER_LEGACY',
+            ], 502);
+        }
+
+        $enriched = [];
+        foreach ($results as $row) {
+            $enriched[] = $this->enrichScanResultForUi(is_array($row) ? $row : []);
+        }
+
+        return $enriched;
+    }
+
+    private function searchMetaAds(string $searchTerm, string $token): array
+    {
+        $base = [
+            'competitor' => $searchTerm,
+            'data' => [],
+            'fetchedAt' => now()->toISOString(),
+        ];
+
+        try {
+            $response = Http::timeout(90)
+                ->connectTimeout(25)
+                ->get('https://graph.facebook.com/v21.0/ads_archive', [
+                    'access_token' => $token,
+                    'search_terms' => $searchTerm,
+                    'ad_reached_countries' => 'MX',
+                    'ad_active_status' => 'ACTIVE',
+                    'ad_type' => 'ALL',
+                    'fields' => implode(',', [
+                        'id',
+                        'page_id',
+                        'page_name',
+                        'ad_creation_time',
+                        'ad_delivery_start_time',
+                        'ad_creative_bodies',
+                        'publisher_platforms',
+                        'ad_snapshot_url',
+                    ]),
+                    'limit' => 50,
+                ]);
+
+            if ($response->failed()) {
+                $snippet = $response->json('error.message');
+                if (! is_string($snippet) || $snippet === '') {
+                    $snippet = substr($response->body(), 0, 500);
+                }
+
+                return array_merge($base, [
+                    'error' => 'HTTP '.$response->status().': '.$snippet,
+                ]);
+            }
+
+            $payload = $response->json();
+            if (isset($payload['error']) && is_array($payload['error'])) {
+                $msg = $payload['error']['message'] ?? json_encode($payload['error']);
+
+                return array_merge($base, ['error' => is_string($msg) ? $msg : json_encode($payload['error'])]);
+            }
+
+            return array_merge($base, [
+                'data' => $payload['data'] ?? [],
+                'paging' => $payload['paging'] ?? null,
+            ]);
+        } catch (\Throwable $e) {
+            return array_merge($base, ['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Añade claves `ads` y `adsFound` para la UI y reportes (formato compatible con el scraper Node).
+     */
+    private function enrichScanResultForUi(array $result): array
+    {
+        if (array_key_exists('ads', $result) && is_array($result['ads'])) {
+            $result['adsFound'] = (int) ($result['adsFound'] ?? count($result['ads']));
+
+            return $result;
+        }
+
+        $items = $result['data'] ?? [];
+        $ads = [];
+        foreach ($items as $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+            $bodies = $row['ad_creative_bodies'] ?? null;
+            $text = is_array($bodies)
+                ? implode("\n", array_filter($bodies, fn ($b) => is_string($b) && $b !== ''))
+                : (string) $bodies;
+            $images = [];
+            if (! empty($row['ad_snapshot_url']) && is_string($row['ad_snapshot_url'])) {
+                $images[] = $row['ad_snapshot_url'];
+            }
+            $ads[] = [
+                'text' => $text,
+                'images' => $images,
+                'imageCount' => count($images),
+                'videoCount' => 0,
             ];
         }
+        $result['ads'] = $ads;
+        $result['adsFound'] = count($ads);
+
+        return $result;
     }
 
     private function getDataFiles(): array
@@ -325,13 +468,13 @@ class BenchmarkAdsController extends Controller
     private function generateHTMLReport(array $results, string $timestamp): string
     {
         $date = now()->format('d \d\e F Y');
-        $totalAds = collect($results)->sum(fn($r) => count($r['data'] ?? []));
-        $successful = collect($results)->filter(fn($r) => empty($r['error']))->count();
+        $totalAds = collect($results)->sum(fn ($r) => (int) ($r['adsFound'] ?? count($r['ads'] ?? $r['data'] ?? [])));
+        $successful = collect($results)->filter(fn ($r) => empty($r['error']))->count();
 
         $competitorRows = '';
         foreach ($results as $r) {
             $name = $r['competitor'] ?? 'Desconocido';
-            $count = count($r['data'] ?? []);
+            $count = (int) ($r['adsFound'] ?? count($r['ads'] ?? $r['data'] ?? []));
             $hasError = !empty($r['error']);
             $status = $hasError ? '<span style="color:#ff4444">Error</span>' : ($count > 0 ? 'Activo' : 'Sin anuncios');
             $fetchedAt = $r['fetchedAt'] ?? '-';
@@ -362,7 +505,7 @@ HTML;
         $rows = ["Competidor,Anuncios Activos,Estado,Fecha"];
         foreach ($results as $r) {
             $name = $r['competitor'] ?? 'Desconocido';
-            $count = count($r['data'] ?? []);
+            $count = (int) ($r['adsFound'] ?? count($r['ads'] ?? $r['data'] ?? []));
             $status = !empty($r['error']) ? 'Error' : ($count > 0 ? 'Activo' : 'Sin anuncios');
             $date = $r['fetchedAt'] ?? '-';
             $rows[] = "\"{$name}\",{$count},\"{$status}\",\"{$date}\"";

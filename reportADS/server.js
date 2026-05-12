@@ -21,7 +21,7 @@ app.get('/', (req, res) => {
 
 // API: Escanear competidores
 app.post('/api/scan', async (req, res) => {
-  const { competitors, method } = req.body;
+  const { competitors, method, includeResults } = req.body;
   const targets = competitors || config.COMPETITORS;
 
   try {
@@ -42,7 +42,7 @@ app.post('/api/scan', async (req, res) => {
     const htmlFile = reportGen.generateHTML(results, method === 'scraper' ? 'scraper' : 'api');
     const csvFile = reportGen.generateCSV(results, method === 'scraper' ? 'scraper' : 'api');
 
-    res.json({
+    const payload = {
       success: true,
       summary: results.map(r => ({
         competitor: r.competitor,
@@ -50,7 +50,11 @@ app.post('/api/scan', async (req, res) => {
         error: r.error || null
       })),
       files: { data: dataFile, html: htmlFile, csv: csvFile }
-    });
+    };
+    if (includeResults) {
+      payload.results = results;
+    }
+    res.json(payload);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

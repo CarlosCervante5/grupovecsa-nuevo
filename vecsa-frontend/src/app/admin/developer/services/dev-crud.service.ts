@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '@environments/environment';
-import { Observable } from 'rxjs';
+import { Observable, timeout } from 'rxjs';
 
 export interface FormField {
   key: string;
@@ -61,8 +61,12 @@ export class DevCrudService {
     return this.http.post(url, body, { headers: this.headers });
   }
 
-  store(endpoint: string, body: any): Observable<any> {
-    return this.http.post(`${this.baseUrl}/api/${endpoint}`, body, { headers: this.headers });
+  store(endpoint: string, body: any, opts?: { timeoutMs?: number }): Observable<any> {
+    const req = this.http.post(`${this.baseUrl}/api/${endpoint}`, body, { headers: this.headers });
+    if (opts?.timeoutMs != null && opts.timeoutMs > 0) {
+      return req.pipe(timeout(opts.timeoutMs));
+    }
+    return req;
   }
 
   update(endpoint: string, body: any): Observable<any> {
