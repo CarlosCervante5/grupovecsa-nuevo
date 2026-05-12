@@ -81,7 +81,9 @@
     <div class="bench-controls">
       <div class="bench-controls-main">
         <select class="bench-select" [(ngModel)]="method" aria-label="Método de escaneo">
-          <option value="scraper">Web Scraper (sin API key)</option>
+          <option value="scraper" [disabled]="!scraperProxyConfigured">
+            Web Scraper (requiere BENCHMARK_REPORT_ADS_URL en el backend)
+          </option>
           <option value="api">Meta API (requiere token)</option>
         </select>
         <button type="button" class="bench-btn-primary" (click)="startScan()" [disabled]="scanning">
@@ -94,6 +96,14 @@
         <span class="material-icons">group</span> Competidores ({{ competitors.length }})
       </button>
     </div>
+    @if (!scraperProxyConfigured) {
+      <p class="bench-scraper-hint">
+        <span class="material-icons">info</span>
+        El Web Scraper corre en Node (Puppeteer), no en PHP. Para habilitarlo, despliegue el proyecto
+        <code>reportADS</code> del monorepo y defina la variable
+        <code>BENCHMARK_REPORT_ADS_URL</code> en el servicio Laravel (p. ej. Railway) con la URL pública de ese servicio (sin barra al final).
+      </p>
+    }
 
     @if (showCompetitors) {
       <div class="bench-competitors-panel">
