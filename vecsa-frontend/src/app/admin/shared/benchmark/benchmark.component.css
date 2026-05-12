@@ -143,3 +143,97 @@
 .bench-list-arrow { color: #cbd5e1; margin-left: auto; }
 .bench-list-link { text-decoration: none; color: #1e293b; font-size: 13px; }
 .bench-list-link .bench-list-arrow { color: #1c69d4; }
+
+/* Token Meta */
+.bench-meta-panel {
+  margin-bottom: 20px;
+  padding: 18px 20px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.04);
+}
+.bench-meta-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.bench-meta-head-icon {
+  font-size: 28px;
+  color: #1c69d4;
+  flex-shrink: 0;
+}
+.bench-meta-head-text {
+  flex: 1;
+  min-width: 200px;
+}
+.bench-meta-head-text strong {
+  display: block;
+  font-size: 0.95rem;
+  color: #0f172a;
+  margin-bottom: 6px;
+}
+.bench-meta-head-text p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #64748b;
+  line-height: 1.5;
+}
+.bench-meta-head-text code {
+  font-size: 0.75rem;
+  background: #f1f5f9;
+  padding: 1px 6px;
+  border-radius: 4px;
+  color: #475569;
+}
+.bench-meta-badge {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+.bench-meta-badge--ok {
+  background: #ecfdf5;
+  color: #047857;
+}
+.bench-meta-env-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  font-size: 0.78rem;
+  color: #64748b;
+}
+.bench-meta-env-hint .material-icons {
+  font-size: 18px;
+  color: #94a3b8;
+}
+.bench-meta-env-hint--ok {
+  color: #047857;
+}
+.bench-meta-env-hint--ok .material-icons {
+  color: #10b981;
+}
+.bench-meta-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.bench-meta-input {
+  flex: 1;
+  min-width: 220px;
+  max-width: 100%;
+}
+.bench-meta-msg {
+  margin: 12px 0 0;
+  font-size: 0.8rem;
+  color: #475569;
+}

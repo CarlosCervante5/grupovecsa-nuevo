@@ -23,6 +23,12 @@ export class BenchmarkComponent implements OnInit {
   showCompetitors = false;
   tab: 'scan' | 'history' | 'reports' = 'scan';
 
+  metaTokenConfigured = false;
+  metaTokenSource: 'storage' | 'env' | null = null;
+  metaTokenInput = '';
+  metaTokenSaving = false;
+  metaTokenMessage = '';
+
   get totalAds(): number {
     if (!this.scanResults?.summary) return 0;
     return this.scanResults.summary.reduce((s: number, r: any) => s + (r.adsCount || 0), 0);
@@ -32,6 +38,61 @@ export class BenchmarkComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadCompetitors();
+    this.loadMetaTokenStatus();
+  }
+
+  loadMetaTokenStatus(): void {
+    this.crud.fetch('benchmark/meta-token', 'GET', {}).subscribe({
+      next: (res: any) => {
+        this.metaTokenConfigured = !!res?.configured;
+        this.metaTokenSource = res?.source ?? null;
+      },
+      error: () => {
+        this.metaTokenConfigured = false;
+        this.metaTokenSource = null;
+      },
+    });
+  }
+
+  saveMetaToken(): void {
+    const token = this.metaTokenInput.trim();
+    if (!token) {
+      return;
+    }
+    this.metaTokenSaving = true;
+    this.metaTokenMessage = '';
+    this.crud.store('benchmark/meta-token', { token }).subscribe({
+      next: (res: any) => {
+        this.metaTokenSaving = false;
+        this.metaTokenInput = '';
+        this.metaTokenConfigured = !!res?.configured;
+        this.metaTokenSource = res?.source ?? 'storage';
+        this.metaTokenMessage = res?.message || 'Token guardado.';
+      },
+      error: (err: any) => {
+        this.metaTokenSaving = false;
+        const e = err?.error;
+        const first = e?.errors?.token?.[0];
+        this.metaTokenMessage = first || e?.message || e?.error || 'No se pudo guardar el token.';
+      },
+    });
+  }
+
+  clearMetaToken(): void {
+    this.metaTokenSaving = true;
+    this.metaTokenMessage = '';
+    this.crud.deleteAt('benchmark/meta-token').subscribe({
+      next: (res: any) => {
+        this.metaTokenSaving = false;
+        this.metaTokenConfigured = !!res?.configured;
+        this.metaTokenSource = res?.source ?? null;
+        this.metaTokenMessage = res?.message || 'Token eliminado.';
+      },
+      error: (err: any) => {
+        this.metaTokenSaving = false;
+        this.metaTokenMessage = err?.error?.message || err?.error?.error || 'Error al eliminar.';
+      },
+    });
   }
 
   loadCompetitors(): void {

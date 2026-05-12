@@ -406,3 +406,287 @@
 .text-gray {
     color: gray;
 }
+
+/* ——— Vista detalle vehículo: alineada a estilos boutique / home (azul #1c69d4, slate) ——— */
+.vd-page {
+  --vd-blue: #1c69d4;
+  --vd-blue-dark: #1554b0;
+  --vd-text: #0f172a;
+  --vd-muted: #64748b;
+  --vd-border: #e5e7eb;
+  --vd-surface: #f8fafc;
+  background: var(--vd-surface);
+}
+
+.vd-page.container {
+  padding-left: max(1rem, env(safe-area-inset-left));
+  padding-right: max(1rem, env(safe-area-inset-right));
+}
+
+@media (min-width: 768px) {
+  .vd-page.container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+.vd-breadcrumb {
+  background: #fff;
+  border: 1px solid var(--vd-border);
+  border-radius: 12px;
+  padding: 0.65rem 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.vd-breadcrumb-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.vd-breadcrumb-back {
+  color: var(--vd-blue);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.vd-breadcrumb-back:hover {
+  text-decoration: underline;
+  color: var(--vd-blue-dark);
+}
+
+.vd-breadcrumb-sep {
+  color: #9ca3af;
+  user-select: none;
+}
+
+.vd-breadcrumb-part {
+  color: var(--vd-muted);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.vd-breadcrumb-part:hover {
+  color: var(--vd-blue);
+}
+
+.vd-breadcrumb-current {
+  color: #475569;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.vd-breadcrumb-current:hover {
+  color: var(--vd-text);
+}
+
+.vd-mobile-strip {
+  background: #fff;
+  border: 1px solid var(--vd-border);
+  border-radius: 12px;
+  margin-bottom: 0.75rem;
+}
+
+.vd-mobile-strip .ellipsis,
+.vd-mobile-strip b {
+  color: var(--vd-text);
+}
+
+.vd-mobile-strip .abcars-offer {
+  color: var(--vd-blue) !important;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.vd-gallery-wrap .container-big,
+.vd-gallery-wrap swiper-container.container-big {
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--vd-border);
+  background: #fff;
+  box-shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
+}
+
+.vd-page .slide-big {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.vd-page .img-small {
+  border-radius: 8px;
+}
+
+.vd-sidebar-card.style-div {
+  margin-left: 0 !important;
+  border-radius: 16px !important;
+  border: 1px solid var(--vd-border) !important;
+  box-shadow: 0 4px 24px rgba(15, 23, 42, 0.08) !important;
+  background: #fff !important;
+  padding-bottom: 0.5rem;
+}
+
+.vd-page .titleCar {
+  font-size: clamp(0.95rem, 1.2vw, 1.05rem) !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.04em;
+  color: var(--vd-text) !important;
+  text-transform: uppercase;
+  line-height: 1.35;
+  width: auto !important;
+  max-width: 100%;
+}
+
+.vd-page .style-div .titles .fw-light,
+.vd-page .style-div p.fw-light {
+  font-size: 0.72rem !important;
+  font-weight: 600 !important;
+  color: var(--vd-muted) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 0.35rem !important;
+}
+
+.vd-page .style-div .abcars-color {
+  font-size: clamp(1.85rem, 2.8vw, 2.35rem) !important;
+  font-weight: 800 !important;
+  color: var(--vd-blue) !important;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.vd-page .style-div .abcars-offer {
+  font-size: clamp(1.5rem, 2.2vw, 1.85rem);
+  font-weight: 800;
+}
+
+.vd-page .style-div .abcars-offer del {
+  color: #94a3b8 !important;
+  font-weight: 600;
+}
+
+.vd-page .vd-offer-price {
+  color: var(--vd-blue) !important;
+}
+
+.vd-page #accordionActionsDesktop .accordion-item,
+.vd-page #accordionActionsMobile .accordion-item {
+  border: none !important;
+  border-bottom: 1px solid var(--vd-border) !important;
+  background: transparent;
+}
+
+.vd-page #accordionActionsDesktop .accordion-button,
+.vd-page #accordionActionsMobile .accordion-button {
+  background: #fff !important;
+  box-shadow: none !important;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--vd-text) !important;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.vd-page #accordionActionsDesktop .accordion-button:hover,
+.vd-page #accordionActionsMobile .accordion-button:hover {
+  background: #f8fafc !important;
+  color: var(--vd-blue) !important;
+}
+
+.vd-page #accordionActionsDesktop .accordion-button::after,
+.vd-page #accordionActionsMobile .accordion-button::after {
+  filter: opacity(0.45);
+}
+
+.vd-page #vehicleDetailAccordion .accordion-item {
+  border: 1px solid var(--vd-border);
+  border-radius: 12px;
+  margin-bottom: 0.65rem;
+  overflow: hidden;
+  background: #fff;
+}
+
+.vd-page #vehicleDetailAccordion .accordion-button {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--vd-text);
+  background: #fff;
+}
+
+.vd-page #vehicleDetailAccordion .accordion-button:not(.collapsed) {
+  color: var(--vd-blue);
+  background: #eff6ff;
+  box-shadow: none;
+}
+
+.vd-page #vehicleDetailAccordion .accordion-body {
+  font-size: 0.9375rem;
+  color: #475569;
+  line-height: 1.65;
+}
+
+.vd-page .details-bg {
+  background: #f8fafc;
+  border: 1px solid var(--vd-border);
+  border-radius: 12px;
+}
+
+.vd-page .d-xl-none .titleCar {
+  font-size: 1.25rem !important;
+  letter-spacing: 0.03em;
+}
+
+.vd-page .d-xl-none .abcars-color {
+  color: var(--vd-blue) !important;
+  font-weight: 800;
+}
+
+.vd-page .d-xl-none .abcars-offer {
+  font-weight: 800;
+}
+
+.vd-page .d-xl-none .abcars-offer del {
+  color: #94a3b8 !important;
+  font-weight: 600;
+}
+
+.vd-page .d-xl-none .vd-offer-price {
+  color: var(--vd-blue) !important;
+}
+
+.vd-related-title {
+  font-family: 'Oswald', 'Inter', system-ui, sans-serif;
+  color: var(--vd-text);
+  letter-spacing: 0.02em;
+}
+
+.vd-page hr {
+  border: 0;
+  border-top: 1px solid var(--vd-border);
+  opacity: 1;
+}
+
+.vd-page .legal span {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--vd-muted);
+}
+
+.vd-page .legal p {
+  font-size: 0.65rem !important;
+  line-height: 1.45 !important;
+  color: #64748b;
+  max-width: 100%;
+}
+
+@media (min-width: 768px) {
+  .vd-page .legal p {
+    font-size: 0.7rem !important;
+  }
+}

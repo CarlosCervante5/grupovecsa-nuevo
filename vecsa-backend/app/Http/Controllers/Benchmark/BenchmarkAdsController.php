@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Benchmark;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 
@@ -11,6 +12,66 @@ class BenchmarkAdsController extends Controller
 {
     private string $dataDir = 'benchmark/data';
     private string $reportsDir = 'benchmark/reports';
+
+    private function metaTokenStoragePath(): string
+    {
+        return 'benchmark/meta_access_token.enc';
+    }
+
+    // ─── Meta access token (Ad Library) ───
+
+    /**
+     * Estado del token: si hay valor en storage cifrado o en META_ACCESS_TOKEN (.env).
+     */
+    public function metaTokenStatus()
+    {
+        $fromStorage = $this->getMetaTokenFromStorage();
+        $fromEnv = $this->getMetaTokenFromEnv();
+
+        return response()->json([
+            'configured' => $fromStorage !== null || $fromEnv !== null,
+            'source' => $fromStorage !== null ? 'storage' : ($fromEnv !== null ? 'env' : null),
+        ]);
+    }
+
+    public function saveMetaToken(Request $request)
+    {
+        $data = $request->validate([
+            'token' => 'required|string|min:10|max:4096',
+        ]);
+
+        $token = trim($data['token']);
+        if ($token === '' || $token === 'TU_ACCESS_TOKEN_AQUI') {
+            return response()->json(['error' => 'Token inválido'], 422);
+        }
+
+        try {
+            Storage::put($this->metaTokenStoragePath(), Crypt::encryptString($token));
+        } catch (\Throwable $e) {
+            return response()->json(['error' => 'No se pudo guardar el token'], 500);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Token guardado de forma segura en el servidor.',
+            'configured' => true,
+            'source' => 'storage',
+        ]);
+    }
+
+    public function clearMetaToken()
+    {
+        if (Storage::exists($this->metaTokenStoragePath())) {
+            Storage::delete($this->metaTokenStoragePath());
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Token eliminado del almacenamiento de la aplicación. Si existe META_ACCESS_TOKEN en .env, se seguirá usando.',
+            'configured' => $this->getMetaTokenFromEnv() !== null,
+            'source' => $this->getMetaTokenFromEnv() !== null ? 'env' : null,
+        ]);
+    }
 
     // ─── Competitors ───
 
@@ -61,7 +122,7 @@ class BenchmarkAdsController extends Controller
         $token = $this->getMetaToken();
 
         if (!$token) {
-            return response()->json(['error' => 'No se ha configurado META_ACCESS_TOKEN'], 400);
+            return response()->json(['error' => 'No hay token de Meta. Configúralo en Benchmark ADS (Token de Meta) o define META_ACCESS_TOKEN en el .env del backend.'], 400);
         }
 
         try {
@@ -105,7 +166,7 @@ class BenchmarkAdsController extends Controller
 
         $token = $this->getMetaToken();
         if (!$token) {
-            return response()->json(['error' => 'No se ha configurado META_ACCESS_TOKEN'], 400);
+            return response()->json(['error' => 'No hay token de Meta. Configúralo en Benchmark ADS (Token de Meta) o define META_ACCESS_TOKEN en el .env del backend.'], 400);
         }
 
         try {
@@ -177,8 +238,38 @@ class BenchmarkAdsController extends Controller
 
     private function getMetaToken(): ?string
     {
-        $token = env('META_ACCESS_TOKEN', '');
-        return ($token && $token !== 'TU_ACCESS_TOKEN_AQUI') ? $token : null;
+        $fromStorage = $this->getMetaTokenFromStorage();
+        if ($fromStorage !== null) {
+            return $fromStorage;
+        }
+
+        return $this->getMetaTokenFromEnv();
+    }
+
+    private function getMetaTokenFromStorage(): ?string
+    {
+        $path = $this->metaTokenStoragePath();
+        if (! Storage::exists($path)) {
+            return null;
+        }
+        try {
+            $raw = trim((string) Storage::get($path));
+            if ($raw === '') {
+                return null;
+            }
+
+            return Crypt::decryptString($raw);
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    private function getMetaTokenFromEnv(): ?string
+    {
+        $token = (string) env('META_ACCESS_TOKEN', '');
+        $token = trim($token);
+
+        return ($token !== '' && $token !== 'TU_ACCESS_TOKEN_AQUI') ? $token : null;
     }
 
     private function searchMetaAds(string $searchTerm, string $token): array

@@ -77,6 +77,11 @@ export class DevCrudService {
     return this.http.post(`${this.baseUrl}/api/${endpoint}`, body, { headers: this.headers });
   }
 
+  /** DELETE a una ruta API relativa, p. ej. `benchmark/meta-token`. */
+  deleteAt(endpoint: string): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/api/${endpoint}`, { headers: this.headers });
+  }
+
   deleteById(resource: string, id: number | string): Observable<any> {
     return this.http.delete(`${this.baseUrl}/api/${resource}/${id}`, { headers: this.headers });
   }
