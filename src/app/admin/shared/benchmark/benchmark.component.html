@@ -31,6 +31,53 @@
 
   <!-- SCAN TAB -->
   @if (tab === 'scan') {
+    <div class="bench-meta-panel">
+      <div class="bench-meta-head">
+        <span class="material-icons bench-meta-head-icon">vpn_key</span>
+        <div class="bench-meta-head-text">
+          <strong>Token de Meta (Ad Library API)</strong>
+          <p>
+            Necesario para el escaneo por <strong>Meta API</strong>. Puedes pegarlo aquí (se guarda cifrado en el servidor) o definir
+            <code>META_ACCESS_TOKEN</code> en el <code>.env</code> del backend. Si existen ambos, tiene prioridad el guardado aquí.
+          </p>
+        </div>
+        <span class="bench-meta-badge" [class.bench-meta-badge--ok]="metaTokenConfigured">
+          {{ metaTokenConfigured ? 'Configurado' : 'Sin configurar' }}
+        </span>
+      </div>
+      @if (metaTokenSource === 'env' && metaTokenConfigured) {
+        <p class="bench-meta-env-hint"><span class="material-icons">info</span> Activo desde variables de entorno.</p>
+      }
+      @if (metaTokenSource === 'storage' && metaTokenConfigured) {
+        <p class="bench-meta-env-hint bench-meta-env-hint--ok"><span class="material-icons">lock</span> Guardado en el servidor (cifrado).</p>
+      }
+      <div class="bench-meta-form">
+        <input
+          type="password"
+          class="bench-input bench-meta-input"
+          [(ngModel)]="metaTokenInput"
+          placeholder="Pega el access token de Meta…"
+          autocomplete="off"
+          [disabled]="metaTokenSaving"
+        />
+        <button type="button" class="bench-btn-primary" (click)="saveMetaToken()" [disabled]="metaTokenSaving || !metaTokenInput.trim()">
+          @if (metaTokenSaving) {
+            <div class="bench-spinner-sm"></div> Guardando…
+          } @else {
+            <span class="material-icons">save</span> Guardar token
+          }
+        </button>
+        @if (metaTokenConfigured && metaTokenSource === 'storage') {
+          <button type="button" class="bench-btn-secondary" (click)="clearMetaToken()" [disabled]="metaTokenSaving">
+            Quitar del servidor
+          </button>
+        }
+      </div>
+      @if (metaTokenMessage) {
+        <p class="bench-meta-msg">{{ metaTokenMessage }}</p>
+      }
+    </div>
+
     <div class="bench-controls">
       <div class="bench-controls-main">
         <select class="bench-select" [(ngModel)]="method" aria-label="Método de escaneo">

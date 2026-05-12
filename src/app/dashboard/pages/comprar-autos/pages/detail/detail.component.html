@@ -1,10 +1,10 @@
-<div class="container mx-auto px-4 md:px-6 lg:px-8 content" >
+<div class="vd-page container mx-auto px-4 md:px-6 lg:px-8 content">
     <ng-container *ngIf="(!vehicle); else elseTemplate">
         <app-sk-cube></app-sk-cube>
      </ng-container>
      <ng-template #elseTemplate>
         <div class="col-lg-12 col-md-12">
-            <div class=" d-xl-none col-lg-12 section mb-1">
+            <div class="vd-mobile-strip d-xl-none col-lg-12 section mb-1">
                     <div class="col-lg-12 p-3">
                         <!-- Esto es para ambas pantallas-->
                         <div class="">
@@ -31,37 +31,22 @@
                         <!-- Termina para ambas pestañas-->
                     </div>
             </div>
-            <div class="col-lg-12 mb-3 p-3">
-                    <div class="col-12 mt-5 ">
-                        <nav aria-label="breadcrumb">
-                            <ul class="breadcrumb">  
-                                <li class="breadcrumb-item" >
-                                    <a class="fw-bold text-dark text-decoration-none"
-                                        [routerLink]="[pathStockBrand]">
-                                        <i class="fas fa-arrow-left"></i> Volver a resultados 
-                                    </a>
-                                </li>
-                                
-                                <li class="breadcrumb-item" aria-current="page">
-                                    <p class="text-truncate"
-                                        [routerLink]="[pathStockBrand]">
-                                        {{ vehicle != undefined ? (vehicle.brand.name | titlecase) : ''}}
-                                    </p>
-                                </li>
-
-                                <li class="breadcrumb-item" aria-current="page">
-                                    <p class="text-truncate"
-                                        [routerLink]="[pathStockCarmodel]">
-                                        {{ vehicle != undefined ? (vehicle.model.name | titlecase) : ''}}
-                                    </p>
-                                </li>
-                            </ul>
-                        </nav>
-                    </div>
+            <div class="col-lg-12 mb-3 px-0 px-md-1">
+                    <nav class="vd-breadcrumb" aria-label="Ruta del vehículo">
+                        <div class="vd-breadcrumb-inner">
+                            <a class="vd-breadcrumb-back" [routerLink]="[pathStockBrand]">Volver a resultados</a>
+                            <span class="vd-breadcrumb-sep" aria-hidden="true">/</span>
+                            <a class="vd-breadcrumb-part text-truncate d-inline-block" style="max-width: 42vw;"
+                               [routerLink]="[pathStockBrand]">{{ vehicle.brand.name | titlecase }}</a>
+                            <span class="vd-breadcrumb-sep" aria-hidden="true">/</span>
+                            <a class="vd-breadcrumb-current text-truncate d-inline-block" style="max-width: 42vw;"
+                               [routerLink]="[pathStockCarmodel]">{{ vehicle.model.name | titlecase }}</a>
+                        </div>
+                    </nav>
             </div>
             <div class="row col-lg-12">
                     <div class="col-sm-12 col-lg-12 col-xl-8">
-                        <div class="col-lg-12 mb-3">
+                        <div class="col-lg-12 mb-3 vd-gallery-wrap">
                             <div class="col-lg-12 ">
                                 <swiper-container class="container-big" #mainSwiper slides-per-view="1" loop="true"  zoom="true">
                                     <swiper-slide class="slider-c" *ngFor="let image of imagesForSlider">
@@ -114,7 +99,7 @@
                                     <div class="col-12 mt-5" style="height: 50px;">
                                         <p class="fw-light mb-3">Precio de oferta:</p>
                                         <span
-                                            class=" abcars-offer" style="color: rgb(105, 174, 243);">
+                                            class=" abcars-offer vd-offer-price">
                                             ${{ vehicle != undefined ? (vehicle.offer_price | number:'') : '' }}
                                         </span>
                                     </div>
@@ -138,7 +123,7 @@
                                         <h2 class="accordion-header" id="mobHdrList">
                                             <div class="accordion-button collapsed" type="button"
                                                 data-bs-toggle="collapse" aria-expanded="false">
-                                                <span class="acordiontext" [ngStyle]="{'color': textButton === 'EN MI LISTA' ? '#008bcc' : '#000000'}">
+                                                <span class="acordiontext" [ngStyle]="{'color': textButton === 'EN MI LISTA' ? '#1c69d4' : '#0f172a'}">
                                                     {{ textButton }}
                                                 </span>
                                             </div>
@@ -424,7 +409,7 @@
                         </div>
                     </div>
                     <div class="d-none d-xl-block col-xl-4 ">
-                        <div class="row sticky-top style-div detail-sidebar-sticky">
+                        <div class="row sticky-top style-div detail-sidebar-sticky vd-sidebar-card">
                                     <h1 class="titleCar p-3 m-3" style="width: 90%;">{{ vehicle != undefined ? (vehicle.name) : ''}}</h1>
 
                                     <div class="titles row p-3 m-3" *ngIf="!priceOffer" style="width: 90%;">
@@ -451,7 +436,7 @@
                                         <div class="col-12 mt-5" style="height: 50px;">
                                             <p class="fw-light mb-3">Precio de oferta:</p>
                                             <span
-                                                class=" abcars-offer" style="color: rgb(105, 174, 243);">
+                                                class=" abcars-offer vd-offer-price">
                                                 <!-- $xxxxx -->
                                                 ${{ vehicle != undefined ? (vehicle.offer_price | number:'') : '' }}
                                             </span>
@@ -484,7 +469,7 @@
                                                 <h2 class="accordion-header" id="deskHdrList">
                                                     <div class="accordion-button collapsed" type="button"
                                                         data-bs-toggle="collapse" aria-expanded="false">
-                                                        <span class="acordiontext" [ngStyle]="{'color': textButton === 'EN MI LISTA' ? '#008bcc' : '#000000'}">
+                                                        <span class="acordiontext" [ngStyle]="{'color': textButton === 'EN MI LISTA' ? '#1c69d4' : '#0f172a'}">
                                                             {{ textButton }}
                                                         </span>
                                                     </div>
@@ -573,7 +558,7 @@
             </div>
             <div class="row marginContentLeft">
                 <div class="col-12 mt-2">
-                    <h2 class="fw-bold fs-3 mb-3 text">También Te Puede Interesar</h2>
+                    <h2 class="vd-related-title fw-bold fs-3 mb-3 text">También te puede interesar</h2>
                     <swiper-container class=" mb-3" [slidesPerView]="anchoCards" speed="500" loop="true" navigation="true" zoom="true">
                         <swiper-slide class="slider-vp" *ngFor="let vehicle of recommended_vehicles">
                                 <c-vender-autos-vehicle class="card-info" [vehicle]="vehicle"
