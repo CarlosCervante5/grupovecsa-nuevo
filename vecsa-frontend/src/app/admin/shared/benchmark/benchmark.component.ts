@@ -29,6 +29,9 @@ export class BenchmarkComponent implements OnInit {
   metaTokenSaving = false;
   metaTokenMessage = '';
 
+  /** true si en el backend existe BENCHMARK_REPORT_ADS_URL (proxy al Node reportADS). */
+  scraperProxyConfigured = false;
+
   get totalAds(): number {
     if (!this.scanResults?.summary) return 0;
     return this.scanResults.summary.reduce((s: number, r: any) => s + (r.adsCount || 0), 0);
@@ -37,8 +40,26 @@ export class BenchmarkComponent implements OnInit {
   constructor(private router: Router, private crud: DevCrudService) {}
 
   ngOnInit(): void {
+    this.loadBenchmarkOptions();
     this.loadCompetitors();
     this.loadMetaTokenStatus();
+  }
+
+  loadBenchmarkOptions(): void {
+    this.crud.fetch('benchmark/options', 'GET', {}).subscribe({
+      next: (res: any) => {
+        this.scraperProxyConfigured = !!res?.scraperProxyConfigured;
+        if (!this.scraperProxyConfigured && this.method === 'scraper') {
+          this.method = 'api';
+        }
+      },
+      error: () => {
+        this.scraperProxyConfigured = false;
+        if (this.method === 'scraper') {
+          this.method = 'api';
+        }
+      },
+    });
   }
 
   loadMetaTokenStatus(): void {
@@ -104,7 +125,7 @@ export class BenchmarkComponent implements OnInit {
     this.crud.fetch('benchmark/competitors', 'GET', {}).subscribe({
       next: (res: any) => { this.competitors = Array.isArray(res) ? res : []; this.loading = false; },
       error: (err: any) => {
-        this.error = err?.error?.error || 'No se pudo conectar al servicio de benchmark. Asegúrate de que el servidor reportADS esté corriendo.';
+        this.error = err?.error?.error || 'No se pudo cargar la lista de competidores desde el servidor.';
         this.loading = false;
       },
     });

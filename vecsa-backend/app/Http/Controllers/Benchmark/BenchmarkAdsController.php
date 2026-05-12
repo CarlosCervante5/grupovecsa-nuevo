@@ -34,6 +34,18 @@ class BenchmarkAdsController extends Controller
         ]);
     }
 
+    /**
+     * Opciones de UI: si el proxy al servicio Node reportADS está configurado (Web Scraper).
+     */
+    public function options()
+    {
+        $base = rtrim((string) env('BENCHMARK_REPORT_ADS_URL', ''), '/');
+
+        return response()->json([
+            'scraperProxyConfigured' => $base !== '',
+        ]);
+    }
+
     public function saveMetaToken(Request $request)
     {
         $data = $request->validate([
@@ -309,7 +321,7 @@ class BenchmarkAdsController extends Controller
         $base = rtrim((string) env('BENCHMARK_REPORT_ADS_URL', ''), '/');
         if ($base === '') {
             return response()->json([
-                'error' => 'El modo Web Scraper no está integrado en PHP. Configure BENCHMARK_REPORT_ADS_URL con la URL base del servicio reportADS (Node), o use Meta API con un token válido.',
+                'error' => 'Modo Web Scraper: falta BENCHMARK_REPORT_ADS_URL en el backend (URL pública del servicio Node reportADS con Puppeteer). En Railway, añádala a las variables del servicio Laravel. Alternativa: use Meta API con token.',
                 'code' => 'SCRAPER_UNAVAILABLE',
             ], 422);
         }

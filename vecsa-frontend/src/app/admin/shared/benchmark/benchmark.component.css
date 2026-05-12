@@ -70,6 +70,30 @@
 .bench-scan-hint p {
   margin: 0;
 }
+.bench-scraper-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  color: #1e40af;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+.bench-scraper-hint .material-icons {
+  flex-shrink: 0;
+  font-size: 20px;
+  margin-top: 1px;
+}
+.bench-scraper-hint code {
+  font-size: 0.78rem;
+  background: #dbeafe;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
 .bench-input { width: 100%; padding: 9px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.85rem; color: #0f172a; background: #fff; outline: none; box-sizing: border-box; }
 .bench-input:focus { border-color: #1c69d4; }
 
