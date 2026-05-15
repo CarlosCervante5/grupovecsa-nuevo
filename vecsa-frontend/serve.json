@@ -1,4 +1,94 @@
 {
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/sucursales",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/compra-tu-auto/**",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/promociones",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/riders",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/carcare",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/community",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/404",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/auth/**",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/admin/**",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/vender-autos/**",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/terminos-y-condiciones",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/landing/**",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/formrider",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/form-prospection",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/boutique/**",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/rewards/**",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/experience/**",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/aviso-privacidad",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/condiciones-uso",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/politicas-devolucion",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/uso-cookies",
+      "destination": "/index.html"
+    }
+  ],
   "headers": [
     {
       "source": "/index.html",
@@ -14,7 +104,7 @@
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
+          "value": "public, max-age=604800"
         }
       ]
     }
