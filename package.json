@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "serve:clean": "rm -rf .angular/cache && ng serve",
-    "start": "npx serve dist/vecsa-frontend/browser -s -l 3000",
+    "start": "npx serve dist/vecsa-frontend/browser",
     "build": "ng build --configuration=sandbox",
     "postbuild": "node ./src/assets/scripts/rename-build-files.js",
     "watch": "ng build --watch --configuration development",

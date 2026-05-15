@@ -1,6 +1,6 @@
 /**
  * Postbuild: renombra chunks legacy `src_app_*` y copia serve.json al output `browser/`
- * (Angular 19 + serve -s: index en caché + chunks viejos → MIME text/html en .js).
+ * (serve sin --single: rewrites solo en rutas SPA; un .js inexistente devuelve 404 real, no index.html).
  */
 const fs = require('fs');
 const path = require('path');

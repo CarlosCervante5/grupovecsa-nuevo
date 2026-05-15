@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 // Form
 import { FormGroup } from '@angular/forms';
 
 // HTTP Client
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 
 // Enviroment
 import { environment } from '@environments/environment';
@@ -27,8 +27,17 @@ export class AccountService {
   constructor(private _http: HttpClient) { }
 
   public validateRole(expected_role:string) {
-  
-    let user_token = localStorage.getItem('user_token');
+    const user_token = localStorage.getItem('user_token');
+    if (!user_token) {
+      return throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 401,
+            statusText: 'Sin sesión',
+            url: `${this.url}/api/auth/validate_role`,
+          }),
+      );
+    }
     let stored_role =  localStorage.getItem('role') || '';
 
     let headers = new HttpHeaders()

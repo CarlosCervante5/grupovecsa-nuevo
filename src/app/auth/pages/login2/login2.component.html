@@ -12,6 +12,7 @@
           class="field-input"
           [class.invalid]="emailInvalid"
           type="email"
+          autocomplete="username"
           placeholder="tu@correo.com"
           formControlName="email"
         />
@@ -27,6 +28,7 @@
             class="field-input"
             [class.invalid]="passwordInvalid || passwordLength"
             [type]="hide ? 'password' : 'text'"
+            autocomplete="current-password"
             placeholder="••••••••"
             formControlName="password"
           />
