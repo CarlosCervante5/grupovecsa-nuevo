@@ -761,6 +761,9 @@ Route::prefix('experience')->middleware('bandwidth_usage')->group(function () {
 // Segmento Benchmark ADS
 
 Route::prefix('benchmark')->middleware(['bandwidth_usage', 'auth:sanctum', 'permission:access benchmark'])->group(function () {
+    Route::get('/meta-token', [BenchmarkAdsController::class, 'metaTokenStatus']);
+    Route::post('/meta-token', [BenchmarkAdsController::class, 'saveMetaToken']);
+    Route::delete('/meta-token', [BenchmarkAdsController::class, 'clearMetaToken']);
     Route::post('/scan', [BenchmarkAdsController::class, 'scan']);
     Route::get('/search', [BenchmarkAdsController::class, 'search']);
     Route::get('/history', [BenchmarkAdsController::class, 'history']);
