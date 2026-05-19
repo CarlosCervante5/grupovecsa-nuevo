@@ -6,16 +6,21 @@ use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Boutique\ConfirmManualPaymentRequest;
 use App\Models\Boutique\BoutiqueOrder;
+use App\Services\Boutique\OpenPayService;
 use App\Services\Boutique\StripeService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class BoutiquePaymentController extends Controller
 {
     protected StripeService $stripeService;
 
-    public function __construct(StripeService $stripeService)
+    protected OpenPayService $openPayService;
+
+    public function __construct(StripeService $stripeService, OpenPayService $openPayService)
     {
         $this->stripeService = $stripeService;
+        $this->openPayService = $openPayService;
     }
 
     public function stripeWebhook(Request $request)
@@ -36,6 +41,29 @@ class BoutiquePaymentController extends Controller
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al procesar webhook de Stripe', $e->getMessage(), 400, 'STRIPE_WEBHOOK_ERROR');
         }
+    }
+
+    /**
+     * Webhook OpenPay (basic auth). Registrar URL en el dashboard OpenPay con los mismos user/password.
+     */
+    public function openpayWebhook(Request $request)
+    {
+        if (! $this->openPayService->verifyWebhookAuth($request->getUser(), $request->getPassword())) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $payload = json_decode($request->getContent(), true);
+        if (! is_array($payload)) {
+            return response()->json(['message' => 'JSON inválido'], 400);
+        }
+
+        try {
+            $this->openPayService->processWebhook($payload);
+        } catch (\Exception $e) {
+            Log::error('OpenPay webhook error', ['message' => $e->getMessage()]);
+        }
+
+        return response()->json(['status' => 'ok'], 200);
     }
 
     public function confirmManual(ConfirmManualPaymentRequest $request)

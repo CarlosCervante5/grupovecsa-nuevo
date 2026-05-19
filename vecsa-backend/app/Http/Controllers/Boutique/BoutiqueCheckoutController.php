@@ -435,9 +435,7 @@ class BoutiqueCheckoutController extends Controller
      * Confirma el cobro OpenPay con token (OpenPay.js) + device_session_id.
      * Ruta pública para permitir checkout de invitados.
      *
-     * TODO (fase posterior): webhook OpenPay para notificaciones asíncronas (p. ej. verificación
-     * de cargos, estados distintos de completed en la misma respuesta, reconciliación).
-     * Por ahora el flujo queda cerrado con la respuesta síncrona del API de cargos.
+     * Confirmación síncrona; reconciliación asíncrona vía POST /api/boutique/webhook/openpay.
      */
     public function confirmOpenPayCharge(Request $request)
     {

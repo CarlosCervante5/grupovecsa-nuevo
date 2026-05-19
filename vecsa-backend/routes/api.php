@@ -656,9 +656,10 @@ Route::prefix('boutique')->middleware(['bandwidth_usage', 'auth:sanctum'])->grou
     Route::post('/shipping/track', [BoutiqueShippingController::class, 'track']);
 });
 
-// Boutique Webhook Stripe (sin auth)
+// Boutique webhooks (sin auth Sanctum; OpenPay usa basic auth propio)
 Route::prefix('boutique')->middleware('bandwidth_usage')->group(function () {
     Route::post('/webhook/stripe', [BoutiquePaymentController::class, 'stripeWebhook']);
+    Route::post('/webhook/openpay', [BoutiquePaymentController::class, 'openpayWebhook']);
 });
 
 // Boutique Admin

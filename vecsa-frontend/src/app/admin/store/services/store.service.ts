@@ -119,14 +119,13 @@ export class StoreService {
     return this.boutiquePost('openpay/update', payload);
   }
 
-  /** Métodos de pago del checkout boutique (transferencia / sucursal; Stripe/OpenPay según llaves). */
+  /** Métodos de pago del checkout boutique (OpenPay, transferencia, sucursal). */
   getCheckoutPaymentMethodsConfig(): Observable<any> {
     return this.boutiquePost('checkout_payment_methods/config');
   }
 
   updateCheckoutPaymentMethods(payload: {
-    boutique_checkout_stripe: boolean;
-    boutique_checkout_openpay: boolean;
+    boutique_checkout_openpay?: boolean;
     boutique_checkout_transferencia: boolean;
     boutique_checkout_sucursal: boolean;
   }): Observable<any> {
