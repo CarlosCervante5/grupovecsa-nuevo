@@ -136,7 +136,6 @@ export class GestorLayoutComponent implements OnInit, OnDestroy {
   }
 
   logout(): void {
-    localStorage.clear();
-    this.router.navigateByUrl('/auth/iniciar-sesion');
+    this.auth.signOut(this.router);
   }
 }

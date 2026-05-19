@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
 import { Observable, BehaviorSubject, of, throwError } from 'rxjs';
-import { catchError, map, switchMap, tap } from 'rxjs/operators';
+import { catchError, finalize, map, switchMap, tap } from 'rxjs/operators';
 
 // Form
 import { UntypedFormGroup } from '@angular/forms';
@@ -50,6 +51,23 @@ export class AuthService {
         localStorage.removeItem('profile');
         localStorage.removeItem('permissions');
         this.authStatus.next(false);
+    }
+
+    /**
+     * Cierra sesión en API (si hay token), limpia solo claves de auth y redirige al login.
+     */
+    public signOut(router: Router, redirectUrl = '/auth/iniciar-sesion'): void {
+        const navigate = () => void router.navigateByUrl(redirectUrl);
+        if (!localStorage.getItem('user_token')) {
+            this.clearClientAuthState();
+            navigate();
+            return;
+        }
+        this.logout()
+            .pipe(finalize(navigate))
+            .subscribe({
+                error: () => this.clearClientAuthState(),
+            });
     }
 
     private bearerHeaders(): HttpHeaders {

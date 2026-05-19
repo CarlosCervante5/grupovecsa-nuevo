@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 
 // Services
 import { AccountService } from 'src/app/auth/pages/account/services/account.service';
+import { AuthService } from 'src/app/auth/services/auth.service';
 
 // Interfaces
 import { Overview } from '@interfaces/admin.interfaces';
@@ -27,7 +28,12 @@ export class OverviewComponent implements OnInit {
     public email: string = '';
     public role: string = '';
 
-    constructor(private _accountService: AccountService, private titleService: Title, private router: Router) {}
+    constructor(
+        private _accountService: AccountService,
+        private titleService: Title,
+        private router: Router,
+        private auth: AuthService,
+    ) {}
     
     ngOnInit(): void {   
         this.userSessionStorage()
@@ -73,7 +79,6 @@ export class OverviewComponent implements OnInit {
     }
 
     logout(): void {
-        localStorage.clear();
-        this.router.navigateByUrl('/auth/iniciar-sesion');
+        this.auth.signOut(this.router);
     }
 }

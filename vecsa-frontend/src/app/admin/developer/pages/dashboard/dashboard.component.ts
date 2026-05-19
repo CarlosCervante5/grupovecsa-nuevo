@@ -1,5 +1,6 @@
 import { Component, OnInit, AfterViewInit, ElementRef, ViewChild, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthService } from 'src/app/auth/services/auth.service';
 import { adminBenchmarkUrl } from 'src/app/admin/utils/admin-route.util';
 import { DevCrudService, CrudSection } from '../../services/dev-crud.service';
 import * as echarts from 'echarts';
@@ -403,7 +404,11 @@ export class DeveloperDashboardComponent implements OnInit, AfterViewInit, OnDes
     { label: 'Home', route: '/', icon: 'home' },
   ];
 
-  constructor(private router: Router, private crud: DevCrudService) {}
+  constructor(
+    private router: Router,
+    private crud: DevCrudService,
+    private auth: AuthService,
+  ) {}
 
   ngOnInit(): void {
     const raw = localStorage.getItem('user');
@@ -1092,5 +1097,7 @@ export class DeveloperDashboardComponent implements OnInit, AfterViewInit, OnDes
   }
 
   navigate(route: string): void { this.router.navigateByUrl(route); }
-  logout(): void { localStorage.clear(); this.router.navigateByUrl('/auth/iniciar-sesion'); }
+  logout(): void {
+    this.auth.signOut(this.router);
+  }
 }

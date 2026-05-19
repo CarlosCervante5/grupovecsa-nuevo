@@ -1,8 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/auth/services/auth.service';
-import Swal from 'sweetalert2';
-
 @Component({
     selector: 'app-sidebar',
     templateUrl: './sidebar.component.html',
@@ -16,23 +14,6 @@ export class SidebarComponent {
     private _router: Router,
   ){}
   public logout() {
-          
-    this._authService.logout()
-    .subscribe({
-        next: () => {
-        Swal.fire({
-            icon: 'success',
-            title: 'Hasta luego!',
-            text: 'Haz cerrado sesión correctamente.',
-            showConfirmButton: true,
-            confirmButtonColor: '#EEB838',
-            timer: 3500
-        });
-        },
-        error: () => {}
-        
-    });
-    localStorage.clear();
-    this._router.navigate(['/auth/iniciar-sesion']);
-}
+    this._authService.signOut(this._router);
+  }
 }

@@ -1,5 +1,6 @@
 import { Component, OnInit, AfterViewInit, ElementRef, ViewChild, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthService } from 'src/app/auth/services/auth.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { StoreService } from '../../services/store.service';
 import { environment } from '@environments/environment';
@@ -182,7 +183,12 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     return adminDashboardUrl(this.role);
   }
 
-  constructor(private router: Router, private storeService: StoreService, private http: HttpClient) {}
+  constructor(
+    private router: Router,
+    private storeService: StoreService,
+    private http: HttpClient,
+    private auth: AuthService,
+  ) {}
 
   ngOnInit(): void {
     const raw = localStorage.getItem('user');
@@ -251,8 +257,7 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   logout(): void {
-    localStorage.clear();
-    this.router.navigateByUrl('/auth/iniciar-sesion');
+    this.auth.signOut(this.router);
   }
 
   // ── Dashboard ──

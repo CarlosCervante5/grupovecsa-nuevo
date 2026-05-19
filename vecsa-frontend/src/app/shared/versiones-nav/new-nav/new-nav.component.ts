@@ -115,14 +115,10 @@ export class NewNavComponent implements OnInit, OnDestroy {
   }
 
   logout(): void {
-    // Fire-and-forget the backend logout
-    this.authService.logout().subscribe({ error: () => {} });
-    // Clear local state immediately
-    localStorage.clear();
     this.isLoggedIn = false;
     this.user = null;
     this.cartService.updateCount(null);
-    this.router.navigateByUrl('/auth/iniciar-sesion');
+    this.authService.signOut(this.router);
   }
 
   public get_url_dashboard() {
