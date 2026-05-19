@@ -19,6 +19,7 @@ import {
   BoutiqueCart,
   BoutiqueOpenPayPublicConfig,
   BoutiquePaymentMethodsPublicPayload,
+  BoutiqueTransferBankDetails,
   ShippingQuote,
 } from '../../interfaces/boutique.interfaces';
 import {
@@ -96,7 +97,12 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   openPayOrderTotal = 0;
 
   /** Si el pedido con tarjeta en línea (OpenPay) fue como invitado, al terminar pago ir a /boutique/gracias. */
-  private guestThanksAfterOnlinePayment: { orderNumber: string; guestEmail: string } | null = null;
+  private guestThanksAfterOnlinePayment: {
+    orderNumber: string;
+    guestEmail: string;
+    paymentMethod: string;
+    transferBank: BoutiqueTransferBankDetails | null;
+  } | null = null;
 
   private subs: Subscription[] = [];
 
@@ -441,9 +447,13 @@ export class CheckoutComponent implements OnInit, OnDestroy {
         this.creatingOrder = false;
         const wrapper = res.data as any;
         const order = wrapper.order || wrapper;
+        const transferBank = (wrapper.transfer_bank as BoutiqueTransferBankDetails | undefined) ?? null;
         this.snackBar.open(`Pedido ${order.order_number} creado exitosamente`, 'Cerrar', { duration: 4000 });
 
         const asGuest = !this.isLoggedIn;
+        if (asGuest) {
+          this.cartService.clearLocal();
+        }
 
         if (this.paymentMethod === 'openpay') {
           this.openPayOrderTotal = Number(order.total ?? this.total);
@@ -463,6 +473,8 @@ export class CheckoutComponent implements OnInit, OnDestroy {
             this.guestThanksAfterOnlinePayment = {
               orderNumber: String(order.order_number ?? ''),
               guestEmail: String(this.guestForm.value.guest_email ?? ''),
+              paymentMethod: this.paymentMethod,
+              transferBank,
             };
           } else {
             this.guestThanksAfterOnlinePayment = null;
@@ -474,6 +486,8 @@ export class CheckoutComponent implements OnInit, OnDestroy {
             state: {
               orderNumber: order.order_number,
               guestEmail: this.guestForm.value.guest_email,
+              paymentMethod: this.paymentMethod,
+              transferBank,
             },
           });
         } else {
@@ -562,7 +576,12 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       const st = this.guestThanksAfterOnlinePayment;
       this.guestThanksAfterOnlinePayment = null;
       this.router.navigate(['/boutique/gracias', orderUuid], {
-        state: { orderNumber: st.orderNumber, guestEmail: st.guestEmail },
+        state: {
+          orderNumber: st.orderNumber,
+          guestEmail: st.guestEmail,
+          paymentMethod: st.paymentMethod,
+          transferBank: st.transferBank,
+        },
       });
     } else {
       this.router.navigate(['/boutique/orders', orderUuid]);
@@ -582,7 +601,12 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       const st = this.guestThanksAfterOnlinePayment;
       this.guestThanksAfterOnlinePayment = null;
       this.router.navigate(['/boutique/gracias', orderUuid], {
-        state: { orderNumber: st.orderNumber, guestEmail: st.guestEmail },
+        state: {
+          orderNumber: st.orderNumber,
+          guestEmail: st.guestEmail,
+          paymentMethod: st.paymentMethod,
+          transferBank: st.transferBank,
+        },
       });
     } else {
       this.router.navigate(['/boutique/orders', orderUuid]);

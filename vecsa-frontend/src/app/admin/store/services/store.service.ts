@@ -131,4 +131,8 @@ export class StoreService {
   }): Observable<any> {
     return this.boutiquePost('checkout_payment_methods/update', payload);
   }
+
+  updateTransferBankDetails(payload: Record<string, string>): Observable<any> {
+    return this.boutiquePost('transfer_bank_details/update', payload);
+  }
 }

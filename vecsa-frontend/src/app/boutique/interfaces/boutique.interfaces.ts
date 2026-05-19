@@ -16,6 +16,16 @@ export interface BoutiquePaymentMethodsPublicPayload {
     sucursal: boolean;
   };
   openpay: BoutiqueOpenPayPublicConfig;
+  transfer_bank?: BoutiqueTransferBankDetails;
+}
+
+export interface BoutiqueTransferBankDetails {
+  bank_name: string;
+  account_holder: string;
+  clabe: string;
+  account_number: string;
+  instructions: string;
+  configured: boolean;
 }
 
 export interface BoutiqueCategory {

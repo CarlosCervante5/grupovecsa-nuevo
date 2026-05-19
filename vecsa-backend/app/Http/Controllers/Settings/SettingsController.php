@@ -338,6 +338,36 @@ class SettingsController extends Controller
     }
 
     /**
+     * Admin tienda: datos bancarios para transferencia en checkout boutique.
+     */
+    public function updateBoutiqueTransferBankDetails(Request $request)
+    {
+        try {
+            $data = $request->validate([
+                'boutique_transfer_bank_name' => 'nullable|string|max:255',
+                'boutique_transfer_account_holder' => 'nullable|string|max:255',
+                'boutique_transfer_clabe' => 'nullable|string|max:18',
+                'boutique_transfer_account_number' => 'nullable|string|max:32',
+                'boutique_transfer_instructions' => 'nullable|string|max:2000',
+            ]);
+
+            foreach ($data as $key => $value) {
+                SystemSetting::set($key, is_string($value) ? trim($value) : '');
+            }
+
+            return ApiResponseHelper::apiSuccess(
+                200,
+                'Datos bancarios actualizados',
+                BoutiqueCheckoutPaymentMethods::adminConfigPayload()
+            );
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al guardar datos bancarios', $e->getMessage(), 500);
+        }
+    }
+
+    /**
      * Checkout boutique público: tipos de embalaje para cotización (sin auth).
      * Si no hay catálogo en BD, se devuelve un tipo por defecto compatible con el checkout.
      */

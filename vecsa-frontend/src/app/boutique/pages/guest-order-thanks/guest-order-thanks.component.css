@@ -77,3 +77,36 @@ h1 {
   margin-right: 6px;
   vertical-align: middle;
 }
+
+.transfer-bank-box {
+  text-align: left;
+  background: #eff6ff;
+  border: 1px solid #93c5fd;
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin: 0 0 20px;
+}
+
+.transfer-bank-box h2 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 10px;
+  color: #1e3a8a;
+}
+
+.transfer-bank-box p {
+  margin: 6px 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.transfer-instructions {
+  margin-top: 10px !important;
+  color: #475569;
+}
+
+.transfer-deadline {
+  font-size: 0.8rem !important;
+  color: #64748b !important;
+  margin-top: 12px !important;
+}
