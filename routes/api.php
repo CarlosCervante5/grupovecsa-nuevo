@@ -656,9 +656,10 @@ Route::prefix('boutique')->middleware(['bandwidth_usage', 'auth:sanctum'])->grou
     Route::post('/shipping/track', [BoutiqueShippingController::class, 'track']);
 });
 
-// Boutique Webhook Stripe (sin auth)
+// Boutique webhooks (sin auth Sanctum; OpenPay usa basic auth propio)
 Route::prefix('boutique')->middleware('bandwidth_usage')->group(function () {
     Route::post('/webhook/stripe', [BoutiquePaymentController::class, 'stripeWebhook']);
+    Route::post('/webhook/openpay', [BoutiquePaymentController::class, 'openpayWebhook']);
 });
 
 // Boutique Admin
@@ -696,6 +697,7 @@ Route::prefix('boutique/admin')->middleware(['bandwidth_usage', 'auth:sanctum'])
     // Checkout boutique: qué métodos mostrar (transferencia / sucursal; Stripe/OpenPay por llaves)
     Route::post('/checkout_payment_methods/config', [SettingsController::class, 'boutiqueCheckoutPaymentMethodsConfig']);
     Route::post('/checkout_payment_methods/update', [SettingsController::class, 'updateBoutiqueCheckoutPaymentMethods']);
+    Route::post('/transfer_bank_details/update', [SettingsController::class, 'updateBoutiqueTransferBankDetails']);
 
     // OpenPay (config tienda; documentación https://documents.openpay.mx/docs/api/)
     Route::post('/openpay/config', [SettingsController::class, 'openpay']);

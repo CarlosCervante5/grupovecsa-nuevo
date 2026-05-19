@@ -2,6 +2,8 @@
 
 namespace App\Services\Boutique;
 
+use App\Models\Boutique\BoutiqueOrder;
+use App\Models\Boutique\BoutiquePayment;
 use App\Models\SystemSetting;
 use Exception;
 use Illuminate\Http\Client\Response;
@@ -113,5 +115,145 @@ class OpenPayService
         $status = $charge['status'] ?? '';
 
         return $status === 'completed';
+    }
+
+    public function webhookUrl(): string
+    {
+        return rtrim((string) config('app.url'), '/') . '/api/boutique/webhook/openpay';
+    }
+
+    /**
+     * Basic auth configurado al registrar el webhook en OpenPay.
+     */
+    public function verifyWebhookAuth(?string $user, ?string $password): bool
+    {
+        $expectedUser = trim((string) SystemSetting::get('openpay_webhook_user', ''));
+        $expectedPass = trim((string) (SystemSetting::getEncrypted('openpay_webhook_password') ?? ''));
+
+        if ($expectedUser === '' || $expectedPass === '') {
+            return false;
+        }
+
+        return hash_equals($expectedUser, (string) $user)
+            && hash_equals($expectedPass, (string) $password);
+    }
+
+    /**
+     * Procesa notificación webhook (verification, charge.succeeded, charge.failed, etc.).
+     *
+     * @param  array<string, mixed>  $payload
+     */
+    public function processWebhook(array $payload): void
+    {
+        $type = (string) ($payload['type'] ?? '');
+
+        if ($type === 'verification') {
+            Log::info('OpenPay webhook verification received', [
+                'verification_code' => $payload['verification_code'] ?? null,
+            ]);
+
+            return;
+        }
+
+        $transaction = $payload['transaction'] ?? null;
+        if (! is_array($transaction)) {
+            Log::warning('OpenPay webhook sin transaction', ['type' => $type]);
+
+            return;
+        }
+
+        $payment = $this->resolvePaymentFromTransaction($transaction);
+        if (! $payment) {
+            Log::warning('OpenPay webhook: pago no encontrado', [
+                'type' => $type,
+                'charge_id' => $transaction['id'] ?? null,
+                'order_id' => $transaction['order_id'] ?? null,
+            ]);
+
+            return;
+        }
+
+        if ($payment->method !== 'openpay') {
+            Log::warning('OpenPay webhook: método de pago distinto', [
+                'payment_uuid' => $payment->uuid,
+                'method' => $payment->method,
+            ]);
+
+            return;
+        }
+
+        $chargeStatus = (string) ($transaction['status'] ?? '');
+        $chargeId = $transaction['id'] ?? null;
+
+        if ($type === 'charge.succeeded' || $chargeStatus === 'completed') {
+            $this->markPaymentCompleted($payment, is_string($chargeId) ? $chargeId : null);
+
+            return;
+        }
+
+        if (in_array($type, ['charge.failed', 'charge.cancelled'], true)
+            || in_array($chargeStatus, ['failed', 'cancelled'], true)) {
+            if ($payment->status !== 'completado') {
+                $payment->update(['status' => 'fallido']);
+            }
+
+            return;
+        }
+
+        Log::info('OpenPay webhook ignorado', ['type' => $type, 'charge_status' => $chargeStatus]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $transaction
+     */
+    protected function resolvePaymentFromTransaction(array $transaction): ?BoutiquePayment
+    {
+        $chargeId = $transaction['id'] ?? null;
+        if (is_string($chargeId) && $chargeId !== '') {
+            $byCharge = BoutiquePayment::where('transaction_reference', $chargeId)->first();
+            if ($byCharge) {
+                return $byCharge;
+            }
+        }
+
+        $orderId = $transaction['order_id'] ?? null;
+        if (! is_string($orderId) || $orderId === '') {
+            return null;
+        }
+
+        $order = BoutiqueOrder::where('order_number', $orderId)->first();
+
+        return $order?->payment;
+    }
+
+    protected function markPaymentCompleted(BoutiquePayment $payment, ?string $chargeId): void
+    {
+        if ($payment->status === 'completado') {
+            return;
+        }
+
+        $updates = [
+            'status' => 'completado',
+            'confirmed_at' => now(),
+        ];
+        if ($chargeId !== null && $chargeId !== '') {
+            $updates['transaction_reference'] = $chargeId;
+        }
+        $payment->update($updates);
+
+        $order = $payment->order;
+        if ($order && $order->status === 'pendiente') {
+            $order->update(['status' => 'pagado']);
+        }
+
+        if ($order) {
+            app(BoutiqueOrderMailService::class)->sendOrderPaid($order->fresh());
+        }
+
+        Log::info('OpenPay webhook: pago completado', [
+            'payment_uuid' => $payment->uuid,
+            'order_number' => $order?->order_number,
+            'charge_id' => $chargeId,
+        ]);
     }
 }

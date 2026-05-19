@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Boutique;
 use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Boutique\BoutiqueOrder;
+use App\Support\BoutiqueTransferBankDetails;
 use Illuminate\Http\Request;
 
 class BoutiqueOrderController extends Controller
@@ -40,7 +41,12 @@ class BoutiqueOrderController extends Controller
                 return ApiResponseHelper::apiError('El pedido no existe', null, 404, 'ORDER_NOT_FOUND');
             }
 
-            return ApiResponseHelper::apiSuccess(200, 'Detalle del pedido obtenido exitosamente', ['order' => $order]);
+            $payload = ['order' => $order];
+            if ($order->status === 'pendiente' && $order->payment?->method === 'transferencia') {
+                $payload['transfer_bank'] = BoutiqueTransferBankDetails::publicPayload();
+            }
+
+            return ApiResponseHelper::apiSuccess(200, 'Detalle del pedido obtenido exitosamente', $payload);
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al obtener el detalle del pedido', $e->getMessage(), 500, 'GET_ORDER_DETAIL_ERROR');
         }

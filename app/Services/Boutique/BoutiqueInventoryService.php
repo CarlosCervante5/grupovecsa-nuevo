@@ -4,6 +4,7 @@ namespace App\Services\Boutique;
 
 use App\Models\Boutique\BoutiqueInventoryMovement;
 use App\Models\Boutique\BoutiqueProduct;
+use App\Models\Boutique\BoutiqueProductVariant;
 use Exception;
 
 class BoutiqueInventoryService
@@ -74,6 +75,44 @@ class BoutiqueInventoryService
             'reason' => $reason,
             'reference_type' => 'manual',
             'reference_uuid' => null,
+        ]);
+    }
+
+    public function reduceVariantStock(BoutiqueProductVariant $variant, int $quantity, string $reason, ?string $referenceUuid = null): BoutiqueInventoryMovement
+    {
+        if ($variant->stock < $quantity) {
+            throw new Exception("Stock insuficiente para la variante. Disponible: {$variant->stock}, solicitado: {$quantity}");
+        }
+
+        $previousStock = (int) $variant->stock;
+        $newStock = $previousStock - $quantity;
+        $variant->update(['stock' => $newStock]);
+
+        return BoutiqueInventoryMovement::create([
+            'product_id' => $variant->product_id,
+            'previous_stock' => $previousStock,
+            'new_stock' => $newStock,
+            'quantity_change' => -$quantity,
+            'reason' => $reason,
+            'reference_type' => $referenceUuid ? 'order' : null,
+            'reference_uuid' => $referenceUuid,
+        ]);
+    }
+
+    public function restoreVariantStock(BoutiqueProductVariant $variant, int $quantity, string $reason, ?string $referenceUuid = null): BoutiqueInventoryMovement
+    {
+        $previousStock = (int) $variant->stock;
+        $newStock = $previousStock + $quantity;
+        $variant->update(['stock' => $newStock]);
+
+        return BoutiqueInventoryMovement::create([
+            'product_id' => $variant->product_id,
+            'previous_stock' => $previousStock,
+            'new_stock' => $newStock,
+            'quantity_change' => $quantity,
+            'reason' => $reason,
+            'reference_type' => $referenceUuid ? 'order' : null,
+            'reference_uuid' => $referenceUuid,
         ]);
     }
 }

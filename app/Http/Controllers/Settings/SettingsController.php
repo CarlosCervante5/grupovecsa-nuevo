@@ -34,6 +34,7 @@ class SettingsController extends Controller
     private const OPENPAY_SECRET_KEYS = [
         'openpay_sandbox_private_key',
         'openpay_production_private_key',
+        'openpay_webhook_password',
     ];
 
     private const OPENPAY_PUBLIC_KEYS = [
@@ -168,6 +169,9 @@ class SettingsController extends Controller
                 $data[$key] = $this->mask($raw);
             }
 
+            $data['openpay_webhook_user'] = SystemSetting::get('openpay_webhook_user', '');
+            $data['openpay_webhook_url'] = app(\App\Services\Boutique\OpenPayService::class)->webhookUrl();
+
             return ApiResponseHelper::apiSuccess(200, 'Configuración de OpenPay obtenida', $data);
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al obtener la configuración de OpenPay', $e->getMessage(), 500);
@@ -236,6 +240,11 @@ class SettingsController extends Controller
                 }
             }
 
+            $webhookUser = $request->input('openpay_webhook_user');
+            if ($webhookUser !== null && $webhookUser !== '') {
+                SystemSetting::set('openpay_webhook_user', (string) $webhookUser);
+            }
+
             return ApiResponseHelper::apiSuccess(200, 'Configuración de OpenPay actualizada correctamente');
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al actualizar la configuración de OpenPay', $e->getMessage(), 500);
@@ -275,7 +284,7 @@ class SettingsController extends Controller
     public function boutiqueCheckoutPaymentMethodsConfig(Request $request)
     {
         try {
-            return ApiResponseHelper::apiSuccess(200, 'Métodos de pago checkout', BoutiqueCheckoutPaymentMethods::publicPayload());
+            return ApiResponseHelper::apiSuccess(200, 'Métodos de pago checkout', BoutiqueCheckoutPaymentMethods::adminConfigPayload());
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al leer métodos de pago', $e->getMessage(), 500);
         }
@@ -288,9 +297,22 @@ class SettingsController extends Controller
     {
         try {
             $data = $request->validate([
+                'boutique_checkout_openpay' => 'sometimes|boolean',
                 'boutique_checkout_transferencia' => 'required|boolean',
                 'boutique_checkout_sucursal' => 'required|boolean',
             ]);
+
+            if (array_key_exists('boutique_checkout_openpay', $data)) {
+                if ($data['boutique_checkout_openpay'] && ! BoutiqueCheckoutPaymentMethods::openpayKeysConfigured()) {
+                    return ApiResponseHelper::apiError(
+                        'OpenPay no tiene credenciales configuradas. Complétalas en «Pagos OpenPay».',
+                        null,
+                        422,
+                        'OPENPAY_KEYS_MISSING'
+                    );
+                }
+                SystemSetting::set('boutique_checkout_openpay', $data['boutique_checkout_openpay'] ? '1' : '0');
+            }
 
             SystemSetting::set('boutique_checkout_transferencia', $data['boutique_checkout_transferencia'] ? '1' : '0');
             SystemSetting::set('boutique_checkout_sucursal', $data['boutique_checkout_sucursal'] ? '1' : '0');
@@ -300,18 +322,48 @@ class SettingsController extends Controller
                 SystemSetting::set('boutique_checkout_sucursal', '1');
 
                 return ApiResponseHelper::apiError(
-                    'Debe quedar al menos un método de pago habilitado (Stripe, OpenPay, transferencia o sucursal). Se revirtieron los cambios.',
+                    'Debe quedar al menos un método de pago habilitado (OpenPay, transferencia o sucursal). Se revirtieron los cambios.',
                     null,
                     422,
                     'CHECKOUT_PAYMENT_NONE_ENABLED'
                 );
             }
 
-            return ApiResponseHelper::apiSuccess(200, 'Métodos de pago actualizados', BoutiqueCheckoutPaymentMethods::publicPayload());
+            return ApiResponseHelper::apiSuccess(200, 'Métodos de pago actualizados', BoutiqueCheckoutPaymentMethods::adminConfigPayload());
         } catch (\Illuminate\Validation\ValidationException $e) {
             throw $e;
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al guardar métodos de pago', $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Admin tienda: datos bancarios para transferencia en checkout boutique.
+     */
+    public function updateBoutiqueTransferBankDetails(Request $request)
+    {
+        try {
+            $data = $request->validate([
+                'boutique_transfer_bank_name' => 'nullable|string|max:255',
+                'boutique_transfer_account_holder' => 'nullable|string|max:255',
+                'boutique_transfer_clabe' => 'nullable|string|max:18',
+                'boutique_transfer_account_number' => 'nullable|string|max:32',
+                'boutique_transfer_instructions' => 'nullable|string|max:2000',
+            ]);
+
+            foreach ($data as $key => $value) {
+                SystemSetting::set($key, is_string($value) ? trim($value) : '');
+            }
+
+            return ApiResponseHelper::apiSuccess(
+                200,
+                'Datos bancarios actualizados',
+                BoutiqueCheckoutPaymentMethods::adminConfigPayload()
+            );
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al guardar datos bancarios', $e->getMessage(), 500);
         }
     }
 
