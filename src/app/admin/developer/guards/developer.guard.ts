@@ -13,7 +13,7 @@ export class DeveloperGuard {
     this.accountService.validateRole('developer').subscribe({
       next: () => subject.next(true),
       error: () => {
-        this.router.navigateByUrl('/auth/login');
+        this.router.navigateByUrl('/auth/iniciar-sesion');
         subject.next(false);
       }
     });

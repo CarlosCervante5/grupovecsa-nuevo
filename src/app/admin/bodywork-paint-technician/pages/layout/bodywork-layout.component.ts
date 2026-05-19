@@ -91,6 +91,6 @@ export class BodyworkLayoutComponent implements OnInit, OnDestroy {
 
   logout(): void {
     localStorage.clear();
-    this.router.navigateByUrl('/auth/login');
+    this.router.navigateByUrl('/auth/iniciar-sesion');
   }
 }

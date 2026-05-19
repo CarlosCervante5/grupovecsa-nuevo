@@ -122,7 +122,7 @@ export class NewNavComponent implements OnInit, OnDestroy {
     this.isLoggedIn = false;
     this.user = null;
     this.cartService.updateCount(null);
-    this.router.navigateByUrl('/auth/login');
+    this.router.navigateByUrl('/auth/iniciar-sesion');
   }
 
   public get_url_dashboard() {
