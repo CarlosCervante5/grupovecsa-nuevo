@@ -12,7 +12,7 @@ import Swal from 'sweetalert2';
 @Component({
     selector: 'app-add-user',
     templateUrl: './add-user.component.html',
-    styleUrls: ['./add-user.component.css'],
+    styleUrls: ['../user-form.styles.css'],
     standalone: false
 })
 export class AddUserComponent {
