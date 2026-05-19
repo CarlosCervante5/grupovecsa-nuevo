@@ -1,0 +1,9 @@
+node_modules
+.angular
+dist
+**/.cache
+.npm
+.git
+.cursor
+*.log
+.DS_Store
