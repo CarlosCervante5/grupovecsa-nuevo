@@ -38,33 +38,8 @@ export class NavRewardsComponent {
   }
 
   public logout() {
-      this._authService.logout()
-      .subscribe({
-          next: () => {
-          Swal.fire({
-              icon: 'success',
-              title: 'Hasta luego!',
-              text: 'Haz cerrado sesión correctamente.',
-              showConfirmButton: true,
-              confirmButtonColor: '#EEB838',
-              timer: 3500
-          });
-          },
-          error: () => {
-            Swal.fire({
-              icon: 'success',
-              title: 'Hasta luego!',
-              text: 'Haz cerrado sesión correctamente.',
-              showConfirmButton: true,
-              confirmButtonColor: '#EEB838',
-              timer: 3500
-            });
-          }
-          
-      });
-      this.spinner = false;
-      localStorage.clear();
-      this._router.navigate(['/auth/iniciar-sesion']);
+    this.spinner = false;
+    this._authService.signOut(this._router);
   }
 
   public get_url_dashboard() {
