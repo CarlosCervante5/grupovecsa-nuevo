@@ -157,6 +157,15 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   checkoutPayTransferencia = true;
   checkoutPaySucursal = true;
 
+  transferBankSaving = false;
+  transferBankSuccess = '';
+  transferBankError = '';
+  transferBankName = '';
+  transferAccountHolder = '';
+  transferClabe = '';
+  transferAccountNumber = '';
+  transferInstructions = '';
+
   readonly navItems = [
     { key: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
     { key: 'categories', label: 'Categorías', icon: 'category' },
@@ -1580,6 +1589,14 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
           this.checkoutPayTransferencia = !!m.transferencia;
           this.checkoutPaySucursal = !!m.sucursal;
         }
+        const tb = d.transfer_bank;
+        if (tb) {
+          this.transferBankName = tb.bank_name || '';
+          this.transferAccountHolder = tb.account_holder || '';
+          this.transferClabe = tb.clabe || '';
+          this.transferAccountNumber = tb.account_number || '';
+          this.transferInstructions = tb.instructions || '';
+        }
         this.checkoutPayLoading = false;
       },
       error: (err: any) => {
@@ -1602,6 +1619,32 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
 
   toggleCheckoutPaySucursal(): void {
     this.checkoutPaySucursal = !this.checkoutPaySucursal;
+  }
+
+  saveTransferBankDetails(): void {
+    this.transferBankSaving = true;
+    this.transferBankError = '';
+    this.transferBankSuccess = '';
+    this.storeService
+      .updateTransferBankDetails({
+        boutique_transfer_bank_name: this.transferBankName.trim(),
+        boutique_transfer_account_holder: this.transferAccountHolder.trim(),
+        boutique_transfer_clabe: this.transferClabe.trim(),
+        boutique_transfer_account_number: this.transferAccountNumber.trim(),
+        boutique_transfer_instructions: this.transferInstructions.trim(),
+      })
+      .subscribe({
+        next: () => {
+          this.transferBankSuccess = 'Datos bancarios guardados';
+          this.transferBankSaving = false;
+          this.loadCheckoutPaymentMethodsConfig();
+          setTimeout(() => (this.transferBankSuccess = ''), 4000);
+        },
+        error: (err: any) => {
+          this.transferBankError = err?.error?.message || 'Error al guardar datos bancarios';
+          this.transferBankSaving = false;
+        },
+      });
   }
 
   saveCheckoutPaymentMethods(): void {

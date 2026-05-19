@@ -118,6 +118,22 @@
           <span class="info-value">{{ order.payment.confirmed_at | date:'d MMM yyyy, HH:mm' }}</span>
         </div>
       </div>
+
+      <div class="transfer-bank-panel" *ngIf="showTransferBank">
+        <h3 class="transfer-bank-title">Datos para transferencia</h3>
+        <ng-container *ngIf="transferBank?.configured; else transferPending">
+          <p><strong>Banco:</strong> {{ transferBank!.bank_name }}</p>
+          <p><strong>Titular:</strong> {{ transferBank!.account_holder }}</p>
+          <p><strong>CLABE:</strong> {{ transferBank!.clabe }}</p>
+          <p *ngIf="transferBank!.account_number"><strong>Cuenta:</strong> {{ transferBank!.account_number }}</p>
+          <p><strong>Referencia:</strong> {{ order.order_number }}</p>
+          <p *ngIf="transferBank!.instructions" class="transfer-instructions">{{ transferBank!.instructions }}</p>
+        </ng-container>
+        <ng-template #transferPending>
+          <p>La tienda te contactará con los datos bancarios. Referencia: <strong>{{ order.order_number }}</strong>.</p>
+        </ng-template>
+        <p class="transfer-deadline">Plazo de pago: 72 horas desde el pedido.</p>
+      </div>
     </div>
 
     <!-- Shipping Info -->

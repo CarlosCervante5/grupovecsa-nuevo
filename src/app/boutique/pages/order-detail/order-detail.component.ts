@@ -12,6 +12,7 @@ import { BoutiqueOrderService } from '../../services/boutique-order.service';
 import { BoutiqueShippingService } from '../../services/boutique-shipping.service';
 import {
   BoutiqueOrder,
+  BoutiqueTransferBankDetails,
   TrackingInfo,
   TrackingEvent,
 } from '../../interfaces/boutique.interfaces';
@@ -40,6 +41,7 @@ interface StatusStep {
 })
 export class OrderDetailComponent implements OnInit, OnDestroy {
   order: BoutiqueOrder | null = null;
+  transferBank: BoutiqueTransferBankDetails | null = null;
   isLoading = true;
   errorMessage = '';
 
@@ -83,6 +85,7 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
       next: (res) => {
         const wrapper = res.data as any;
         this.order = wrapper.order || wrapper;
+        this.transferBank = wrapper.transfer_bank ?? null;
         this.isLoading = false;
       },
       error: (err) => {
@@ -117,6 +120,13 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
 
   get isCancelled(): boolean {
     return this.order?.status === 'cancelado';
+  }
+
+  get showTransferBank(): boolean {
+    return (
+      this.order?.status === 'pendiente' &&
+      this.order?.payment?.method === 'transferencia'
+    );
   }
 
   get currentStepIndex(): number {

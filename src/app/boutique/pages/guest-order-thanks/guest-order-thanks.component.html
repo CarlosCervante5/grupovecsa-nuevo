@@ -9,11 +9,40 @@
     }
     @if (guestEmail) {
       <p class="thanks-hint">
-        Enviaremos actualizaciones al correo <strong>{{ guestEmail }}</strong>.
+        Te enviamos un correo a <strong>{{ guestEmail }}</strong> con los detalles del pedido.
       </p>
     } @else {
       <p class="thanks-hint">Revisa tu correo para los siguientes pasos (pago, envío o recolección).</p>
     }
+
+    @if (showTransferBank) {
+      <div class="transfer-bank-box">
+        <h2>Datos para transferencia bancaria</h2>
+        @if (transferBank?.configured) {
+          <p><strong>Banco:</strong> {{ transferBank!.bank_name }}</p>
+          <p><strong>Titular:</strong> {{ transferBank!.account_holder }}</p>
+          <p><strong>CLABE:</strong> {{ transferBank!.clabe }}</p>
+          @if (transferBank!.account_number) {
+            <p><strong>Cuenta:</strong> {{ transferBank!.account_number }}</p>
+          }
+          @if (orderNumber) {
+            <p><strong>Referencia:</strong> {{ orderNumber }}</p>
+          }
+          @if (transferBank!.instructions) {
+            <p class="transfer-instructions">{{ transferBank!.instructions }}</p>
+          }
+        } @else {
+          <p>
+            La tienda te contactará con los datos bancarios.
+            @if (orderNumber) {
+              Usa como referencia: <strong>{{ orderNumber }}</strong>.
+            }
+          </p>
+        }
+        <p class="transfer-deadline">Tienes 72 horas para realizar el pago; de lo contrario el pedido puede cancelarse.</p>
+      </div>
+    }
+
     @if (orderReferenceUuid && !orderNumber) {
       <p class="thanks-ref">Referencia de pedido: {{ orderReferenceUuid }}</p>
     }

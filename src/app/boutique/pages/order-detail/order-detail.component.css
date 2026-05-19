@@ -589,3 +589,34 @@
     display: none;
   }
 }
+
+.transfer-bank-panel {
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 10px;
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(96, 165, 250, 0.35);
+}
+
+.transfer-bank-title {
+  margin: 0 0 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #93c5fd;
+}
+
+.transfer-bank-panel p {
+  margin: 6px 0;
+  font-size: 0.875rem;
+  color: #e5e7eb;
+}
+
+.transfer-instructions {
+  color: #cbd5e1 !important;
+}
+
+.transfer-deadline {
+  font-size: 0.8rem !important;
+  color: #94a3b8 !important;
+  margin-top: 10px !important;
+}

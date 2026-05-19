@@ -584,7 +584,7 @@
                     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
                       <span style="font-size:0.8rem;color:#64748b;font-weight:600;">{{ totalVariantsCount }} variantes · Stock total: {{ totalStockCount }}</span>
                       <button class="filter-btn" (click)="saveVariantChanges()" [disabled]="modifiedVariantUuids.size === 0 || variantsSaving" style="font-size:0.78rem;height:34px;">
-                        @if (variantsSaving) { <div class="spinner-sm"></div> } @else { <span class="material-icons" style="font-size:16px;">save</span> Guardar cambios }
+                        @if (variantsSaving) { <div class="spinner-sm"></div> } @else { <span class="material-icons" style="font-size:16px;">save</span> Guardar métodos de pago }
                       </button>
                     </div>
                     <div class="table-wrap">
@@ -1284,6 +1284,32 @@
               </label>
             </div>
           </div>
+        </div>
+
+        <div class="store-card" style="margin:16px 0;">
+          <h3 class="card-title"><span class="material-icons" style="color:#0d9488;">account_balance</span> Datos bancarios (transferencia)</h3>
+          <p style="font-size:0.85rem;color:#64748b;margin:0 0 16px;">
+            Se muestran en el checkout, correo de confirmación y detalle del pedido cuando el cliente elige transferencia.
+          </p>
+          @if (transferBankSuccess) {
+            <div class="alert-success" style="margin-bottom:12px;"><span class="material-icons">check_circle</span> {{ transferBankSuccess }}</div>
+          }
+          @if (transferBankError) {
+            <div class="alert-error" style="margin-bottom:12px;"><span class="material-icons">error</span> {{ transferBankError }}</div>
+          }
+          <label class="modal-label">Banco</label>
+          <input class="modal-input" type="text" [(ngModel)]="transferBankName" />
+          <label class="modal-label">Titular de la cuenta</label>
+          <input class="modal-input" type="text" [(ngModel)]="transferAccountHolder" />
+          <label class="modal-label">CLABE interbancaria</label>
+          <input class="modal-input" type="text" [(ngModel)]="transferClabe" maxlength="18" />
+          <label class="modal-label">Número de cuenta (opcional)</label>
+          <input class="modal-input" type="text" [(ngModel)]="transferAccountNumber" />
+          <label class="modal-label">Instrucciones adicionales</label>
+          <textarea class="modal-input" rows="3" [(ngModel)]="transferInstructions"></textarea>
+          <button class="store-action-btn" style="margin-top:12px;" (click)="saveTransferBankDetails()" [disabled]="transferBankSaving">
+            @if (transferBankSaving) { <div class="spinner-sm"></div> Guardando... } @else { <span class="material-icons">save</span> Guardar datos bancarios }
+          </button>
         </div>
 
         <div>

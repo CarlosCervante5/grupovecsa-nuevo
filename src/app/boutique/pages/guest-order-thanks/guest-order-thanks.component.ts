@@ -3,10 +3,13 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { BoutiqueTransferBankDetails } from '../../interfaces/boutique.interfaces';
 
 export interface GuestOrderThanksState {
   orderNumber?: string;
   guestEmail?: string;
+  paymentMethod?: string;
+  transferBank?: BoutiqueTransferBankDetails | null;
 }
 
 @Component({
@@ -20,6 +23,8 @@ export class GuestOrderThanksComponent {
   orderReferenceUuid = '';
   orderNumber: string | null = null;
   guestEmail: string | null = null;
+  paymentMethod: string | null = null;
+  transferBank: BoutiqueTransferBankDetails | null = null;
 
   constructor(
     private router: Router,
@@ -34,5 +39,15 @@ export class GuestOrderThanksComponent {
     if (st?.guestEmail) {
       this.guestEmail = st.guestEmail;
     }
+    if (st?.paymentMethod) {
+      this.paymentMethod = st.paymentMethod;
+    }
+    if (st?.transferBank) {
+      this.transferBank = st.transferBank;
+    }
+  }
+
+  get showTransferBank(): boolean {
+    return this.paymentMethod === 'transferencia';
   }
 }
