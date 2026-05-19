@@ -21,7 +21,6 @@ import {
   BoutiquePaymentMethodsPublicPayload,
   ShippingQuote,
 } from '../../interfaces/boutique.interfaces';
-import { StripePaymentComponent } from '../../components/stripe-payment/stripe-payment.component';
 import {
   OpenpayPaymentComponent,
   OpenPayBillingContext,
@@ -49,7 +48,6 @@ interface Dealership {
     MatSnackBarModule,
     MatRadioModule,
     MatSelectModule,
-    StripePaymentComponent,
     OpenpayPaymentComponent,
   ],
   templateUrl: './checkout.component.html',
@@ -80,8 +78,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   loadingDealerships = false;
 
   // Payment
-  paymentMethod: 'stripe' | 'transferencia' | 'sucursal' | 'openpay' = 'stripe';
-  stripeAvailable = true;
+  paymentMethod: 'transferencia' | 'sucursal' | 'openpay' = 'openpay';
   transferenciaAvailable = true;
   sucursalAvailable = true;
   /** OpenPay visible solo si el backend expone merchant + llave pública para el modo actual. */
@@ -91,8 +88,6 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   // Order creation
   creatingOrder = false;
 
-  // Stripe payment
-  showStripePayment = false;
   createdOrderUuid: string | null = null;
 
   // OpenPay (tarjeta)
@@ -100,7 +95,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   openPayBilling: OpenPayBillingContext | null = null;
   openPayOrderTotal = 0;
 
-  /** Si el pedido con tarjeta en línea (Stripe/OpenPay) fue como invitado, al terminar pago ir a /boutique/gracias. */
+  /** Si el pedido con tarjeta en línea (OpenPay) fue como invitado, al terminar pago ir a /boutique/gracias. */
   private guestThanksAfterOnlinePayment: { orderNumber: string; guestEmail: string } | null = null;
 
   private subs: Subscription[] = [];
@@ -156,7 +151,6 @@ export class CheckoutComponent implements OnInit, OnDestroy {
           this.applyPaymentMethodsFallback();
           return;
         }
-        this.stripeAvailable = !!d.methods.stripe;
         this.transferenciaAvailable = !!d.methods.transferencia;
         this.sucursalAvailable = !!d.methods.sucursal;
         const op = d.openpay;
@@ -181,7 +175,6 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
   /** Si falla el endpoint, no bloquear checkout: mostrar todos salvo OpenPay sin credenciales. */
   private applyPaymentMethodsFallback(): void {
-    this.stripeAvailable = true;
     this.transferenciaAvailable = true;
     this.sucursalAvailable = true;
     this.openPayAvailable = false;
@@ -190,8 +183,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   }
 
   private ensureValidSelectedPaymentMethod(): void {
-    const order: Array<{ id: 'stripe' | 'openpay' | 'transferencia' | 'sucursal'; on: boolean }> = [
-      { id: 'stripe', on: this.stripeAvailable },
+    const order: Array<{ id: 'openpay' | 'transferencia' | 'sucursal'; on: boolean }> = [
       { id: 'openpay', on: this.openPayAvailable },
       { id: 'transferencia', on: this.transferenciaAvailable },
       { id: 'sucursal', on: this.sucursalAvailable },
@@ -200,13 +192,11 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       return;
     }
     const first = order.find(o => o.on);
-    this.paymentMethod = first ? first.id : 'stripe';
+    this.paymentMethod = first ? first.id : 'openpay';
   }
 
   private selectedPaymentMethodAllowed(): boolean {
     switch (this.paymentMethod) {
-      case 'stripe':
-        return this.stripeAvailable;
       case 'openpay':
         return this.openPayAvailable;
       case 'transferencia':
@@ -219,7 +209,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   }
 
   get hasAnyPaymentMethod(): boolean {
-    return this.stripeAvailable || this.openPayAvailable || this.transferenciaAvailable || this.sucursalAvailable;
+    return this.openPayAvailable || this.transferenciaAvailable || this.sucursalAvailable;
   }
 
   ngOnDestroy(): void {
@@ -455,18 +445,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
         const asGuest = !this.isLoggedIn;
 
-        if (this.paymentMethod === 'stripe') {
-          if (asGuest) {
-            this.guestThanksAfterOnlinePayment = {
-              orderNumber: String(order.order_number ?? ''),
-              guestEmail: String(this.guestForm.value.guest_email ?? ''),
-            };
-          } else {
-            this.guestThanksAfterOnlinePayment = null;
-          }
-          this.createdOrderUuid = order.uuid;
-          this.showStripePayment = true;
-        } else if (this.paymentMethod === 'openpay') {
+        if (this.paymentMethod === 'openpay') {
           this.openPayOrderTotal = Number(order.total ?? this.total);
           this.openPayBilling = {
             holder_name: String(order.shipping_name || order.guest_name || 'Cliente'),
@@ -577,7 +556,6 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
   onPaymentSuccess(orderUuid: string): void {
     this.snackBar.open('Pago realizado exitosamente', 'Cerrar', { duration: 4000 });
-    this.showStripePayment = false;
     this.showOpenPayPayment = false;
     this.createdOrderUuid = null;
     if (this.guestThanksAfterOnlinePayment) {

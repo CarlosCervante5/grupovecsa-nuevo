@@ -5,7 +5,7 @@ namespace App\Support;
 use App\Models\SystemSetting;
 
 /**
- * Métodos de pago disponibles en el checkout boutique (Stripe/OpenPay por llaves;
+ * Métodos de pago disponibles en el checkout boutique (tarjeta vía OpenPay;
  * transferencia y sucursal por flags en SystemSetting).
  */
 final class BoutiqueCheckoutPaymentMethods
@@ -15,13 +15,6 @@ final class BoutiqueCheckoutPaymentMethods
      */
     public static function publicPayload(): array
     {
-        $stripeMode = SystemSetting::get('stripe_mode', 'test');
-        if (! in_array($stripeMode, ['test', 'live'], true)) {
-            $stripeMode = 'test';
-        }
-        $pkStripe = trim((string) SystemSetting::get("stripe_{$stripeMode}_publishable_key", ''));
-        $stripeOn = $pkStripe !== '';
-
         $openpayMode = SystemSetting::get('openpay_mode', 'sandbox');
         $suffixOp = $openpayMode === 'production' ? 'production' : 'sandbox';
         $merchantId = trim((string) SystemSetting::get("openpay_{$suffixOp}_merchant_id", ''));
@@ -33,7 +26,7 @@ final class BoutiqueCheckoutPaymentMethods
 
         return [
             'methods' => [
-                'stripe' => $stripeOn,
+                'stripe' => false,
                 'openpay' => $openpayOn,
                 'transferencia' => $transferencia,
                 'sucursal' => $sucursal,
@@ -49,7 +42,10 @@ final class BoutiqueCheckoutPaymentMethods
 
     public static function isMethodEnabled(string $method): bool
     {
-        $allowed = ['stripe', 'openpay', 'transferencia', 'sucursal'];
+        if ($method === 'stripe') {
+            return false;
+        }
+        $allowed = ['openpay', 'transferencia', 'sucursal'];
         if (! in_array($method, $allowed, true)) {
             return false;
         }
@@ -62,6 +58,6 @@ final class BoutiqueCheckoutPaymentMethods
     {
         $m = self::publicPayload()['methods'];
 
-        return ($m['stripe'] || $m['openpay'] || $m['transferencia'] || $m['sucursal']) === true;
+        return ($m['openpay'] || $m['transferencia'] || $m['sucursal']) === true;
     }
 }
