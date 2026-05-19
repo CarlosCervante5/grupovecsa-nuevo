@@ -697,6 +697,7 @@ Route::prefix('boutique/admin')->middleware(['bandwidth_usage', 'auth:sanctum'])
     // Checkout boutique: qué métodos mostrar (transferencia / sucursal; Stripe/OpenPay por llaves)
     Route::post('/checkout_payment_methods/config', [SettingsController::class, 'boutiqueCheckoutPaymentMethodsConfig']);
     Route::post('/checkout_payment_methods/update', [SettingsController::class, 'updateBoutiqueCheckoutPaymentMethods']);
+    Route::post('/transfer_bank_details/update', [SettingsController::class, 'updateBoutiqueTransferBankDetails']);
 
     // OpenPay (config tienda; documentación https://documents.openpay.mx/docs/api/)
     Route::post('/openpay/config', [SettingsController::class, 'openpay']);

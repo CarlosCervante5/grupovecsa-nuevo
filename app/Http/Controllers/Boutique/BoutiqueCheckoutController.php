@@ -12,11 +12,15 @@ use App\Models\Boutique\BoutiqueOrderItem;
 use App\Models\Boutique\BoutiquePayment;
 use App\Models\Boutique\BoutiqueShipment;
 use App\Models\Dealership;
+use App\Services\Boutique\BoutiqueCheckoutLineService;
 use App\Services\Boutique\BoutiqueInventoryService;
+use App\Services\Boutique\BoutiqueOrderMailService;
 use App\Services\Boutique\EnviacomService;
 use App\Services\Boutique\OpenPayService;
 use App\Services\Boutique\StripeService;
 use App\Support\BoutiqueCheckoutPaymentMethods;
+use App\Support\BoutiqueTransferBankDetails;
+use Exception;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -30,16 +34,24 @@ class BoutiqueCheckoutController extends Controller
 
     protected OpenPayService $openPayService;
 
+    protected BoutiqueCheckoutLineService $checkoutLineService;
+
+    protected BoutiqueOrderMailService $orderMailService;
+
     public function __construct(
         BoutiqueInventoryService $inventoryService,
         EnviacomService $enviacomService,
         StripeService $stripeService,
-        OpenPayService $openPayService
+        OpenPayService $openPayService,
+        BoutiqueCheckoutLineService $checkoutLineService,
+        BoutiqueOrderMailService $orderMailService,
     ) {
         $this->inventoryService = $inventoryService;
         $this->enviacomService = $enviacomService;
         $this->stripeService = $stripeService;
         $this->openPayService = $openPayService;
+        $this->checkoutLineService = $checkoutLineService;
+        $this->orderMailService = $orderMailService;
     }
 
     public function shippingQuote(ShippingQuoteRequest $request)
@@ -141,39 +153,34 @@ class BoutiqueCheckoutController extends Controller
                 'items.*.variant_uuid' => 'nullable|string',
             ]);
 
-            // Resolve products from UUIDs
-            $productUuids = collect($data['items'])->pluck('product_uuid')->unique()->toArray();
-            $products = \App\Models\Boutique\BoutiqueProduct::whereIn('uuid', $productUuids)->get()->keyBy('uuid');
-
-            // Verify stock
-            $insufficientStock = [];
-            foreach ($data['items'] as $item) {
-                $product = $products[$item['product_uuid']] ?? null;
-                if (!$product) {
-                    return ApiResponseHelper::apiError("Producto no encontrado: {$item['product_uuid']}", null, 404, 'PRODUCT_NOT_FOUND');
+            try {
+                $resolved = $this->checkoutLineService->resolveLines($data['items']);
+            } catch (Exception $e) {
+                $code = $e->getMessage();
+                if (str_starts_with($code, 'PRODUCT_NOT_FOUND:')) {
+                    return ApiResponseHelper::apiError('Producto no encontrado', null, 404, 'PRODUCT_NOT_FOUND');
                 }
-                if ($product->stock < $item['quantity']) {
-                    $insufficientStock[] = [
-                        'product' => $product->name,
-                        'available' => $product->stock,
-                        'requested' => $item['quantity'],
-                    ];
+                if ($code === 'PRODUCT_VARIANT_NOT_FOUND') {
+                    return ApiResponseHelper::apiError('La variante del producto no es válida', null, 422, 'PRODUCT_VARIANT_NOT_FOUND');
                 }
+                throw $e;
             }
 
-            if (!empty($insufficientStock)) {
-                return ApiResponseHelper::apiError('Stock insuficiente para algunos productos', json_encode($insufficientStock), 400, 'INSUFFICIENT_STOCK');
+            if (! empty($resolved['insufficient'])) {
+                return ApiResponseHelper::apiError(
+                    'Stock insuficiente para algunos productos',
+                    ['items' => $resolved['insufficient']],
+                    400,
+                    'INSUFFICIENT_STOCK'
+                );
             }
 
             if (! BoutiqueCheckoutPaymentMethods::isMethodEnabled($data['payment_method'])) {
                 return ApiResponseHelper::apiError('El método de pago seleccionado no está habilitado', null, 422, 'PAYMENT_METHOD_DISABLED');
             }
 
-            // Calculate totals
-            $subtotal = 0;
-            foreach ($data['items'] as $item) {
-                $subtotal += $item['quantity'] * $products[$item['product_uuid']]->price;
-            }
+            $lines = $resolved['lines'];
+            $subtotal = round(array_sum(array_column($lines, 'subtotal')), 2);
 
             $shippingCost = 0;
             if ($data['delivery_method'] === 'envio_domicilio' && !empty($data['shipping_option'])) {
@@ -186,7 +193,7 @@ class BoutiqueCheckoutController extends Controller
             $dailyCount = BoutiqueOrder::whereDate('created_at', Carbon::today())->count() + 1;
             $orderNumber = 'BOUT-' . $today . '-' . str_pad($dailyCount, 4, '0', STR_PAD_LEFT);
 
-            $order = DB::transaction(function () use ($data, $products, $subtotal, $shippingCost, $total, $orderNumber) {
+            $order = DB::transaction(function () use ($data, $lines, $subtotal, $shippingCost, $total, $orderNumber) {
                 $order = BoutiqueOrder::create([
                     'user_id'          => null,
                     'guest_name'       => $data['guest_name'],
@@ -206,56 +213,29 @@ class BoutiqueCheckoutController extends Controller
                     'notes'            => $data['notes'] ?? null,
                 ]);
 
-                foreach ($data['items'] as $item) {
-                    $product = $products[$item['product_uuid']];
+                foreach ($lines as $line) {
+                    $product = $line['product'];
+                    $variant = $line['variant'];
                     BoutiqueOrderItem::create([
-                        'order_id'     => $order->id,
-                        'product_id'   => $product->id,
-                        'product_name' => $product->name,
-                        'product_sku'  => $product->sku,
-                        'quantity'     => $item['quantity'],
-                        'unit_price'   => $product->price,
-                        'subtotal'     => round($item['quantity'] * $product->price, 2),
+                        'order_id' => $order->id,
+                        'product_id' => $product->id,
+                        'product_variant_id' => $variant?->id,
+                        'product_name' => $line['product_name'],
+                        'product_sku' => $line['product_sku'],
+                        'quantity' => $line['quantity'],
+                        'unit_price' => $line['unit_price'],
+                        'subtotal' => $line['subtotal'],
                     ]);
 
-                    $this->inventoryService->reduceStock($product, $item['quantity'], 'venta', $order->uuid);
+                    $this->checkoutLineService->reduceLineStock($line, $order->uuid);
                 }
 
-                BoutiquePayment::create([
-                    'order_id' => $order->id,
-                    'method'   => $data['payment_method'],
-                    'amount'   => $total,
-                    'status'   => 'pendiente',
-                ]);
-
-                $shipmentData = [
-                    'order_id'        => $order->id,
-                    'delivery_method' => $data['delivery_method'],
-                    'status'          => 'pendiente',
-                ];
-
-                if ($data['delivery_method'] === 'recoleccion_sucursal' && !empty($data['dealership_uuid'])) {
-                    $dealership = Dealership::where('uuid', $data['dealership_uuid'])->first();
-                    if ($dealership) {
-                        $shipmentData['dealership_id'] = $dealership->id;
-                    }
-                }
-
-                if ($data['delivery_method'] === 'envio_domicilio' && !empty($data['shipping_option'])) {
-                    $shipmentData['carrier_name'] = $data['shipping_option']['carrier'] ?? null;
-                    $shipmentData['estimated_delivery'] = isset($data['shipping_option']['estimated_days'])
-                        ? Carbon::now()->addDays($data['shipping_option']['estimated_days'])->toDateString()
-                        : null;
-                }
-
-                BoutiqueShipment::create($shipmentData);
+                $this->createPaymentAndShipment($order, $data, $total);
 
                 return $order;
             });
 
-            $order->load(['orderItems', 'payment', 'shipment']);
-
-            return ApiResponseHelper::apiSuccess(201, 'Pedido creado exitosamente', ['order' => $order]);
+            return $this->orderCreatedResponse($order, $data['payment_method']);
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al crear el pedido', $e->getMessage(), 500, 'CREATE_ORDER_ERROR');
         }
@@ -276,31 +256,46 @@ class BoutiqueCheckoutController extends Controller
                 return ApiResponseHelper::apiError('El carrito está vacío', null, 400, 'EMPTY_CART');
             }
 
-            // Verify stock for all items
-            $insufficientStock = [];
-            foreach ($cart->items as $item) {
-                if ($item->product->stock < $item->quantity) {
-                    $insufficientStock[] = [
-                        'product' => $item->product->name,
-                        'available' => $item->product->stock,
-                        'requested' => $item->quantity,
-                    ];
+            $cartItemsPayload = $cart->items->map(function ($item) {
+                $row = [
+                    'product_uuid' => $item->product->uuid,
+                    'quantity' => $item->quantity,
+                ];
+                if (! empty($item->variant_uuid)) {
+                    $row['variant_uuid'] = $item->variant_uuid;
                 }
+
+                return $row;
+            })->all();
+
+            try {
+                $resolved = $this->checkoutLineService->resolveLines($cartItemsPayload);
+            } catch (Exception $e) {
+                $code = $e->getMessage();
+                if (str_starts_with($code, 'PRODUCT_NOT_FOUND:')) {
+                    return ApiResponseHelper::apiError('Producto no encontrado en el carrito', null, 404, 'PRODUCT_NOT_FOUND');
+                }
+                if ($code === 'PRODUCT_VARIANT_NOT_FOUND') {
+                    return ApiResponseHelper::apiError('La variante del producto no es válida', null, 422, 'PRODUCT_VARIANT_NOT_FOUND');
+                }
+                throw $e;
             }
 
-            if (!empty($insufficientStock)) {
-                return ApiResponseHelper::apiError('Stock insuficiente para algunos productos', json_encode($insufficientStock), 400, 'INSUFFICIENT_STOCK');
+            if (! empty($resolved['insufficient'])) {
+                return ApiResponseHelper::apiError(
+                    'Stock insuficiente para algunos productos',
+                    ['items' => $resolved['insufficient']],
+                    400,
+                    'INSUFFICIENT_STOCK'
+                );
             }
 
             if (! BoutiqueCheckoutPaymentMethods::isMethodEnabled($data['payment_method'])) {
                 return ApiResponseHelper::apiError('El método de pago seleccionado no está habilitado', null, 422, 'PAYMENT_METHOD_DISABLED');
             }
 
-            // Calculate totals
-            $subtotal = 0;
-            foreach ($cart->items as $item) {
-                $subtotal += $item->quantity * $item->product->price;
-            }
+            $lines = $resolved['lines'];
+            $subtotal = round(array_sum(array_column($lines, 'subtotal')), 2);
 
             $shippingCost = 0;
             if ($data['delivery_method'] === 'envio_domicilio' && !empty($data['shipping_option'])) {
@@ -314,7 +309,7 @@ class BoutiqueCheckoutController extends Controller
             $dailyCount = BoutiqueOrder::whereDate('created_at', Carbon::today())->count() + 1;
             $orderNumber = 'BOUT-' . $today . '-' . str_pad($dailyCount, 4, '0', STR_PAD_LEFT);
 
-            $order = DB::transaction(function () use ($data, $user, $cart, $subtotal, $shippingCost, $total, $orderNumber) {
+            $order = DB::transaction(function () use ($data, $user, $cart, $lines, $subtotal, $shippingCost, $total, $orderNumber) {
                 // Create Order
                 $order = BoutiqueOrder::create([
                     'user_id' => $user->id,
@@ -333,59 +328,25 @@ class BoutiqueCheckoutController extends Controller
                     'notes' => $data['notes'] ?? null,
                 ]);
 
-                // Create OrderItems (snapshot product data)
-                foreach ($cart->items as $item) {
+                foreach ($lines as $line) {
+                    $product = $line['product'];
+                    $variant = $line['variant'];
                     BoutiqueOrderItem::create([
                         'order_id' => $order->id,
-                        'product_id' => $item->product->id,
-                        'product_name' => $item->product->name,
-                        'product_sku' => $item->product->sku,
-                        'quantity' => $item->quantity,
-                        'unit_price' => $item->product->price,
-                        'subtotal' => round($item->quantity * $item->product->price, 2),
+                        'product_id' => $product->id,
+                        'product_variant_id' => $variant?->id,
+                        'product_name' => $line['product_name'],
+                        'product_sku' => $line['product_sku'],
+                        'quantity' => $line['quantity'],
+                        'unit_price' => $line['unit_price'],
+                        'subtotal' => $line['subtotal'],
                     ]);
 
-                    // Reduce stock
-                    $this->inventoryService->reduceStock(
-                        $item->product,
-                        $item->quantity,
-                        'venta',
-                        $order->uuid
-                    );
+                    $this->checkoutLineService->reduceLineStock($line, $order->uuid);
                 }
 
-                // Create Payment
-                BoutiquePayment::create([
-                    'order_id' => $order->id,
-                    'method' => $data['payment_method'],
-                    'amount' => $total,
-                    'status' => 'pendiente',
-                ]);
+                $this->createPaymentAndShipment($order, $data, $total);
 
-                // Create Shipment
-                $shipmentData = [
-                    'order_id' => $order->id,
-                    'delivery_method' => $data['delivery_method'],
-                    'status' => 'pendiente',
-                ];
-
-                if ($data['delivery_method'] === 'recoleccion_sucursal' && !empty($data['dealership_uuid'])) {
-                    $dealership = Dealership::where('uuid', $data['dealership_uuid'])->first();
-                    if ($dealership) {
-                        $shipmentData['dealership_id'] = $dealership->id;
-                    }
-                }
-
-                if ($data['delivery_method'] === 'envio_domicilio' && !empty($data['shipping_option'])) {
-                    $shipmentData['carrier_name'] = $data['shipping_option']['carrier'] ?? null;
-                    $shipmentData['estimated_delivery'] = isset($data['shipping_option']['estimated_days'])
-                        ? Carbon::now()->addDays($data['shipping_option']['estimated_days'])->toDateString()
-                        : null;
-                }
-
-                BoutiqueShipment::create($shipmentData);
-
-                // Soft delete cart items
                 foreach ($cart->items as $item) {
                     $item->delete();
                 }
@@ -393,9 +354,7 @@ class BoutiqueCheckoutController extends Controller
                 return $order;
             });
 
-            $order->load(['orderItems', 'payment', 'shipment']);
-
-            return ApiResponseHelper::apiSuccess(201, 'Pedido creado exitosamente', ['order' => $order]);
+            return $this->orderCreatedResponse($order, $data['payment_method']);
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al crear el pedido', $e->getMessage(), 500, 'CREATE_ORDER_ERROR');
         }
@@ -529,6 +488,7 @@ class BoutiqueCheckoutController extends Controller
             $order->update(['status' => 'pagado']);
 
             $order->load(['orderItems', 'payment', 'shipment']);
+            $this->orderMailService->sendOrderPaid($order);
 
             return ApiResponseHelper::apiSuccess(200, 'Pago con OpenPay confirmado', [
                 'order' => $order,
@@ -541,5 +501,53 @@ class BoutiqueCheckoutController extends Controller
 
             return ApiResponseHelper::apiError('Error al confirmar el pago OpenPay', $e->getMessage(), 500, 'OPENPAY_CHARGE_ERROR');
         }
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private function createPaymentAndShipment(BoutiqueOrder $order, array $data, float $total): void
+    {
+        BoutiquePayment::create([
+            'order_id' => $order->id,
+            'method' => $data['payment_method'],
+            'amount' => $total,
+            'status' => 'pendiente',
+        ]);
+
+        $shipmentData = [
+            'order_id' => $order->id,
+            'delivery_method' => $data['delivery_method'],
+            'status' => 'pendiente',
+        ];
+
+        if ($data['delivery_method'] === 'recoleccion_sucursal' && ! empty($data['dealership_uuid'])) {
+            $dealership = Dealership::where('uuid', $data['dealership_uuid'])->first();
+            if ($dealership) {
+                $shipmentData['dealership_id'] = $dealership->id;
+            }
+        }
+
+        if ($data['delivery_method'] === 'envio_domicilio' && ! empty($data['shipping_option'])) {
+            $shipmentData['carrier_name'] = $data['shipping_option']['carrier'] ?? null;
+            $shipmentData['estimated_delivery'] = isset($data['shipping_option']['estimated_days'])
+                ? Carbon::now()->addDays($data['shipping_option']['estimated_days'])->toDateString()
+                : null;
+        }
+
+        BoutiqueShipment::create($shipmentData);
+    }
+
+    private function orderCreatedResponse(BoutiqueOrder $order, string $paymentMethod)
+    {
+        $order->load(['orderItems', 'payment', 'shipment']);
+        $this->orderMailService->sendOrderPlaced($order);
+
+        $payload = ['order' => $order];
+        if ($paymentMethod === 'transferencia') {
+            $payload['transfer_bank'] = BoutiqueTransferBankDetails::publicPayload();
+        }
+
+        return ApiResponseHelper::apiSuccess(201, 'Pedido creado exitosamente', $payload);
     }
 }

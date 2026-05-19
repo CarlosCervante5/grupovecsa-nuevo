@@ -6,6 +6,7 @@ use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Boutique\ConfirmManualPaymentRequest;
 use App\Models\Boutique\BoutiqueOrder;
+use App\Services\Boutique\BoutiqueOrderMailService;
 use App\Services\Boutique\OpenPayService;
 use App\Services\Boutique\StripeService;
 use Illuminate\Http\Request;
@@ -81,6 +82,8 @@ class BoutiquePaymentController extends Controller
                 return ApiResponseHelper::apiError('No se encontró el pago asociado', null, 404, 'PAYMENT_NOT_FOUND');
             }
 
+            $wasCompleted = $payment->status === 'completado';
+
             $payment->update([
                 'status' => 'completado',
                 'transaction_reference' => $data['transaction_reference'] ?? null,
@@ -88,6 +91,10 @@ class BoutiquePaymentController extends Controller
             ]);
 
             $order->update(['status' => 'pagado']);
+
+            if (! $wasCompleted) {
+                app(BoutiqueOrderMailService::class)->sendOrderPaid($order->fresh(['payment']));
+            }
 
             return ApiResponseHelper::apiSuccess(200, 'Pago confirmado exitosamente', [
                 'order' => $order->fresh(['payment']),

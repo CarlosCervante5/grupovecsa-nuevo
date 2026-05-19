@@ -43,6 +43,7 @@ final class BoutiqueCheckoutPaymentMethods
                 'transferencia' => $transferencia,
                 'sucursal' => $sucursal,
             ],
+            'transfer_bank' => BoutiqueTransferBankDetails::publicPayload(),
             'openpay' => [
                 'merchant_id' => $merchantId,
                 'public_key' => $publicKey,
@@ -63,6 +64,7 @@ final class BoutiqueCheckoutPaymentMethods
         $openPayService = app(OpenPayService::class);
 
         return array_merge($public, [
+            'transfer_bank' => BoutiqueTransferBankDetails::publicPayload(),
             'admin' => [
                 'keys_configured' => [
                     'stripe' => false,

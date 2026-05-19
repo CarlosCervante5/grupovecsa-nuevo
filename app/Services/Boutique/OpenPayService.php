@@ -246,6 +246,10 @@ class OpenPayService
             $order->update(['status' => 'pagado']);
         }
 
+        if ($order) {
+            app(BoutiqueOrderMailService::class)->sendOrderPaid($order->fresh());
+        }
+
         Log::info('OpenPay webhook: pago completado', [
             'payment_uuid' => $payment->uuid,
             'order_number' => $order?->order_number,
