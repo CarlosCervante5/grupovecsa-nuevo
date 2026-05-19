@@ -74,6 +74,6 @@ export class OverviewComponent implements OnInit {
 
     logout(): void {
         localStorage.clear();
-        this.router.navigateByUrl('/auth/login');
+        this.router.navigateByUrl('/auth/iniciar-sesion');
     }
 }

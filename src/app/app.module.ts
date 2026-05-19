@@ -53,7 +53,8 @@ import { NavCarcareComponent } from './shared/versiones-nav/nav-carcare/nav-carc
 import { NavRewardsComponent } from './shared/versiones-nav/nav-rewards/nav-rewards.component';
 import { SwiperComponent } from './shared/components/swiper/swiper.component';
 import { ChatAssistantComponent } from './shared/components/chat-assistant/chat-assistant.component';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { AuthInterceptor } from './auth/interceptors/auth.interceptor';
 
 
 
@@ -112,7 +113,11 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
     NavRewardsComponent,
     NewNavComponent,
   ],
-  providers: [Title, provideHttpClient(withInterceptorsFromDi())], 
+  providers: [
+    Title,
+    provideHttpClient(withInterceptorsFromDi()),
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+  ], 
   bootstrap: [AppComponent],
   schemas:[CUSTOM_ELEMENTS_SCHEMA]
 })

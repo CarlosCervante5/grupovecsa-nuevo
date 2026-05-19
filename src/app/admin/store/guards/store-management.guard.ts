@@ -25,7 +25,7 @@ export class StoreManagementGuard implements CanMatch {
 
   private evaluate(perms: string[]): boolean {
     if (!localStorage.getItem('user_token')) {
-      this.router.navigateByUrl('/auth/login');
+      this.router.navigateByUrl('/auth/iniciar-sesion');
       return false;
     }
     if (perms.includes('access store_management')) {

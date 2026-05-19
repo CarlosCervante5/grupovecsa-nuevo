@@ -63,7 +63,7 @@ export class VehicleInventoryGuard implements CanMatch, CanActivate {
 
   private evaluate(perms: string[]): boolean {
     if (!localStorage.getItem('user_token')) {
-      this.router.navigateByUrl('/auth/login');
+      this.router.navigateByUrl('/auth/iniciar-sesion');
       return false;
     }
     if (VehicleInventoryGuard.permissionAllowList.some((p) => perms.includes(p))) {

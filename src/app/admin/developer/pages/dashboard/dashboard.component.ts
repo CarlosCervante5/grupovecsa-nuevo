@@ -399,7 +399,7 @@ export class DeveloperDashboardComponent implements OnInit, AfterViewInit, OnDes
 
   readonly quickLinks = [
     { label: 'Boutique', route: '/boutique', icon: 'storefront' },
-    { label: 'Login', route: '/auth/login', icon: 'lock_outline' },
+    { label: 'Login', route: '/auth/iniciar-sesion', icon: 'lock_outline' },
     { label: 'Home', route: '/', icon: 'home' },
   ];
 
@@ -1092,5 +1092,5 @@ export class DeveloperDashboardComponent implements OnInit, AfterViewInit, OnDes
   }
 
   navigate(route: string): void { this.router.navigateByUrl(route); }
-  logout(): void { localStorage.clear(); this.router.navigateByUrl('/auth/login'); }
+  logout(): void { localStorage.clear(); this.router.navigateByUrl('/auth/iniciar-sesion'); }
 }

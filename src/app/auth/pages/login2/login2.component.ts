@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { Title } from '@angular/platform-browser';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { AuthService } from '../../services/auth.service';
 import { LoginResponse } from '@interfaces/auth.interface';
@@ -28,6 +28,7 @@ export class Login2Component {
         private _authService: AuthService,
         private _formBuilder: UntypedFormBuilder, 
         private _router: Router,
+        private _route: ActivatedRoute,
         private titleService: Title,
         private _cartService: BoutiqueCartService
     ) { 
@@ -91,10 +92,26 @@ export class Login2Component {
                   localStorage.setItem('permissions', JSON.stringify(loginResponse.data.permissions));
                 }
 
-                const dest = loginResponse.data.role === 'client'
-                    ? ['/auth/mi-cuenta']
-                    : ['/admin', adminRouteSegmentForRole(loginResponse.data.role)];
-                this._router.navigate(dest).finally(() => { this.spinner = false; });
+                const returnUrl = this._route.snapshot.queryParamMap.get('returnUrl');
+                const safeReturn =
+                    returnUrl &&
+                    returnUrl.startsWith('/') &&
+                    !returnUrl.startsWith('//') &&
+                    loginResponse.data.role === 'client';
+
+                if (safeReturn) {
+                    void this._router.navigateByUrl(returnUrl).finally(() => {
+                        this.spinner = false;
+                    });
+                } else {
+                    const dest =
+                        loginResponse.data.role === 'client'
+                            ? ['/auth/mi-cuenta']
+                            : ['/admin', adminRouteSegmentForRole(loginResponse.data.role)];
+                    void this._router.navigate(dest).finally(() => {
+                        this.spinner = false;
+                    });
+                }
 
                 this._cartService.syncLocalCartToServer().subscribe();
 
