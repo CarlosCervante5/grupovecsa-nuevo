@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\SystemSetting;
+use App\Services\Boutique\OpenPayService;
 
 /**
  * Métodos de pago disponibles en el checkout boutique (tarjeta vía OpenPay;
@@ -10,6 +11,16 @@ use App\Models\SystemSetting;
  */
 final class BoutiqueCheckoutPaymentMethods
 {
+    public static function openpayKeysConfigured(): bool
+    {
+        $openpayMode = SystemSetting::get('openpay_mode', 'sandbox');
+        $suffixOp = $openpayMode === 'production' ? 'production' : 'sandbox';
+        $merchantId = trim((string) SystemSetting::get("openpay_{$suffixOp}_merchant_id", ''));
+        $publicKey = trim((string) SystemSetting::get("openpay_{$suffixOp}_public_key", ''));
+
+        return $merchantId !== '' && $publicKey !== '';
+    }
+
     /**
      * @return array{methods: array{stripe: bool, openpay: bool, transferencia: bool, sucursal: bool}, openpay: array{merchant_id: string, public_key: string, sandbox: bool, available: bool}}
      */
@@ -19,7 +30,8 @@ final class BoutiqueCheckoutPaymentMethods
         $suffixOp = $openpayMode === 'production' ? 'production' : 'sandbox';
         $merchantId = trim((string) SystemSetting::get("openpay_{$suffixOp}_merchant_id", ''));
         $publicKey = trim((string) SystemSetting::get("openpay_{$suffixOp}_public_key", ''));
-        $openpayOn = $merchantId !== '' && $publicKey !== '';
+        $openpayFlag = filter_var(SystemSetting::get('boutique_checkout_openpay', '1'), FILTER_VALIDATE_BOOLEAN);
+        $openpayOn = self::openpayKeysConfigured() && $openpayFlag;
 
         $transferencia = filter_var(SystemSetting::get('boutique_checkout_transferencia', '1'), FILTER_VALIDATE_BOOLEAN);
         $sucursal = filter_var(SystemSetting::get('boutique_checkout_sucursal', '1'), FILTER_VALIDATE_BOOLEAN);
@@ -38,6 +50,33 @@ final class BoutiqueCheckoutPaymentMethods
                 'available' => $openpayOn,
             ],
         ];
+    }
+
+    /**
+     * Configuración para el panel tienda (incluye flags editables y URL de webhook).
+     *
+     * @return array<string, mixed>
+     */
+    public static function adminConfigPayload(): array
+    {
+        $public = self::publicPayload();
+        $openPayService = app(OpenPayService::class);
+
+        return array_merge($public, [
+            'admin' => [
+                'keys_configured' => [
+                    'stripe' => false,
+                    'openpay' => self::openpayKeysConfigured(),
+                ],
+                'flags' => [
+                    'boutique_checkout_stripe' => false,
+                    'boutique_checkout_openpay' => filter_var(SystemSetting::get('boutique_checkout_openpay', '1'), FILTER_VALIDATE_BOOLEAN),
+                    'boutique_checkout_transferencia' => filter_var(SystemSetting::get('boutique_checkout_transferencia', '1'), FILTER_VALIDATE_BOOLEAN),
+                    'boutique_checkout_sucursal' => filter_var(SystemSetting::get('boutique_checkout_sucursal', '1'), FILTER_VALIDATE_BOOLEAN),
+                ],
+                'webhook_url' => $openPayService->webhookUrl(),
+            ],
+        ]);
     }
 
     public static function isMethodEnabled(string $method): bool
