@@ -1,12 +1,9 @@
 import { Component } from '@angular/core';
-import { AbstractControl, FormControl, FormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
-import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
+import { AbstractControl, FormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
 import { MatBottomSheetRef } from '@angular/material/bottom-sheet';
 import { DealerShipResponse, roles, RolesResponse, Dealership } from '@interfaces/admin.interfaces';
 import { GralResponse } from '@interfaces/vehicle_data.interface';
 import { AdminService } from '@services/admin.service';
-import { Observable, of } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -22,16 +19,8 @@ export class AddUserComponent {
     public files: File[] = [];
     /** Vista previa; placeholder hasta elegir archivo */
     public foto = 'assets/img/user.jpeg';
-    //variables para el select de roles
-    public roles!: roles[];
-    public rolesControl = new FormControl();
-    public filteredRoles: Observable<roles[]> = of([]);
-    public rol!: string;
-
-    //variables para el select de locations
-    public dealership!: Dealership[];
-    public locationControl = new FormControl();
-    public filteredLocation: Observable<Dealership[]> = of([]);
+    public roles: roles[] = [];
+    public dealership: Dealership[] = [];
 
 
     constructor(
@@ -164,7 +153,6 @@ export class AddUserComponent {
                     'name':     rol.name
                 }));
                 this.roles = datosR;
-                this.filters();
             }
         })
     }
@@ -174,34 +162,8 @@ export class AddUserComponent {
         .subscribe({
             next: (response : DealerShipResponse) =>{
                 this.dealership = response.data;
-                this.filters();
             }
         })
     }
 
-    private filters(): void {
-        this.filteredRoles = this.rolesControl.valueChanges.pipe(
-            startWith(''),
-            map(value => this._filter(value, this.roles)),
-          );
-        this.filteredLocation = this.locationControl.valueChanges.pipe(
-        startWith(''),
-        map(value => this._filter(value, this.dealership)),
-        );
-    }
-
-    private _filter<T extends { name: string }>(value: string, options: T[]): T[] {
-        const filterValue = value.toLowerCase();
-        return options.filter(option => option.name.toLowerCase().includes(filterValue));
-    }
-
-    onRolesSelected(event: MatAutocompleteSelectedEvent): void{
-        const selectedRole = event.option.value;
-        this.form.patchValue({ role_name: selectedRole });
-    }
-
-    onLocationSelected(event: MatAutocompleteSelectedEvent): void{
-        const selectedLocation = event.option.value;
-        this.form.patchValue({ location: selectedLocation });
-    }
 }
