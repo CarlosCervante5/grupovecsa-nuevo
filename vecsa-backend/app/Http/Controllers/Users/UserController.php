@@ -14,6 +14,7 @@ use App\Http\Requests\Users\UpdateUserRequest;
 use App\Jobs\UploadProfileImage;
 use App\Services\UserService;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -33,11 +34,48 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
-            // Obtener todos los usuarios
-            $users = User::whereHas('userProfile')->with('dealerships')->paginate(15);
+            $keyword = trim((string) $request->query('keyword', ''));
+            $perPage = (int) $request->query('paginate', 15);
+            if ($perPage < 1 || $perPage > 100) {
+                $perPage = 15;
+            }
+
+            $query = User::whereHas('userProfile')->with(['dealerships', 'roles']);
+
+            if ($keyword !== '') {
+                $term = '%' . $keyword . '%';
+                $words = array_values(array_filter(preg_split('/\s+/', $keyword)));
+
+                $query->where(function ($q) use ($term, $words) {
+                    $q->where('users.nickname', 'LIKE', $term)
+                        ->orWhere('users.email', 'LIKE', $term);
+
+                    $q->orWhereHas('userProfile', function ($profileQuery) use ($term, $words) {
+                        $profileQuery->where(function ($pq) use ($term, $words) {
+                            $pq->where('location', 'LIKE', $term);
+
+                            foreach ($words as $word) {
+                                $like = '%' . $word . '%';
+                                $pq->orWhere('name', 'LIKE', $like)
+                                    ->orWhere('last_name', 'LIKE', $like);
+                            }
+                        });
+                    });
+
+                    $q->orWhereHas('roles', function ($roleQuery) use ($term) {
+                        $roleQuery->where('name', 'LIKE', $term);
+                    });
+
+                    $q->orWhereHas('dealerships', function ($dealershipQuery) use ($term) {
+                        $dealershipQuery->where('name', 'LIKE', $term);
+                    });
+                });
+            }
+
+            $users = $query->paginate($perPage);
 
             $users->getCollection()->transform(function ($user) {
                 
