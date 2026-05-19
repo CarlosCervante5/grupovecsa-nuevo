@@ -1,12 +1,9 @@
 import { Component, Inject } from '@angular/core';
-import { AbstractControl, FormControl, FormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
-import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
+import { AbstractControl, FormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
 import { MAT_BOTTOM_SHEET_DATA, MatBottomSheetRef } from '@angular/material/bottom-sheet';
-import { DataDetailUser, Datum, Dealership, DealerShipResponse, DetailResponsive, roles, RolesResponse, UsersResponse } from '@interfaces/admin.interfaces';
+import { DataDetailUser, Dealership, DealerShipResponse, DetailResponsive, roles, RolesResponse } from '@interfaces/admin.interfaces';
 import { GralResponse } from '@interfaces/vehicle_data.interface';
 import { AdminService } from '@services/admin.service';
-import { Observable, of } from 'rxjs';
-import { map,startWith } from 'rxjs/operators';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -19,27 +16,18 @@ export class UpdateUserComponent {
     public uuid_user!: string;
     public form!: FormGroup;
     public files: File[] = [];
-    public users !: DataDetailUser;
+    public users!: DataDetailUser;
     public spinner = true;
     public foto = 'assets/img/user.jpeg';
-    //variables para el select de roles
-    public roles!: roles[];
-    public rolesControl = new FormControl();
-    public filteredRoles: Observable<roles[]> = of([]);
-    public rol!: string;
-    //variables para el select de locations
-    public dealership!: Dealership[];
-    public locationControl = new FormControl();
-    public filteredLocation: Observable<Dealership[]> = of([]);
-
-
+    public roles: roles[] = [];
+    public dealership: Dealership[] = [];
 
     constructor(
-        @Inject(MAT_BOTTOM_SHEET_DATA) public data: any,
+        @Inject(MAT_BOTTOM_SHEET_DATA) public data: { uuid: string },
         private _formBuilder: UntypedFormBuilder,
-        private _bottomSheetRef: MatBottomSheetRef<any>,
-        private _adminservice : AdminService,
-    ){
+        private _bottomSheetRef: MatBottomSheetRef<UpdateUserComponent>,
+        private _adminservice: AdminService,
+    ) {
         this.uuid_user = data.uuid;
         this.createForm();
         this.getUser();
@@ -48,12 +36,12 @@ export class UpdateUserComponent {
 
     private createForm() {
         this.form = this._formBuilder.group({
-            name:           ['', [ Validators.pattern("[a-zA-ZÀ-ÿ ]+"), Validators.required]],
-            last_name:      ['', [ Validators.pattern("[a-zA-ZÀ-ÿ ]+"), Validators.required]],
+            name:           ['', [Validators.pattern('[a-zA-ZÀ-ÿ ]+'), Validators.required]],
+            last_name:      ['', [Validators.pattern('[a-zA-ZÀ-ÿ ]+'), Validators.required]],
             phone_1:        ['', [this.phoneValidator.bind(this), Validators.required]],
             phone_2:        ['', [this.phoneValidator.bind(this)]],
             gender:         ['', [Validators.required]],
-            email:          ['', [Validators.required, Validators.pattern("[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$")]],
+            email:          ['', [Validators.required, Validators.pattern('[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$')]],
             location:       ['', [Validators.required]],
             role_name:      ['', [Validators.required]],
             picture:        [''],
@@ -65,24 +53,22 @@ export class UpdateUserComponent {
         const phone = control.value;
 
         if (!phone) {
-            return null; // If the field is empty, it's valid
+            return null;
         }
 
-        // If a phone number is provided, validate the format
         const phonePattern = /^[0-9]+$/;
         const valid = phonePattern.test(phone) && phone.length === 10;
 
         if (!valid) {
-        return { invalidPhone: true };
+            return { invalidPhone: true };
         }
 
-        return null; // Valid phone number
+        return null;
     }
 
-    public getUser(){
-        this._adminservice.detailUser(this.uuid_user)
-        .subscribe({
-            next: (response : DetailResponsive) =>{
+    public getUser() {
+        this._adminservice.detailUser(this.uuid_user).subscribe({
+            next: (response: DetailResponsive) => {
                 this.spinner = false;
                 this.users = response.data;
                 this.getRoles();
@@ -97,13 +83,13 @@ export class UpdateUserComponent {
                         location: this.users.profile.location,
                         role_name: this.users.role,
                     });
-                    this.foto = this.users.profile.picture ? this.users.profile.picture: 'assets/img/user.jpeg';
+                    this.foto = this.users.profile.picture ? this.users.profile.picture : 'assets/img/user.jpeg';
                 }, 500);
             }
-        })
+        });
     }
 
-    public close():void {
+    public close(): void {
         this._bottomSheetRef.dismiss();
     }
 
@@ -146,10 +132,6 @@ export class UpdateUserComponent {
     get role_nameInvalid() {
         return this.form.get('role_name')!.invalid && (this.form.get('role_name')!.dirty || this.form.get('role_name')?.touched);
     }
-    get passwordInvalid() {
-        return this.form.get('password')!.invalid && (this.form.get('password')!.dirty || this.form.get('password')?.touched);
-    }
-   
 
     public onSubmit(): void {
         const pics = this.files?.length ? this.files : [];
@@ -182,53 +164,22 @@ export class UpdateUserComponent {
         });
     }
 
-    public getRoles(){
-        this._adminservice.getRoles()
-        .subscribe({
-            next: (response: RolesResponse[]) =>{
-                const datosR = response.map((rol) => ({
-                    'id':       rol.id,
-                    'name':     rol.name
+    public getRoles() {
+        this._adminservice.getRoles().subscribe({
+            next: (response: RolesResponse[]) => {
+                this.roles = response.map((rol) => ({
+                    id: rol.id,
+                    name: rol.name
                 }));
-                this.roles = datosR;
-                this.filters();
             }
-        })
+        });
     }
 
-    public getDealership(){
-        this._adminservice.getDealerships()
-        .subscribe({
-            next: (response : DealerShipResponse) =>{
+    public getDealership() {
+        this._adminservice.getDealerships().subscribe({
+            next: (response: DealerShipResponse) => {
                 this.dealership = response.data;
-                this.filters();
             }
-        })
+        });
     }
-
-    private filters(): void {
-        this.filteredRoles = this.rolesControl.valueChanges.pipe(
-            startWith(''),
-            map(value => this._filter(value, this.roles)),
-          );
-        this.filteredLocation = this.locationControl.valueChanges.pipe(
-        startWith(''),
-        map(value => this._filter(value, this.dealership)),
-        );
-    }
-
-    private _filter<T extends { name: string }>(value: string, options: T[]): T[] {
-        const filterValue = value.toLowerCase();
-        return options.filter(option => option.name.toLowerCase().includes(filterValue));
-    }
-
-    onRolesSelected(event: MatAutocompleteSelectedEvent): void{
-        const selectedRole = event.option.value;
-        this.form.patchValue({ role_name: selectedRole });
-    }
-    onLocationSelected(event: MatAutocompleteSelectedEvent): void{
-        const selectedLocation = event.option.value;
-        this.form.patchValue({ location: selectedLocation });
-    }
-
 }
