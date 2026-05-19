@@ -1,0 +1,11 @@
+# Evita "npm ci" dos veces (install + build): EBUSY en node_modules/.cache en Railway.
+# Ver: install una vez, build solo compila Angular.
+
+[phases.install]
+cmds = ["npm ci --no-audit"]
+
+[phases.build]
+cmds = ["npm run build"]
+
+[start]
+cmd = "npm start"
