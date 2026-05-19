@@ -12,6 +12,10 @@ Atajo para publicar ambos subtrees a sandbox:
 ./tools/push-sandbox-subtrees.sh
 ```
 
+En Railway, el backend sandbox ejecuta `deploy.sh` en cada release (`migrate` + seeders idempotentes con usuarios de prueba). Si el login falla con 401, revisa que el release terminó bien y usa las credenciales de la tabla siguiente.
+
+Login único en la app: `/auth/iniciar-sesion` (la ruta `/auth/login` abre la misma pantalla).
+
 ## Usuarios de Prueba
 
 
@@ -84,8 +88,7 @@ Atajo para publicar ambos subtrees a sandbox:
 | /experience             | Experience                    |
 | /carcare                | Car Care                      |
 | /promociones            | Promociones                   |
-| /auth/login             | Login (boutique)              |
-| /auth/iniciar-sesion    | Login (general)               |
+| /auth/iniciar-sesion    | Login (único; `/auth/login` es alias) |
 | /auth/registro          | Registro                      |
 | /auth/mi-cuenta         | Perfil cliente                |
 

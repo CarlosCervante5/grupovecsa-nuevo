@@ -8,5 +8,6 @@
 builder = "nixpacks"
 
 [deploy]
-releaseCommand = "php artisan migrate --force --no-interaction"
+# migrate + seeders idempotentes (usuarios de prueba ACCESOS.md, roles, datos demo)
+releaseCommand = "bash deploy.sh"
 startCommand = "php artisan serve --host=0.0.0.0 --port=$PORT"
