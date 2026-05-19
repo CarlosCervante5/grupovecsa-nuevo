@@ -12,16 +12,16 @@ import Swal from 'sweetalert2';
 @Component({
     selector: 'app-update-user',
     templateUrl: './update-user.component.html',
-    styleUrls: ['./update-user.component.css'],
+    styleUrls: ['../user-form.styles.css'],
     standalone: false
 })
 export class UpdateUserComponent {
     public uuid_user!: string;
     public form!: FormGroup;
-    public files!: File[];
+    public files: File[] = [];
     public users !: DataDetailUser;
     public spinner = true;
-    public foto!: string;
+    public foto = 'assets/img/user.jpeg';
     //variables para el select de roles
     public roles!: roles[];
     public rolesControl = new FormControl();
@@ -52,8 +52,8 @@ export class UpdateUserComponent {
             last_name:      ['', [ Validators.pattern("[a-zA-ZÀ-ÿ ]+"), Validators.required]],
             phone_1:        ['', [this.phoneValidator.bind(this), Validators.required]],
             phone_2:        ['', [this.phoneValidator.bind(this)]],
-            gender:         ['',],
-            email:          ['', [Validators.pattern("[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$")]],
+            gender:         ['', [Validators.required]],
+            email:          ['', [Validators.required, Validators.pattern("[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$")]],
             location:       ['', [Validators.required]],
             role_name:      ['', [Validators.required]],
             picture:        [''],
@@ -107,13 +107,19 @@ export class UpdateUserComponent {
         this._bottomSheetRef.dismiss();
     }
 
-    assignImagePromo( event: Event){
+    assignImagePromo(event: Event): void {
         const element = event.currentTarget as HTMLInputElement;
-        let fileList: FileList | null = element.files;
-        if (fileList) {
-            //this.files = fileList[0];
-            this.files = Array.from(fileList);
+        const fileList = element.files;
+        if (!fileList?.length) {
+            return;
         }
+        this.files = Array.from(fileList);
+        const file = fileList[0];
+        const reader = new FileReader();
+        reader.onload = () => {
+            this.foto = reader.result as string;
+        };
+        reader.readAsDataURL(file);
     }
 
     get nameInvalid() {
@@ -145,27 +151,35 @@ export class UpdateUserComponent {
     }
    
 
-    public onSubmit(){
-        this._adminservice.updateUser(this.uuid_user, this.form.get('name')!.value, this.form.get('last_name')!.value, this.form.get('phone_1')!.value, this.form.get('phone_2')!.value,
-        this.form.get('gender')!.value, this.form.get('email')!.value, this.form.get('location')!.value, this.form.get('role_name')!.value, this.files,
-        this.form.get('password')!.value)
-        .subscribe({
-            next: (response: GralResponse) =>{
-                Swal.fire({                    
+    public onSubmit(): void {
+        const pics = this.files?.length ? this.files : [];
+        this._adminservice.updateUser(
+            this.uuid_user,
+            this.form.get('name')!.value,
+            this.form.get('last_name')!.value,
+            this.form.get('phone_1')!.value,
+            this.form.get('phone_2')!.value,
+            this.form.get('gender')!.value,
+            this.form.get('email')!.value,
+            this.form.get('location')!.value,
+            this.form.get('role_name')!.value,
+            pics,
+            this.form.get('password')!.value,
+        ).subscribe({
+            next: (response: GralResponse) => {
+                Swal.fire({
                     icon: 'success',
-                    title: 'Usuario actualizado con exito',
+                    title: 'Usuario actualizado',
                     text: response.message,
                     showConfirmButton: false,
-                    timer: 2000
-                  });
-                  this._bottomSheetRef.dismiss(
-                    {reload: true}
-                  );
+                    timer: 2000,
+                });
+                this._bottomSheetRef.dismiss({ reload: true });
             },
-            error: (error)=>{
+            error: (error) => {
                 console.log(error);
-            }
-        })
+            },
+        });
     }
 
     public getRoles(){

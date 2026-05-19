@@ -1,7 +1,7 @@
 <div class="user-form-sheet">
   <header class="user-form-head">
     <h2 class="user-form-title">Editar usuario</h2>
-    <p class="user-form-lead">Modifica los datos que necesites y pulsa <strong>Actualizar</strong>.</p>
+    <p class="user-form-lead">Modifica los datos que necesites y pulsa <strong>Actualizar</strong>. La foto de perfil es opcional.</p>
   </header>
 
   <ng-container *ngIf="spinner; else formBlock">
@@ -49,7 +49,7 @@
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>Teléfono secundario</mat-label>
           <input matInput type="tel" inputmode="numeric" maxlength="10" autocomplete="tel-national" formControlName="phone_2" />
-          <mat-hint *ngIf="phoneTwoInvalid">10 dígitos numéricos u opcional vacío.</mat-hint>
+          <mat-hint *ngIf="phoneTwoInvalid">10 dígitos u opcional vacío.</mat-hint>
         </mat-form-field>
 
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
@@ -85,19 +85,19 @@
         <mat-hint>Si la dejas vacía, no se modifica la contraseña.</mat-hint>
       </mat-form-field>
 
-      <section class="user-form-photo" aria-labelledby="photo-heading">
-        <h3 id="photo-heading" class="user-form-section-title">Foto de perfil</h3>
+      <section class="user-form-photo" aria-labelledby="photo-heading-edit">
+        <h3 id="photo-heading-edit" class="user-form-section-title">Foto de perfil</h3>
         <div class="user-form-photo-row">
           <div class="user-form-photo-preview">
             <img [src]="foto" alt="Vista previa de la foto de perfil" width="120" height="120" />
           </div>
-          <label class="user-form-drop" for="picture">
+          <label class="user-form-drop" for="picture-edit">
             <span class="material-icons user-form-drop-icon">cloud_upload</span>
             <span class="user-form-drop-title">Arrastra una imagen aquí</span>
             <span class="user-form-drop-sub">o haz clic para elegir archivo (PNG, JPG, WebP)</span>
             <input
               type="file"
-              id="picture"
+              id="picture-edit"
               class="user-form-file-input"
               (change)="assignImagePromo($event)"
               accept=".png,.jpg,.jpeg,.webp"
