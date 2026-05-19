@@ -37,7 +37,8 @@ export class AdminUsersComponent {
   }
 
   getUsers(page: number): void {
-    this._adminservice.getUsers(page).subscribe({
+    const keyword = this.searchTerm.trim();
+    this._adminservice.getUsers(page, keyword || undefined, this.paginate).subscribe({
       next: (response: UsersResponse) => {
         this.users = response.data.data;
         this.length = response.data.total;
