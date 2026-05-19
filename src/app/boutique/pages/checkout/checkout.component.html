@@ -279,19 +279,11 @@
           </h2>
 
           <mat-radio-group [(ngModel)]="paymentMethod" class="payment-radio-group">
-            @if (stripeAvailable) {
-              <mat-radio-button value="stripe" class="payment-radio">
-                <div class="radio-content">
-                  <mat-icon class="payment-icon">credit_card</mat-icon>
-                  <span class="radio-label">Tarjeta de crédito / débito (Stripe)</span>
-                </div>
-              </mat-radio-button>
-            }
             @if (openPayAvailable) {
               <mat-radio-button value="openpay" class="payment-radio">
                 <div class="radio-content">
                   <mat-icon class="payment-icon">credit_card</mat-icon>
-                  <span class="radio-label">Tarjeta (OpenPay)</span>
+                  <span class="radio-label">Tarjeta de crédito / débito</span>
                 </div>
               </mat-radio-button>
             }
@@ -405,13 +397,6 @@
         </a>
       </aside>
     </div>
-
-    @if (showStripePayment && createdOrderUuid) {
-      <app-stripe-payment
-        [order_uuid]="createdOrderUuid"
-        (paymentSuccess)="onPaymentSuccess($event)"
-      ></app-stripe-payment>
-    }
 
     @if (showOpenPayPayment && createdOrderUuid && openPayPublicConfig && openPayBilling) {
       <div
