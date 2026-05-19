@@ -1,115 +1,112 @@
-<div class="user-form-sheet">
-  <header class="user-form-head">
-    <h2 class="user-form-title">Editar usuario</h2>
-    <p class="user-form-lead">Modifica los datos que necesites y pulsa <strong>Actualizar</strong>. La foto de perfil es opcional.</p>
-  </header>
+<div class="form-card">
+  <h1 class="page-title">Editar usuario</h1>
+  <p class="form-lead">Modifica los datos que necesites y pulsa <strong>Actualizar</strong>.</p>
 
   <ng-container *ngIf="spinner; else formBlock">
-    <div class="user-form-loading">
+    <div class="form-loading">
       <app-sk-cube></app-sk-cube>
     </div>
   </ng-container>
 
   <ng-template #formBlock>
-    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="user-form">
-      <div class="user-form-grid">
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Nombre(s)</mat-label>
-          <input matInput type="text" autocomplete="given-name" formControlName="name" />
-          <mat-hint *ngIf="nameInvalid">Ingresa un nombre válido.</mat-hint>
-        </mat-form-field>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
 
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Apellido(s)</mat-label>
-          <input matInput type="text" autocomplete="family-name" formControlName="last_name" />
-          <mat-hint *ngIf="last_nameInvalid">Ingresa apellidos válidos.</mat-hint>
-        </mat-form-field>
+      <div class="form-grid">
+        <div class="field-group">
+          <label class="field-label" for="update-user-name">Nombre(s)</label>
+          <input id="update-user-name" class="field-input" type="text" autocomplete="given-name" formControlName="name" />
+          <span class="field-error" *ngIf="nameInvalid">Ingresa un nombre válido.</span>
+        </div>
 
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Género</mat-label>
-          <mat-select formControlName="gender">
-            <mat-option value="M">Mujer</mat-option>
-            <mat-option value="H">Hombre</mat-option>
-          </mat-select>
-          <mat-hint *ngIf="genderInvalid">Selecciona una opción.</mat-hint>
-        </mat-form-field>
+        <div class="field-group">
+          <label class="field-label" for="update-user-last-name">Apellido(s)</label>
+          <input id="update-user-last-name" class="field-input" type="text" autocomplete="family-name" formControlName="last_name" />
+          <span class="field-error" *ngIf="last_nameInvalid">Ingresa apellidos válidos.</span>
+        </div>
 
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Correo electrónico</mat-label>
-          <input matInput type="email" autocomplete="email" formControlName="email" />
-          <mat-hint *ngIf="emailInvalid">Ingresa un correo válido.</mat-hint>
-        </mat-form-field>
+        <div class="field-group">
+          <label class="field-label" for="update-user-gender">Género</label>
+          <select id="update-user-gender" class="field-input" formControlName="gender">
+            <option value="">— Seleccionar —</option>
+            <option value="M">Mujer</option>
+            <option value="H">Hombre</option>
+          </select>
+          <span class="field-error" *ngIf="genderInvalid">Selecciona una opción.</span>
+        </div>
 
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Teléfono principal</mat-label>
-          <input matInput type="tel" inputmode="numeric" maxlength="10" autocomplete="tel" formControlName="phone_1" />
-          <mat-hint *ngIf="phoneOneInvalid">10 dígitos numéricos.</mat-hint>
-        </mat-form-field>
+        <div class="field-group">
+          <label class="field-label" for="update-user-email">Correo electrónico</label>
+          <input id="update-user-email" class="field-input" type="email" autocomplete="email" formControlName="email" />
+          <span class="field-error" *ngIf="emailInvalid">Ingresa un correo válido.</span>
+        </div>
 
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Teléfono secundario</mat-label>
-          <input matInput type="tel" inputmode="numeric" maxlength="10" autocomplete="tel-national" formControlName="phone_2" />
-          <mat-hint *ngIf="phoneTwoInvalid">10 dígitos u opcional vacío.</mat-hint>
-        </mat-form-field>
+        <div class="field-group">
+          <label class="field-label" for="update-user-phone-1">Teléfono principal</label>
+          <input id="update-user-phone-1" class="field-input" type="tel" inputmode="numeric" maxlength="10" autocomplete="tel" formControlName="phone_1" />
+          <span class="field-error" *ngIf="phoneOneInvalid">10 dígitos numéricos.</span>
+        </div>
 
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Sucursal</mat-label>
-          <mat-select formControlName="location">
-            <mat-option *ngFor="let location of filteredLocation | async" [value]="location.name">
-              {{ location.name }}
-            </mat-option>
-          </mat-select>
-          <mat-hint *ngIf="locationInvalid">Selecciona sucursal.</mat-hint>
-        </mat-form-field>
+        <div class="field-group">
+          <label class="field-label" for="update-user-phone-2">Teléfono secundario</label>
+          <input id="update-user-phone-2" class="field-input" type="tel" inputmode="numeric" maxlength="10" autocomplete="tel-national" formControlName="phone_2" />
+          <span class="field-error" *ngIf="phoneTwoInvalid">10 dígitos numéricos u opcional vacío.</span>
+        </div>
 
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Rol</mat-label>
-          <mat-select formControlName="role_name">
-            <mat-option *ngFor="let rol of filteredRoles | async" [value]="rol.name">
-              {{ rol.name }}
-            </mat-option>
-          </mat-select>
-          <mat-hint *ngIf="role_nameInvalid">Selecciona un rol.</mat-hint>
-        </mat-form-field>
+        <div class="field-group">
+          <label class="field-label" for="update-user-location">Sucursal</label>
+          <select id="update-user-location" class="field-input" formControlName="location">
+            <option value="">— Seleccionar —</option>
+            <option *ngFor="let location of dealership" [value]="location.name">{{ location.name }}</option>
+          </select>
+          <span class="field-error" *ngIf="locationInvalid">Selecciona sucursal.</span>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="update-user-role">Rol</label>
+          <select id="update-user-role" class="field-input" formControlName="role_name">
+            <option value="">— Seleccionar —</option>
+            <option *ngFor="let rol of roles" [value]="rol.name">{{ rol.name }}</option>
+          </select>
+          <span class="field-error" *ngIf="role_nameInvalid">Selecciona un rol.</span>
+        </div>
+
+        <div class="field-group field-span-full">
+          <label class="field-label" for="update-user-password">Nueva contraseña</label>
+          <input
+            id="update-user-password"
+            class="field-input"
+            type="password"
+            autocomplete="new-password"
+            formControlName="password"
+            placeholder="Vacío = sin cambio"
+          />
+          <span class="field-hint">Si la dejas vacía, no se modifica la contraseña.</span>
+        </div>
       </div>
 
-      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="user-form-field-full">
-        <mat-label>Nueva contraseña</mat-label>
-        <input
-          matInput
-          type="password"
-          autocomplete="new-password"
-          formControlName="password"
-          placeholder="Vacío = sin cambio"
-        />
-        <mat-hint>Si la dejas vacía, no se modifica la contraseña.</mat-hint>
-      </mat-form-field>
-
-      <section class="user-form-photo" aria-labelledby="photo-heading-edit">
-        <h3 id="photo-heading-edit" class="user-form-section-title">Foto de perfil</h3>
-        <div class="user-form-photo-row">
-          <div class="user-form-photo-preview">
-            <img [src]="foto" alt="Vista previa de la foto de perfil" width="120" height="120" />
-          </div>
-          <label class="user-form-drop" for="picture-edit">
-            <span class="material-icons user-form-drop-icon">cloud_upload</span>
-            <span class="user-form-drop-title">Arrastra una imagen aquí</span>
-            <span class="user-form-drop-sub">o haz clic para elegir archivo (PNG, JPG, WebP)</span>
-            <input
-              type="file"
-              id="picture-edit"
-              class="user-form-file-input"
-              (change)="assignImagePromo($event)"
-              accept=".png,.jpg,.jpeg,.webp"
-            />
-          </label>
+      <h4 class="heading-4 horizontal_line"><span>Foto de perfil</span></h4>
+      <div class="photo-row">
+        <div class="photo-preview">
+          <img [src]="foto" alt="Vista previa de la foto de perfil" width="120" height="120" />
         </div>
-      </section>
+        <label class="photo-drop" for="picture-edit">
+          <span class="material-icons photo-drop-icon">cloud_upload</span>
+          <span class="photo-drop-title">Arrastra una imagen aquí</span>
+          <span class="photo-drop-sub">o haz clic para elegir archivo (PNG, JPG, WebP)</span>
+          <input
+            type="file"
+            id="picture-edit"
+            class="photo-file-input"
+            (change)="assignImagePromo($event)"
+            accept=".png,.jpg,.jpeg,.webp"
+          />
+        </label>
+      </div>
 
-      <footer class="user-form-actions">
-        <button mat-stroked-button type="button" class="user-form-cancel" (click)="close()">Cancelar</button>
-        <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || spinner">Actualizar</button>
-      </footer>
+      <div class="form-actions">
+        <button type="button" class="btn-cancel" (click)="close()">Cancelar</button>
+        <button type="submit" class="btn-submit" [disabled]="form.invalid || spinner">Actualizar</button>
+      </div>
     </form>
   </ng-template>
 </div>

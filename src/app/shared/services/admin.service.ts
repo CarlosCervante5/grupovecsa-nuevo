@@ -494,15 +494,24 @@ export class AdminService {
         return this._http.post<CreateEvent>(`${this.baseUrl}/api/uploadPrincipalImages`, formData, { headers });
     }
 
-    public getUsers(page:number){
+    public getUsers(page: number, keyword?: string, paginate?: number) {
         let user_token = localStorage.getItem('user_token');
         let headers = new HttpHeaders().set('Authorization', `Bearer ${user_token}`);
-        let params = new HttpParams(); 
+        let params = new HttpParams();
+
+        if (keyword) {
+            params = params.set('keyword', keyword);
+        }
+
+        if (paginate) {
+            params = params.set('paginate', paginate.toString());
+        }
 
         if (page) {
-        params = params.set('page', page.toString());
+            params = params.set('page', page.toString());
         }
-        return this._http.get<UsersResponse>(`${this.baseUrl}/api/users`,  {headers , params});
+
+        return this._http.get<UsersResponse>(`${this.baseUrl}/api/users`, { headers, params });
     }
 
     public addUser( name: string,last_name: string,phone_1: string,phone_2: string,gender: string,email: string,location: string,role_name: string,picture: File[],password: string,
