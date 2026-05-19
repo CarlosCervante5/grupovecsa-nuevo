@@ -1226,7 +1226,7 @@
     @if (activeSection === 'checkout_payments') {
       <h1 class="store-title">Métodos de pago en checkout</h1>
       <p class="store-subtitle">
-        Controla qué opciones ve el cliente en el checkout. <strong>Stripe</strong> y <strong>OpenPay</strong> requieren llaves (Stripe en ajustes globales del sitio, OpenPay en la sección «Pagos OpenPay»);
+        Controla qué opciones ve el cliente en el checkout. La tarjeta con <strong>OpenPay</strong> requiere credenciales en «Pagos OpenPay»;
         aun con llaves, puedes ocultar el método con el interruptor.
       </p>
 
@@ -1245,9 +1245,7 @@
         <div class="store-card" style="margin-bottom:16px;">
           <h3 class="card-title"><span class="material-icons" style="color:#64748b;">info</span> Efectivo en el checkout ahora (solo lectura)</h3>
           <p style="font-size:0.9rem;color:#475569;margin:0 0 8px;">
-            Visibles ahora: Stripe
-            <span class="badge" [class.badge-available]="checkoutPayShowStripe" [class.badge-sold]="!checkoutPayShowStripe">{{ checkoutPayShowStripe ? 'Sí' : 'No' }}</span>
-            · OpenPay
+            Visibles ahora: Tarjeta de crédito / débito (OpenPay)
             <span class="badge" [class.badge-available]="checkoutPayShowOpenpay" [class.badge-sold]="!checkoutPayShowOpenpay">{{ checkoutPayShowOpenpay ? 'Sí' : 'No' }}</span>
             · Transferencia
             <span class="badge" [class.badge-available]="checkoutPayShowTransferencia" [class.badge-sold]="!checkoutPayShowTransferencia">{{ checkoutPayShowTransferencia ? 'Sí' : 'No' }}</span>
@@ -1261,19 +1259,7 @@
           <div style="display:flex;flex-direction:column;gap:20px;max-width:520px;">
             <div>
               <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;">
-                <span style="font-weight:600;">Tarjeta (Stripe)</span>
-                <label class="store-switch" [style.opacity]="!checkoutPayKeysStripe ? 0.45 : 1" [style.user-select]="'none'">
-                  <input type="checkbox" [disabled]="!checkoutPayKeysStripe" [checked]="checkoutPayFlagStripe" (change)="toggleCheckoutPayFlagStripe()" />
-                  <span class="store-switch-slider"></span>
-                </label>
-              </div>
-              @if (!checkoutPayKeysStripe) {
-                <p style="font-size:0.8rem;color:#94a3b8;margin:6px 0 0;">Sin llave publicable de Stripe. Configúrala en el panel Developer o equivalente.</p>
-              }
-            </div>
-            <div>
-              <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;">
-                <span style="font-weight:600;">Tarjeta (OpenPay)</span>
+                <span style="font-weight:600;">Tarjeta de crédito / débito (OpenPay)</span>
                 <label class="store-switch" [style.opacity]="!checkoutPayKeysOpenpay ? 0.45 : 1" [style.user-select]="'none'">
                   <input type="checkbox" [disabled]="!checkoutPayKeysOpenpay" [checked]="checkoutPayFlagOpenpay" (change)="toggleCheckoutPayFlagOpenpay()" />
                   <span class="store-switch-slider"></span>
@@ -1343,6 +1329,20 @@
               {{ openpayConfig['openpay_mode'] === 'production' ? 'PROD' : 'SANDBOX' }}
             </span>
           </div>
+        </div>
+
+        <div class="store-card" style="margin-bottom:16px;">
+          <h3 class="card-title"><span class="material-icons" style="color:#64748b;">webhook</span> Webhook (notificaciones)</h3>
+          <p style="font-size:0.85rem;color:#64748b;margin:0 0 12px;">
+            Registra esta URL en el dashboard de OpenPay con el mismo usuario y contraseña.
+            Eventos recomendados: <code>charge.succeeded</code>, <code>charge.failed</code>, <code>charge.cancelled</code>.
+          </p>
+          <label class="modal-label">URL del webhook</label>
+          <input class="modal-input" type="text" [value]="openpayConfig['openpay_webhook_url'] || ''" readonly />
+          <label class="modal-label">Usuario (basic auth)</label>
+          <input class="modal-input" type="text" [(ngModel)]="openpayConfig['openpay_webhook_user']" autocomplete="off" />
+          <label class="modal-label">Contraseña webhook — dejar vacío para no cambiar</label>
+          <input class="modal-input" type="password" autocomplete="new-password" [(ngModel)]="openpayConfig['openpay_webhook_password']" />
         </div>
 
         <div class="charts-grid" style="grid-template-columns:1fr 1fr;">
