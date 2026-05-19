@@ -1,0 +1,8 @@
+# Railway sandbox/producción — SPA Angular (build sandbox + serve estático).
+# Si el dashboard define otro Start Command, alinéalo con `npm start` o borra startCommand aquí.
+
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "npm start"
