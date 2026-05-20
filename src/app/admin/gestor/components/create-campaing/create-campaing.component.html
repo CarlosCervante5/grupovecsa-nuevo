@@ -1,94 +1,73 @@
-<div class="container">
-    <div class="row">
-        <div class="col-12 mt-5 mb-5">
-                <div class="row">
-                    <div class="col-12">
-                        <div class="row">
-                            <div class="col-12 text-center">
-                                <h1 class=fw-bold>Nueva Campaña</h1>
-                                <span>Por favor, ingrese los datos de la campaña.</span>
-                                <hr />
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-12">
-                                <form [formGroup]="form" (ngSubmit)="onSubmit()">
-                                    <!--Nombre-->
-                                    <div class="row paddingInputs">
-                                        <div class="col-12 ">
-                                            <mat-form-field appearance="outline" class="example-full-width">
-                                                <mat-label>Nombre de la campaña:</mat-label>
-                                                <input matInput type="text" formControlName="name" placeholder="Nombre" minlength="1" maxlength="191" required>
-                                            </mat-form-field>
-                                        </div>
-                                    </div>
-                                    <div class="row paddingInputs">
-                                        <div class="col-6">
-                                            <mat-form-field appearance="outline" class="example-full-width">
-                                                <mat-label>Inicio de campaña:</mat-label>
-                                                <input matInput type="date" formControlName="begin_date"  required>
-                                            </mat-form-field>
-                                        </div>
-                                        <div class="col-6">
-                                            <mat-form-field appearance="outline" class="example-full-width">
-                                                <mat-label>Fin de campaña</mat-label>
-                                                <input matInput type="date" formControlName="end_date" required>
-                                            </mat-form-field>
-                                        </div>
-                                    </div>
-        
-                                    <div class="row">
-                                        <div class="col-6 paddingInputs">
-                                            <mat-form-field appearance="outline" class="example-full-width">
-                                                <mat-label>Marca:</mat-label>
-                                                <mat-select formControlName="segment_name" >
-                                                    <mat-option value="BMW">BMW</mat-option>
-                                                    <mat-option value="MINI">MINI</mat-option>
-                                                    <mat-option value="MOTORRAD">MOTORRAD</mat-option>
-                                                    <mat-option value="Chevrolet">Chevrolet</mat-option>
-                                                    <mat-option value="ABcars">ABcars</mat-option>
-                                                    <mat-option value="Seminuevos Vecsa">Seminuevos Vecsa</mat-option>
-                                                </mat-select>
-                                            </mat-form-field>
-                                        </div>
-    
-                                        <div class="col-6 paddingInputs">
-                                            <mat-form-field appearance="outline" class="example-full-width">
-                                                <mat-label>Categoria:</mat-label>
-                                                <mat-select formControlName="category" >
-                                                    <mat-option value="vehiculos nuevos">Vehiculos Nuevos</mat-option>
-                                                    <mat-option value="vehiculos seminuevos">Vehiculos Seminuevos</mat-option>
-                                                    <mat-option value="aftersales">Aftersales</mat-option>
-                                                </mat-select>
-                                            </mat-form-field>
-                                        </div>
-                                    </div>
+<div class="campaign-form-sheet">
+  <h2 class="campaign-form__title">Nueva Campaña</h2>
+  <p class="campaign-form__lead">Por favor, ingrese los datos de la campaña.</p>
 
-                                    <div class="row paddingInputs">
-                                        <div class="col-12 ">
-                                            <mat-form-field appearance="outline" class="example-full-width">
-                                                <mat-label>Descripción:</mat-label>
-                                                <input matInput type="text" formControlName="description" placeholder="Descripción" minlength="1" maxlength="191">
-                                            </mat-form-field>
-                                        </div>
-                                    </div>
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="upload-fields-grid">
+      <div class="field-group full">
+        <label class="field-label" for="campaign-name">Nombre de la campaña *</label>
+        <input
+          id="campaign-name"
+          type="text"
+          class="field-input"
+          formControlName="name"
+          placeholder="Nombre"
+          minlength="1"
+          maxlength="191"
+          required
+        />
+      </div>
 
-                                    <div class="row">
-                                        <div class="col-12 text-end">
-                                            <button mat-raised-button type="submit" class="marginButtons btn abcars-background-color-blue  mx-3 px-3" >                                    
-                                                <span >Ingresar</span>
-                                            </button>                                            
-    
-                                            <button mat-raised-button type="button"class="marginButtons btn  mx-3 px-3" (click)="close()">                                    
-                                                Cancelar
-                                            </button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-        </div>
+      <div class="field-group">
+        <label class="field-label" for="campaign-begin">Inicio de campaña *</label>
+        <input id="campaign-begin" type="date" class="field-input" formControlName="begin_date" required />
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="campaign-end">Fin de campaña *</label>
+        <input id="campaign-end" type="date" class="field-input" formControlName="end_date" required />
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="campaign-segment">Marca *</label>
+        <select id="campaign-segment" class="field-input" formControlName="segment_name">
+          <option value="">— Seleccionar —</option>
+          <option value="BMW">BMW</option>
+          <option value="MINI">MINI</option>
+          <option value="MOTORRAD">MOTORRAD</option>
+          <option value="Chevrolet">Chevrolet</option>
+          <option value="ABcars">ABcars</option>
+          <option value="Seminuevos Vecsa">Seminuevos Vecsa</option>
+        </select>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="campaign-category">Categoría *</label>
+        <select id="campaign-category" class="field-input" formControlName="category">
+          <option value="">— Seleccionar —</option>
+          <option value="vehiculos nuevos">Vehículos nuevos</option>
+          <option value="vehiculos seminuevos">Vehículos seminuevos</option>
+          <option value="aftersales">Aftersales</option>
+        </select>
+      </div>
+
+      <div class="field-group full">
+        <label class="field-label" for="campaign-description">Descripción</label>
+        <input
+          id="campaign-description"
+          type="text"
+          class="field-input"
+          formControlName="description"
+          placeholder="Descripción"
+          minlength="1"
+          maxlength="191"
+        />
+      </div>
     </div>
+
+    <div class="campaign-form__actions">
+      <button type="button" class="action-btn" (click)="close()">Cancelar</button>
+      <button type="submit" class="action-btn primary-btn" [disabled]="form.invalid">Ingresar</button>
+    </div>
+  </form>
 </div>
