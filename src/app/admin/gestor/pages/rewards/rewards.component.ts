@@ -80,7 +80,9 @@ export class RewardsComponent {
     );
   }
 
-  public formatDate(dateString: string): string {
+  public formatDate(value: Date | string): string {
+    const dateString =
+      value instanceof Date ? value.toISOString().slice(0, 10) : String(value).slice(0, 10);
     const date = new Date(dateString + 'T00:00:00Z');
     const day = String(date.getUTCDate()).padStart(2, '0');
     const month = String(date.getUTCMonth() + 1).padStart(2, '0');
