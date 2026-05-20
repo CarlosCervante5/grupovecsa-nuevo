@@ -1,80 +1,68 @@
-<div class="container">
-  <div class="row">
-    <div class="col-12 mt-5 mb-5">
-
-        <div class="row mb-3">
-            <div class="col-12">
-                <h4 class="fs-4 fw-bold text-truncate">Recompensas</h4>
-                <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item" [routerLink]="['/admin/gestor/']">Overview</li>
-                        <li class="breadcrumb-item active" aria-current="page">Recompensas</li>
-                    </ol>
-                    <div class="d-flex justify-content-end p-3">
-                        <a mat-button (click)="newRewards()"><i class="fa-solid fa-plus"></i> Agregar Recompensa</a>
-                    </div>
-                </nav>
-            </div>
-        </div>
-
-        <div class="d-flex flex-wrap mb-3 barra">
-            <div class="col-lg-12 col-md-12 col-sm-12 mb-2">
-              <mat-form-field appearance="outline" class="w-100">
-                <mat-label>Buscar...</mat-label>
-                <input matInput placeholder="Gwen Stacy" #input>
-              </mat-form-field>
-            </div>
-        </div>
-          
-          <!-- Tabla -->
-          <div class="d-flex justify-content-center mat-table-container">
-            <div class="mat-elevation-z8 w-100">
-              <table mat-table [dataSource]="dataSource" class="w-100">
-                <!-- Columnas de la tabla -->
-                <ng-container matColumnDef="id">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
-                  <td mat-cell *matCellDef="let row">{{row.id}}</td>
-                </ng-container>
-          
-                <ng-container matColumnDef="name">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Nombre</th>
-                  <td mat-cell *matCellDef="let row">{{row.name}}</td>
-                </ng-container>
-          
-                <ng-container matColumnDef="fecha_i">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha de inicio</th>
-                  <td mat-cell *matCellDef="let row">{{row.begin_date}}</td>
-                </ng-container>
-          
-                <ng-container matColumnDef="fecha_f">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Ficha de fin</th>
-                  <td mat-cell *matCellDef="let row">{{row.end_date}}</td>
-                </ng-container>
-          
-                <!-- <ng-container matColumnDef="type">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Tipo</th>
-                  <td mat-cell *matCellDef="let row">{{ row.type }}</td>
-                </ng-container> -->
-          
-                <ng-container matColumnDef="actions">
-                  <th mat-header-cell *matHeaderCellDef>Acciones</th>
-                  <td mat-cell *matCellDef="let row">
-                    <div class="d-flex justify-content-between">
-                      <a  class="btn btn-link" (click)="updateReward(row.uuid)">
-                        <img src="assets/icons-fontawesome/pencil-solid.svg" alt="flecha" width="17px" height="17px"> Editar
-                      </a>
-                    </div>
-                  </td>
-                </ng-container>
-          
-                <!-- Fila de encabezado y datos -->
-                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-              </table>
-              <mat-paginator [pageSize]="10" aria-label="Select page of shields"></mat-paginator>
-            </div>
-          </div>
-
+<div class="rewards-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Recompensas</h1>
+      <p class="page-subtitle">{{ uuids.length }} recompensas registradas</p>
     </div>
+    <div class="header-actions">
+      <button type="button" class="action-btn primary-btn" (click)="newRewards()">
+        <span class="material-icons">add</span>
+        Agregar recompensa
+      </button>
+    </div>
+  </div>
+
+  <div class="search-bar">
+    <span class="material-icons search-icon">search</span>
+    <input
+      type="text"
+      class="search-input"
+      placeholder="Buscar por nombre, descripción o fechas…"
+      [(ngModel)]="searchTerm"
+      (keyup)="onSearch()"
+    />
+    <button type="button" class="search-clear" *ngIf="searchTerm" (click)="clearSearch()">
+      <span class="material-icons">close</span>
+    </button>
+  </div>
+
+  <div class="loading-box" *ngIf="loading">
+    <app-sk-cube></app-sk-cube>
+    <span>Cargando…</span>
+  </div>
+
+  <div class="table-wrap" *ngIf="!loading && filtered.length > 0">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th class="th-num">#</th>
+          <th>Nombre</th>
+          <th>Fecha de inicio</th>
+          <th>Fecha de fin</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of filtered; let i = index">
+          <td class="cell-num">{{ i + 1 }}</td>
+          <td class="cell-strong">{{ row.name }}</td>
+          <td>{{ row.begin_date }}</td>
+          <td>{{ row.end_date }}</td>
+          <td>
+            <div class="row-actions">
+              <button type="button" class="act-btn edit" (click)="updateReward(row.uuid)" title="Editar">
+                <span class="material-icons">edit</span>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="empty-state" *ngIf="!loading && filtered.length === 0">
+    <span class="material-icons">card_giftcard</span>
+    <p *ngIf="uuids.length === 0">No hay recompensas registradas</p>
+    <p *ngIf="uuids.length > 0">Ningún resultado con este filtro</p>
   </div>
 </div>
