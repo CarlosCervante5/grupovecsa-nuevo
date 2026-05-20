@@ -1,98 +1,68 @@
-<div class="container">
-    <div class="row">
-        <div class="col-12 mt-5 mb-5">
-            <div class="row">
-                <div class="col-12">
-                    <div class="row">
-                        <div class="col-12 text-center">
-                            <h1 class=fw-bold>Registrar kilometros</h1>
-                            <span>Por favor, ingrese los datos para registrar el kilometraje...</span>
-                            <hr />
-                        </div>
-                    </div>
+<div class="campaign-form-sheet">
+  <h2 class="campaign-form__title">Registrar kilómetros</h2>
+  <p class="campaign-form__lead">Por favor, ingrese los datos para registrar el kilometraje.</p>
 
-                    <ng-container *ngIf="spinner; else elseTemplate">
-                        <app-sk-cube></app-sk-cube>
-                    </ng-container>
-
-                    <ng-template #elseTemplate>
-                        <div class="row">
-                            <div class="col-12 mb-2">
-                                <form [formGroup]="form" (ngSubmit)="onSubmit()">
-                                    <div class="row">                            
-                                        <div class="col-12 col-md-6">
-                                            <mat-form-field appearance="outline">
-                                                <mat-label>Cantidad de kilometros</mat-label>
-                                                <input matInput type="number" class="no-spinner" placeholder="100" formControlName="quantity">
-                                                <mat-hint *ngIf="quantityInvalid">Ingrese la cantidad de kilometros</mat-hint>
-                                            </mat-form-field>
-                                        </div>
-        
-                                        <div class="col-12 col-md-6">
-                                            <mat-form-field appearance="outline">
-                                                <mat-label>Área de origen del evento</mat-label>
-                                                <mat-select formControlName="origin">
-                                                    <mat-option value="accesorios">Accesorios</mat-option>
-                                                    <mat-option value="lifestyle">LifeStyle</mat-option>
-                                                    <mat-option value="refacciones">Refacciones</mat-option>
-                                                    <mat-option value="rider">Rider</mat-option>
-                                                    <mat-option value="servicio">Servicio</mat-option>
-                                                    <mat-option value="hyp">HyP</mat-option>
-                                                    <mat-option value="bmw_nuevos">BMW Nuevos</mat-option>
-                                                    <mat-option value="mini_nuevos">Mini Nuevos</mat-option>
-                                                    <mat-option value="moto_nuevos">Moto Nuevos</mat-option>
-                                                    <mat-option value="nuevos">Nuevos</mat-option>
-                                                    <mat-option value="seminuevos">Seminuevos</mat-option>
-                                                </mat-select>
-                                                <mat-hint *ngIf="originInvalid">Seleccione el área de origen.</mat-hint>
-                                            </mat-form-field>
-                                        </div>
-        
-                                        <div class="col-12 col-md-6">
-                                            <mat-form-field appearance="outline">
-                                                <mat-label>Evento</mat-label>
-                                                <input matInput type="text" placeholder="Octoberfest" formControlName="sale_id">
-                                                <mat-hint *ngIf="rideNameInvalid">Ingrese nombre del evento</mat-hint>
-                                            </mat-form-field>
-                                        </div>
-        
-                                        <!-- <div class="col-12 col-md-6">
-                                            <mat-form-field appearance="outline">
-                                                <mat-label>Recompensa:</mat-label>
-                                                <mat-select formControlName="reward_uuid">
-                                                    <mat-option *ngFor="let reward of rewards" [value]="reward.uuid">
-                                                        {{ reward.name }}
-                                                    </mat-option>
-                                                </mat-select>
-                                                <mat-hint *ngIf="rewardInvalid">Seleccione la recompensa.</mat-hint>
-                                            </mat-form-field>
-                                        </div> -->
-                                        
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-12 text-end">
-                                            <button 
-                                                mat-raised-button
-                                                [disabled]="form.invalid"
-                                                type="submit"
-                                                class="marginButtons btn abcars-background-color-blue  mx-3 px-3" >                                    
-                                                <span >Actualizar</span>
-                                                
-                                            </button>                                            
-    
-                                            <button mat-raised-button type="button"class="marginButtons btn  mx-3 px-3" (click)="close()">                                    
-                                                Cancelar
-                                            </button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </ng-template>
-                        
-                </div>
-            </div>
-        </div>
+  <ng-container *ngIf="spinner; else formTemplate">
+    <div class="loading-box">
+      <app-sk-cube></app-sk-cube>
+      <span>Cargando…</span>
     </div>
+  </ng-container>
+
+  <ng-template #formTemplate>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="upload-fields-grid">
+        <div class="field-group">
+          <label class="field-label" for="riderkm-quantity">Cantidad de kilómetros *</label>
+          <input
+            id="riderkm-quantity"
+            type="number"
+            class="field-input no-spinner"
+            formControlName="quantity"
+            placeholder="100"
+            min="0"
+            required
+          />
+          <span class="field-error" *ngIf="quantityInvalid">Ingrese la cantidad de kilómetros.</span>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="riderkm-origin">Área de origen del evento *</label>
+          <select id="riderkm-origin" class="field-input" formControlName="origin" required>
+            <option value="">— Seleccionar —</option>
+            <option value="accesorios">Accesorios</option>
+            <option value="lifestyle">LifeStyle</option>
+            <option value="refacciones">Refacciones</option>
+            <option value="rider">Rider</option>
+            <option value="servicio">Servicio</option>
+            <option value="hyp">HyP</option>
+            <option value="bmw_nuevos">BMW Nuevos</option>
+            <option value="mini_nuevos">Mini Nuevos</option>
+            <option value="moto_nuevos">Moto Nuevos</option>
+            <option value="nuevos">Nuevos</option>
+            <option value="seminuevos">Seminuevos</option>
+          </select>
+          <span class="field-error" *ngIf="originInvalid">Seleccione el área de origen.</span>
+        </div>
+
+        <div class="field-group full">
+          <label class="field-label" for="riderkm-event">Evento *</label>
+          <input
+            id="riderkm-event"
+            type="text"
+            class="field-input"
+            formControlName="sale_id"
+            placeholder="Octoberfest"
+            required
+          />
+          <span class="field-error" *ngIf="rideNameInvalid">Ingrese el nombre del evento.</span>
+        </div>
+      </div>
+
+      <div class="campaign-form__actions">
+        <button type="button" class="action-btn" (click)="close()">Cancelar</button>
+        <button type="submit" class="action-btn primary-btn" [disabled]="form.invalid">Registrar</button>
+      </div>
+    </form>
+  </ng-template>
 </div>
