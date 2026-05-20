@@ -1,9 +1,8 @@
 import { Component } from '@angular/core';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
-import { MatTableDataSource } from '@angular/material/table';
 import { AdminService } from '@services/admin.service';
 import { AddRewardrComponent } from '../../components/add-rewardr/add-rewardr.component';
-import { DataReward, detailsRewardResponse, rewardsResponse, rewardTable } from '@interfaces/admin.interfaces';
+import { DataReward, rewardsResponse, rewardTable } from '@interfaces/admin.interfaces';
 import { UpdateRewardsComponent } from '../../components/update-rewards/update-rewards.component';
 
 @Component({
@@ -13,80 +12,90 @@ import { UpdateRewardsComponent } from '../../components/update-rewards/update-r
     standalone: false
 })
 export class RewardsComponent {
-  public reward !: DataReward;
+  public reward!: DataReward;
   public uuids: rewardTable[] = [];
+  public filtered: rewardTable[] = [];
+  public searchTerm = '';
+  public loading = true;
+
   constructor(
     private _riderservice: AdminService,
     private _bottomSheet: MatBottomSheet
-  ){
+  ) {
     this.getRewards();
   }
 
-  public data = [{
-    'id': 1,
-    'name': 'Riders',
-    'fecha_i': '2024-09-01',
-    'fecha_f': '2024-09-30',
-    'type': 'motos'
-  }];
-
-  dataSource = new MatTableDataSource();
-  displayedColumns: string[] = ['id', 'name','fecha_i', 'fecha_f','actions'];
-
-  public newRewards(){
-    const bottomSheetRef = this._bottomSheet.open(AddRewardrComponent);   
-    bottomSheetRef.afterDismissed().subscribe((dataFromChild) => {      
-      if(dataFromChild != undefined && dataFromChild.reload === true ){        
-     
-      }      
+  public newRewards(): void {
+    const bottomSheetRef = this._bottomSheet.open(AddRewardrComponent);
+    bottomSheetRef.afterDismissed().subscribe(() => {
       this.getRewards();
     });
   }
 
-  getRewards(){
-    this._riderservice.getRewards()
-    .subscribe({
+  getRewards(): void {
+    this.loading = true;
+    this._riderservice.getRewards().subscribe({
       next: (response: rewardsResponse) => {
-
         this.reward = response.data;
-        const datosR = this.reward.rewards.map((reward, index) => ({
+        this.uuids = this.reward.rewards.map((reward, index) => ({
           uuid: reward.uuid,
-          id: index +1,
+          id: index + 1,
           name: reward.name,
           description: reward.description,
           begin_date: this.formatDate(reward.begin_date),
           end_date: this.formatDate(reward.end_date),
-          // type: reward.type
         }));
-          this.uuids = datosR;
-          this.dataSource.data = this.uuids;
-    },
-    error: () => {
-
-    }
-    })
+        this.applyFilter();
+        this.loading = false;
+      },
+      error: () => {
+        this.uuids = [];
+        this.filtered = [];
+        this.loading = false;
+      }
+    });
   }
 
-  public formatDate(dateString: any): string {
-    const date = new Date(dateString  + 'T00:00:00Z');
-    const day = (String(date.getUTCDate()).padStart(2, '0'));
-    const month = String(date.getUTCMonth()+1).padStart(2, '0'); // Los meses empiezan en 0
+  onSearch(): void {
+    this.applyFilter();
+  }
+
+  clearSearch(): void {
+    this.searchTerm = '';
+    this.applyFilter();
+  }
+
+  private applyFilter(): void {
+    const q = this.searchTerm.trim().toLowerCase();
+    if (!q) {
+      this.filtered = [...this.uuids];
+      return;
+    }
+    this.filtered = this.uuids.filter(
+      (r) =>
+        (r.name || '').toLowerCase().includes(q) ||
+        (r.description || '').toLowerCase().includes(q) ||
+        (r.begin_date || '').toLowerCase().includes(q) ||
+        (r.end_date || '').toLowerCase().includes(q)
+    );
+  }
+
+  public formatDate(value: Date | string): string {
+    const dateString =
+      value instanceof Date ? value.toISOString().slice(0, 10) : String(value).slice(0, 10);
+    const date = new Date(dateString + 'T00:00:00Z');
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
     const year = date.getUTCFullYear();
     return `${day}-${month}-${year}`;
   }
 
-  public updateReward( uuid: string){
+  public updateReward(uuid: string): void {
     const bottomSheetRef = this._bottomSheet.open(UpdateRewardsComponent, {
-      data: {
-        uuid: uuid
-      }
-    });  
-    bottomSheetRef.afterDismissed().subscribe((dataFromChild) => {      
-      if(dataFromChild != undefined && dataFromChild.reload === true ){        
-        
-      }      
+      data: { uuid }
+    });
+    bottomSheetRef.afterDismissed().subscribe(() => {
       this.getRewards();
-    }); 
+    });
   }
-
 }

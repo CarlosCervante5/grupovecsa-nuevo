@@ -85,7 +85,7 @@ export class NewSaleComponent{
                     
                     Swal.fire({
                         icon: 'success',
-                        title: 'Recompenza actualizada exitosamente.',
+                        title: 'Compra registrada correctamente.',
                         showConfirmButton: false,
                         timer: 2000
                     });
@@ -120,8 +120,11 @@ export class NewSaleComponent{
 
         this._rewards.getRewardsByCategory('sale')
             .subscribe({
-            next: ( rewardsResponse: RewardsResponse) => {
+            next: (rewardsResponse: RewardsResponse) => {
                 this.rewards = rewardsResponse.data;
+                if (this.rewards.length > 0) {
+                    this.form.patchValue({ reward_uuid: this.rewards[0].uuid });
+                }
             }
         });
     }

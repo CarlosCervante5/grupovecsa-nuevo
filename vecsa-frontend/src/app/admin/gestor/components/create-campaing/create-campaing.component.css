@@ -1,0 +1,140 @@
+:host {
+  display: block;
+  padding: 16px 20px 24px;
+  box-sizing: border-box;
+}
+
+.campaign-form-sheet {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.campaign-form__title {
+  margin: 0 0 6px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.campaign-form__lead {
+  margin: 0 0 20px;
+  font-size: 0.85rem;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+.upload-fields-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field-group.full {
+  grid-column: 1 / -1;
+}
+
+.field-label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.field-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #0f172a;
+  background: #fff;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.field-input:focus {
+  border-color: #4a90d9;
+  box-shadow: 0 0 0 2px rgba(74, 144, 217, 0.15);
+}
+
+.field-input::placeholder {
+  color: #94a3b8;
+}
+
+select.field-input {
+  appearance: auto;
+  cursor: pointer;
+}
+
+.campaign-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #334155;
+}
+
+.action-btn.primary-btn {
+  background: #1c69d4;
+  color: #fff;
+  border-color: #1c69d4;
+}
+
+.action-btn:hover:not(:disabled) {
+  background: #f8fafc;
+}
+
+.action-btn.primary-btn:hover:not(:disabled) {
+  background: #1554b0;
+}
+
+.action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 576px) {
+  :host {
+    padding: 12px 12px 20px;
+  }
+
+  .upload-fields-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .field-group.full {
+    grid-column: auto;
+  }
+
+  .campaign-form__actions {
+    flex-direction: column-reverse;
+  }
+
+  .action-btn {
+    width: 100%;
+  }
+}

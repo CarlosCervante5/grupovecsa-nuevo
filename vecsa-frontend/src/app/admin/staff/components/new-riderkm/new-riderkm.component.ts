@@ -48,7 +48,7 @@ export class NewRiderkmComponent{
             quantity: ['', [Validators.required]],
             origin: ['', [Validators.required]],
             sale_id: ['', [Validators.required]],
-            reward_uuid: ['', [Validators.required]],
+            reward_uuid: [''],
             customer_uuid: ['', [Validators.required]]
         });
 
@@ -86,7 +86,7 @@ export class NewRiderkmComponent{
                     
                     Swal.fire({
                         icon: 'success',
-                        title: 'Recompenza actualizada exitosamente.',
+                        title: 'Kilometraje registrado correctamente.',
                         showConfirmButton: false,
                         timer: 2000
                     });
