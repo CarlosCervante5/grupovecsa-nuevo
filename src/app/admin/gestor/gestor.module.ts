@@ -13,7 +13,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { LoadVideoComponent } from './components/events/load-video/load-video.component';
 import { ShowEventComponent } from './components/show-event/show-event.component';
 import { CreateEventComponent } from './components/create-event/create-event.component';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { EventCardComponent } from './components/event-card/event-card.component';
 import { LoadPrincipalImagesComponent } from './components/load-principal-images/load-principal-images.component';
 import { CreateCampaingComponent } from './components/create-campaing/create-campaing.component';
@@ -26,6 +26,7 @@ import { GestorLayoutComponent } from './pages/layout/gestor-layout.component';
 import { ExperienceStoriesSharedModule } from '../shared/experience-stories/experience-stories-shared.module';
 import { VehicleStockModule } from '../shared/vehicle-stock/vehicle-stock.module';
 import { BenchmarkModule } from '../shared/benchmark/benchmark.module';
+import { SkCubeComponent } from '@components/sk-cube/sk-cube.component';
 
 @NgModule({
   declarations: [
@@ -52,11 +53,13 @@ import { BenchmarkModule } from '../shared/benchmark/benchmark.module';
     GestorRoutingModule,
     AdminModule,
     DragDropModule,
+    FormsModule,
     ReactiveFormsModule,
     NewNavComponent,
     ExperienceStoriesSharedModule,
     VehicleStockModule,
     BenchmarkModule,
+    SkCubeComponent,
   ]
 })
 export class GestorModule { }

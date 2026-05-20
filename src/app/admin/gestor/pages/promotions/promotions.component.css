@@ -1,4 +1,18 @@
+.btn-add-campaign {
+  height: auto;
+  line-height: normal;
+}
 
+.btn-add-campaign__inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-add-campaign__inner img {
+  display: block;
+  flex-shrink: 0;
+}
 
 .mat-title {
     height: 60px;

@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatBottomSheetRef } from '@angular/material/bottom-sheet';
-import { rewardsResponse } from '@interfaces/admin.interfaces';
 import { AdminService } from '@services/admin.service';
 import Swal from 'sweetalert2';
 import {reload} from '@helpers/session.helper';
@@ -62,8 +61,8 @@ export class AddRewardrComponent {
       next: (resp) => {
         Swal.fire({
           icon: 'success',
-          title: 'Success',
-          text: 'Evento creado con exito',
+          title: 'Recompensa creada',
+          text: 'La recompensa se registró correctamente.',
           showConfirmButton: true,
           confirmButtonColor: '#008bcc',
           timer: 3500

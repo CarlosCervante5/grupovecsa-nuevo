@@ -1,98 +1,77 @@
-<div class="container">
-    <div class="row">
-        <div class="col-12 mt-5 mb-5">
-            <div class="row">
-                <div class="col-12">
-                    <div class="row">
-                        <div class="col-12 text-center">
-                            <h1 class=fw-bold>Registrar compra</h1>
-                            <span>Por favor, ingrese los datos de la compra...</span>
-                            <hr />
-                        </div>
-                    </div>
+<div class="campaign-form-sheet">
+  <h2 class="campaign-form__title">Registrar compra</h2>
+  <p class="campaign-form__lead">Por favor, ingrese los datos de la compra.</p>
 
-                    <ng-container *ngIf="spinner; else elseTemplate">
-                        <app-sk-cube></app-sk-cube>
-                    </ng-container>
-
-                    <ng-template #elseTemplate>
-                        <div class="row">
-                            <div class="col-12 mb-2">
-                                <form [formGroup]="form" (ngSubmit)="onSubmit()">
-                                    <div class="row">                            
-                                        <div class="col-12 col-md-6">
-                                            <mat-form-field appearance="outline">
-                                                <mat-label>Cantidad (pesos) de la compra</mat-label>
-                                                <input matInput type="number" class="no-spinner" placeholder="100" formControlName="quantity">
-                                                <mat-hint *ngIf="quantityInvalid">Ingrese la cantidad de la compra</mat-hint>
-                                            </mat-form-field>
-                                        </div>
-        
-                                        <div class="col-12 col-md-6">
-                                            <mat-form-field appearance="outline">
-                                                <mat-label>Área de origen de la compra</mat-label>
-                                                <mat-select formControlName="origin">
-                                                    <mat-option value="accesorios">Accesorios</mat-option>
-                                                    <mat-option value="lifestyle">LifeStyle</mat-option>
-                                                    <mat-option value="refacciones">Refacciones</mat-option>
-                                                    <mat-option value="rider">Rider</mat-option>
-                                                    <mat-option value="servicio">Servicio</mat-option>
-                                                    <mat-option value="hyp">HyP</mat-option>
-                                                    <mat-option value="bmw_nuevos">BMW Nuevos</mat-option>
-                                                    <mat-option value="mini_nuevos">Mini Nuevos</mat-option>
-                                                    <mat-option value="moto_nuevos">Moto Nuevos</mat-option>
-                                                    <mat-option value="nuevos">Nuevos</mat-option>
-                                                    <mat-option value="seminuevos">Seminuevos</mat-option>
-                                                </mat-select>
-                                                <mat-hint *ngIf="originInvalid">Seleccione la recompensa.</mat-hint>
-                                            </mat-form-field>
-                                        </div>
-        
-                                        <div class="col-12 col-md-6">
-                                            <mat-form-field appearance="outline">
-                                                <mat-label>Id de la compra</mat-label>
-                                                <input matInput type="text" placeholder="G11_3434" formControlName="sale_id">
-                                                <mat-hint *ngIf="idInvalid">Ingrese el id.</mat-hint>
-                                            </mat-form-field>
-                                        </div>
-        
-                                        <div class="col-12 col-md-6">
-                                            <mat-form-field appearance="outline">
-                                                <mat-label>Recompensa:</mat-label>
-                                                <mat-select formControlName="reward_uuid">
-                                                    <mat-option *ngFor="let reward of rewards" [value]="reward.uuid">
-                                                        {{ reward.name }}
-                                                    </mat-option>
-                                                </mat-select>
-                                                <mat-hint *ngIf="rewardInvalid">Seleccione la recompensa.</mat-hint>
-                                            </mat-form-field>
-                                        </div>
-                                        
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-12 text-end">
-                                            <button 
-                                                mat-raised-button
-                                                [disabled]="form.invalid"
-                                                type="submit"
-                                                class="marginButtons btn abcars-background-color-blue  mx-3 px-3" >                                    
-                                                <span >Actualizar</span>
-                                                
-                                            </button>                                            
-    
-                                            <button mat-raised-button type="button"class="marginButtons btn  mx-3 px-3" (click)="close()">                                    
-                                                Cancelar
-                                            </button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </ng-template>
-                        
-                </div>
-            </div>
-        </div>
+  <ng-container *ngIf="spinner; else formTemplate">
+    <div class="loading-box">
+      <app-sk-cube></app-sk-cube>
+      <span>Cargando…</span>
     </div>
+  </ng-container>
+
+  <ng-template #formTemplate>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="upload-fields-grid">
+        <div class="field-group">
+          <label class="field-label" for="sale-quantity">Cantidad (pesos) de la compra *</label>
+          <input
+            id="sale-quantity"
+            type="number"
+            class="field-input no-spinner"
+            formControlName="quantity"
+            placeholder="100"
+            min="0"
+            required
+          />
+          <span class="field-error" *ngIf="quantityInvalid">Ingrese la cantidad de la compra.</span>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="sale-origin">Área de origen de la compra *</label>
+          <select id="sale-origin" class="field-input" formControlName="origin" required>
+            <option value="">— Seleccionar —</option>
+            <option value="accesorios">Accesorios</option>
+            <option value="lifestyle">LifeStyle</option>
+            <option value="refacciones">Refacciones</option>
+            <option value="rider">Rider</option>
+            <option value="servicio">Servicio</option>
+            <option value="hyp">HyP</option>
+            <option value="bmw_nuevos">BMW Nuevos</option>
+            <option value="mini_nuevos">Mini Nuevos</option>
+            <option value="moto_nuevos">Moto Nuevos</option>
+            <option value="nuevos">Nuevos</option>
+            <option value="seminuevos">Seminuevos</option>
+          </select>
+          <span class="field-error" *ngIf="originInvalid">Seleccione el área de origen.</span>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="sale-id">Id de la compra *</label>
+          <input
+            id="sale-id"
+            type="text"
+            class="field-input"
+            formControlName="sale_id"
+            placeholder="G11_3434"
+            required
+          />
+          <span class="field-error" *ngIf="idInvalid">Ingrese el id de la compra.</span>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="sale-reward">Recompensa *</label>
+          <select id="sale-reward" class="field-input" formControlName="reward_uuid" required>
+            <option value="">— Seleccionar —</option>
+            <option *ngFor="let reward of rewards" [value]="reward.uuid">{{ reward.name }}</option>
+          </select>
+          <span class="field-error" *ngIf="rewardInvalid">Seleccione la recompensa.</span>
+        </div>
+      </div>
+
+      <div class="campaign-form__actions">
+        <button type="button" class="action-btn" (click)="close()">Cancelar</button>
+        <button type="submit" class="action-btn primary-btn" [disabled]="form.invalid">Registrar</button>
+      </div>
+    </form>
+  </ng-template>
 </div>
