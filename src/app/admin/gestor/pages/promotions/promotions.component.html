@@ -11,7 +11,12 @@
                             <li class="breadcrumb-item active" aria-current="page">Campañas</li>
                         </ol>
                         <div class="d-flex justify-content-end p-3">
-                            <a mat-button (click)="newCampaing()"><img src="assets/icons-fontawesome/circle-plus.svg" alt="flecha" width="17px" height="17px"> Agregar Campaña</a>
+                            <a mat-button class="btn-add-campaign" (click)="newCampaing()">
+                                <span class="btn-add-campaign__inner">
+                                    <img src="assets/icons-fontawesome/circle-plus.svg" alt="" width="17" height="17" />
+                                    <span>Agregar Campaña</span>
+                                </span>
+                            </a>
                         </div>
                     </nav>
                 </div>
