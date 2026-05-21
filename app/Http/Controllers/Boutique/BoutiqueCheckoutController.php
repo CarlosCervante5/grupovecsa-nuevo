@@ -25,6 +25,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 class BoutiqueCheckoutController extends Controller
 {
@@ -214,19 +215,7 @@ class BoutiqueCheckoutController extends Controller
                 ]);
 
                 foreach ($lines as $line) {
-                    $product = $line['product'];
-                    $variant = $line['variant'];
-                    BoutiqueOrderItem::create([
-                        'order_id' => $order->id,
-                        'product_id' => $product->id,
-                        'product_variant_id' => $variant?->id,
-                        'product_name' => $line['product_name'],
-                        'product_sku' => $line['product_sku'],
-                        'quantity' => $line['quantity'],
-                        'unit_price' => $line['unit_price'],
-                        'subtotal' => $line['subtotal'],
-                    ]);
-
+                    $this->createOrderItemFromLine($order, $line);
                     $this->checkoutLineService->reduceLineStock($line, $order->uuid);
                 }
 
@@ -237,6 +226,8 @@ class BoutiqueCheckoutController extends Controller
 
             return $this->orderCreatedResponse($order, $data['payment_method']);
         } catch (\Exception $e) {
+            Log::error('Boutique createGuestOrder', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+
             return ApiResponseHelper::apiError('Error al crear el pedido', $e->getMessage(), 500, 'CREATE_ORDER_ERROR');
         }
     }
@@ -329,19 +320,7 @@ class BoutiqueCheckoutController extends Controller
                 ]);
 
                 foreach ($lines as $line) {
-                    $product = $line['product'];
-                    $variant = $line['variant'];
-                    BoutiqueOrderItem::create([
-                        'order_id' => $order->id,
-                        'product_id' => $product->id,
-                        'product_variant_id' => $variant?->id,
-                        'product_name' => $line['product_name'],
-                        'product_sku' => $line['product_sku'],
-                        'quantity' => $line['quantity'],
-                        'unit_price' => $line['unit_price'],
-                        'subtotal' => $line['subtotal'],
-                    ]);
-
+                    $this->createOrderItemFromLine($order, $line);
                     $this->checkoutLineService->reduceLineStock($line, $order->uuid);
                 }
 
@@ -356,6 +335,8 @@ class BoutiqueCheckoutController extends Controller
 
             return $this->orderCreatedResponse($order, $data['payment_method']);
         } catch (\Exception $e) {
+            Log::error('Boutique createOrder', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+
             return ApiResponseHelper::apiError('Error al crear el pedido', $e->getMessage(), 500, 'CREATE_ORDER_ERROR');
         }
     }
@@ -541,7 +522,15 @@ class BoutiqueCheckoutController extends Controller
     private function orderCreatedResponse(BoutiqueOrder $order, string $paymentMethod)
     {
         $order->load(['orderItems', 'payment', 'shipment']);
-        $this->orderMailService->sendOrderPlaced($order);
+
+        try {
+            $this->orderMailService->sendOrderPlaced($order);
+        } catch (\Throwable $e) {
+            Log::warning('Boutique: pedido creado pero falló encolar correo', [
+                'order_uuid' => $order->uuid,
+                'message' => $e->getMessage(),
+            ]);
+        }
 
         $payload = ['order' => $order];
         if ($paymentMethod === 'transferencia') {
@@ -549,5 +538,40 @@ class BoutiqueCheckoutController extends Controller
         }
 
         return ApiResponseHelper::apiSuccess(201, 'Pedido creado exitosamente', $payload);
+    }
+
+    /**
+     * @param  array{product: \App\Models\Boutique\BoutiqueProduct, variant: ?\App\Models\Boutique\BoutiqueProductVariant, quantity: int, unit_price: float, subtotal: float, product_name: string, product_sku: string}  $line
+     */
+    private function createOrderItemFromLine(BoutiqueOrder $order, array $line): void
+    {
+        $product = $line['product'];
+        $variant = $line['variant'];
+
+        $attrs = [
+            'order_id' => $order->id,
+            'product_id' => $product->id,
+            'product_name' => $line['product_name'],
+            'product_sku' => $line['product_sku'],
+            'quantity' => $line['quantity'],
+            'unit_price' => $line['unit_price'],
+            'subtotal' => $line['subtotal'],
+        ];
+
+        if ($variant !== null && $this->orderItemsTableHasVariantId()) {
+            $attrs['product_variant_id'] = $variant->id;
+        }
+
+        BoutiqueOrderItem::create($attrs);
+    }
+
+    private function orderItemsTableHasVariantId(): bool
+    {
+        static $has = null;
+        if ($has === null) {
+            $has = Schema::hasColumn((new BoutiqueOrderItem)->getTable(), 'product_variant_id');
+        }
+
+        return $has;
     }
 }
