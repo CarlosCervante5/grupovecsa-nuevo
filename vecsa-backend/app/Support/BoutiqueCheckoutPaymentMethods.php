@@ -18,7 +18,11 @@ final class BoutiqueCheckoutPaymentMethods
         $merchantId = trim((string) SystemSetting::get("openpay_{$suffixOp}_merchant_id", ''));
         $publicKey = trim((string) SystemSetting::get("openpay_{$suffixOp}_public_key", ''));
 
-        return $merchantId !== '' && $publicKey !== '';
+        if ($merchantId === '' || $publicKey === '') {
+            return false;
+        }
+
+        return app(OpenPayService::class)->privateKeyConfigured();
     }
 
     /**

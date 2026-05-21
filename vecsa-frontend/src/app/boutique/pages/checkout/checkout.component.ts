@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -26,6 +26,10 @@ import {
   OpenpayPaymentComponent,
   OpenPayBillingContext,
 } from '../../components/openpay-payment/openpay-payment.component';
+import {
+  boutiqueSalesWhatsAppUrl,
+  formatMxn,
+} from '../../utils/boutique-sales-whatsapp.util';
 
 interface Dealership {
   id?: number;
@@ -55,6 +59,8 @@ interface Dealership {
   styleUrls: ['./checkout.component.css'],
 })
 export class CheckoutComponent implements OnInit, OnDestroy {
+  @ViewChild(OpenpayPaymentComponent) openPayModal?: OpenpayPaymentComponent;
+
   cart: BoutiqueCart | null = null;
   isLoading = true;
 
@@ -90,6 +96,9 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   creatingOrder = false;
 
   createdOrderUuid: string | null = null;
+
+  /** Payload de checkout pendiente hasta confirmar pago OpenPay. */
+  private pendingOpenPayCheckout: Record<string, unknown> | null = null;
 
   // OpenPay (tarjeta)
   showOpenPayPayment = false;
@@ -216,6 +225,32 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
   get hasAnyPaymentMethod(): boolean {
     return this.openPayAvailable || this.transferenciaAvailable || this.sucursalAvailable;
+  }
+
+  /** Pasarela OpenPay desactivada o sin credenciales. */
+  get showSalesWhatsAppCta(): boolean {
+    return !this.openPayAvailable;
+  }
+
+  /** Datos de envío/cliente listos para armar el mensaje a ventas. */
+  get canContactSalesWhatsApp(): boolean {
+    if (!this.cart?.items?.length) {
+      return false;
+    }
+    if (!this.guestConfirmed) {
+      return false;
+    }
+    if (this.deliveryMethod === 'envio_domicilio') {
+      if (this.shippingForm.invalid) {
+        return false;
+      }
+      if (!this.selectedQuote) {
+        return false;
+      }
+    } else if (!this.selectedDealership) {
+      return false;
+    }
+    return true;
   }
 
   ngOnDestroy(): void {
@@ -368,6 +403,80 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     return this.subtotal + this.shippingCost;
   }
 
+  openSalesWhatsApp(): void {
+    if (!this.canContactSalesWhatsApp) {
+      this.snackBar.open(
+        'Completa tus datos y la entrega antes de contactar a ventas.',
+        'Cerrar',
+        { duration: 5000 },
+      );
+      return;
+    }
+    const url = boutiqueSalesWhatsAppUrl(this.buildSalesWhatsAppMessage());
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }
+
+  private buildSalesWhatsAppMessage(): string {
+    const lines: string[] = [
+      'Hola, requiero realizar una compra en la Boutique VECSA.',
+      '',
+      '*Productos:*',
+    ];
+
+    for (const item of this.cart?.items ?? []) {
+      const name = item.product?.name ?? 'Producto';
+      const qty = item.quantity;
+      const lineTotal = formatMxn(Number(item.subtotal ?? 0));
+      lines.push(`• ${name} (cant. ${qty}) — ${lineTotal}`);
+    }
+
+    lines.push(
+      '',
+      `*Subtotal:* ${formatMxn(this.subtotal)}`,
+      `*Envío:* ${formatMxn(this.shippingCost)}`,
+      `*Total:* ${formatMxn(this.total)}`,
+      '',
+    );
+
+    if (this.deliveryMethod === 'envio_domicilio') {
+      const v = this.shippingForm.getRawValue() as Record<string, string>;
+      lines.push('*Entrega:* Envío a domicilio');
+      if (this.selectedQuote) {
+        lines.push(`*Paquetería:* ${this.selectedQuote.carrier} — ${this.selectedQuote.service}`);
+      }
+      lines.push(
+        `*Nombre:* ${v.shipping_name ?? ''}`,
+        `*Dirección:* ${v.shipping_address ?? ''}`,
+        `*Ciudad:* ${v.shipping_city ?? ''}, ${v.shipping_state ?? ''} CP ${v.shipping_zip ?? ''}`,
+        `*Teléfono:* ${v.shipping_phone ?? ''}`,
+      );
+    } else {
+      lines.push('*Entrega:* Recolección en sucursal');
+      if (this.selectedDealership) {
+        lines.push(`*Sucursal:* ${this.selectedDealership.name} — ${this.selectedDealership.location}`);
+      }
+      const v = this.shippingForm.getRawValue() as Record<string, string>;
+      if (v.shipping_name || v.shipping_phone) {
+        lines.push(`*Contacto:* ${v.shipping_name ?? ''} · ${v.shipping_phone ?? ''}`);
+      }
+    }
+
+    if (!this.isLoggedIn) {
+      lines.push(
+        '',
+        `*Cliente invitado:* ${this.guestForm.value.guest_name ?? ''}`,
+        `*Correo:* ${this.guestForm.value.guest_email ?? ''}`,
+      );
+    }
+
+    lines.push(
+      '',
+      '_El pago en línea con tarjeta no está disponible en este momento. Deseo coordinar la compra con ventas._',
+    );
+
+    return lines.join('\n');
+  }
+
   get canConfirm(): boolean {
     if (!this.cart || !this.cart.items || this.cart.items.length === 0) return false;
     if (!this.guestConfirmed) return false;
@@ -433,6 +542,26 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       }
     }
 
+    if (this.paymentMethod === 'openpay') {
+      this.creatingOrder = false;
+      this.pendingOpenPayCheckout = this.buildOpenPayCheckoutPayload(baseParams);
+      this.openPayOrderTotal = this.total;
+      this.openPayBilling = this.buildOpenPayBillingFromForms();
+      const asGuest = !this.isLoggedIn;
+      if (asGuest) {
+        this.guestThanksAfterOnlinePayment = {
+          orderNumber: '',
+          guestEmail: String(this.guestForm.value.guest_email ?? ''),
+          paymentMethod: this.paymentMethod,
+          transferBank: null,
+        };
+      } else {
+        this.guestThanksAfterOnlinePayment = null;
+      }
+      this.showOpenPayPayment = true;
+      return;
+    }
+
     const order$ = this.isLoggedIn
       ? this.checkoutService.createOrder(baseParams)
       : this.checkoutService.createGuestOrder({
@@ -455,33 +584,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
           this.cartService.clearLocal();
         }
 
-        if (this.paymentMethod === 'openpay') {
-          this.openPayOrderTotal = Number(order.total ?? this.total);
-          this.openPayBilling = {
-            holder_name: String(order.shipping_name || order.guest_name || 'Cliente'),
-            line1: String(order.shipping_address || 'N/A').slice(0, 200),
-            line2: '',
-            city: String(order.shipping_city || '').trim() || 'Ciudad',
-            state: String(order.shipping_state || '').trim() || 'MX',
-            postal_code:
-              String(order.shipping_zip || '00000')
-                .replace(/\D/g, '')
-                .slice(0, 5) || '00000',
-            country_code: 'MX',
-          };
-          if (asGuest) {
-            this.guestThanksAfterOnlinePayment = {
-              orderNumber: String(order.order_number ?? ''),
-              guestEmail: String(this.guestForm.value.guest_email ?? ''),
-              paymentMethod: this.paymentMethod,
-              transferBank,
-            };
-          } else {
-            this.guestThanksAfterOnlinePayment = null;
-          }
-          this.createdOrderUuid = order.uuid;
-          this.showOpenPayPayment = true;
-        } else if (asGuest) {
+        if (asGuest) {
           this.router.navigate(['/boutique/gracias', order.uuid], {
             state: {
               orderNumber: order.order_number,
@@ -497,6 +600,100 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       error: (err) => {
         this.creatingOrder = false;
         this.snackBar.open(this.formatCreateOrderError(err), 'Cerrar', { duration: 7000 });
+      },
+    });
+    this.subs.push(sub);
+  }
+
+  private buildOpenPayCheckoutPayload(baseParams: Record<string, unknown>): Record<string, unknown> {
+    if (!this.isLoggedIn) {
+      return {
+        ...baseParams,
+        guest_name: this.guestForm.value.guest_name,
+        guest_email: this.guestForm.value.guest_email,
+        items: this.buildGuestOrderItems(),
+      };
+    }
+    return { ...baseParams };
+  }
+
+  private buildOpenPayBillingFromForms(): OpenPayBillingContext {
+    const formVal = this.shippingForm.value;
+    const holder = this.isLoggedIn
+      ? String(formVal.shipping_name || 'Cliente')
+      : String(this.guestForm.value.guest_name || formVal.shipping_name || 'Cliente');
+
+    return {
+      holder_name: holder,
+      line1: String(formVal.shipping_address || 'Domicilio').slice(0, 200),
+      line2: '',
+      city: String(formVal.shipping_city || '').trim() || 'Ciudad',
+      state: String(formVal.shipping_state || '').trim() || 'Estado',
+      postal_code:
+        String(formVal.shipping_zip || '00000')
+          .replace(/\D/g, '')
+          .slice(0, 5) || '00000',
+      country_code: 'MX',
+    };
+  }
+
+  onOpenPayChargeAuthorized(tokens: { source_id: string; device_session_id: string }): void {
+    if (!this.pendingOpenPayCheckout) {
+      return;
+    }
+    this.creatingOrder = true;
+    const payload = {
+      ...this.pendingOpenPayCheckout,
+      source_id: tokens.source_id,
+      device_session_id: tokens.device_session_id,
+    };
+
+    const sub = this.checkoutService.placeOpenPayOrder(payload).subscribe({
+      next: (res) => {
+        this.creatingOrder = false;
+        const data = res?.data as {
+          order?: { uuid: string; order_number: string };
+          requires_3ds?: boolean;
+          redirect_url?: string;
+        };
+
+        if (data?.requires_3ds && data.redirect_url) {
+          window.location.href = data.redirect_url;
+          return;
+        }
+
+        const order = data?.order;
+        if (!order?.uuid) {
+          this.snackBar.open('No se recibió el pedido tras el pago.', 'Cerrar', { duration: 5000 });
+          return;
+        }
+
+        if (this.guestThanksAfterOnlinePayment) {
+          this.guestThanksAfterOnlinePayment.orderNumber = String(order.order_number ?? '');
+        }
+
+        this.pendingOpenPayCheckout = null;
+        this.showOpenPayPayment = false;
+        this.snackBar.open(`Pedido ${order.order_number} pagado correctamente`, 'Cerrar', { duration: 4000 });
+
+        if (!this.isLoggedIn) {
+          this.cartService.clearLocal();
+        }
+
+        this.onPaymentSuccess(order.uuid);
+      },
+      error: (err) => {
+        this.creatingOrder = false;
+        this.openPayModal?.resetProcessing();
+        const msg =
+          err?.error?.data?.openpay_error ||
+          err?.error?.message ||
+          'No se pudo completar el pago.';
+        this.snackBar.open(
+          typeof msg === 'string' ? msg.replace(/^Hubo un problema con su solicitud:\s*/i, '').trim() : 'No se pudo completar el pago.',
+          'Cerrar',
+          { duration: 7000 },
+        );
       },
     });
     this.subs.push(sub);
@@ -569,8 +766,8 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   }
 
   onPaymentSuccess(orderUuid: string): void {
-    this.snackBar.open('Pago realizado exitosamente', 'Cerrar', { duration: 4000 });
     this.showOpenPayPayment = false;
+    this.pendingOpenPayCheckout = null;
     this.createdOrderUuid = null;
     if (this.guestThanksAfterOnlinePayment) {
       const st = this.guestThanksAfterOnlinePayment;
@@ -588,28 +785,11 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     }
   }
 
-  /** Cerrar modal de OpenPay sin completar pago: el pedido ya existe como pendiente. */
+  /** Cerrar modal sin pagar: no se crea pedido. */
   closeOpenPayModal(): void {
     this.showOpenPayPayment = false;
-    const orderUuid = this.createdOrderUuid;
+    this.pendingOpenPayCheckout = null;
     this.createdOrderUuid = null;
-    if (!orderUuid) {
-      return;
-    }
-    this.snackBar.open('Pedido creado. Puedes completar el pago con la tienda si lo necesitas.', 'Cerrar', { duration: 5000 });
-    if (this.guestThanksAfterOnlinePayment) {
-      const st = this.guestThanksAfterOnlinePayment;
-      this.guestThanksAfterOnlinePayment = null;
-      this.router.navigate(['/boutique/gracias', orderUuid], {
-        state: {
-          orderNumber: st.orderNumber,
-          guestEmail: st.guestEmail,
-          paymentMethod: st.paymentMethod,
-          transferBank: st.transferBank,
-        },
-      });
-    } else {
-      this.router.navigate(['/boutique/orders', orderUuid]);
-    }
+    this.guestThanksAfterOnlinePayment = null;
   }
 }

@@ -41,7 +41,11 @@ export interface OpenPayBillingContext {
   styleUrls: ['./openpay-payment.component.css'],
 })
 export class OpenpayPaymentComponent implements OnInit, OnDestroy {
-  @Input({ required: true }) order_uuid!: string;
+  /** Si true, no confirma cargo: emite tokens para que el padre cree el pedido tras el pago. */
+  @Input() deferOrderUntilPaid = false;
+
+  /** Requerido solo cuando deferOrderUntilPaid es false (flujo legacy). */
+  @Input() order_uuid?: string;
   @Input({ required: true }) openPayConfig!: BoutiqueOpenPayPublicConfig;
   @Input({ required: true }) billing!: OpenPayBillingContext;
   @Input({ required: true }) amount!: number;
@@ -49,6 +53,12 @@ export class OpenpayPaymentComponent implements OnInit, OnDestroy {
   @Input() inModal = false;
 
   @Output() paymentSuccess = new EventEmitter<string>();
+
+  /** Token listo: el padre debe llamar a openpay_place_order. */
+  @Output() chargeAuthorized = new EventEmitter<{
+    source_id: string;
+    device_session_id: string;
+  }>();
 
   isLoading = true;
   isProcessing = false;
@@ -75,6 +85,11 @@ export class OpenpayPaymentComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {}
+
+  /** Tras un fallo al crear el pedido en el servidor, permite reintentar. */
+  resetProcessing(): void {
+    this.isProcessing = false;
+  }
 
   private loadOpenPayScripts(): void {
     const w = window as any;
@@ -210,7 +225,16 @@ export class OpenpayPaymentComponent implements OnInit, OnDestroy {
           });
           return;
         }
-        this.confirmOnServer(String(tokenId));
+        if (this.deferOrderUntilPaid) {
+          this.ngZone.run(() => {
+            this.chargeAuthorized.emit({
+              source_id: String(tokenId),
+              device_session_id: this.deviceSessionId!,
+            });
+          });
+        } else {
+          this.confirmOnServer(String(tokenId));
+        }
       },
       (err: any) => {
         const desc = err?.data?.description || err?.message || 'Error al tokenizar la tarjeta.';
@@ -226,6 +250,7 @@ export class OpenpayPaymentComponent implements OnInit, OnDestroy {
     const body = (err as { error?: Record<string, unknown> })?.error;
     const data = body?.['data'] as Record<string, unknown> | undefined;
     const openpayBody = data?.['openpay_body'] as Record<string, unknown> | undefined;
+    const code = data?.['openpay_code'];
     const candidates = [
       data?.['openpay_error'],
       openpayBody?.['description'],
@@ -234,13 +259,25 @@ export class OpenpayPaymentComponent implements OnInit, OnDestroy {
     ];
     for (const raw of candidates) {
       if (typeof raw === 'string' && raw.trim()) {
-        return raw.replace(/^Hubo un problema con su solicitud:\s*/i, '').trim();
+        const text = raw.replace(/^Hubo un problema con su solicitud:\s*/i, '').trim();
+        if (typeof code === 'string' && code && !text.includes(code)) {
+          return `${text} (código OpenPay: ${code})`;
+        }
+        return text;
       }
     }
-    return 'No se pudo completar el pago.';
+    return 'No se pudo completar el pago. Revise la respuesta en la consola (Network) o las credenciales OpenPay en administración.';
   }
 
   private confirmOnServer(sourceId: string): void {
+    if (!this.order_uuid) {
+      this.ngZone.run(() => {
+        this.isProcessing = false;
+        this.errorMessage = 'Falta el identificador del pedido.';
+      });
+      return;
+    }
+
     this.checkoutService
       .confirmOpenPayCharge({
         order_uuid: this.order_uuid,
