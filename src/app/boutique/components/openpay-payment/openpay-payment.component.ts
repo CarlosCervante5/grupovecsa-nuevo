@@ -222,6 +222,24 @@ export class OpenpayPaymentComponent implements OnInit, OnDestroy {
     );
   }
 
+  private extractPaymentErrorMessage(err: unknown): string {
+    const body = (err as { error?: Record<string, unknown> })?.error;
+    const data = body?.['data'] as Record<string, unknown> | undefined;
+    const openpayBody = data?.['openpay_body'] as Record<string, unknown> | undefined;
+    const candidates = [
+      data?.['openpay_error'],
+      openpayBody?.['description'],
+      openpayBody?.['error_description'],
+      body?.['message'],
+    ];
+    for (const raw of candidates) {
+      if (typeof raw === 'string' && raw.trim()) {
+        return raw.replace(/^Hubo un problema con su solicitud:\s*/i, '').trim();
+      }
+    }
+    return 'No se pudo completar el pago.';
+  }
+
   private confirmOnServer(sourceId: string): void {
     this.checkoutService
       .confirmOpenPayCharge({
@@ -245,17 +263,10 @@ export class OpenpayPaymentComponent implements OnInit, OnDestroy {
           });
         },
         error: (err) => {
-          const raw =
-            err?.error?.data?.openpay_error ||
-            err?.error?.data?.openpay_body?.description ||
-            err?.error?.message;
-          const msg =
-            typeof raw === 'string'
-              ? raw.replace(/^Hubo un problema con su solicitud:\s*/i, '').trim()
-              : 'No se pudo completar el pago.';
+          const msg = this.extractPaymentErrorMessage(err);
           this.ngZone.run(() => {
             this.isProcessing = false;
-            this.errorMessage = msg || 'No se pudo completar el pago.';
+            this.errorMessage = msg;
           });
         },
       });
