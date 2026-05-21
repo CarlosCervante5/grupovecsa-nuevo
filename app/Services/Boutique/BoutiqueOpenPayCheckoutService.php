@@ -350,7 +350,7 @@ class BoutiqueOpenPayCheckoutService
         ];
 
         if ($data['delivery_method'] === 'recoleccion_sucursal' && ! empty($data['dealership_uuid'])) {
-            $dealership = Dealership::where('uuid', $data['dealership_uuid'])->first();
+            $dealership = \App\Support\DealershipLookup::findByUuidOrId($data['dealership_uuid']);
             if ($dealership) {
                 $shipmentData['dealership_id'] = $dealership->id;
             }

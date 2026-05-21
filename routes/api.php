@@ -726,6 +726,9 @@ Route::prefix('boutique/admin')->middleware(['bandwidth_usage', 'auth:sanctum'])
     Route::post('/banners/delete', [BoutiqueBannerController::class, 'delete']);
     Route::post('/banners/sort_update', [BoutiqueBannerController::class, 'sortUpdate']);
     Route::post('/banners/toggle', [BoutiqueBannerController::class, 'toggle']);
+
+    Route::post('/dealerships/list', [\App\Http\Controllers\Boutique\BoutiqueDealershipController::class, 'listForAdmin']);
+    Route::post('/dealerships/update_whatsapp', [\App\Http\Controllers\Boutique\BoutiqueDealershipController::class, 'updateWhatsapp']);
 });
 
 // Boutique Banners Público

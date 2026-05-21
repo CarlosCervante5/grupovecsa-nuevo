@@ -6,6 +6,7 @@ use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Boutique\BoutiqueCategory;
 use App\Models\Boutique\BoutiqueProduct;
+use App\Support\BoutiqueDealershipPresenter;
 use Illuminate\Http\Request;
 
 class BoutiqueCatalogController extends Controller
@@ -14,9 +15,13 @@ class BoutiqueCatalogController extends Controller
     {
         try {
             $query = BoutiqueProduct::where('active', true)
-                ->with(['category', 'images' => function ($q) {
-                    $q->where('status', 'uploaded')->orderBy('sort_id')->limit(1);
-                }]);
+                ->with([
+                    'category',
+                    'dealership',
+                    'images' => function ($q) {
+                        $q->where('status', 'uploaded')->orderBy('sort_id')->limit(1);
+                    },
+                ]);
 
             if ($request->filled('category_uuid')) {
                 $category = BoutiqueCategory::findByUuid($request->input('category_uuid'));
@@ -43,11 +48,18 @@ class BoutiqueCatalogController extends Controller
             }
 
             $total = $query->count();
-            $products = $query->orderBy('created_at', 'desc')
+            $paginator = $query->orderBy('created_at', 'desc')
                 ->paginate($request->input('per_page', 15));
 
+            $paginator->getCollection()->transform(function (BoutiqueProduct $product) {
+                $arr = $product->toArray();
+                $arr['dealership'] = BoutiqueDealershipPresenter::catalogSummary($product->dealership);
+
+                return $arr;
+            });
+
             return ApiResponseHelper::apiSuccess(200, 'Catálogo obtenido exitosamente', [
-                'products' => $products,
+                'products' => $paginator,
                 'total' => $total,
             ]);
         } catch (\Exception $e) {
@@ -64,6 +76,7 @@ class BoutiqueCatalogController extends Controller
                 ->where('active', true)
                 ->with([
                     'category',
+                    'dealership',
                     'images' => function ($q) {
                         $q->where('status', 'uploaded')->orderBy('sort_id');
                     },
@@ -81,6 +94,7 @@ class BoutiqueCatalogController extends Controller
 
             // Transform variants to include effective_price and readable description
             $productArray = $product->toArray();
+            $productArray['dealership'] = BoutiqueDealershipPresenter::catalogSummary($product->dealership);
             if (isset($productArray['variants'])) {
                 foreach ($productArray['variants'] as &$variant) {
                     // Effective price: variant price or product price

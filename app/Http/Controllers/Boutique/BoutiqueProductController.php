@@ -13,6 +13,7 @@ use App\Models\Boutique\BoutiqueProductAttributeValue;
 use App\Models\Boutique\BoutiqueProductVariant;
 use App\Models\Boutique\BoutiqueVariantAttributeValue;
 use App\Services\DealershipAccessService;
+use App\Support\BoutiqueDealershipPresenter;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
@@ -26,9 +27,13 @@ class BoutiqueProductController extends Controller
     public function search(Request $request)
     {
         try {
-            $query = BoutiqueProduct::with(['category', 'images' => function ($q) {
-                $q->orderBy('sort_id')->limit(1);
-            }]);
+            $query = BoutiqueProduct::with([
+                'category',
+                'dealership',
+                'images' => function ($q) {
+                    $q->orderBy('sort_id')->limit(1);
+                },
+            ]);
 
             $scopeIds = $this->dealershipAccess->inventoryDealershipIds($request->user());
             $productsTable = (new BoutiqueProduct)->getTable();
@@ -65,6 +70,12 @@ class BoutiqueProductController extends Controller
 
             $products->getCollection()->transform(function ($product) {
                 $product->low_stock = $product->stock <= 5;
+                if ($product->relationLoaded('dealership')) {
+                    $product->setAttribute(
+                        'dealership',
+                        BoutiqueDealershipPresenter::catalogSummary($product->dealership)
+                    );
+                }
 
                 return $product;
             });
