@@ -165,6 +165,7 @@
 .pd-description p {
   font-size: 0.95rem; color: #475569;
   line-height: 1.75; margin: 0;
+  white-space: pre-line;
 }
 
 /* Cart actions */
