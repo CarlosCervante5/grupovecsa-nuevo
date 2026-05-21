@@ -19,7 +19,9 @@ export class BoutiqueAuthGuard {
     return this._accountService.validateRole('client').pipe(
       map(() => true),
       catchError(() => {
-        this._router.navigateByUrl('/auth/iniciar-sesion');
+        void this._router.navigate(['/auth/iniciar-sesion'], {
+          queryParams: { returnUrl: this._router.url },
+        });
         return of(false);
       })
     );
@@ -29,7 +31,9 @@ export class BoutiqueAuthGuard {
     return this._accountService.validateRole('client').pipe(
       map(() => true),
       catchError(() => {
-        this._router.navigateByUrl('/auth/iniciar-sesion');
+        void this._router.navigate(['/auth/iniciar-sesion'], {
+          queryParams: { returnUrl: this._router.url },
+        });
         return of(false);
       })
     );
