@@ -15,10 +15,12 @@ import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-
 
 import { BoutiqueAdminProductService } from '../../services/boutique-admin-product.service';
 import { BoutiqueAdminCategoryService } from '../../services/boutique-admin-category.service';
+import { BoutiqueAdminDealershipService } from '../../services/boutique-admin-dealership.service';
 import {
   BoutiqueProduct,
   BoutiqueCategory,
-  BoutiqueProductImage
+  BoutiqueProductImage,
+  BoutiqueDealershipSummary,
 } from '../../../../../../boutique/interfaces/boutique.interfaces';
 import { reload } from '@helpers/session.helper';
 
@@ -46,6 +48,7 @@ export class ProductFormComponent implements OnInit {
 
   form!: FormGroup;
   categories: BoutiqueCategory[] = [];
+  dealerships: BoutiqueDealershipSummary[] = [];
   product: BoutiqueProduct | null = null;
   images: BoutiqueProductImage[] = [];
 
@@ -61,12 +64,14 @@ export class ProductFormComponent implements OnInit {
     private _router: Router,
     private _productService: BoutiqueAdminProductService,
     private _categoryService: BoutiqueAdminCategoryService,
+    private _dealershipService: BoutiqueAdminDealershipService,
     private _snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
     this.initForm();
     this.loadCategories();
+    this.loadDealerships();
 
     const uuid = this._route.snapshot.paramMap.get('uuid');
     if (uuid) {
@@ -85,8 +90,22 @@ export class ProductFormComponent implements OnInit {
       price: [null, [Validators.required, Validators.min(0)]],
       sku: ['', Validators.required],
       category_uuid: ['', Validators.required],
+      dealership_id: [null as number | null, Validators.required],
       stock: [0, [Validators.required, Validators.min(0)]],
       active: [true]
+    });
+  }
+
+  private loadDealerships(): void {
+    this._dealershipService.list().subscribe({
+      next: (response) => {
+        const rows = response.data?.dealerships || [];
+        this.dealerships = Array.isArray(rows) ? rows : [];
+        if (this.dealerships.length === 1 && !this.form.get('dealership_id')?.value) {
+          this.form.patchValue({ dealership_id: this.dealerships[0].id });
+        }
+      },
+      error: (error) => reload(error, this._router),
     });
   }
 
@@ -120,6 +139,7 @@ export class ProductFormComponent implements OnInit {
             price: found.price,
             sku: found.sku,
             category_uuid: found.category?.uuid || '',
+            dealership_id: found.dealership_id ?? found.dealership?.id ?? null,
             stock: found.stock,
             active: found.active
           });
@@ -146,6 +166,7 @@ export class ProductFormComponent implements OnInit {
       this._productService.update({
         uuid: this.productUuid,
         category_uuid: formValue.category_uuid,
+        dealership_id: formValue.dealership_id,
         name: formValue.name.trim(),
         description: formValue.description?.trim() || undefined,
         price: formValue.price,
@@ -169,6 +190,7 @@ export class ProductFormComponent implements OnInit {
     } else {
       this._productService.store({
         category_uuid: formValue.category_uuid,
+        dealership_id: formValue.dealership_id,
         name: formValue.name.trim(),
         description: formValue.description?.trim() || undefined,
         price: formValue.price,

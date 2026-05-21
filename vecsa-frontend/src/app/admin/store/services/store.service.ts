@@ -135,4 +135,13 @@ export class StoreService {
   updateTransferBankDetails(payload: Record<string, string>): Observable<any> {
     return this.boutiquePost('transfer_bank_details/update', payload);
   }
+
+  /** Sucursales boutique: inventario y WhatsApp de ventas en checkout. */
+  listBoutiqueDealerships(): Observable<any> {
+    return this.boutiquePost('dealerships/list');
+  }
+
+  updateBoutiqueDealershipWhatsapp(id: number, whatsapp_phone: string): Observable<any> {
+    return this.boutiquePost('dealerships/update_whatsapp', { id, whatsapp_phone });
+  }
 }

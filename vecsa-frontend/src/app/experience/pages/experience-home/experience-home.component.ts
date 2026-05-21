@@ -6,7 +6,7 @@ import { ExperienceService, ExperienceEvent, ExperiencePost } from '@services/ex
 @Component({
   selector: 'app-experience-home',
   templateUrl: './experience-home.component.html',
-  styleUrls: ['./experience-home.component.css', '../../../shared/styles/vecsa-page-hero.shared.css'],
+  styleUrls: ['./experience-home.component.css'],
   standalone: false,
 })
 export class ExperienceHomeComponent implements OnInit, OnDestroy {

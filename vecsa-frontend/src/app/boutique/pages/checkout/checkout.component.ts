@@ -29,14 +29,13 @@ import {
 import {
   boutiqueSalesWhatsAppUrl,
   formatMxn,
+  resolveBoutiqueSalesWhatsAppPhone,
+  type BoutiqueDealershipContact,
 } from '../../utils/boutique-sales-whatsapp.util';
 
-interface Dealership {
-  id?: number;
+interface Dealership extends BoutiqueDealershipContact {
   uuid?: string;
-  name: string;
-  location: string;
-  description: string | null;
+  description?: string | null;
 }
 
 @Component({
@@ -412,7 +411,12 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       );
       return;
     }
-    const url = boutiqueSalesWhatsAppUrl(this.buildSalesWhatsAppMessage());
+    const phone = resolveBoutiqueSalesWhatsAppPhone({
+      pickupDealership:
+        this.deliveryMethod === 'recoleccion_sucursal' ? this.selectedDealership : null,
+      cartItems: this.cart?.items,
+    });
+    const url = boutiqueSalesWhatsAppUrl(this.buildSalesWhatsAppMessage(), phone);
     window.open(url, '_blank', 'noopener,noreferrer');
   }
 
@@ -427,7 +431,9 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       const name = item.product?.name ?? 'Producto';
       const qty = item.quantity;
       const lineTotal = formatMxn(Number(item.subtotal ?? 0));
-      lines.push(`• ${name} (cant. ${qty}) — ${lineTotal}`);
+      const branch = item.product?.dealership?.name;
+      const branchSuffix = branch ? ` · ${branch}` : '';
+      lines.push(`• ${name} (cant. ${qty}) — ${lineTotal}${branchSuffix}`);
     }
 
     lines.push(

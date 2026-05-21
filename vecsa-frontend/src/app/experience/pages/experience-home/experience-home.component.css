@@ -2,7 +2,7 @@
 .exp-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 1.25rem 1.5rem 4rem;
+  padding: 2rem 1.5rem 4rem;
 }
 
 /* Section */
@@ -51,6 +51,12 @@
   grid-template-columns: minmax(280px, 1.1fr) minmax(200px, 0.55fr) minmax(220px, 0.55fr);
   gap: 1.25rem;
   align-items: start;
+}
+
+/** Sin eventos: solo el calendario centrado */
+.upcoming-hub--calendar-only {
+  grid-template-columns: minmax(260px, 340px);
+  justify-content: center;
 }
 
 .upcoming-carousel-wrap {
@@ -315,6 +321,14 @@
   border-radius: 14px;
   border: 1px solid #e8ecf1;
   padding: 0.75rem 0.85rem 1rem;
+}
+
+.cal-empty-hint {
+  margin: 0 0 0.65rem;
+  font-size: 0.8rem;
+  color: #94a3b8;
+  text-align: center;
+  line-height: 1.35;
 }
 
 .cal-header {

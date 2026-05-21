@@ -43,7 +43,7 @@ import { reload } from '@helpers/session.helper';
 })
 export class ProductsComponent implements OnInit {
 
-  displayedColumns: string[] = ['image', 'name', 'sku', 'category', 'price', 'stock', 'active', 'actions'];
+  displayedColumns: string[] = ['image', 'name', 'sku', 'category', 'dealership', 'price', 'stock', 'active', 'actions'];
   products: BoutiqueProduct[] = [];
   categories: BoutiqueCategory[] = [];
   loading = true;

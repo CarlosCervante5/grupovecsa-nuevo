@@ -1,14 +1,3 @@
-<!-- Hero (mismo bloque que Rewards / Car Care / Promociones) -->
-<section class="vecsa-page-hero">
-  <div class="vecsa-page-hero__overlay">
-    <div class="vecsa-page-hero__inner">
-      <div class="vecsa-page-hero__badge">GRUPO VECSA</div>
-      <h1 class="vecsa-page-hero__title">VECSA <span class="vecsa-page-hero__accent">Experience</span></h1>
-      <p class="vecsa-page-hero__sub">Eventos, presentaciones, nuevos lanzamientos y noticias relevantes de nuestras marcas. Todo en un solo lugar.</p>
-    </div>
-  </div>
-</section>
-
 <div class="exp-container">
 
   <!-- Próximos Eventos -->
@@ -19,14 +8,13 @@
       <div class="exp-skeleton" *ngFor="let i of [1,2,3]"></div>
     </div>
 
-    <div *ngIf="!loadingUpcoming && upcomingEvents.length === 0" class="exp-empty">
-      <span>🗓️</span>
-      <p>No hay eventos próximos por el momento.</p>
-    </div>
-
-    <div *ngIf="!loadingUpcoming && upcomingEvents.length > 0" class="upcoming-hub">
-      <!-- Carrusel destacado -->
-      <div class="upcoming-carousel-wrap">
+    <div
+      *ngIf="!loadingUpcoming"
+      class="upcoming-hub"
+      [class.upcoming-hub--calendar-only]="upcomingEvents.length === 0"
+    >
+      <!-- Carrusel destacado (solo si hay eventos) -->
+      <div class="upcoming-carousel-wrap" *ngIf="upcomingEvents.length > 0">
         <div class="upcoming-carousel" *ngIf="carouselSlide as slide">
           <div class="carousel-slide">
             <div class="carousel-bg">
@@ -64,7 +52,7 @@
       </div>
 
       <!-- Lista de eventos -->
-      <div class="upcoming-side-list">
+      <div class="upcoming-side-list" *ngIf="upcomingEvents.length > 0">
         <ul class="upcoming-side-ul">
           <li
             *ngFor="let ev of upcomingEvents; trackBy: trackByUuid"
@@ -87,8 +75,11 @@
         </ul>
       </div>
 
-      <!-- Calendario -->
+      <!-- Calendario: siempre visible -->
       <div class="upcoming-calendar">
+        <p *ngIf="upcomingEvents.length === 0" class="cal-empty-hint">
+          No hay eventos próximos por el momento.
+        </p>
         <div class="cal-header">
           <button type="button" class="cal-nav" (click)="prevCalendarMonth()" aria-label="Mes anterior">
             <span class="material-icons">chevron_left</span>

@@ -53,6 +53,15 @@
       <span class="pd-category">{{ product.category?.name }}</span>
       <h1 class="pd-name">{{ product.name }}</h1>
       <p class="pd-sku">SKU: {{ product.sku }}</p>
+      @if (product.dealership?.name) {
+        <p class="pd-branch">
+          <mat-icon class="pd-branch-icon">store</mat-icon>
+          Disponible en: <strong>{{ product.dealership!.name }}</strong>
+          @if (product.dealership!.location) {
+            <span class="pd-branch-loc"> — {{ product.dealership!.location }}</span>
+          }
+        </p>
+      }
 
       <div class="pd-price-row">
         <span class="pd-price">{{ product.price | currency:'MXN':'symbol-narrow':'1.2-2' }}</span>

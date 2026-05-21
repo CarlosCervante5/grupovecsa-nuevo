@@ -159,6 +159,19 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   checkoutPayTransferencia = true;
   checkoutPaySucursal = true;
 
+  boutiqueDealershipRows: {
+    id: number;
+    name: string;
+    location: string;
+    state?: string | null;
+    whatsapp_phone?: string;
+    editPhone: string;
+  }[] = [];
+  boutiqueDealershipLoading = false;
+  boutiqueDealershipSavingId: number | null = null;
+  boutiqueDealershipError = '';
+  boutiqueDealershipSuccess = '';
+
   transferBankSaving = false;
   transferBankSuccess = '';
   transferBankError = '';
@@ -180,6 +193,7 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     { key: 'coupons', label: 'Cupones', icon: 'confirmation_number' },
     { key: 'redemptions', label: 'Redenciones', icon: 'redeem' },
     { key: 'checkout_payments', label: 'Métodos de pago (checkout)', icon: 'payments' },
+    { key: 'boutique_dealerships', label: 'Sucursales (WhatsApp)', icon: 'store' },
     { key: 'openpay', label: 'Pagos OpenPay', icon: 'account_balance' },
     { key: 'incadea', label: 'Sync Incadea', icon: 'sync' },
     { key: 'wc_import', label: 'WC Import', icon: 'upload_file' },
@@ -257,6 +271,8 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
       this.loadRedemptions();
     } else if (key === 'checkout_payments') {
       this.loadCheckoutPaymentMethodsConfig();
+    } else if (key === 'boutique_dealerships') {
+      this.loadBoutiqueDealerships();
     } else if (key === 'openpay') {
       this.loadOpenpayConfig();
     } else if (key === 'incadea') {
@@ -670,6 +686,7 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     else if (this.activeSection === 'coupons') this.loadCoupons();
     else if (this.activeSection === 'redemptions') this.loadRedemptions();
     else if (this.activeSection === 'checkout_payments') this.loadCheckoutPaymentMethodsConfig();
+    else if (this.activeSection === 'boutique_dealerships') this.loadBoutiqueDealerships();
     else if (this.activeSection === 'openpay') this.loadOpenpayConfig();
   }
 
@@ -1565,6 +1582,56 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   formatDate(val: any): string {
     if (!val) return '—';
     return new Date(val).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' });
+  }
+
+  loadBoutiqueDealerships(): void {
+    this.boutiqueDealershipLoading = true;
+    this.boutiqueDealershipError = '';
+    this.boutiqueDealershipSuccess = '';
+    this.storeService.listBoutiqueDealerships().subscribe({
+      next: (res: any) => {
+        const rows = res?.data?.dealerships || [];
+        this.boutiqueDealershipRows = (Array.isArray(rows) ? rows : []).map((d: any) => ({
+          id: d.id,
+          name: d.name || '—',
+          location: d.location || '',
+          state: d.state,
+          whatsapp_phone: d.whatsapp_phone || '',
+          editPhone: d.whatsapp_phone || '',
+        }));
+        this.boutiqueDealershipLoading = false;
+      },
+      error: (err: any) => {
+        this.boutiqueDealershipError = err?.error?.message || 'Error al cargar sucursales';
+        this.boutiqueDealershipRows = [];
+        this.boutiqueDealershipLoading = false;
+      },
+    });
+  }
+
+  saveBoutiqueDealershipWhatsapp(row: { id: number; editPhone: string }): void {
+    this.boutiqueDealershipSavingId = row.id;
+    this.boutiqueDealershipError = '';
+    this.boutiqueDealershipSuccess = '';
+    this.storeService.updateBoutiqueDealershipWhatsapp(row.id, row.editPhone.trim()).subscribe({
+      next: (res: any) => {
+        const updated = res?.data?.dealership;
+        if (updated) {
+          const idx = this.boutiqueDealershipRows.findIndex(r => r.id === row.id);
+          if (idx >= 0) {
+            this.boutiqueDealershipRows[idx].whatsapp_phone = updated.whatsapp_phone || '';
+            this.boutiqueDealershipRows[idx].editPhone = updated.whatsapp_phone || '';
+          }
+        }
+        this.boutiqueDealershipSavingId = null;
+        this.boutiqueDealershipSuccess = 'WhatsApp actualizado';
+        setTimeout(() => (this.boutiqueDealershipSuccess = ''), 4000);
+      },
+      error: (err: any) => {
+        this.boutiqueDealershipSavingId = null;
+        this.boutiqueDealershipError = err?.error?.message || 'Error al guardar WhatsApp';
+      },
+    });
   }
 
   loadCheckoutPaymentMethodsConfig(): void {

@@ -10,6 +10,7 @@ use App\Http\Requests\Boutique\UpdateCartItemRequest;
 use App\Models\Boutique\BoutiqueCart;
 use App\Models\Boutique\BoutiqueCartItem;
 use App\Models\Boutique\BoutiqueProduct;
+use App\Support\BoutiqueDealershipPresenter;
 use Illuminate\Http\Request;
 
 class BoutiqueCartController extends Controller
@@ -22,9 +23,12 @@ class BoutiqueCartController extends Controller
             $cart = BoutiqueCart::where('user_id', $user->id)
                 ->with(['items' => function ($q) {
                     $q->with(['product' => function ($pq) {
-                        $pq->with(['images' => function ($iq) {
-                            $iq->where('status', 'uploaded')->orderBy('sort_id')->limit(1);
-                        }]);
+                        $pq->with([
+                            'dealership',
+                            'images' => function ($iq) {
+                                $iq->where('status', 'uploaded')->orderBy('sort_id')->limit(1);
+                            },
+                        ]);
                     }]);
                 }])
                 ->first();
@@ -38,9 +42,14 @@ class BoutiqueCartController extends Controller
             }
 
             $items = $cart->items->map(function ($item) {
+                $product = $item->product;
+                $productArr = $product->toArray();
+                $productArr['dealership'] = BoutiqueDealershipPresenter::checkoutSummary($product->dealership)
+                    ?? BoutiqueDealershipPresenter::catalogSummary($product->dealership);
+
                 return [
                     'uuid' => $item->uuid,
-                    'product' => $item->product,
+                    'product' => $productArr,
                     'quantity' => $item->quantity,
                     'unit_price' => $item->product->price,
                     'subtotal' => round($item->quantity * $item->product->price, 2),

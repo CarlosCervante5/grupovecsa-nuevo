@@ -5,7 +5,7 @@ import { GetcampaingResponse, Campaign } from '@interfaces/admin.interfaces';
 @Component({
     selector: 'app-events',
     templateUrl: './events.component.html',
-    styleUrls: ['./events.component.css', '../../../../../shared/styles/vecsa-page-hero.shared.css'],
+    styleUrls: ['./events.component.css'],
     standalone: false
 })
 export class EventsComponent implements OnInit {
