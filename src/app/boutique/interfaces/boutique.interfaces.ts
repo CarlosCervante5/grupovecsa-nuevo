@@ -61,10 +61,20 @@ export interface BoutiqueProductVariant {
   sku: string | null;
 }
 
+/** Sucursal donde está el inventario / venta del producto. */
+export interface BoutiqueDealershipSummary {
+  id: number;
+  name: string;
+  location: string;
+  state?: string | null;
+  whatsapp_phone?: string | null;
+}
+
 export interface BoutiqueProduct {
   uuid: string;
   /** Sucursal (admin); null en productos legacy o globales */
   dealership_id?: number | null;
+  dealership?: BoutiqueDealershipSummary | null;
   category: BoutiqueCategory;
   name: string;
   description: string | null;

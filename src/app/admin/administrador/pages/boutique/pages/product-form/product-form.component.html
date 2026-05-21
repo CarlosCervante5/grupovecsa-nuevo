@@ -63,6 +63,17 @@
           </mat-form-field>
 
           <mat-form-field appearance="outline">
+            <mat-label>Sucursal (inventario)</mat-label>
+            <mat-select formControlName="dealership_id">
+              <mat-option *ngFor="let d of dealerships" [value]="d.id">{{ d.name }} — {{ d.location }}</mat-option>
+            </mat-select>
+            <mat-hint>Define en qué sucursal está el producto y qué WhatsApp puede usarse en checkout.</mat-hint>
+            <mat-error *ngIf="form.get('dealership_id')?.hasError('required')">La sucursal es requerida</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row two-cols">
+          <mat-form-field appearance="outline">
             <mat-label>Stock</mat-label>
             <input matInput type="number" formControlName="stock" placeholder="0" min="0">
             <mat-error *ngIf="form.get('stock')?.hasError('required')">El stock es requerido</mat-error>

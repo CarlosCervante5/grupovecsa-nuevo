@@ -279,6 +279,7 @@
                 <th>Imagen</th>
                 <th>Nombre</th>
                 <th>Categoría</th>
+                <th>Sucursal</th>
                 <th>SKU</th>
                 <th>Precio</th>
                 <th>Stock</th>
@@ -298,6 +299,7 @@
                   </td>
                   <td style="font-weight:600;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ row.name || '—' }}</td>
                   <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.85rem;color:#64748b;">{{ row.category?.name || '—' }}</td>
+                  <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.85rem;">{{ row.dealership?.name || '—' }}</td>
                   <td>{{ row.sku || '—' }}</td>
                   <td>{{ formatCurrency(row.price) }}</td>
                   <td [style.color]="(row.stock || 0) <= 5 ? '#ef4444' : '#059669'" style="font-weight:600;">{{ row.stock ?? 0 }}</td>
@@ -1323,6 +1325,84 @@
           <button class="store-action-btn" (click)="saveCheckoutPaymentMethods()" [disabled]="checkoutPaySaving">
             @if (checkoutPaySaving) { <div class="spinner-sm"></div> Guardando... } @else { <span class="material-icons">save</span> Guardar cambios }
           </button>
+        </div>
+      }
+    }
+
+    <!-- ═══ SUCURSALES WHATSAPP ═══ -->
+    @if (activeSection === 'boutique_dealerships') {
+      <h1 class="store-title">Sucursales (WhatsApp ventas)</h1>
+      <p class="store-subtitle">
+        Cada producto boutique se asigna a una sucursal. En el checkout, si OpenPay está desactivado o no hay tarjeta,
+        el botón de WhatsApp usa el teléfono de la sucursal de recolección o del producto (fallback global si falta).
+        También puedes editar sucursales completas en
+        <a routerLink="/admin/administrator/sucursales" style="color:#1c69d4;">Administrador → Sucursales</a>.
+      </p>
+
+      @if (boutiqueDealershipLoading) {
+        <div class="crud-loading"><div class="spinner"></div><span>Cargando...</span></div>
+      }
+      @if (boutiqueDealershipError) {
+        <div class="alert-error" style="margin-bottom:12px;"><span class="material-icons">error</span> {{ boutiqueDealershipError }}</div>
+      }
+      @if (boutiqueDealershipSuccess) {
+        <div class="alert-success" style="margin-bottom:12px;"><span class="material-icons">check_circle</span> {{ boutiqueDealershipSuccess }}</div>
+      }
+
+      @if (!boutiqueDealershipLoading) {
+        <div class="store-card">
+          <h3 class="card-title"><span class="material-icons" style="color:#25D366;">chat</span> Teléfono WhatsApp por sucursal</h3>
+          <p style="font-size:0.85rem;color:#64748b;margin:0 0 16px;">
+            Formato recomendado: 10 dígitos locales o con lada 52 (ej. 527712843793). Sin espacios ni guiones.
+          </p>
+          @if (boutiqueDealershipRows.length === 0) {
+            <p style="color:#64748b;">No hay sucursales registradas.</p>
+          } @else {
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Sucursal</th>
+                    <th>Ubicación</th>
+                    <th>WhatsApp ventas</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of boutiqueDealershipRows; track row.id) {
+                    <tr>
+                      <td style="font-weight:600;">{{ row.name }}</td>
+                      <td style="font-size:0.85rem;color:#64748b;">{{ row.location || '—' }}</td>
+                      <td>
+                        <input
+                          class="modal-input"
+                          type="text"
+                          [(ngModel)]="row.editPhone"
+                          placeholder="Ej. 7712843793"
+                          style="max-width:220px;margin:0;"
+                        />
+                      </td>
+                      <td>
+                        <button
+                          class="store-action-btn"
+                          type="button"
+                          (click)="saveBoutiqueDealershipWhatsapp(row)"
+                          [disabled]="boutiqueDealershipSavingId === row.id"
+                        >
+                          @if (boutiqueDealershipSavingId === row.id) {
+                            <div class="spinner-sm"></div>
+                          } @else {
+                            <span class="material-icons">save</span>
+                          }
+                          Guardar
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
         </div>
       }
     }
