@@ -18,7 +18,14 @@ class BoutiqueOrderMailService
             return;
         }
 
-        SendBoutiqueOrderEmailJob::dispatch($order->uuid, 'placed', $email);
+        try {
+            SendBoutiqueOrderEmailJob::dispatch($order->uuid, 'placed', $email);
+        } catch (\Throwable $e) {
+            Log::error('Boutique: no se pudo encolar correo de pedido creado', [
+                'order_uuid' => $order->uuid,
+                'message' => $e->getMessage(),
+            ]);
+        }
     }
 
     public function sendOrderPaid(BoutiqueOrder $order): void
@@ -28,7 +35,14 @@ class BoutiqueOrderMailService
             return;
         }
 
-        SendBoutiqueOrderEmailJob::dispatch($order->uuid, 'paid', $email);
+        try {
+            SendBoutiqueOrderEmailJob::dispatch($order->uuid, 'paid', $email);
+        } catch (\Throwable $e) {
+            Log::error('Boutique: no se pudo encolar correo de pago confirmado', [
+                'order_uuid' => $order->uuid,
+                'message' => $e->getMessage(),
+            ]);
+        }
     }
 
     private function recipientEmail(BoutiqueOrder $order): ?string
