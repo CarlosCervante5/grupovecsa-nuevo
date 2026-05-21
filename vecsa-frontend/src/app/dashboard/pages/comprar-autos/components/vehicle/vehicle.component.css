@@ -17,16 +17,19 @@
   box-shadow: 0 8px 24px rgba(0,0,0,0.12);
 }
 
-/* Image */
+/* Image — proporción un poco más alta para que el auto encaje mejor */
 .price-container {
   position: relative;
   overflow: hidden;
+  aspect-ratio: 4 / 3;
+  background: #f3f4f6;
 }
 
 .card-element img {
   width: 100%;
-  height: 200px;
+  height: 100%;
   object-fit: cover;
+  object-position: center center;
   display: block;
   transition: transform 0.3s ease;
 }
