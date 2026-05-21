@@ -2,8 +2,10 @@
 
 namespace App\Models\Boutique;
 
+use App\Helpers\RichTextHelper;
 use App\Models\Dealership;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -52,6 +54,14 @@ class BoutiqueProduct extends Model
         'active' => 'boolean',
         'price' => 'decimal:2',
     ];
+
+    protected function description(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value) => RichTextHelper::toPlainText($value),
+            set: fn (?string $value) => RichTextHelper::toPlainText($value),
+        );
+    }
 
     protected $dates = ['created_at', 'updated_at', 'deleted_at'];
 
