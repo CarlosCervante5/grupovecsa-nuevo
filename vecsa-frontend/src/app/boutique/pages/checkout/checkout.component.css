@@ -645,7 +645,7 @@
 
 .checkout-modal-panel {
   position: relative;
-  width: min(480px, 100%);
+  width: min(520px, calc(100vw - 32px));
   max-height: min(90vh, 720px);
   display: flex;
   flex-direction: column;
@@ -655,6 +655,7 @@
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45);
   overflow: hidden;
   border: 1px solid rgba(148, 163, 184, 0.2);
+  box-sizing: border-box;
 }
 
 .checkout-modal-toolbar {
@@ -694,9 +695,31 @@
   color: #fff;
 }
 
+.checkout-modal-panel--openpay {
+  width: min(680px, calc(100vw - 24px));
+}
+
+.checkout-modal-panel--openpay .checkout-modal-toolbar {
+  padding: 20px 24px 12px;
+}
+
+.checkout-modal-panel--openpay .checkout-modal-openpay-wrap {
+  padding: 0 24px 24px;
+}
+
 .checkout-modal-openpay-wrap {
   flex: 1;
   min-height: 0;
-  overflow: auto;
+  min-width: 0;
+  width: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
   padding: 0 20px 20px;
+  box-sizing: border-box;
+}
+
+.checkout-modal-openpay-wrap app-openpay-payment {
+  display: block;
+  width: 100%;
+  max-width: 100%;
 }

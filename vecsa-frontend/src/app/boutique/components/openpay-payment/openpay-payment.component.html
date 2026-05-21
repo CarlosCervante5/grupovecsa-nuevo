@@ -22,13 +22,13 @@
         <label class="field-label">Número de tarjeta</label>
         <input class="field-input" type="text" inputmode="numeric" autocomplete="cc-number" [(ngModel)]="cardNumber" name="op_card" placeholder="0000 0000 0000 0000" />
       </div>
-      <div class="row-2">
+      <div class="row-2" [class.row-2--modal]="inModal">
         <div class="field-group">
-          <label class="field-label">Mes (MM)</label>
+          <label class="field-label">{{ inModal ? 'Mes' : 'Mes (MM)' }}</label>
           <input class="field-input" type="text" inputmode="numeric" maxlength="2" [(ngModel)]="expirationMonth" name="op_m" placeholder="12" />
         </div>
         <div class="field-group">
-          <label class="field-label">Año (AA o AAAA)</label>
+          <label class="field-label">{{ inModal ? 'Año' : 'Año (AA o AAAA)' }}</label>
           <input class="field-input" type="text" inputmode="numeric" maxlength="4" [(ngModel)]="expirationYear" name="op_y" placeholder="28" />
         </div>
         <div class="field-group">

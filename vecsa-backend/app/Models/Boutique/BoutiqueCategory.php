@@ -2,7 +2,9 @@
 
 namespace App\Models\Boutique;
 
+use App\Helpers\RichTextHelper;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -46,6 +48,14 @@ class BoutiqueCategory extends Model
     protected $casts = [
         'active' => 'boolean',
     ];
+
+    protected function description(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value) => RichTextHelper::toPlainText($value),
+            set: fn (?string $value) => RichTextHelper::toPlainText($value),
+        );
+    }
 
     protected $dates = ['created_at', 'updated_at', 'deleted_at'];
 
