@@ -43,7 +43,9 @@ class ApiResponseHelper
         self::resourceError($logMessage, $error);
 
         $genericMessage = 'Hubo un problema con su solicitud: ' . $userMessage;
-        return response()->json(['status' => $status, 'message' => $genericMessage, 'data' => null], $status);
+        $data = is_array($error) ? $error : null;
+
+        return response()->json(['status' => $status, 'message' => $genericMessage, 'data' => $data], $status);
     }
 
     public static function imageSuccess($status = 200, $message, $data = null)

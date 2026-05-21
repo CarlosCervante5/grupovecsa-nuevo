@@ -5,7 +5,6 @@ namespace App\Services\Boutique;
 use App\Models\Boutique\BoutiqueOrder;
 use App\Models\Boutique\BoutiquePayment;
 use App\Models\SystemSetting;
-use Exception;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -26,7 +25,7 @@ class OpenPayService
      *
      * @return array<string, mixed> Respuesta JSON del cargo
      *
-     * @throws Exception
+     * @throws OpenPayChargeException
      */
     public function createMerchantCardCharge(
         string $merchantId,
@@ -44,7 +43,7 @@ class OpenPayService
         $merchantId = trim($merchantId);
         $privateKey = trim($privateKey);
         if ($merchantId === '' || $privateKey === '') {
-            throw new Exception('OpenPay no está configurado (merchant o llave privada vacíos).');
+            throw new OpenPayChargeException('OpenPay no está configurado (merchant o llave privada vacíos).', 503);
         }
 
         $url = $this->baseUrl($sandbox) . '/v1/' . rawurlencode($merchantId) . '/charges';
@@ -58,6 +57,7 @@ class OpenPayService
             'order_id' => mb_substr($orderId, 0, 100),
             'device_session_id' => $deviceSessionId,
             'customer' => $customer,
+            'origin_channel' => 'PLUGIN_WOOCOMMERCE',
         ];
 
         if ($clientIp !== null || $userAgent !== null) {
@@ -78,14 +78,107 @@ class OpenPayService
             $msg = is_array($body)
                 ? ($body['description'] ?? $body['error_description'] ?? $response->body())
                 : $response->body();
+            $code = is_array($body) ? ($body['error_code'] ?? $body['category'] ?? null) : null;
             Log::warning('OpenPay charge error', [
                 'status' => $response->status(),
                 'body' => $body,
             ]);
-            throw new Exception(is_string($msg) ? $msg : 'Error al procesar el cargo en OpenPay.');
+            throw new OpenPayChargeException(
+                is_string($msg) ? $msg : 'Error al procesar el cargo en OpenPay.',
+                $response->status(),
+                is_array($body) ? $body : null,
+                is_string($code) ? $code : null,
+            );
         }
 
         return $response->json();
+    }
+
+    /**
+     * Datos de cliente exigidos por OpenPay MX (incluye domicilio).
+     *
+     * @return array<string, mixed>
+     */
+    public function buildCustomerFromOrder(BoutiqueOrder $order): array
+    {
+        $fullName = trim((string) ($order->shipping_name ?: $order->guest_name ?: 'Cliente'));
+        $nameParts = preg_split('/\s+/', $fullName, 2) ?: ['Cliente', ''];
+        $firstName = $nameParts[0] !== '' ? $nameParts[0] : 'Cliente';
+        $lastName = isset($nameParts[1]) && $nameParts[1] !== '' ? $nameParts[1] : $firstName;
+
+        $email = trim((string) ($order->guest_email ?: ''));
+        if ($email === '' && $order->user_id) {
+            $order->loadMissing('user');
+            $email = trim((string) ($order->user?->email ?? ''));
+        }
+        if ($email === '' || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new OpenPayChargeException('Correo del pedido inválido para procesar el pago.', 422);
+        }
+
+        $phone = preg_replace('/\D+/', '', (string) ($order->shipping_phone ?? ''));
+        if (strlen($phone) > 10) {
+            $phone = substr($phone, -10);
+        }
+        if (strlen($phone) < 10) {
+            $phone = '5555555555';
+        }
+
+        $zip = preg_replace('/\D/', '', (string) ($order->shipping_zip ?? ''));
+        if (strlen($zip) > 5) {
+            $zip = substr($zip, 0, 5);
+        }
+        if ($zip === '') {
+            $zip = '00000';
+        }
+
+        $line1 = trim((string) ($order->shipping_address ?? ''));
+        if ($line1 === '') {
+            $line1 = 'Domicilio';
+        }
+
+        return [
+            'name' => mb_substr($firstName, 0, 100),
+            'last_name' => mb_substr($lastName, 0, 100),
+            'phone_number' => $phone,
+            'email' => mb_substr($email, 0, 100),
+            'requires_account' => false,
+            'address' => [
+                'line1' => mb_substr($line1, 0, 200),
+                'line2' => '',
+                'city' => mb_substr(trim((string) ($order->shipping_city ?? 'Ciudad')), 0, 100),
+                'state' => mb_substr(trim((string) ($order->shipping_state ?? 'Estado')), 0, 100),
+                'postal_code' => $zip,
+                'country_code' => 'MX',
+            ],
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $charge
+     */
+    public function chargeRequires3ds(array $charge): bool
+    {
+        $status = $charge['status'] ?? '';
+        $pm = $charge['payment_method'] ?? null;
+
+        return $status === 'in_progress'
+            && is_array($pm)
+            && ($pm['type'] ?? '') === 'redirect'
+            && ! empty($pm['url']);
+    }
+
+    /**
+     * @param  array<string, mixed>  $charge
+     */
+    public function charge3dsRedirectUrl(array $charge): ?string
+    {
+        if (! $this->chargeRequires3ds($charge)) {
+            return null;
+        }
+
+        $url = $charge['payment_method']['url'] ?? null;
+
+        return is_string($url) && $url !== '' ? $url : null;
     }
 
     /**
