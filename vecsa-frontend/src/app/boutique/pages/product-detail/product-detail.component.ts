@@ -13,6 +13,7 @@ import { BoutiqueCatalogService } from '../../services/boutique-catalog.service'
 import { BoutiqueCartService } from '../../services/boutique-cart.service';
 import { BoutiqueProduct, BoutiqueProductVariant, BoutiqueColorOption } from '../../interfaces/boutique.interfaces';
 import { ProductCardComponent } from '../../components/product-card/product-card.component';
+import { scrollBoutiquePageToTop } from '../../utils/boutique-scroll.util';
 
 @Component({
   selector: 'app-product-detail',
@@ -64,9 +65,11 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    scrollBoutiquePageToTop();
     this.routeSub = this.route.params.subscribe((params) => {
       const uuid = params['uuid'];
       if (uuid) {
+        scrollBoutiquePageToTop();
         this.loadProduct(uuid);
       }
     });
