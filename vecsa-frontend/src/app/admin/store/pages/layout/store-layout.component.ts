@@ -136,6 +136,8 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   modifiedVariantUuids: Set<string> = new Set();
 
   openpayConfig: Record<string, string> = {};
+  openpayPasarelaEnabled = true;
+  openpayKeysConfigured = false;
   openpayLoading = false;
   openpaySaving = false;
   openpayError = '';
@@ -1607,9 +1609,6 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   toggleCheckoutPayFlagOpenpay(): void {
-    if (!this.checkoutPayKeysOpenpay) {
-      return;
-    }
     this.checkoutPayFlagOpenpay = !this.checkoutPayFlagOpenpay;
   }
 
@@ -1653,7 +1652,7 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     this.checkoutPaySuccess = '';
     this.storeService
       .updateCheckoutPaymentMethods({
-        boutique_checkout_openpay: this.checkoutPayKeysOpenpay ? this.checkoutPayFlagOpenpay : false,
+        boutique_checkout_openpay: this.checkoutPayFlagOpenpay,
         boutique_checkout_transferencia: this.checkoutPayTransferencia,
         boutique_checkout_sucursal: this.checkoutPaySucursal,
       })
@@ -1682,7 +1681,10 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     this.openpaySuccess = '';
     this.storeService.getOpenpayConfig().subscribe({
       next: (res: any) => {
-        this.openpayConfig = { ...(res?.data || {}) };
+        const d = res?.data || {};
+        this.openpayConfig = { ...d };
+        this.openpayPasarelaEnabled = d.boutique_checkout_openpay !== false;
+        this.openpayKeysConfigured = !!d.keys_configured;
         this.openpayLoading = false;
       },
       error: (err: any) => {
@@ -1697,12 +1699,17 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
       this.openpayConfig['openpay_mode'] === 'production' ? 'sandbox' : 'production';
   }
 
+  toggleOpenpayPasarela(): void {
+    this.openpayPasarelaEnabled = !this.openpayPasarelaEnabled;
+  }
+
   saveOpenpayConfig(): void {
     this.openpaySaving = true;
     this.openpayError = '';
     this.openpaySuccess = '';
     const payload: Record<string, unknown> = {
       openpay_mode: this.openpayConfig['openpay_mode'] || 'sandbox',
+      boutique_checkout_openpay: this.openpayPasarelaEnabled,
     };
     const fields = [
       'openpay_sandbox_merchant_id',

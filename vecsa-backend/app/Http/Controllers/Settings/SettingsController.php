@@ -171,6 +171,11 @@ class SettingsController extends Controller
 
             $data['openpay_webhook_user'] = SystemSetting::get('openpay_webhook_user', '');
             $data['openpay_webhook_url'] = app(\App\Services\Boutique\OpenPayService::class)->webhookUrl();
+            $data['boutique_checkout_openpay'] = filter_var(
+                SystemSetting::get('boutique_checkout_openpay', '1'),
+                FILTER_VALIDATE_BOOLEAN
+            );
+            $data['keys_configured'] = BoutiqueCheckoutPaymentMethods::openpayKeysConfigured();
 
             return ApiResponseHelper::apiSuccess(200, 'Configuración de OpenPay obtenida', $data);
         } catch (\Exception $e) {
@@ -245,7 +250,31 @@ class SettingsController extends Controller
                 SystemSetting::set('openpay_webhook_user', (string) $webhookUser);
             }
 
-            return ApiResponseHelper::apiSuccess(200, 'Configuración de OpenPay actualizada correctamente');
+            $webhookPassword = $request->input('openpay_webhook_password');
+            if ($webhookPassword !== null && $webhookPassword !== '') {
+                SystemSetting::setEncrypted('openpay_webhook_password', (string) $webhookPassword);
+            }
+
+            if ($request->has('boutique_checkout_openpay')) {
+                $enablePasarela = filter_var($request->input('boutique_checkout_openpay'), FILTER_VALIDATE_BOOLEAN);
+                if ($enablePasarela && ! BoutiqueCheckoutPaymentMethods::openpayKeysConfigured()) {
+                    return ApiResponseHelper::apiError(
+                        'No se puede activar la pasarela sin credenciales completas (comercio, llave pública y privada).',
+                        null,
+                        422,
+                        'OPENPAY_KEYS_MISSING'
+                    );
+                }
+                SystemSetting::set('boutique_checkout_openpay', $enablePasarela ? '1' : '0');
+            }
+
+            return ApiResponseHelper::apiSuccess(200, 'Configuración de OpenPay actualizada correctamente', [
+                'boutique_checkout_openpay' => filter_var(
+                    SystemSetting::get('boutique_checkout_openpay', '1'),
+                    FILTER_VALIDATE_BOOLEAN
+                ),
+                'keys_configured' => BoutiqueCheckoutPaymentMethods::openpayKeysConfigured(),
+            ]);
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al actualizar la configuración de OpenPay', $e->getMessage(), 500);
         }
@@ -317,19 +346,13 @@ class SettingsController extends Controller
             SystemSetting::set('boutique_checkout_transferencia', $data['boutique_checkout_transferencia'] ? '1' : '0');
             SystemSetting::set('boutique_checkout_sucursal', $data['boutique_checkout_sucursal'] ? '1' : '0');
 
+            $payload = BoutiqueCheckoutPaymentMethods::adminConfigPayload();
+            $message = 'Métodos de pago actualizados';
             if (! BoutiqueCheckoutPaymentMethods::hasAnyEnabledMethod()) {
-                SystemSetting::set('boutique_checkout_transferencia', '1');
-                SystemSetting::set('boutique_checkout_sucursal', '1');
-
-                return ApiResponseHelper::apiError(
-                    'Debe quedar al menos un método de pago habilitado (OpenPay, transferencia o sucursal). Se revirtieron los cambios.',
-                    null,
-                    422,
-                    'CHECKOUT_PAYMENT_NONE_ENABLED'
-                );
+                $message .= '. Ningún método en checkout: los clientes verán la opción de contactar ventas por WhatsApp.';
             }
 
-            return ApiResponseHelper::apiSuccess(200, 'Métodos de pago actualizados', BoutiqueCheckoutPaymentMethods::adminConfigPayload());
+            return ApiResponseHelper::apiSuccess(200, $message, $payload);
         } catch (\Illuminate\Validation\ValidationException $e) {
             throw $e;
         } catch (\Exception $e) {

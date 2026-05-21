@@ -1260,13 +1260,20 @@
             <div>
               <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;">
                 <span style="font-weight:600;">Tarjeta de crédito / débito (OpenPay)</span>
-                <label class="store-switch" [style.opacity]="!checkoutPayKeysOpenpay ? 0.45 : 1" [style.user-select]="'none'">
-                  <input type="checkbox" [disabled]="!checkoutPayKeysOpenpay" [checked]="checkoutPayFlagOpenpay" (change)="toggleCheckoutPayFlagOpenpay()" />
+                <label class="store-switch">
+                  <input type="checkbox" [checked]="checkoutPayFlagOpenpay" (change)="toggleCheckoutPayFlagOpenpay()" />
                   <span class="store-switch-slider"></span>
                 </label>
               </div>
-              @if (!checkoutPayKeysOpenpay) {
-                <p style="font-size:0.8rem;color:#94a3b8;margin:6px 0 0;">Sin credenciales OpenPay en la sección «Pagos OpenPay».</p>
+              @if (!checkoutPayKeysOpenpay && checkoutPayFlagOpenpay) {
+                <p style="font-size:0.8rem;color:#b45309;margin:6px 0 0;">
+                  Pasarela marcada como activa pero faltan credenciales en «Pagos OpenPay». En checkout se ofrecerá WhatsApp de ventas.
+                </p>
+              }
+              @if (!checkoutPayFlagOpenpay) {
+                <p style="font-size:0.8rem;color:#64748b;margin:6px 0 0;">
+                  Pasarela desactivada: en checkout aparece contacto a ventas por WhatsApp.
+                </p>
               }
             </div>
             <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;">
@@ -1341,6 +1348,25 @@
       }
 
       @if (!openpayLoading) {
+        <div class="store-card" style="margin-bottom:16px;">
+          <h3 class="card-title"><span class="material-icons" style="color:#15803d;">credit_card</span> Pasarela en el checkout</h3>
+          <p style="font-size:0.85rem;color:#64748b;margin:0 0 14px;">
+            Si la desactivas, no se mostrará pago con tarjeta; el cliente verá contacto a ventas por WhatsApp con el resumen del pedido.
+          </p>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;max-width:480px;">
+            <span style="font-weight:600;">Pasarela OpenPay activa</span>
+            <label class="store-switch">
+              <input type="checkbox" [checked]="openpayPasarelaEnabled" (change)="toggleOpenpayPasarela()" />
+              <span class="store-switch-slider"></span>
+            </label>
+          </div>
+          @if (!openpayKeysConfigured && openpayPasarelaEnabled) {
+            <p style="font-size:0.8rem;color:#b45309;margin:10px 0 0;">
+              Faltan credenciales completas; en checkout se ofrecerá WhatsApp de ventas hasta configurarlas.
+            </p>
+          }
+        </div>
+
         <div class="store-card" style="margin-bottom:16px;">
           <h3 class="card-title"><span class="material-icons" style="color:#1c69d4;">toggle_on</span> Modo activo</h3>
           <p style="font-size:0.85rem;color:#64748b;margin:0 0 12px;">Sandbox para pruebas; Producción para cobros reales.</p>

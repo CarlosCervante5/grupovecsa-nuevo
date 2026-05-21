@@ -430,6 +430,17 @@
       }
 
       @if (!openpayLoading) {
+        <div class="dev-card" style="margin-bottom:16px;">
+          <h3 class="dev-card-title"><span class="material-icons">credit_card</span> Pasarela en checkout</h3>
+          <p style="font-size:0.85rem;color:#64748b;margin:0 0 12px;">
+            Desactiva para ocultar pago con tarjeta; el checkout mostrará contacto a ventas por WhatsApp.
+          </p>
+          <label class="stripe-switch" style="display:inline-flex;align-items:center;gap:10px;">
+            <input type="checkbox" [checked]="openpayPasarelaEnabled" (change)="toggleOpenpayPasarela()" />
+            <span>Pasarela OpenPay activa</span>
+          </label>
+        </div>
+
         <div class="dev-card">
           <div class="stripe-mode-header">
             <h3 class="dev-card-title"><span class="material-icons">toggle_on</span> Modo</h3>

@@ -78,6 +78,7 @@ export class DeveloperDashboardComponent implements OnInit, AfterViewInit, OnDes
   stripeSuccess = '';
 
   openpayConfig: Record<string, string> = {};
+  openpayPasarelaEnabled = true;
   openpayLoading = false;
   openpaySaving = false;
   openpayError = '';
@@ -1040,7 +1041,9 @@ export class DeveloperDashboardComponent implements OnInit, AfterViewInit, OnDes
     this.openpaySuccess = '';
     this.crud.fetch('settings/openpay', 'POST', {}).subscribe({
       next: (res: any) => {
-        this.openpayConfig = { ...(res?.data || {}) };
+        const d = res?.data || {};
+        this.openpayConfig = { ...d };
+        this.openpayPasarelaEnabled = d.boutique_checkout_openpay !== false;
         this.openpayLoading = false;
       },
       error: (err: any) => {
@@ -1056,6 +1059,7 @@ export class DeveloperDashboardComponent implements OnInit, AfterViewInit, OnDes
     this.openpaySuccess = '';
     const payload: Record<string, unknown> = {
       openpay_mode: this.openpayConfig['openpay_mode'] || 'sandbox',
+      boutique_checkout_openpay: this.openpayPasarelaEnabled,
     };
     const fields = [
       'openpay_sandbox_merchant_id',
@@ -1090,6 +1094,10 @@ export class DeveloperDashboardComponent implements OnInit, AfterViewInit, OnDes
   toggleOpenpayMode(): void {
     this.openpayConfig['openpay_mode'] =
       this.openpayConfig['openpay_mode'] === 'production' ? 'sandbox' : 'production';
+  }
+
+  toggleOpenpayPasarela(): void {
+    this.openpayPasarelaEnabled = !this.openpayPasarelaEnabled;
   }
 
   get benchmarkPanelUrl(): string {
