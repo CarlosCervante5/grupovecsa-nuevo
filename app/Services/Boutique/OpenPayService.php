@@ -159,6 +159,65 @@ class OpenPayService
     }
 
     /**
+     * Cliente OpenPay a partir del payload de checkout (antes de persistir el pedido).
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    public function buildCustomerFromCheckoutData(array $data, ?\App\Models\User $user = null): array
+    {
+        $fullName = trim((string) ($data['shipping_name'] ?? $data['guest_name'] ?? 'Cliente'));
+        $nameParts = preg_split('/\s+/', $fullName, 2) ?: ['Cliente', ''];
+        $firstName = $nameParts[0] !== '' ? $nameParts[0] : 'Cliente';
+        $lastName = isset($nameParts[1]) && $nameParts[1] !== '' ? $nameParts[1] : $firstName;
+
+        $email = trim((string) ($data['guest_email'] ?? ''));
+        if ($email === '' && $user) {
+            $email = trim((string) ($user->email ?? ''));
+        }
+        if ($email === '' || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new OpenPayChargeException('Correo inválido para procesar el pago.', 422);
+        }
+
+        $phone = preg_replace('/\D+/', '', (string) ($data['shipping_phone'] ?? ''));
+        if (strlen($phone) > 10) {
+            $phone = substr($phone, -10);
+        }
+        if (strlen($phone) < 10) {
+            $phone = '5555555555';
+        }
+
+        $zip = preg_replace('/\D/', '', (string) ($data['shipping_zip'] ?? ''));
+        if (strlen($zip) > 5) {
+            $zip = substr($zip, 0, 5);
+        }
+        if ($zip === '') {
+            $zip = '00000';
+        }
+
+        $line1 = trim((string) ($data['shipping_address'] ?? ''));
+        if ($line1 === '') {
+            $line1 = 'Domicilio';
+        }
+
+        return [
+            'name' => mb_substr($firstName, 0, 100),
+            'last_name' => mb_substr($lastName, 0, 100),
+            'phone_number' => $phone,
+            'email' => mb_substr($email, 0, 100),
+            'requires_account' => false,
+            'address' => [
+                'line1' => mb_substr($line1, 0, 200),
+                'line2' => '',
+                'city' => mb_substr(trim((string) ($data['shipping_city'] ?? 'Ciudad')), 0, 100),
+                'state' => mb_substr(trim((string) ($data['shipping_state'] ?? 'Estado')), 0, 100),
+                'postal_code' => $zip,
+                'country_code' => 'MX',
+            ],
+        ];
+    }
+
+    /**
      * @param  array<string, mixed>  $charge
      */
     public function chargeRequires3ds(array $charge): bool
@@ -221,6 +280,14 @@ class OpenPayService
         return trim((string) env('OPENPAY_PRIVATE_KEY', ''));
     }
 
+    public function privateKeyConfigured(): bool
+    {
+        $mode = SystemSetting::get('openpay_mode', 'sandbox');
+        $suffix = $mode === 'production' ? 'production' : 'sandbox';
+
+        return str_starts_with($this->resolvePrivateKey($suffix), 'sk_');
+    }
+
     /**
      * @param  array<string, mixed>  $charge
      */
@@ -278,6 +345,21 @@ class OpenPayService
 
         $payment = $this->resolvePaymentFromTransaction($transaction);
         if (! $payment) {
+            $orderId = $transaction['order_id'] ?? null;
+            if (is_string($orderId) && $orderId !== ''
+                && ($type === 'charge.succeeded' || ($transaction['status'] ?? '') === 'completed')) {
+                $chargeId = is_string($transaction['id'] ?? null) ? $transaction['id'] : null;
+                $order = app(BoutiqueOpenPayCheckoutService::class)->finalizePendingFromWebhook($orderId, $chargeId);
+                if ($order) {
+                    Log::info('OpenPay webhook: pedido creado tras 3DS pendiente', [
+                        'order_number' => $orderId,
+                        'order_uuid' => $order->uuid,
+                    ]);
+
+                    return;
+                }
+            }
+
             Log::warning('OpenPay webhook: pago no encontrado', [
                 'type' => $type,
                 'charge_id' => $transaction['id'] ?? null,

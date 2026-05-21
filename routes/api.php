@@ -635,6 +635,7 @@ Route::prefix('boutique')->middleware('bandwidth_usage')->group(function () {
     Route::post('/checkout/shipping_quote_public', [BoutiqueCheckoutController::class, 'shippingQuote']);
     Route::post('/checkout/openpay_public_config', [SettingsController::class, 'openpayCheckoutPublic']);
     Route::post('/checkout/openpay_confirm_charge', [BoutiqueCheckoutController::class, 'confirmOpenPayCharge']);
+    Route::post('/checkout/openpay_place_order', [BoutiqueCheckoutController::class, 'placeOpenPayOrder']);
     Route::post('/checkout/payment_methods_public', [SettingsController::class, 'boutiquePaymentMethodsPublic']);
     Route::post('/checkout/shipping_package_types_public', [SettingsController::class, 'boutiqueShippingPackageTypesPublic']);
 });

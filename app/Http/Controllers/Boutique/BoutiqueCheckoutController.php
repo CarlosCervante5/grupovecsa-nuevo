@@ -14,6 +14,7 @@ use App\Models\Boutique\BoutiqueShipment;
 use App\Models\Dealership;
 use App\Services\Boutique\BoutiqueCheckoutLineService;
 use App\Services\Boutique\BoutiqueInventoryService;
+use App\Services\Boutique\BoutiqueOpenPayCheckoutService;
 use App\Services\Boutique\BoutiqueOrderMailService;
 use App\Services\Boutique\EnviacomService;
 use App\Services\Boutique\OpenPayChargeException;
@@ -40,6 +41,8 @@ class BoutiqueCheckoutController extends Controller
 
     protected BoutiqueOrderMailService $orderMailService;
 
+    protected BoutiqueOpenPayCheckoutService $openPayCheckoutService;
+
     public function __construct(
         BoutiqueInventoryService $inventoryService,
         EnviacomService $enviacomService,
@@ -47,6 +50,7 @@ class BoutiqueCheckoutController extends Controller
         OpenPayService $openPayService,
         BoutiqueCheckoutLineService $checkoutLineService,
         BoutiqueOrderMailService $orderMailService,
+        BoutiqueOpenPayCheckoutService $openPayCheckoutService,
     ) {
         $this->inventoryService = $inventoryService;
         $this->enviacomService = $enviacomService;
@@ -54,6 +58,55 @@ class BoutiqueCheckoutController extends Controller
         $this->openPayService = $openPayService;
         $this->checkoutLineService = $checkoutLineService;
         $this->orderMailService = $orderMailService;
+        $this->openPayCheckoutService = $openPayCheckoutService;
+    }
+
+    /**
+     * Cobra con OpenPay y crea el pedido solo si el cargo se confirma (sin pedido previo pendiente).
+     * Invitados: body como create_guest_order + source_id + device_session_id.
+     * Sesión: mismo body que create_order + tokens OpenPay (Bearer opcional en ruta pública).
+     */
+    public function placeOpenPayOrder(Request $request)
+    {
+        try {
+            $result = $this->openPayCheckoutService->placeOrder($request);
+
+            if (! empty($result['requires_3ds'])) {
+                return ApiResponseHelper::apiSuccess(200, 'Se requiere autenticación 3D Secure', [
+                    'requires_3ds' => true,
+                    'redirect_url' => $result['redirect_url'],
+                    'order_number' => $result['order_number'],
+                ]);
+            }
+
+            $order = $result['order'];
+            $order->load(['orderItems', 'payment', 'shipment']);
+
+            return ApiResponseHelper::apiSuccess(201, 'Pedido creado y pago confirmado', ['order' => $order]);
+        } catch (OpenPayChargeException $e) {
+            Log::warning('OpenPay place order', [
+                'message' => $e->getMessage(),
+                'http_status' => $e->httpStatus,
+                'openpay_code' => $e->openpayErrorCode,
+            ]);
+
+            return ApiResponseHelper::apiError(
+                $e->getMessage(),
+                [
+                    'openpay_error' => $e->getMessage(),
+                    'openpay_code' => $e->openpayErrorCode,
+                    'openpay_body' => $e->openpayBody,
+                ],
+                $e->httpStatus >= 400 && $e->httpStatus < 500 ? $e->httpStatus : 422,
+                'OPENPAY_CHARGE_ERROR'
+            );
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            Log::error('OpenPay place order', ['message' => $e->getMessage()]);
+
+            return ApiResponseHelper::apiError('Error al procesar el pago', $e->getMessage(), 500, 'OPENPAY_PLACE_ORDER_ERROR');
+        }
     }
 
     public function shippingQuote(ShippingQuoteRequest $request)
@@ -460,7 +513,7 @@ class BoutiqueCheckoutController extends Controller
                 return ApiResponseHelper::apiError(
                     'El cargo no se completó. Estado: ' . $st,
                     ['openpay_status' => $st, 'openpay_error' => $charge['description'] ?? null],
-                    402,
+                    422,
                     'OPENPAY_CHARGE_INCOMPLETE'
                 );
             }
@@ -498,17 +551,15 @@ class BoutiqueCheckoutController extends Controller
                 'body' => $e->openpayBody,
             ]);
 
-            // Siempre 402 al cliente: el 403/401 suele ser rechazo de OpenPay, no un bloqueo de Laravel.
-            $status = 402;
-
             return ApiResponseHelper::apiError(
                 $e->getMessage(),
                 [
                     'openpay_error' => $e->getMessage(),
                     'openpay_code' => $e->openpayErrorCode,
                     'openpay_body' => $e->openpayBody,
+                    'openpay_http_status' => $e->httpStatus,
                 ],
-                $status,
+                422,
                 'OPENPAY_CHARGE_ERROR'
             );
         } catch (\Exception $e) {
