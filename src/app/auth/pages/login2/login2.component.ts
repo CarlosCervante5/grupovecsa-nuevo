@@ -3,6 +3,7 @@ import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import Swal from 'sweetalert2';
+import { catchError, finalize, of } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { LoginResponse } from '@interfaces/auth.interface';
 import { BoutiqueCartService } from 'src/app/boutique/services/boutique-cart.service';
@@ -93,27 +94,30 @@ export class Login2Component {
                 }
 
                 const returnUrl = this._route.snapshot.queryParamMap.get('returnUrl');
-                const safeReturn =
-                    returnUrl &&
-                    returnUrl.startsWith('/') &&
-                    !returnUrl.startsWith('//') &&
-                    loginResponse.data.role === 'client';
+                const safeReturnUrl = this.resolveSafeReturnUrl(returnUrl, loginResponse.data.role);
 
-                if (safeReturn) {
-                    void this._router.navigateByUrl(returnUrl).finally(() => {
+                const afterCartSync$ = safeReturnUrl && this.isBoutiqueReturnUrl(safeReturnUrl)
+                    ? this._cartService.syncLocalCartToServer().pipe(catchError(() => of(undefined)))
+                    : of(undefined);
+
+                afterCartSync$.pipe(
+                    finalize(() => {
+                        if (safeReturnUrl) {
+                            void this._router.navigateByUrl(safeReturnUrl);
+                        } else {
+                            const dest =
+                                loginResponse.data.role === 'client'
+                                    ? ['/auth/mi-cuenta']
+                                    : ['/admin', adminRouteSegmentForRole(loginResponse.data.role)];
+                            void this._router.navigate(dest);
+                        }
                         this.spinner = false;
-                    });
-                } else {
-                    const dest =
-                        loginResponse.data.role === 'client'
-                            ? ['/auth/mi-cuenta']
-                            : ['/admin', adminRouteSegmentForRole(loginResponse.data.role)];
-                    void this._router.navigate(dest).finally(() => {
-                        this.spinner = false;
-                    });
+                    }),
+                ).subscribe();
+
+                if (!safeReturnUrl || !this.isBoutiqueReturnUrl(safeReturnUrl)) {
+                    this._cartService.syncLocalCartToServer().subscribe();
                 }
-
-                this._cartService.syncLocalCartToServer().subscribe();
 
             },
             error: ( errorResponse ) => {
@@ -131,6 +135,24 @@ export class Login2Component {
         });
     }
 
+    /** Rutas internas permitidas tras login (evita open redirect). */
+    private resolveSafeReturnUrl(returnUrl: string | null, role: string): string | null {
+        if (!returnUrl || !returnUrl.startsWith('/') || returnUrl.startsWith('//')) {
+            return null;
+        }
 
+        if (returnUrl.startsWith('/boutique')) {
+            return returnUrl;
+        }
 
+        if (role === 'client') {
+            return returnUrl;
+        }
+
+        return null;
+    }
+
+    private isBoutiqueReturnUrl(url: string): boolean {
+        return url === '/boutique' || url.startsWith('/boutique/');
+    }
 }
