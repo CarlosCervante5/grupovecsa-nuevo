@@ -230,21 +230,32 @@ export class OpenpayPaymentComponent implements OnInit, OnDestroy {
         device_session_id: this.deviceSessionId!,
       })
       .subscribe({
-        next: () => {
+        next: (res) => {
+          const data = res?.data as { requires_3ds?: boolean; redirect_url?: string } | undefined;
+          if (data?.requires_3ds && data.redirect_url) {
+            this.ngZone.run(() => {
+              this.isProcessing = false;
+              window.location.href = data.redirect_url!;
+            });
+            return;
+          }
           this.ngZone.run(() => {
             this.isProcessing = false;
             this.paymentSuccess.emit(this.order_uuid);
           });
         },
         error: (err) => {
-          const msg =
+          const raw =
             err?.error?.data?.openpay_error ||
-            err?.error?.message ||
-            err?.error?.data?.description ||
-            'No se pudo completar el pago.';
+            err?.error?.data?.openpay_body?.description ||
+            err?.error?.message;
+          const msg =
+            typeof raw === 'string'
+              ? raw.replace(/^Hubo un problema con su solicitud:\s*/i, '').trim()
+              : 'No se pudo completar el pago.';
           this.ngZone.run(() => {
             this.isProcessing = false;
-            this.errorMessage = typeof msg === 'string' ? msg : 'No se pudo completar el pago.';
+            this.errorMessage = msg || 'No se pudo completar el pago.';
           });
         },
       });
