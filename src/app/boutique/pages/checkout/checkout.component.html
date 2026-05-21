@@ -305,7 +305,29 @@
             }
           </mat-radio-group>
 
-          @if (!hasAnyPaymentMethod) {
+          @if (showSalesWhatsAppCta) {
+            <div class="sales-whatsapp-cta">
+              <mat-icon class="sales-whatsapp-cta__icon">support_agent</mat-icon>
+              <div class="sales-whatsapp-cta__body">
+                <p class="sales-whatsapp-cta__title">¿Requieres hacer una compra?</p>
+                <p class="sales-whatsapp-cta__text">
+                  El pago con tarjeta en línea no está disponible. Contacta a ventas por WhatsApp con el resumen de tu pedido.
+                </p>
+                <button
+                  type="button"
+                  mat-flat-button
+                  class="sales-whatsapp-btn"
+                  [disabled]="!canContactSalesWhatsApp"
+                  (click)="openSalesWhatsApp()"
+                >
+                  <mat-icon>chat</mat-icon>
+                  Contactar ventas por WhatsApp
+                </button>
+              </div>
+            </div>
+          }
+
+          @if (!hasAnyPaymentMethod && !showSalesWhatsAppCta) {
             <div class="payment-note payment-note--warn">
               <mat-icon>warning</mat-icon>
               <span>No hay métodos de pago habilitados. Contacta a la tienda.</span>
@@ -376,20 +398,36 @@
           <span>{{ total | currency:'MXN':'symbol-narrow' }}</span>
         </div>
 
-        <button
-          type="button"
-          mat-flat-button
-          color="primary"
-          class="confirm-btn"
-          [disabled]="!canConfirm || creatingOrder"
-          (click)="confirmOrder()"
-        >
-          @if (creatingOrder) {
-            <div class="spinner spinner-sm spinner-white"></div>
-          } @else {
-            Confirmar pedido
-          }
-        </button>
+        @if (showSalesWhatsAppCta && !hasAnyPaymentMethod) {
+          <button
+            type="button"
+            mat-flat-button
+            class="confirm-btn sales-whatsapp-btn sales-whatsapp-btn--summary"
+            [disabled]="!canContactSalesWhatsApp"
+            (click)="openSalesWhatsApp()"
+          >
+            <mat-icon>chat</mat-icon>
+            Contactar ventas por WhatsApp
+          </button>
+          <p class="sales-whatsapp-hint">Se abrirá WhatsApp con el detalle de tu pedido para coordinar la compra.</p>
+        } @else {
+          <button
+            type="button"
+            mat-flat-button
+            color="primary"
+            class="confirm-btn"
+            [disabled]="!canConfirm || creatingOrder"
+            (click)="confirmOrder()"
+          >
+            @if (creatingOrder) {
+              <div class="spinner spinner-sm spinner-white"></div>
+            } @else if (paymentMethod === 'openpay') {
+              Continuar al pago
+            } @else {
+              Confirmar pedido
+            }
+          </button>
+        }
 
         <a mat-button routerLink="/boutique/cart" class="back-btn">
           <mat-icon>arrow_back</mat-icon>
@@ -398,7 +436,7 @@
       </aside>
     </div>
 
-    @if (showOpenPayPayment && createdOrderUuid && openPayPublicConfig && openPayBilling) {
+    @if (showOpenPayPayment && openPayPublicConfig && openPayBilling) {
       <div
         class="checkout-modal-backdrop"
         role="dialog"
@@ -419,13 +457,19 @@
             </button>
           </div>
           <div class="checkout-modal-openpay-wrap">
+            @if (creatingOrder) {
+              <div class="checkout-modal-processing" aria-live="polite">
+                <div class="spinner spinner-md"></div>
+                <span>Confirmando pago y creando pedido…</span>
+              </div>
+            }
             <app-openpay-payment
               [inModal]="true"
-              [order_uuid]="createdOrderUuid"
+              [deferOrderUntilPaid]="true"
               [openPayConfig]="openPayPublicConfig"
               [billing]="openPayBilling"
               [amount]="openPayOrderTotal"
-              (paymentSuccess)="onPaymentSuccess($event)"
+              (chargeAuthorized)="onOpenPayChargeAuthorized($event)"
             ></app-openpay-payment>
           </div>
         </div>

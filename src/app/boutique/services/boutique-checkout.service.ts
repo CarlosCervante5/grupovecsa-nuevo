@@ -116,4 +116,33 @@ export class BoutiqueCheckoutService {
       params
     );
   }
+
+  /**
+   * Cobra con OpenPay y crea el pedido solo si el pago se confirma (sin crear pedido antes).
+   */
+  public placeOpenPayOrder(
+    checkout: Record<string, unknown> & {
+      source_id: string;
+      device_session_id: string;
+    },
+  ): Observable<
+    ApiResponse<{
+      order?: BoutiqueOrder;
+      requires_3ds?: boolean;
+      redirect_url?: string;
+      order_number?: string;
+    }>
+  > {
+    const token = localStorage.getItem('user_token');
+    const options = token ? { headers: this.getHeaders() } : {};
+
+    return this._http.post<
+      ApiResponse<{
+        order?: BoutiqueOrder;
+        requires_3ds?: boolean;
+        redirect_url?: string;
+        order_number?: string;
+      }>
+    >(`${this.url}/api/boutique/checkout/openpay_place_order`, checkout, options);
+  }
 }
