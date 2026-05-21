@@ -412,8 +412,22 @@ class BoutiqueCheckoutController extends Controller
                 return ApiResponseHelper::apiError(
                     $e->getMessage(),
                     ['openpay_error' => $e->getMessage()],
-                    $e->httpStatus >= 400 && $e->httpStatus < 600 ? $e->httpStatus : 422,
+                    422,
                     'OPENPAY_CUSTOMER_INVALID'
+                );
+            }
+
+            if (! str_starts_with($creds['private_key'], 'sk_')) {
+                Log::warning('OpenPay: llave privada ausente o no descifrable', [
+                    'merchant_id' => $creds['merchant_id'],
+                    'sandbox' => $creds['sandbox'],
+                ]);
+
+                return ApiResponseHelper::apiError(
+                    'La llave privada de OpenPay no está disponible en el servidor. Guarde de nuevo las credenciales en administración (mismo comercio y modo sandbox).',
+                    ['openpay_error' => 'OPENPAY_PRIVATE_KEY_INVALID'],
+                    503,
+                    'OPENPAY_NOT_CONFIGURED'
                 );
             }
 
@@ -484,10 +498,8 @@ class BoutiqueCheckoutController extends Controller
                 'body' => $e->openpayBody,
             ]);
 
-            $status = $e->httpStatus >= 400 && $e->httpStatus < 600 ? $e->httpStatus : 402;
-            if ($status >= 500) {
-                $status = 402;
-            }
+            // Siempre 402 al cliente: el 403/401 suele ser rechazo de OpenPay, no un bloqueo de Laravel.
+            $status = 402;
 
             return ApiResponseHelper::apiError(
                 $e->getMessage(),

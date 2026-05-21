@@ -83,8 +83,13 @@ class OpenPayService
                 'status' => $response->status(),
                 'body' => $body,
             ]);
+            $userMsg = is_string($msg) ? $msg : 'Error al procesar el cargo en OpenPay.';
+            if (in_array($response->status(), [401, 403], true)) {
+                $userMsg .= ' Revise en administración que la llave privada (sk_…) sea del mismo comercio y modo (sandbox/producción) que la llave pública del checkout.';
+            }
+
             throw new OpenPayChargeException(
-                is_string($msg) ? $msg : 'Error al procesar el cargo en OpenPay.',
+                $userMsg,
                 $response->status(),
                 is_array($body) ? $body : null,
                 is_string($code) ? $code : null,
@@ -190,14 +195,30 @@ class OpenPayService
         $suffix = $mode === 'production' ? 'production' : 'sandbox';
 
         $merchantId = trim((string) SystemSetting::get("openpay_{$suffix}_merchant_id", ''));
-        $privateKey = SystemSetting::getEncrypted("openpay_{$suffix}_private_key")
-            ?? trim((string) env('OPENPAY_PRIVATE_KEY', ''));
 
         return [
             'merchant_id' => $merchantId,
-            'private_key' => trim((string) $privateKey),
+            'private_key' => $this->resolvePrivateKey($suffix),
             'sandbox' => $mode !== 'production',
         ];
+    }
+
+    /**
+     * Llave privada activa: cifrada en BD, texto plano legacy o variable de entorno.
+     */
+    protected function resolvePrivateKey(string $suffix): string
+    {
+        $encrypted = SystemSetting::getEncrypted("openpay_{$suffix}_private_key");
+        if (is_string($encrypted) && trim($encrypted) !== '') {
+            return trim($encrypted);
+        }
+
+        $plain = trim((string) SystemSetting::get("openpay_{$suffix}_private_key", ''));
+        if ($plain !== '' && str_starts_with($plain, 'sk_')) {
+            return $plain;
+        }
+
+        return trim((string) env('OPENPAY_PRIVATE_KEY', ''));
     }
 
     /**
