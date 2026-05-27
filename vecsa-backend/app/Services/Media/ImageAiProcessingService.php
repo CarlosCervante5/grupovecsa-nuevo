@@ -36,27 +36,7 @@ final class ImageAiProcessingService
         [$body, $headerMime] = $this->downloadSourceImage($sourceUrl);
         $mime = $this->normalizeImageMime($headerMime, $sourceUrl);
         $b64Input = base64_encode($body);
-        $prompt = $this->promptForAction($action);
-
-        $payload = [
-            'contents' => [
-                [
-                    'parts' => [
-                        ['text' => $prompt],
-                        [
-                            'inline_data' => [
-                                'mime_type' => $mime,
-                                'data' => $b64Input,
-                            ],
-                        ],
-                    ],
-                ],
-            ],
-            'generationConfig' => [
-                'responseModalities' => ['IMAGE'],
-                'temperature' => 0.15,
-            ],
-        ];
+        $payload = $this->buildGeminiPayload($mime, $b64Input, $action);
 
         $lastHint = '';
         foreach ($this->modelCandidates() as $model) {
@@ -145,6 +125,7 @@ final class ImageAiProcessingService
     {
         $candidates = array_merge(
             [$this->resolvedModel()],
+            ['gemini-3-pro-image-preview'],
             [self::DEFAULT_IMAGE_MODEL],
             self::FALLBACK_IMAGE_MODELS,
         );
@@ -265,7 +246,7 @@ final class ImageAiProcessingService
             [
                 'id' => 'studio_white',
                 'label' => 'Fondo blanco (estudio)',
-                'description' => 'Quita el fondo y ajusta la luz; el vehículo se mantiene igual que en la foto original.',
+                'description' => 'Solo fondo blanco y luz suave; sin añadir portaplacas, placas ni accesorios nuevos.',
             ],
         ];
     }
@@ -275,25 +256,70 @@ final class ImageAiProcessingService
         return trim((string) SystemSetting::getEncrypted('gemini_api_key', ''));
     }
 
+    /**
+     * @return array<string, mixed>
+     */
+    private function buildGeminiPayload(string $mime, string $b64Input, string $action): array
+    {
+        return [
+            'systemInstruction' => [
+                'parts' => [
+                    ['text' => $this->systemInstructionForVehicleEdit()],
+                ],
+            ],
+            'contents' => [
+                [
+                    'parts' => [
+                        [
+                            'inline_data' => [
+                                'mime_type' => $mime,
+                                'data' => $b64Input,
+                            ],
+                        ],
+                        ['text' => $this->promptForAction($action)],
+                    ],
+                ],
+            ],
+            'generationConfig' => [
+                'responseModalities' => ['IMAGE'],
+                'temperature' => 0.08,
+            ],
+        ];
+    }
+
+    private function systemInstructionForVehicleEdit(): string
+    {
+        return <<<'TEXT'
+You are a conservative automotive inventory photo retoucher. You edit photographs; you never synthesize a new vehicle.
+
+Hard rules:
+- The car in the output must be the same vehicle as in the input photograph.
+- Never invent, add, complete, or "fix" parts, accessories, or hardware.
+- Never add license plate holders (portaplacas), plate frames, dealer frames, brackets, extra badges, emblems, antennas, spoilers, fog lights, roof racks, stickers, or bumper accessories unless they are clearly and fully visible in the input.
+- If the input has no portaplacas, the output must have no portaplacas. If a plate or holder exists, copy it exactly — do not replace or upgrade it.
+- Only background pixels may be replaced. Vehicle pixels stay faithful to the source.
+TEXT;
+    }
+
     private function promptForAction(string $action): string
     {
         return <<<'PROMPT'
-Edit this existing dealership vehicle inventory photograph. This is a strict photo edit of the SAME car, not a new image.
+Using the photograph above (the only source of truth), produce ONE edited version.
 
-ALLOWED CHANGES ONLY:
-1. Remove the original background completely and replace it with a pure seamless white (#FFFFFF) studio backdrop.
-2. Apply subtle catalog lighting on the existing vehicle only: gentle exposure balance, neutral white balance, soft shadow under the tires. No dramatic relighting.
+ALLOWED:
+1. Replace the background with pure seamless white (#FFFFFF) studio backdrop.
+2. Subtle catalog lighting on the existing car only: light exposure/white-balance correction, soft shadow under tires. No relighting that changes how the car looks.
 
-STRICT PRESERVATION — the vehicle must remain pixel-faithful and identical to the input:
-- Same exact car: make, model, body style, year look, paint color, trim, wheels, tires, badges, logos, grille, lights, mirrors, glass, interior visible through windows.
-- Same camera angle, perspective, framing, scale, and position of the car in the frame. Do not crop, zoom, or reframe the vehicle.
-- Keep all license plates, text, decals, scratches, dents, panel gaps, reflections, and details that belong to this specific car.
-- Do NOT replace, redesign, upgrade, stylize, or "improve" the vehicle. Do NOT generate a different car or change its color, wheels, or body shape.
-- Do NOT add or remove parts, accessories, people, or objects touching the car.
+ZERO INVENTION — do not add anything not in the photo:
+- No new portaplacas, plate frames, plates, screws, badges, logos, trim, moldings, mirrors, wipers, or body parts.
+- No "cleaning up" or "completing" the bumper, grille, or license area by drawing new objects.
+- If something is absent, cropped, or unclear in the input, leave it absent or unclear. Do not guess.
 
-FORBIDDEN: changing the car model, changing paint color, swapping wheels, merging background into the body, cartoon or AI-art look, blur on vehicle details, hallucinated parts.
+PRESERVE EXACTLY:
+- Same car identity, color, wheels, tires, glass, interior glimpses, angle, framing, scale, dents, scratches, reflections, and all visible text/plates.
+- Do not change model, body shape, paint, or swap components. Do not generate a different vehicle.
 
-Output one photorealistic edited photo suitable for an automotive sales catalog.
+Output: one photorealistic catalog photo. Background white; car unchanged except subtle light correction.
 PROMPT;
     }
 
