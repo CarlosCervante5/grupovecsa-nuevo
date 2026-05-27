@@ -183,7 +183,7 @@ class ImageAiController extends Controller
         }
 
         if ($targetType === 'vehicle_image') {
-            $image = VehicleImage::with('vehicle')->findByUuid($targetUuid);
+            $image = VehicleImage::with('vehicle')->where('uuid', $targetUuid)->first();
             if (! $image) {
                 throw new AuthorizationException('Imagen de vehículo no encontrada.');
             }
@@ -227,7 +227,7 @@ class ImageAiController extends Controller
         $ext = $format === 'png' ? 'png' : 'jpg';
 
         if ($targetType === 'vehicle_image') {
-            $image = VehicleImage::with('vehicle')->findByUuid($targetUuid);
+            $image = VehicleImage::with('vehicle')->where('uuid', $targetUuid)->first();
             if (! $image || ! $image->vehicle) {
                 throw new \RuntimeException('Imagen de vehículo no encontrada.');
             }
