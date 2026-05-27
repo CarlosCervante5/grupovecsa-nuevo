@@ -26,6 +26,7 @@ export class MarketingLayoutComponent implements OnInit, OnDestroy {
     { label: 'Testimonios', icon: 'format_quote', route: '/admin/marketing/home-testimonials' },
     { label: 'Banners Boutique', icon: 'view_carousel', route: '/admin/marketing/boutique-banners' },
     { label: 'Experience — Historias', icon: 'auto_stories', route: '/admin/marketing/experience-stories' },
+    { label: 'Chats asistente', icon: 'forum', route: '/admin/marketing/assistant-chats' },
   ];
 
   dynamicItems: { label: string; icon: string; route: string }[] = [];

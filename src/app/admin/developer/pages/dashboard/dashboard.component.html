@@ -47,6 +47,10 @@
       <span class="material-icons">account_balance</span>
       Configuración OpenPay
     </button>
+    <button class="dev-nav-item" [class.active]="activeSection === 'gemini_ai_config'" (click)="selectSection('gemini_ai_config')">
+      <span class="material-icons">auto_fix_high</span>
+      Gemini (edición de fotos)
+    </button>
     <button class="dev-nav-item" (click)="navigate('/admin/developer/incadea-sync')">
       <span class="material-icons">sync</span>
       Sync Incadea
@@ -495,6 +499,72 @@
           <button class="crud-create-btn" (click)="saveOpenpayConfig()" [disabled]="openpaySaving">
             @if (openpaySaving) { <div class="spinner-sm"></div> } @else { <span class="material-icons">save</span> }
             Guardar OpenPay
+          </button>
+        </div>
+      }
+    }
+
+    <!-- GEMINI — EDICIÓN DE FOTOS -->
+    @if (activeSection === 'gemini_ai_config') {
+      <h1 class="dev-title">Gemini — edición de fotos</h1>
+      <p class="dev-subtitle">
+        Llaves de <strong>Google AI Studio</strong> (Gemini) para el flujo «IA» en fotos de vehículos y productos boutique.
+        <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">Crear o copiar llave API</a>.
+      </p>
+
+      @if (geminiAiLoading) {
+        <div class="crud-loading"><div class="spinner"></div><span>Cargando...</span></div>
+      }
+
+      @if (geminiAiError) {
+        <div class="stripe-alert stripe-alert-error"><span class="material-icons">error</span> {{ geminiAiError }}</div>
+      }
+      @if (geminiAiSuccess) {
+        <div class="stripe-alert stripe-alert-success"><span class="material-icons">check_circle</span> {{ geminiAiSuccess }}</div>
+      }
+
+      @if (!geminiAiLoading) {
+        <div class="dev-card" style="margin-bottom:16px;">
+          <h3 class="dev-card-title"><span class="material-icons">power_settings_new</span> Estado</h3>
+          <label class="stripe-switch" style="display:inline-flex;align-items:center;gap:10px;">
+            <input type="checkbox" [checked]="geminiAiFeatureEnabled" (change)="toggleGeminiAiFeature()" />
+            <span>Permitir edición de fotos con Gemini en el sistema</span>
+          </label>
+          <p style="font-size:0.82rem;color:#64748b;margin:10px 0 0;">
+            Si está desactivado, los usuarios que abran «IA» en imágenes verán el servicio como no disponible.
+          </p>
+        </div>
+
+        <div class="dev-card" style="margin-bottom:16px;">
+          <h3 class="dev-card-title"><span class="material-icons">key</span> Llave API</h3>
+          <label class="modal-label">GEMINI_API_KEY (se guarda cifrada en la base)</label>
+          <input class="modal-input" type="password" autocomplete="off"
+            placeholder="AIza..."
+            [value]="$any(geminiAiConfig)['gemini_api_key'] ?? ''"
+            (input)="geminiAiConfig['gemini_api_key'] = $any($event.target).value" />
+          <p style="font-size:0.82rem;color:#64748b;margin:8px 0 0;">
+            Deja los puntos (••••) si no quieres cambiar la llave actual.
+          </p>
+        </div>
+
+        <div class="dev-card" style="margin-bottom:16px;">
+          <h3 class="dev-card-title"><span class="material-icons">model_training</span> Modelo para imagen</h3>
+          <label class="modal-label">
+            Identificador del modelo Gemini (vacío = predeterminado sugerido: <code>{{ geminiAiDefaultModelHint }}</code>)
+          </label>
+          <input class="modal-input" type="text" autocomplete="off"
+            placeholder="ej. gemini-3.1-flash-image-preview"
+            [value]="$any(geminiAiConfig)['gemini_image_model'] ?? ''"
+            (input)="geminiAiConfig['gemini_image_model'] = $any($event.target).value" />
+          <p style="font-size:0.82rem;color:#64748b;margin:8px 0 0;">
+            Para edición imagen+texto Google recomienda modelos «image» (p. ej. <code>gemini-2.5-flash-image</code> o <code>gemini-3-pro-image-preview</code>).
+          </p>
+        </div>
+
+        <div class="stripe-actions">
+          <button class="crud-create-btn" (click)="saveGeminiAiConfig()" [disabled]="geminiAiSaving">
+            @if (geminiAiSaving) { <div class="spinner-sm"></div> } @else { <span class="material-icons">save</span> }
+            Guardar Gemini
           </button>
         </div>
       }

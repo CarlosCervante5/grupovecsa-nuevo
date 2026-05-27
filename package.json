@@ -5,6 +5,7 @@
     "ng": "ng",
     "serve:clean": "rm -rf .angular/cache && ng serve",
     "start": "npx serve dist/vecsa-frontend/browser",
+    "gantt:sync": "node ../scripts/sync-gantt-tasks.mjs",
     "prebuild": "node -e \"try{require('fs').rmSync('node_modules/.cache',{recursive:true,force:true})}catch(e){}\"",
     "build": "ng build --configuration=sandbox",
     "postbuild": "node ./src/assets/scripts/rename-build-files.js",

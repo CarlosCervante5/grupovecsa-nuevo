@@ -136,6 +136,15 @@ export class StoreService {
     return this.boutiquePost('transfer_bank_details/update', payload);
   }
 
+  /** Rutas o URLs de condiciones, privacidad y devoluciones en el checkout boutique. */
+  updateCheckoutLegalPages(payload: {
+    boutique_checkout_legal_terms_url?: string;
+    boutique_checkout_legal_privacy_url?: string;
+    boutique_checkout_legal_returns_url?: string;
+  }): Observable<any> {
+    return this.boutiquePost('checkout_legal_pages/update', payload);
+  }
+
   /** Sucursales boutique: inventario y WhatsApp de ventas en checkout. */
   listBoutiqueDealerships(): Observable<any> {
     return this.boutiquePost('dealerships/list');

@@ -5,6 +5,7 @@ import { DashboardAdminComponent } from './pages/dashboard/dashboardAdmin.compon
 import { AdminUsersComponent } from './pages/admin-users/admin-users.component';
 import { AdminPermisosComponent } from './pages/admin-permisos/admin-permisos.component';
 import { ExperienceStoriesComponent } from '../marketing/pages/experience-stories/experience-stories.component';
+import { AssistantChatsComponent } from '../marketing/pages/assistant-chats/assistant-chats.component';
 import { VehiclesComponent } from '../shared/vehicle-stock/pages/vehicles/vehicles.component';
 import { VehicleInventoryGuard } from '../vehicle-inventory/guards/vehicle-inventory.guard';
 import { BenchmarkComponent } from '../shared/benchmark/benchmark.component';
@@ -28,6 +29,11 @@ const routes: Routes = [
         path: 'experience-wordpress',
         component: ExperienceStoriesComponent,
         data: { title: 'Experience — Importar WordPress' },
+      },
+      {
+        path: 'assistant-chats',
+        component: AssistantChatsComponent,
+        data: { title: 'Chats del asistente' },
       },
       { path: 'boutique', loadChildren: () => import('./pages/boutique/boutique-admin.module').then(m => m.BoutiqueAdminModule) },
       {

@@ -6,6 +6,7 @@ import { HomeTestimonialsComponent } from './pages/home-testimonials/home-testim
 import { BoutiqueBannersComponent } from './pages/boutique-banners/boutique-banners.component';
 import { MarketingLayoutComponent } from './pages/layout/marketing-layout.component';
 import { ExperienceStoriesComponent } from './pages/experience-stories/experience-stories.component';
+import { AssistantChatsComponent } from './pages/assistant-chats/assistant-chats.component';
 import { VehiclesComponent } from '../shared/vehicle-stock/pages/vehicles/vehicles.component';
 import { VehicleInventoryGuard } from '../vehicle-inventory/guards/vehicle-inventory.guard';
 import { BenchmarkComponent } from '../shared/benchmark/benchmark.component';
@@ -26,6 +27,7 @@ const routes: Routes = [
       { path: 'home-testimonials', component: HomeTestimonialsComponent },
       { path: 'boutique-banners', component: BoutiqueBannersComponent },
       { path: 'experience-stories', component: ExperienceStoriesComponent },
+      { path: 'assistant-chats', component: AssistantChatsComponent },
       {
         path: 'benchmark',
         component: BenchmarkComponent,

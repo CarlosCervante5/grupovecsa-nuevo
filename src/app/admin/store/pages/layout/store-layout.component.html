@@ -444,6 +444,14 @@
                   @for (img of selectedProduct.images; track img.uuid || img.id || $index) {
                     <div style="position:relative;display:inline-block;">
                       <img [src]="img.image_path" alt="" style="width:90px;height:90px;object-fit:cover;border-radius:8px;border:1px solid #e2e8f0;" />
+                      @if (img.image_path && img.uuid) {
+                        <button
+                          type="button"
+                          (click)="openProductImageAi(img)"
+                          title="Editar con IA"
+                          style="position:absolute;bottom:4px;left:4px;padding:2px 6px;border-radius:4px;background:#1c69d4;color:#fff;border:none;cursor:pointer;font-size:10px;line-height:1.2;"
+                        >IA</button>
+                      }
                       <button (click)="deleteProductImage(img)" style="position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:#ef4444;color:#fff;border:none;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;">×</button>
                     </div>
                   }
@@ -1293,6 +1301,39 @@
               </label>
             </div>
           </div>
+        </div>
+
+        <div class="store-card" style="margin-bottom:16px;">
+          <h3 class="card-title"><span class="material-icons" style="color:#475569;">gavel</span> Avisos legales en el checkbox del checkout</h3>
+          <p style="font-size:0.85rem;color:#64748b;margin:0 0 12px;">
+            Rutas internas (ej. <code>/condiciones-uso</code>) o URLs completas (<code>https://…</code>). Deja vacío cada campo para usar el valor por defecto del sistema.
+          </p>
+          @if (checkoutLegalPagesSuccess) {
+            <div class="alert-success" style="margin-bottom:12px;"><span class="material-icons">check_circle</span> {{ checkoutLegalPagesSuccess }}</div>
+          }
+          @if (checkoutLegalPagesError) {
+            <div class="alert-error" style="margin-bottom:12px;"><span class="material-icons">error</span> {{ checkoutLegalPagesError }}</div>
+          }
+          @if (checkoutLegalEffectiveTerms || checkoutLegalEffectivePrivacy || checkoutLegalEffectiveReturns) {
+            <p style="font-size:0.8rem;color:#475569;margin:0 0 12px;">
+              Vista efectiva al cliente:
+              <strong>Condiciones</strong>
+              <span style="color:#64748b;"> {{ checkoutLegalEffectiveTerms }}</span>
+              · <strong>Privacidad</strong>
+              <span style="color:#64748b;"> {{ checkoutLegalEffectivePrivacy }}</span>
+              · <strong>Devoluciones</strong>
+              <span style="color:#64748b;"> {{ checkoutLegalEffectiveReturns }}</span>
+            </p>
+          }
+          <label class="modal-label">Condiciones de uso</label>
+          <input class="modal-input" type="text" [(ngModel)]="checkoutLegalFormTermsUrl" placeholder="/condiciones-uso (vacío = defecto)" autocomplete="off" />
+          <label class="modal-label">Aviso de privacidad</label>
+          <input class="modal-input" type="text" [(ngModel)]="checkoutLegalFormPrivacyUrl" placeholder="/aviso-privacidad (vacío = defecto)" autocomplete="off" />
+          <label class="modal-label">Políticas de devolución</label>
+          <input class="modal-input" type="text" [(ngModel)]="checkoutLegalFormReturnsUrl" placeholder="/politicas-devolucion (vacío = defecto)" autocomplete="off" />
+          <button class="store-action-btn" style="margin-top:12px;" type="button" (click)="saveCheckoutLegalPages()" [disabled]="checkoutLegalPagesSaving">
+            @if (checkoutLegalPagesSaving) { <div class="spinner-sm"></div> Guardando... } @else { <span class="material-icons">save</span> Guardar avisos legales }
+          </button>
         </div>
 
         <div class="store-card" style="margin:16px 0;">

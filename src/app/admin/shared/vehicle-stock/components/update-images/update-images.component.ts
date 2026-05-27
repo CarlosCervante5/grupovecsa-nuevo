@@ -1,5 +1,7 @@
 import { Component, ElementRef, Inject, ViewChild } from '@angular/core';
 import { MAT_BOTTOM_SHEET_DATA, MatBottomSheetRef } from '@angular/material/bottom-sheet';
+import { MatDialog } from '@angular/material/dialog';
+import { ImageAiDialogComponent } from 'src/app/shared/components/image-ai-dialog/image-ai-dialog.component';
 import { VehiclesComponent } from '../../pages/vehicles/vehicles.component';
 import { ImagesService } from '@services/images.service';
 import Swal from 'sweetalert2';
@@ -40,7 +42,8 @@ export class UpdateImagesComponent {
     @Inject(MAT_BOTTOM_SHEET_DATA) public data: any,
     private _bottomSheetRef: MatBottomSheetRef<VehiclesComponent>,
     private _imagesService: ImagesService,
-    private _router: Router
+    private _router: Router,
+    private _dialog: MatDialog,
   ) {
     // Set images
     for (let i = 0; i < this.data.images.length; i++) {
@@ -102,6 +105,31 @@ export class UpdateImagesComponent {
           reload(err, this._router);
         }
       });
+  }
+
+  openImageAi(image: ImageOrder, index: number): void {
+    const ref = this._dialog.open(ImageAiDialogComponent, {
+      width: '640px',
+      maxWidth: '95vw',
+      data: {
+        sourceUrl: image.path,
+        targetType: 'vehicle_image',
+        targetUuid: image.id,
+        title: 'Mejorar foto del vehículo',
+      },
+    });
+    ref.afterClosed().subscribe((result) => {
+      if (result?.saved && result.imageUrl) {
+        this.imagesForSlider[index].path = result.imageUrl;
+        this.result.reload = true;
+        Swal.fire({
+          icon: 'success',
+          title: 'Imagen actualizada con IA',
+          showConfirmButton: false,
+          timer: 2200,
+        });
+      }
+    });
   }
 
   deleteimage(vehicle_image_uuid: string, index: number): void {

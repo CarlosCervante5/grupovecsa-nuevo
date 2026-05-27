@@ -1,0 +1,117 @@
+<div class="assistant-chats-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Chats del asistente (público)</h1>
+      <p class="page-subtitle">
+        Consultas y solicitudes de visitantes en el chat flotante del sitio. {{ total }} conversaciones.
+      </p>
+    </div>
+  </div>
+
+  <div class="filters-bar">
+    <input
+      type="search"
+      class="search-input"
+      placeholder="Buscar por mensaje, nombre, correo o página…"
+      [(ngModel)]="searchTerm"
+      (keyup.enter)="onSearch()"
+    />
+    <button type="button" class="action-btn primary-btn" (click)="onSearch()">
+      <span class="material-icons">search</span>
+      Buscar
+    </button>
+  </div>
+
+  <div class="layout-grid">
+    <div class="list-panel">
+      <div class="loading-state" *ngIf="loading">
+        <div class="spinner"></div>
+        <p>Cargando…</p>
+      </div>
+
+      <p class="empty-hint" *ngIf="!loading && rows.length === 0">
+        Aún no hay conversaciones registradas. Los nuevos mensajes del asistente aparecerán aquí.
+      </p>
+
+      <div class="table-wrap" *ngIf="!loading && rows.length > 0">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Visitante</th>
+              <th>Última consulta</th>
+              <th>Mensajes</th>
+              <th>Última actividad</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="let row of rows"
+              [class.is-selected]="selected?.uuid === row.uuid"
+              (click)="openRow(row)"
+            >
+              <td>
+                <div class="visitor-cell">
+                  <strong>{{ row.visitor_name }}</strong>
+                  <span class="visitor-meta" *ngIf="row.visitor_email">{{ row.visitor_email }}</span>
+                  <span class="badge" [class.badge-user]="row.is_registered">
+                    {{ row.is_registered ? 'Registrado' : 'Anónimo' }}
+                  </span>
+                </div>
+              </td>
+              <td class="preview-cell">{{ row.preview || '—' }}</td>
+              <td>{{ row.messages_count }}</td>
+              <td>{{ formatDate(row.last_message_at) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <mat-paginator
+        *ngIf="!loading && total > 0"
+        [length]="total"
+        [pageIndex]="pageIndex"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="[10, 20, 50]"
+        (page)="onPage($event)"
+      ></mat-paginator>
+    </div>
+
+    <div class="detail-panel">
+      <div class="detail-placeholder" *ngIf="!selected && !detailLoading">
+        <span class="material-icons">forum</span>
+        <p>Selecciona una conversación para ver el historial completo.</p>
+      </div>
+
+      <div class="loading-state" *ngIf="detailLoading">
+        <div class="spinner"></div>
+      </div>
+
+      <ng-container *ngIf="selected && !detailLoading">
+        <div class="detail-header">
+          <h2>{{ selected.visitor_name }}</h2>
+          <p *ngIf="selected.visitor_email">{{ selected.visitor_email }}</p>
+          <p class="detail-meta" *ngIf="selected.page_url">
+            <span class="material-icons">link</span>
+            {{ selected.page_url }}
+          </p>
+          <p class="detail-meta">
+            Inicio: {{ formatDate(selected.created_at) }} · Último: {{ formatDate(selected.last_message_at) }}
+          </p>
+        </div>
+
+        <div class="thread">
+          <div
+            *ngFor="let msg of selected.messages"
+            class="thread-msg"
+            [class.thread-msg-user]="msg.role === 'user'"
+            [class.thread-msg-assistant]="msg.role === 'assistant'"
+          >
+            <div class="thread-role">{{ msg.role === 'user' ? 'Cliente' : 'Asistente' }}</div>
+            <div class="thread-bubble">{{ msg.content }}</div>
+            <div class="thread-time">{{ formatDate(msg.created_at) }}</div>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</div>

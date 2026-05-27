@@ -1,0 +1,54 @@
+<h2 mat-dialog-title class="image-ai-title">
+  <mat-icon>auto_fix_high</mat-icon>
+  {{ dialogTitle }}
+</h2>
+
+<mat-dialog-content class="image-ai-content">
+  @if (loadingConfig) {
+    <p class="image-ai-muted">Cargando opciones…</p>
+  } @else if (!enabled) {
+    <p class="image-ai-error">El servicio Gemini no está listo: activa «edición con Gemini» en <strong>Panel desarrollo → Gemini (edición de fotos)</strong> y guarda una llave API válida.</p>
+  } @else {
+    <div class="image-ai-preview-row">
+      <div class="image-ai-thumb">
+        <span class="image-ai-thumb-label">Original</span>
+        <img [src]="data.sourceUrl" alt="Original" />
+      </div>
+      @if (previewUrl) {
+        <div class="image-ai-thumb">
+          <span class="image-ai-thumb-label">Resultado</span>
+          <img [src]="previewUrl" alt="Vista previa IA" />
+        </div>
+      }
+    </div>
+
+    <p class="image-ai-hint">Elige un efecto y genera una vista previa antes de reemplazar la imagen guardada.</p>
+
+    <mat-radio-group [(ngModel)]="selectedAction" class="image-ai-actions">
+      @for (action of actions; track action.id) {
+        <mat-radio-button [value]="action.id" class="image-ai-action">
+          <span class="image-ai-action-label">{{ action.label }}</span>
+          <span class="image-ai-action-desc">{{ action.description }}</span>
+        </mat-radio-button>
+      }
+    </mat-radio-group>
+  }
+
+  @if (error) {
+    <p class="image-ai-error">{{ error }}</p>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="image-ai-actions-bar">
+  <button type="button" mat-button (click)="close()" [disabled]="processing">Cancelar</button>
+  @if (enabled) {
+    <button type="button" mat-stroked-button (click)="runPreview()" [disabled]="processing">
+      @if (processing && !previewUrl) { Procesando… } @else { Vista previa }
+    </button>
+    @if (data.targetType !== 'preview_only' && data.targetUuid) {
+      <button type="button" mat-flat-button color="primary" (click)="applyAndSave()" [disabled]="processing">
+        @if (processing) { Guardando… } @else { Aplicar y guardar }
+      </button>
+    }
+  }
+</mat-dialog-actions>
