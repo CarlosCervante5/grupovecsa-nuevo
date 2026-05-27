@@ -28,6 +28,9 @@ export interface ImageAiProcessPayload {
   target_type: ImageAiTargetType;
   target_uuid?: string;
   replace_original?: boolean;
+  /** Vista previa ya generada; al guardar evita otra llamada a Gemini. */
+  processed_base64?: string;
+  processed_mime?: string;
 }
 
 export interface ImageAiProcessResult {

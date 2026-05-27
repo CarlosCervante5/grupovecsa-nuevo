@@ -22,9 +22,9 @@
       }
     </div>
 
-    <p class="image-ai-hint">Elige un efecto y genera una vista previa antes de reemplazar la imagen guardada.</p>
+    <p class="image-ai-hint">Genera una vista previa con Gemini; al guardar se sube esa misma imagen vía Cloudinary (como el resto del inventario).</p>
 
-    <mat-radio-group [(ngModel)]="selectedAction" class="image-ai-actions">
+    <mat-radio-group [(ngModel)]="selectedAction" class="image-ai-actions" (ngModelChange)="clearPreview()">
       @for (action of actions; track action.id) {
         <mat-radio-button [value]="action.id" class="image-ai-action">
           <span class="image-ai-action-label">{{ action.label }}</span>
@@ -46,7 +46,7 @@
       @if (processing && !previewUrl) { Procesando… } @else { Vista previa }
     </button>
     @if (data.targetType !== 'preview_only' && data.targetUuid) {
-      <button type="button" mat-flat-button color="primary" (click)="applyAndSave()" [disabled]="processing">
+      <button type="button" mat-flat-button color="primary" (click)="applyAndSave()" [disabled]="processing || !canSave">
         @if (processing) { Guardando… } @else { Aplicar y guardar }
       </button>
     }
