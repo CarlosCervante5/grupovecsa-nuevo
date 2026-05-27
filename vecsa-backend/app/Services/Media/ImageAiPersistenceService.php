@@ -6,24 +6,27 @@ use App\Models\Boutique\BoutiqueProductImage;
 use App\Models\VehicleImage;
 
 /**
- * Persiste el resultado de IA con el mismo pipeline Cloudinary → S3 que las subidas normales.
+ * Persiste el resultado de IA vía Cloudinary (y S3 solo si está configurado en el servidor).
  */
 final class ImageAiPersistenceService
 {
-    public function __construct(private CloudinaryToS3ImageService $storage) {}
+    public function __construct(private CloudinaryImageStorageService $storage) {}
 
     public function persistVehicleImage(VehicleImage $vehicleImage, string $vehicleUuid, string $imageContents, string $extension = 'jpg'): string
     {
-        $url = $this->storage->storeVehicleImageBinary(
+        $stored = $this->storage->storeVehicleImageBinary(
             $vehicleUuid,
             $imageContents,
             $extension,
             'ai_'.$vehicleImage->sort_id
         );
 
-        $vehicleImage->update(['service_image_url' => $url]);
+        $vehicleImage->update([
+            'service_image_url' => $stored['url'],
+            'service_public_id' => $stored['public_id'],
+        ]);
 
-        return $url;
+        return $stored['url'];
     }
 
     public function persistBoutiqueProductImage(
@@ -32,7 +35,7 @@ final class ImageAiPersistenceService
         string $imageContents,
         string $extension = 'jpg'
     ): string {
-        $url = $this->storage->storeBoutiqueImageBinary(
+        $stored = $this->storage->storeBoutiqueImageBinary(
             $productUuid,
             $imageContents,
             $extension,
@@ -40,10 +43,11 @@ final class ImageAiPersistenceService
         );
 
         $productImage->update([
-            'image_path' => $url,
+            'image_path' => $stored['url'],
+            'cloudinary_public_id' => $stored['public_id'],
             'status' => 'uploaded',
         ]);
 
-        return $url;
+        return $stored['url'];
     }
 }
