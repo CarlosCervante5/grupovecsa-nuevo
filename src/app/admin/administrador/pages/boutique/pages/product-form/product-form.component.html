@@ -94,7 +94,7 @@
         <p class="section-hint">Sube fotos, ordena con arrastre o aplica fondo blanco con IA (solo imágenes ya subidas).</p>
 
         <div class="image-upload-area">
-          <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" multiple hidden>
+          <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/jpeg,image/png,image/jpg,image/gif,image/webp,image/heic,image/heif,.heic,.heif" multiple hidden>
           <button mat-stroked-button type="button" (click)="fileInput.click()" [disabled]="uploadingImage">
             <mat-icon>cloud_upload</mat-icon>
             {{ uploadingImage ? 'Subiendo...' : 'Subir imágenes' }}
