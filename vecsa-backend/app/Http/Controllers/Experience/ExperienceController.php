@@ -225,7 +225,7 @@ class ExperienceController extends Controller
 
             if ($request->hasFile('image')) {
                 $image = $request->file('image');
-                $path = $image->store('temp_images');
+                $path = \App\Support\UploadableImage::storeTemp($image);
                 \App\Jobs\UploadEventImage::dispatchSync($path, $event, $image->getClientOriginalName());
             }
 
@@ -428,7 +428,7 @@ class ExperienceController extends Controller
 
             if ($request->hasFile('image')) {
                 $image = $request->file('image');
-                $path = $image->store('temp_images');
+                $path = \App\Support\UploadableImage::storeTemp($image);
                 UploadMarketingPostImage::dispatchSync($path, $post, $image->getClientOriginalName());
                 $post->refresh();
             }
@@ -527,7 +527,7 @@ class ExperienceController extends Controller
 
             if ($request->hasFile('image')) {
                 $image = $request->file('image');
-                $path = $image->store('temp_images');
+                $path = \App\Support\UploadableImage::storeTemp($image);
                 UploadMarketingPostImage::dispatchSync($path, $post, $image->getClientOriginalName());
                 $post->refresh();
             }

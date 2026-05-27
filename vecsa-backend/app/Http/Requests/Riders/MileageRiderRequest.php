@@ -29,8 +29,8 @@ class MileageRiderRequest extends FormRequest
             ],
             'initial_mileage' => 'nullable|integer',
             'final_mileage' => 'nullable|integer',
-            'initial_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,pdf|max:5128',
-            'final_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,pdf|max:5128',
+            'initial_image' => 'nullable|file|uploadable_image:pdf|max:5128',
+            'final_image' => 'nullable|file|uploadable_image:pdf|max:5128',
             'purchase_amount' => 'nullable|numeric'
         ];
     }

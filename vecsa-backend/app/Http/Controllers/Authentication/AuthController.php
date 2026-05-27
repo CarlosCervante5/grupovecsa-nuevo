@@ -434,7 +434,7 @@ class AuthController extends Controller
                 return ApiResponseHelper::apiError('Error al actualizar la imagen de perfil',  'Archivo era inválido o corrupto: ' . $image->getClientOriginalName(), 500, 'UPDATE_PROFILE_IMAGE_ERROR');
             }
 
-            $path = $image->store('temp_images');
+            $path = \App\Support\UploadableImage::storeTemp($image);
 
             UploadProfileImage::dispatchSync($path, $user, $image->getClientOriginalName());
 

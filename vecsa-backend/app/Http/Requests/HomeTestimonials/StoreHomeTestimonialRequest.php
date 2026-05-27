@@ -22,7 +22,7 @@ class StoreHomeTestimonialRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+            'image' => 'required|file|uploadable_image|max:5120',
             'alt' => 'nullable|string',
         ];
     }

@@ -32,8 +32,8 @@ class StoreHomeSlideRequest extends FormRequest
             'button_text' => 'nullable|string',
             'button_link' => 'nullable|string',
             'disclaimer' => 'nullable|string',
-            'desktop_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
-            'mobile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+            'desktop_image' => 'nullable|file|uploadable_image|max:5120',
+            'mobile_image' => 'nullable|file|uploadable_image|max:5120',
         ];
     }
 }

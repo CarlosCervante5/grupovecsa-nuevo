@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Helpers\ApiResponseHelper;
 use App\Models\Vehicle;
+use App\Support\UploadableImage;
 use App\Models\VehicleImage;
 use Cloudinary\Cloudinary;
 use Exception;
@@ -68,10 +69,7 @@ class UploadVehicleImage implements ShouldQueue
             $cloudinary_file = $cloudinary->uploadApi()->upload(storage_path('app/' . $this->path), [
                 'public_id' => $name,
                 'folder' => $this->base_folder . '/' . $this->vehicle_uuid,
-                'transformation' => [
-                    'quality' => 'auto',
-                    'fetch_format' => 'jpg'
-                ]
+                'transformation' => UploadableImage::cloudinaryJpgTransformation(),
             ]);
 
             $s3_path = $this->base_folder . '/' . $this->vehicle_uuid . '/' . $name . '.jpg';

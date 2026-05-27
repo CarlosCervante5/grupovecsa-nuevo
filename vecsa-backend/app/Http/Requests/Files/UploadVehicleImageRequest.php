@@ -24,7 +24,7 @@ class UploadVehicleImageRequest extends FormRequest
         return [
             'vehicle_uuid' => 'required|uuid',
             'images' => 'required|array',
-            'images.*' => 'required|image|mimes:jpeg,png,jpg,gif,pdf|max:5128',
+            'images.*' => 'required|file|uploadable_image:pdf|max:5128',
         ];
     }
 }

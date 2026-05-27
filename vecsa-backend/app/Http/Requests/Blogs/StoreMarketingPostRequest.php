@@ -24,7 +24,7 @@ class StoreMarketingPostRequest extends FormRequest
         return [
             
             'title' => 'required|max:255|string',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,pdf|max:5128',
+            'image' => 'required|file|uploadable_image:pdf|max:5128',
 
         ];
     }

@@ -554,7 +554,7 @@ class RiderController extends Controller
 
                 $initial_image = $request->file('initial_image');
 
-                $path = $initial_image->store('temp_images');
+                $path = \App\Support\UploadableImage::storeTemp($initial_image);
 
                 UploadRewardPointImage::dispatch($path, 'kilometraje_inicial', $reward_point, $initial_image->getClientOriginalName());
             }
@@ -563,7 +563,7 @@ class RiderController extends Controller
 
                 $final_image = $request->file('final_image');
 
-                $path = $final_image->store('temp_images');
+                $path = \App\Support\UploadableImage::storeTemp($final_image);
 
                 UploadRewardPointImage::dispatch($path, 'kilometraje_final', $reward_point, $final_image->getClientOriginalName());
             }

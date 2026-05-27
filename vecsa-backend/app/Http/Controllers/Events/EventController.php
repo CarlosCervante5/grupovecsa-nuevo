@@ -43,7 +43,7 @@ class EventController extends Controller
 
                 $image = $request->file('image');
 
-                $path = $image->store('temp_images');
+                $path = \App\Support\UploadableImage::storeTemp($image);
 
                 UploadEventImage::dispatchSync($path, $event, $image->getClientOriginalName());
             }

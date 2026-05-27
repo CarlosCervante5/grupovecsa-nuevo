@@ -31,7 +31,7 @@ class StoreCampaignRequest extends FormRequest
             'visits' => 'nullable|integer',
             'description' => 'nullable|max:1000|string',
             'page_status' => 'nullable|in:public,clients,exclusive,unique,primary,offer,time_limit,other',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,pdf|max:5128',
+            'image' => 'nullable|file|uploadable_image:pdf|max:5128',
 
         ];
     }

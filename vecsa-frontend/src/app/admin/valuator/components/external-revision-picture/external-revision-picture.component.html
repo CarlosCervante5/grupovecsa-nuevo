@@ -13,7 +13,7 @@
                                 <div *ngIf=" image[2] == 'no'; else updateImageDiv ">
                                     <div (click)="markAsTouched(i); cambiarImgInputs.get(i)?.nativeElement?.click()">
                                         <img class="img-cars" [src]="image[1]" class="d-block w-100">
-                                        <input type="file" class="d-none" #cambiarImgInput (change)="saveImage($event, i)" [formControl]="getImageControl(i)" accept=".jpg, .jpeg, .png, .webp">
+                                        <input type="file" class="d-none" #cambiarImgInput (change)="saveImage($event, i)" [formControl]="getImageControl(i)" accept=".jpg,.jpeg,.png,.webp,.heic,.heif">
                                     </div>
                                     <mat-hint *ngIf="getImageControl(i).hasError('required') && getImageControl(i).touched">
                                         Selecciona una imagen para esta entrada.
@@ -22,7 +22,7 @@
                                 <ng-template #updateImageDiv>
                                     <div (click)="cambiarImgInputs.get(i)?.nativeElement?.click()">
                                         <img class="img-cars" [src]="image[1]" class="d-block w-100">
-                                        <input type="file" class="d-none" #cambiarImgInput (change)="saveImage($event, i)" [formControl]="getImageControl(i)" accept=".jpg, .jpeg, .png, .webp">
+                                        <input type="file" class="d-none" #cambiarImgInput (change)="saveImage($event, i)" [formControl]="getImageControl(i)" accept=".jpg,.jpeg,.png,.webp,.heic,.heif">
                                     </div>
                                 </ng-template>
                                 
@@ -47,7 +47,7 @@
                         <mat-list-item class="mt-5">
                             <div mat-line class="fw-bold">Agregar foto de daños</div>
                             <div mat-line>
-                                <input type="file" multiple  id="picture" accept="image/*" (change)="fileCapture($event)" [disabled]="spinner"> <!-- class="form-control" -->
+                                <input type="file" multiple  id="picture" accept="image/jpeg,image/png,image/jpg,image/gif,image/webp,image/heic,image/heif,.heic,.heif" (change)="fileCapture($event)" [disabled]="spinner"> <!-- class="form-control" -->
                                 <span *ngIf="spinner">Cargando imagen {{ count }}
                                     <span class="spinner-border spinner-border-sm mt-1" role="status" aria-hidden="true"></span>
                                 </span>

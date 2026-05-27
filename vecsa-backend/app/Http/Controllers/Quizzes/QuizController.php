@@ -166,7 +166,7 @@ class QuizController extends Controller
 
                 $image = $request->file('image');
 
-                $path = $image->store('temp_images');
+                $path = \App\Support\UploadableImage::storeTemp($image);
 
                 UploadQuizImage::dispatchSync($path, $quiz, $image->getClientOriginalName());
             }

@@ -30,7 +30,7 @@ class StoreEventRequest extends FormRequest
             'segment_name' => 'nullable|max:255|string',
             'type' => 'nullable|in:video,schedule,community,principal,experience',
             'page_status' => 'nullable|in:public,clients,exclusive,unique,primary,offer,time_limit,other',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,pdf|max:5128',
+            'image' => 'nullable|file|uploadable_image:pdf|max:5128',
 
         ];
     }

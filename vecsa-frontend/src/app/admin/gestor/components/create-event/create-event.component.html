@@ -28,7 +28,7 @@
                 <div class="col">
                     <!-- Title -->
                     <div>
-                        <input type="file" formControlName="picture" accept=".png, .jpg, .jpeg, .webp" multiple (change)="assignImage($event)" required>
+                        <input type="file" formControlName="picture" accept=".png,.jpg,.jpeg,.webp,.heic,.heif" multiple (change)="assignImage($event)" required>
                         <mat-hint *ngIf="pictureInvalid">Selecciona una imagen para el evento. </mat-hint>
                     </div>
                 </div>                

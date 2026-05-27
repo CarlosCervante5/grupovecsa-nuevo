@@ -80,7 +80,7 @@ class PromotionController extends Controller
                 }
 
                 // Guardar temporalmente el archivo
-                $path = $image->store('temp_images');
+                $path = \App\Support\UploadableImage::storeTemp($image);
 
 
                 // Enviar cada lote a una cola de trabajo para procesamiento en segundo plano

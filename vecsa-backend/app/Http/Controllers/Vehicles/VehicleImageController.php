@@ -61,7 +61,7 @@ class VehicleImageController extends Controller
                 }
 
                 // Guardar temporalmente el archivo
-                $path = $image->store('temp_images');
+                $path = \App\Support\UploadableImage::storeTemp($image);
 
 
                 // Determinar si es la última imagen

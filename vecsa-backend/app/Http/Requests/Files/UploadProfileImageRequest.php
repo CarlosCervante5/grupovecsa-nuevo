@@ -23,7 +23,7 @@ class UploadProfileImageRequest extends FormRequest
     {
         return [
             'user_uuid' => 'required|uuid',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,pdf|max:10128',
+            'image' => 'required|file|uploadable_image:pdf|max:10128',
         ];
     }
 }

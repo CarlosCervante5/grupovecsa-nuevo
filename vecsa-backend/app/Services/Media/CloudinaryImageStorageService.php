@@ -2,6 +2,7 @@
 
 namespace App\Services\Media;
 
+use App\Support\UploadableImage;
 use Cloudinary\Cloudinary;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -65,6 +66,7 @@ final class CloudinaryImageStorageService
 
         $format = $extension === 'png' ? 'png' : 'jpg';
         $tempRelative = 'temp_images/ai_'.uniqid('', true).'.'.$format;
+        $cloudinaryFormat = $format === 'png' ? 'png' : 'jpg';
 
         if (! Storage::put($tempRelative, $contents)) {
             throw new \RuntimeException('No se pudo preparar la imagen temporal para subir.');
@@ -77,10 +79,9 @@ final class CloudinaryImageStorageService
             $cloudinaryFile = $this->cloudinary->uploadApi()->upload(storage_path('app/'.$tempRelative), [
                 'public_id' => $name,
                 'folder' => $folder,
-                'transformation' => [
-                    'quality' => 'auto',
-                    'fetch_format' => $format,
-                ],
+                'transformation' => $cloudinaryFormat === 'jpg'
+                    ? UploadableImage::cloudinaryJpgTransformation()
+                    : ['quality' => 'auto', 'fetch_format' => 'png'],
             ]);
 
             $publicId = (string) ($cloudinaryFile['public_id'] ?? '');

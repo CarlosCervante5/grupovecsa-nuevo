@@ -15,7 +15,7 @@ class StoreBoutiqueProductImageRequest extends FormRequest
     {
         return [
             'product_uuid' => 'required|string',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+            'image' => 'required|file|uploadable_image|max:5120',
         ];
     }
 }

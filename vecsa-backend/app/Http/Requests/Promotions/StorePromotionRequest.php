@@ -26,7 +26,7 @@ class StorePromotionRequest extends FormRequest
             'spec_sheet' => 'required|string',
             'campaign_uuid' => 'required|uuid',
             'images' => 'required|array',
-            'images.*' => 'required|image|mimes:jpeg,png,jpg,gif,pdf|max:5128',
+            'images.*' => 'required|file|uploadable_image:pdf|max:5128',
         ];
     }
 }

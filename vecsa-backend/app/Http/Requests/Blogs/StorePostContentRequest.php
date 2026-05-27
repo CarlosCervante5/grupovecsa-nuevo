@@ -25,8 +25,8 @@ class StorePostContentRequest extends FormRequest
             'post_uuid' => 'required|uuid',
             'type_content' => 'required|string',
             'content_text' => 'required|string|max:65535',
-            'content_multimedia_1' => 'sometimes|image|mimes:jpeg,png,jpg,gif,pdf|max:5128',
-            'content_multimedia_2' => 'sometimes|image|mimes:jpeg,png,jpg,gif,pdf|max:5128',
+            'content_multimedia_1' => 'sometimes|file|uploadable_image:pdf|max:5128',
+            'content_multimedia_2' => 'sometimes|file|uploadable_image:pdf|max:5128',
         ];
     }
 }

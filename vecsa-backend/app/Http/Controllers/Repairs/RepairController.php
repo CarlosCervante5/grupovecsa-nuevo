@@ -44,7 +44,7 @@ class RepairController extends Controller
 
                 $image = $request->file('image');
 
-                $path = $image->store('temp_images');
+                $path = \App\Support\UploadableImage::storeTemp($image);
 
                 UploadRepairImage::dispatchSync($path, $valuation_repair, $image->getClientOriginalName());
             }
