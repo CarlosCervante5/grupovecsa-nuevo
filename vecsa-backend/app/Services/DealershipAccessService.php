@@ -38,7 +38,9 @@ class DealershipAccessService
             }
         }
 
-        $ids = $user->dealerships()->pluck('id')->all();
+        $dealershipRelation = $user->dealerships();
+        $dealershipTable = $dealershipRelation->getRelated()->getTable();
+        $ids = $dealershipRelation->pluck($dealershipTable.'.id')->all();
         if ($ids === []) {
             return null;
         }

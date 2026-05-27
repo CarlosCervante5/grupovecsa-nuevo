@@ -7,11 +7,22 @@ use App\Http\Controllers\Controller;
 use App\Models\AssistantConversation;
 use App\Models\AssistantMessage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
+
 class AssistantChatAdminController extends Controller
 {
     public function search(Request $request)
     {
         try {
+            if (! $this->assistantTablesReady()) {
+                return ApiResponseHelper::apiError(
+                    'El módulo de chats del asistente no está disponible (falta migración en el servidor)',
+                    null,
+                    503,
+                    'ASSISTANT_TABLES_MISSING'
+                );
+            }
+
             $perPage = max(1, min((int) $request->input('per_page', 20), 50));
             $page = max(1, (int) $request->input('page', 1));
             $search = trim((string) $request->input('search', ''));
@@ -54,6 +65,15 @@ class AssistantChatAdminController extends Controller
     public function detail(Request $request)
     {
         try {
+            if (! $this->assistantTablesReady()) {
+                return ApiResponseHelper::apiError(
+                    'El módulo de chats del asistente no está disponible (falta migración en el servidor)',
+                    null,
+                    503,
+                    'ASSISTANT_TABLES_MISSING'
+                );
+            }
+
             $data = $request->validate([
                 'uuid' => 'required|string|max:64',
             ]);
@@ -83,6 +103,14 @@ class AssistantChatAdminController extends Controller
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al obtener conversación', $e->getMessage(), 500);
         }
+    }
+
+    private function assistantTablesReady(): bool
+    {
+        $prefix = env('DB_TABLE_PREFIX', '');
+
+        return Schema::hasTable($prefix.'assistant_conversations')
+            && Schema::hasTable($prefix.'assistant_messages');
     }
 
     /**
