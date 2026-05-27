@@ -81,6 +81,25 @@
 .dev-nav-item:hover { background: #1e293b; color: #f1f5f9; }
 .dev-nav-item.active { background: #1c69d4; color: #fff; }
 
+.dev-nav-back {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 12px;
+  color: #60a5fa;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+  margin-top: 12px;
+  border-top: 1px solid #1e293b;
+  padding-top: 14px;
+}
+.dev-nav-back .material-icons { font-size: 18px; flex-shrink: 0; }
+.dev-nav-back:hover { background: #1e293b; color: #93c5fd; }
+
 .dev-logout {
   display: flex; align-items: center; gap: 8px;
   width: 100%; padding: 9px 12px; border: none; background: none;
@@ -511,6 +530,31 @@
 .bench-report-item:hover { border-color: #1c69d4; background: #f8fafc; }
 .bench-report-item .material-icons { color: #94a3b8; font-size: 20px; }
 .bench-report-item .bench-history-arrow { color: #1c69d4; margin-left: auto; }
+
+/* Fila checkbox + texto largo (no usar .stripe-switch: es solo para el pill 44×24px) */
+.dev-toggle-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  max-width: 100%;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+.dev-toggle-row input[type='checkbox'] {
+  flex-shrink: 0;
+  margin-top: 4px;
+  width: 18px;
+  height: 18px;
+  accent-color: #1c69d4;
+}
+.dev-toggle-row .dev-toggle-label-text {
+  flex: 1;
+  min-width: 0;
+  line-height: 1.45;
+  font-size: 0.9rem;
+  color: #334155;
+}
 
 /* ── Stripe Config ── */
 .stripe-mode-header {

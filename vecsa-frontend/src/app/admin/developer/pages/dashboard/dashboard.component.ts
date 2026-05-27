@@ -1,7 +1,7 @@
 import { Component, OnInit, AfterViewInit, ElementRef, ViewChild, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/auth/services/auth.service';
-import { adminBenchmarkUrl } from 'src/app/admin/utils/admin-route.util';
+import { adminBenchmarkUrl, adminPrimaryPanelUrl } from 'src/app/admin/utils/admin-route.util';
 import { DevCrudService, CrudSection } from '../../services/dev-crud.service';
 import * as echarts from 'echarts';
 
@@ -1168,6 +1168,11 @@ export class DeveloperDashboardComponent implements OnInit, AfterViewInit, OnDes
 
   get benchmarkPanelUrl(): string {
     return adminBenchmarkUrl(this.role) ?? '/admin/benchmark';
+  }
+
+  /** Panel operativo fuera del Dev Panel (p. ej. administrador si el rol en sesión es developer). */
+  get mainPanelUrl(): string {
+    return adminPrimaryPanelUrl(this.role);
   }
 
   navigate(route: string): void { this.router.navigateByUrl(route); }

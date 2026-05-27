@@ -65,6 +65,19 @@ export function adminDashboardUrl(role: string | null | undefined): string {
 }
 
 /**
+ * Panel “principal” para volver desde herramientas solo desarrollador (`/admin/developer`).
+ * El home de sesión suele seguir siendo `/admin/developer`; aquí se apunta al panel operativo administrador,
+ * igual que benchmark/inventario (acceso vía mismo criterio de `validate_role` en backend).
+ */
+export function adminPrimaryPanelUrl(role: string | null | undefined): string {
+  const seg = adminRouteSegmentForRole(role);
+  if (seg === 'developer') {
+    return '/admin/administrator';
+  }
+  return adminDashboardUrl(role);
+}
+
+/**
  * Inventario de vehículos embebido en el layout del panel (no la URL plana `/admin/vehicle-inventory`).
  * Marketing conserva el segmento `vehicles`. Developer se trata como administrador.
  */

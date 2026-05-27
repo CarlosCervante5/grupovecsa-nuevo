@@ -60,6 +60,11 @@
       API Monitor
     </button>
 
+    <a class="dev-nav-back" [routerLink]="mainPanelUrl">
+      <span class="material-icons">arrow_back</span>
+      Volver al panel principal
+    </a>
+
     <button class="dev-logout" (click)="logout()">
       <span class="material-icons">logout</span>
       Cerrar sesión
@@ -439,9 +444,9 @@
           <p style="font-size:0.85rem;color:#64748b;margin:0 0 12px;">
             Desactiva para ocultar pago con tarjeta; el checkout mostrará contacto a ventas por WhatsApp.
           </p>
-          <label class="stripe-switch" style="display:inline-flex;align-items:center;gap:10px;">
+          <label class="dev-toggle-row">
             <input type="checkbox" [checked]="openpayPasarelaEnabled" (change)="toggleOpenpayPasarela()" />
-            <span>Pasarela OpenPay activa</span>
+            <span class="dev-toggle-label-text">Pasarela OpenPay activa</span>
           </label>
         </div>
 
@@ -526,9 +531,9 @@
       @if (!geminiAiLoading) {
         <div class="dev-card" style="margin-bottom:16px;">
           <h3 class="dev-card-title"><span class="material-icons">power_settings_new</span> Estado</h3>
-          <label class="stripe-switch" style="display:inline-flex;align-items:center;gap:10px;">
+          <label class="dev-toggle-row">
             <input type="checkbox" [checked]="geminiAiFeatureEnabled" (change)="toggleGeminiAiFeature()" />
-            <span>Permitir edición de fotos con Gemini en el sistema</span>
+            <span class="dev-toggle-label-text">Permitir edición de fotos con Gemini en el sistema</span>
           </label>
           <p style="font-size:0.82rem;color:#64748b;margin:10px 0 0;">
             Si está desactivado, los usuarios que abran «IA» en imágenes verán el servicio como no disponible.
