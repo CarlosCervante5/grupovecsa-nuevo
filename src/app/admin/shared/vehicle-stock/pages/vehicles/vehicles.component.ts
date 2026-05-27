@@ -276,7 +276,9 @@ export class VehiclesComponent implements OnInit {
     }
 
     openStoreVehicleSheet(): void {
-      const bottomSheetRef = this._bottomSheet.open(StoreVehicleComponent);
+      const bottomSheetRef = this._bottomSheet.open(StoreVehicleComponent, {
+        panelClass: 'vehicle-update-bottom-sheet',
+      });
 
       bottomSheetRef.afterDismissed().subscribe((dataFromChild) => {      
         if(dataFromChild != undefined && dataFromChild.reload === true ){        

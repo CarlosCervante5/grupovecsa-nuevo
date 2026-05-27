@@ -113,14 +113,30 @@ export class StoreVehicleComponent  implements OnInit{
     return options.filter(option => option.name.toLowerCase().includes(filterValue));
   }
 
-  public add( event: MatChipInputEvent ): void {
+  public add(event: MatChipInputEvent): void {
     const value = (event.value || '').trim();
     if (value) {
-          this.camps.push(value);
-          this.campaignControl.setValue(null);
-          event.chipInput!.clear();
+      this.pushCampaign(value);
+      this.campaignControl.setValue(null);
+      event.chipInput?.clear();
     }
-    
+  }
+
+  onCampaignEnter(event: Event): void {
+    event.preventDefault();
+    const input = event.target as HTMLInputElement;
+    const value = (input?.value || '').trim();
+    if (value) {
+      this.pushCampaign(value);
+      this.form.patchValue({ campaign_2: '' });
+      input.value = '';
+    }
+  }
+
+  private pushCampaign(name: string): void {
+    if (!this.camps.includes(name)) {
+      this.camps.push(name);
+    }
   }
 
   public remove( event: string): void{
