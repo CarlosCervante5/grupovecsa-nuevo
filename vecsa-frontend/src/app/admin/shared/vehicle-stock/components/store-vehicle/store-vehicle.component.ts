@@ -108,19 +108,36 @@ export class StoreVehicleComponent  implements OnInit{
     );
   }
 
-  private _filter<T extends { name: string }>(value: string, options: T[]): T[] {
-    const filterValue = value.toLowerCase();
-    return options.filter(option => option.name.toLowerCase().includes(filterValue));
+  private _filter<T extends { name: string }>(value: string | { name?: string } | null, options: T[]): T[] {
+    const text = typeof value === 'string' ? value : value?.name ?? '';
+    const filterValue = text.toLowerCase();
+    return options.filter((option) => option.name.toLowerCase().includes(filterValue));
   }
 
-  public add( event: MatChipInputEvent ): void {
+  public add(event: MatChipInputEvent): void {
     const value = (event.value || '').trim();
     if (value) {
-          this.camps.push(value);
-          this.campaignControl.setValue(null);
-          event.chipInput!.clear();
+      this.pushCampaign(value);
+      this.campaignControl.setValue(null);
+      event.chipInput?.clear();
     }
-    
+  }
+
+  onCampaignEnter(event: Event): void {
+    event.preventDefault();
+    const input = event.target as HTMLInputElement;
+    const value = (input?.value || '').trim();
+    if (value) {
+      this.pushCampaign(value);
+      this.form.patchValue({ campaign_2: '' });
+      input.value = '';
+    }
+  }
+
+  private pushCampaign(name: string): void {
+    if (!this.camps.includes(name)) {
+      this.camps.push(name);
+    }
   }
 
   public remove( event: string): void{
@@ -151,10 +168,15 @@ export class StoreVehicleComponent  implements OnInit{
   }
 
   onModelSelected(event: MatAutocompleteSelectedEvent): void {
-    const selectedModel = event.option.value;
-    this.form.patchValue({ model: selectedModel.name });
-    this.form.patchValue({ year: selectedModel.year });
-    this.getVersions(selectedModel).then(() => {
+    const selectedName = String(event.option.value ?? '');
+    const selectedModel = this.models.find((m) => m.name === selectedName);
+    this.form.patchValue({
+      model: selectedName,
+      year: selectedModel?.year ?? this.form.get('year')?.value,
+    });
+    this.form.get('model')?.markAsDirty();
+    this.form.get('model')?.updateValueAndValidity();
+    this.getVersions(selectedName).then(() => {
       this.filters();
     });
   }

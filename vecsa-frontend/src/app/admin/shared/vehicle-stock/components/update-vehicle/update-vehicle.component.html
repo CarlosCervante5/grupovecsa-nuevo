@@ -1,9 +1,9 @@
-<div class="form-card">
-  <h1 class="page-title">Actualizar vehículo</h1>
-  <p class="form-lead">Por favor, actualice los campos del vehículo.</p>
+<div class="update-vehicle-sheet">
+  <h2 class="update-vehicle__title">Actualizar vehículo</h2>
+  <p class="update-vehicle__lead">Por favor, actualice los campos del vehículo.</p>
 
   <ng-container *ngIf="isNotVehicle; else formBlock">
-    <div class="form-loading">
+    <div class="meta-loading">
       <app-sk-cube></app-sk-cube>
       <span>Cargando…</span>
     </div>
@@ -11,8 +11,8 @@
 
   <ng-template #formBlock>
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
-      <div class="form-grid">
-        <div class="field-group field-span-full">
+      <div class="upload-fields-grid">
+        <div class="field-group full">
           <label class="field-label" for="uv-name">Nombre del vehículo *</label>
           <input
             id="uv-name"
@@ -27,14 +27,14 @@
           <span class="field-error" *ngIf="nameInvalid">Escribe el nuevo nombre del vehículo.</span>
         </div>
 
-        <div class="field-group field-span-full">
+        <div class="field-group full">
           <label class="field-label" for="uv-description">Oportunidad *</label>
           <textarea
             id="uv-description"
-            class="field-input"
+            class="field-input field-textarea"
             formControlName="description"
             placeholder="Descripción / oportunidad"
-            rows="5"
+            rows="4"
           ></textarea>
           <span class="field-error" *ngIf="descriptionInvalid">Escribe la nueva oportunidad del vehículo.</span>
         </div>
@@ -151,7 +151,7 @@
           <span class="field-error" *ngIf="kmInvalid">Actualiza el kilometraje.</span>
         </div>
 
-        <div class="field-group">
+        <div class="field-group field-autocomplete">
           <label class="field-label" for="uv-brand">Marca *</label>
           <input
             id="uv-brand"
@@ -166,7 +166,7 @@
           <span class="field-error" *ngIf="brandInvalid">Escribe la marca del vehículo.</span>
         </div>
 
-        <div class="field-group">
+        <div class="field-group field-autocomplete">
           <label class="field-label" for="uv-line">Línea del vehículo *</label>
           <input id="uv-line" type="text" class="field-input" formControlName="line" [matAutocomplete]="autoLine" />
           <mat-autocomplete #autoLine="matAutocomplete" (optionSelected)="onLineSelected($event)">
@@ -175,7 +175,7 @@
           <span class="field-error" *ngIf="lineInvalid">Escribe la línea del vehículo.</span>
         </div>
 
-        <div class="field-group">
+        <div class="field-group field-autocomplete">
           <label class="field-label" for="uv-model">Modelo *</label>
           <input id="uv-model" type="text" class="field-input" formControlName="model" [matAutocomplete]="autoModel" />
           <mat-autocomplete #autoModel="matAutocomplete" (optionSelected)="onModelSelected($event)">
@@ -190,7 +190,7 @@
           <span class="field-error" *ngIf="yearModelInvalid">Escribe el nuevo año del modelo.</span>
         </div>
 
-        <div class="field-group">
+        <div class="field-group field-autocomplete">
           <label class="field-label" for="uv-version">Versión *</label>
           <input id="uv-version" type="text" class="field-input" formControlName="version" [matAutocomplete]="autoVersion" />
           <mat-autocomplete #autoVersion="matAutocomplete" (optionSelected)="onVersionSelected($event)">
@@ -199,7 +199,7 @@
           <span class="field-error" *ngIf="versionInvalid">Escribe la versión del vehículo.</span>
         </div>
 
-        <div class="field-group">
+        <div class="field-group field-autocomplete">
           <label class="field-label" for="uv-body">Carrocería *</label>
           <input id="uv-body" type="text" class="field-input" formControlName="body" [matAutocomplete]="autoBody" />
           <mat-autocomplete #autoBody="matAutocomplete" (optionSelected)="onBodySelected($event)">
@@ -222,7 +222,7 @@
           </span>
         </div>
 
-        <div class="field-group field-span-full">
+        <div class="field-group full">
           <label class="field-label" for="uv-campaign">Campaña</label>
           <div class="campaign-chips" *ngIf="camps.length">
             <span class="campaign-chip" *ngFor="let camp of camps">
@@ -246,19 +246,19 @@
           </mat-autocomplete>
         </div>
 
-        <div class="field-group field-span-full">
+        <div class="field-group full">
           <label class="field-label" for="uv-spec-sheet">Enlace a hoja de especificaciones</label>
           <input id="uv-spec-sheet" type="text" class="field-input" formControlName="spec_sheet" />
         </div>
       </div>
 
       <section class="photos-section">
-        <h2 class="section-heading">Fotos del vehículo</h2>
-        <p class="section-lead">Sube imágenes, arrastra para cambiar el orden, edita con IA o elimina fotos.</p>
+        <h3 class="photos-section__title">Fotos del vehículo</h3>
+        <p class="field-hint">Sube imágenes, arrastra para cambiar el orden, edita con IA o elimina fotos.</p>
 
         <div class="photos-toolbar">
-          <label class="photos-upload-btn">
-            <span class="material-icons">add_photo_alternate</span>
+          <label class="action-btn photos-upload-btn">
+            <span class="material-icons icon-18">add_photo_alternate</span>
             Elegir archivos
             <input
               type="file"
@@ -270,7 +270,7 @@
           </label>
           <button
             type="button"
-            class="btn-photos-upload"
+            class="action-btn primary-btn"
             (click)="uploadPhotos()"
             [disabled]="photoUploadDisabled || photoUploading"
           >
@@ -278,7 +278,7 @@
           </button>
           <button
             type="button"
-            class="btn-photos-order"
+            class="action-btn"
             *ngIf="vehicleImages.length"
             (click)="savePhotoOrder()"
           >
@@ -304,23 +304,22 @@
               <img class="photo-thumb" [src]="image.path" [alt]="'Foto ' + (i + 1)" />
             </div>
             <div class="photo-actions">
-              <button type="button" class="btn-photo-ia" (click)="openPhotoAi(image, i)" title="Editar con IA">
-                <span class="material-icons">auto_fix_high</span>
+              <button type="button" class="action-btn action-btn--compact" (click)="openPhotoAi(image, i)" title="Editar con IA">
+                <span class="material-icons icon-18">auto_fix_high</span>
                 IA
               </button>
-              <button type="button" class="btn-photo-delete" (click)="deletePhoto(image.id, i)" title="Eliminar">
-                <span class="material-icons">delete</span>
+              <button type="button" class="action-btn action-btn--compact action-btn--danger" (click)="deletePhoto(image.id, i)" title="Eliminar">
+                <span class="material-icons icon-18">delete</span>
               </button>
             </div>
           </div>
         </div>
       </section>
 
-      <div class="form-actions">
-        <button type="button" class="btn-cancel" (click)="close()">Cancelar</button>
-        <button type="submit" class="btn-submit" [disabled]="form.invalid || button">
-          <span *ngIf="!button">Actualizar</span>
-          <span *ngIf="button" class="btn-spinner" aria-hidden="true"></span>
+      <div class="update-vehicle__actions">
+        <button type="button" class="action-btn" (click)="close()">Cancelar</button>
+        <button type="submit" class="action-btn primary-btn" [disabled]="form.invalid || button">
+          {{ button ? 'Guardando…' : 'Actualizar' }}
         </button>
       </div>
     </form>
