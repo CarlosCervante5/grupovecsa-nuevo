@@ -87,14 +87,29 @@ select.field-input {
   line-height: 1.3;
 }
 
-.field-autocomplete .field-input {
-  display: block;
+.field-autocomplete {
+  position: relative;
 }
 
-:host ::ng-deep .field-autocomplete .mat-mdc-autocomplete-trigger {
-  padding: 0;
-  border: none;
-  background: transparent;
+.field-autocomplete .field-input {
+  display: block;
+  width: 100%;
+}
+
+/* El input lleva mat-mdc-autocomplete-trigger: no quitar borde/fondo del trigger */
+:host ::ng-deep .field-autocomplete input.field-input.mat-mdc-autocomplete-trigger {
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  box-sizing: border-box;
+  min-height: auto;
+  line-height: normal;
+}
+
+:host ::ng-deep .field-autocomplete input.field-input.mat-mdc-autocomplete-trigger:focus {
+  border-color: #4a90d9;
+  box-shadow: 0 0 0 2px rgba(74, 144, 217, 0.15);
 }
 
 :host ::ng-deep .mat-mdc-autocomplete-panel {
