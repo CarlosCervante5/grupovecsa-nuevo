@@ -326,3 +326,13 @@ router-outlet + * {
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
+/* Bottom sheet: editar vehículo (inventario) */
+.vehicle-update-bottom-sheet.mat-bottom-sheet-container {
+  max-width: min(980px, 96vw);
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 16px 16px 0 0;
+  max-height: 92vh;
+  overflow: auto;
+}
