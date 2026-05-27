@@ -53,7 +53,8 @@ final class ImageAiProcessingService
                 ],
             ],
             'generationConfig' => [
-                'responseModalities' => ['TEXT', 'IMAGE'],
+                'responseModalities' => ['IMAGE'],
+                'temperature' => 0.15,
             ],
         ];
 
@@ -264,7 +265,7 @@ final class ImageAiProcessingService
             [
                 'id' => 'studio_white',
                 'label' => 'Fondo blanco (estudio)',
-                'description' => 'Fondo blanco tipo catálogo con iluminación suave.',
+                'description' => 'Quita el fondo y ajusta la luz; el vehículo se mantiene igual que en la foto original.',
             ],
         ];
     }
@@ -276,8 +277,24 @@ final class ImageAiProcessingService
 
     private function promptForAction(string $action): string
     {
-        return 'Edit this e-commerce/product photo: remove the original background and place the subject centered on '
-            .'a pure seamless white (#FFFFFF) studio backdrop with soft even catalog lighting. No harsh shadows.';
+        return <<<'PROMPT'
+Edit this existing dealership vehicle inventory photograph. This is a strict photo edit of the SAME car, not a new image.
+
+ALLOWED CHANGES ONLY:
+1. Remove the original background completely and replace it with a pure seamless white (#FFFFFF) studio backdrop.
+2. Apply subtle catalog lighting on the existing vehicle only: gentle exposure balance, neutral white balance, soft shadow under the tires. No dramatic relighting.
+
+STRICT PRESERVATION — the vehicle must remain pixel-faithful and identical to the input:
+- Same exact car: make, model, body style, year look, paint color, trim, wheels, tires, badges, logos, grille, lights, mirrors, glass, interior visible through windows.
+- Same camera angle, perspective, framing, scale, and position of the car in the frame. Do not crop, zoom, or reframe the vehicle.
+- Keep all license plates, text, decals, scratches, dents, panel gaps, reflections, and details that belong to this specific car.
+- Do NOT replace, redesign, upgrade, stylize, or "improve" the vehicle. Do NOT generate a different car or change its color, wheels, or body shape.
+- Do NOT add or remove parts, accessories, people, or objects touching the car.
+
+FORBIDDEN: changing the car model, changing paint color, swapping wheels, merging background into the body, cartoon or AI-art look, blur on vehicle details, hallucinated parts.
+
+Output one photorealistic edited photo suitable for an automotive sales catalog.
+PROMPT;
     }
 
     private function normalizeImageMime(string $headerMime, string $sourceUrl): string
