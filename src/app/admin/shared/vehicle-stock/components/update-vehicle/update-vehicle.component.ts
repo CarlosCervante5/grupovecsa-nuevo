@@ -1,13 +1,18 @@
 import { Campaign } from '@interfaces/admin.interfaces';
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_BOTTOM_SHEET_DATA, MatBottomSheetRef } from '@angular/material/bottom-sheet';
+import { MatDialog } from '@angular/material/dialog';
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { AbstractControl, FormControl, FormGroup, UntypedFormBuilder, ValidatorFn, Validators } from '@angular/forms';
 import { VehicleService } from '@services/vehicle.service';
+import { ImagesService } from '@services/images.service';
 import Swal from "sweetalert2";
 import { MatChipInputEvent } from '@angular/material/chips';
 import { Observable, of } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
+import { ImageAiDialogComponent } from 'src/app/shared/components/image-ai-dialog/image-ai-dialog.component';
+import { ImageOrder } from 'src/app/dashboard/pages/comprar-autos/interfaces/detail/vehicle_data.interface';
 
 import {UpdateVehicle,  FullDetailResponse, BrandsResponse, Brand, Line, LinesResponse, Model, Body, ModelsResponse, VersionsResponse, Version, BodiesResponse, VehicleUpdateResponse, GralResponse} from '@interfaces/vehicle_data.interface';
 import { GetcampaingResponse } from '@interfaces/admin.interfaces';
@@ -61,13 +66,21 @@ export class UpdateVehicleComponent implements OnInit {
   public bodies:Body[] = [];
   filteredBodies: Observable<Body[]> = of([]);
 
+  vehicleImages: ImageOrder[] = [];
+  photoFiles: File[] = [];
+  photoUploadDisabled = true;
+  photoUploading = false;
+  imagesChanged = false;
+
   constructor(
     @Inject(MAT_BOTTOM_SHEET_DATA) public data: any,
     private _formBuilder: UntypedFormBuilder,
     private _vehicleService:VehicleService,
     private _campaignService:AdminService,
     private _bottomSheetRef: MatBottomSheetRef<any>,
-    private _router: Router 
+    private _router: Router,
+    private _imagesService: ImagesService,
+    private _dialog: MatDialog,
   ) {
       this.vehicle_uuid =  data.uuid;    
       this.formInit();
@@ -116,14 +129,30 @@ export class UpdateVehicleComponent implements OnInit {
     return options.filter(option => option.name.toLowerCase().includes(filterValue));
   }
 
-  public add( event: MatChipInputEvent ): void {
+  public add(event: MatChipInputEvent): void {
     const value = (event.value || '').trim();
     if (value) {
-          this.camps.push(value);
-          this.campaignControl.setValue(null);
-          event.chipInput!.clear();
+      this.pushCampaign(value);
+      this.campaignControl.setValue(null);
+      event.chipInput?.clear();
     }
-    
+  }
+
+  onCampaignEnter(event: Event): void {
+    event.preventDefault();
+    const input = event.target as HTMLInputElement;
+    const value = (input?.value || '').trim();
+    if (value) {
+      this.pushCampaign(value);
+      this.form.patchValue({ campaign_2: '' });
+      input.value = '';
+    }
+  }
+
+  private pushCampaign(name: string): void {
+    if (!this.camps.includes(name)) {
+      this.camps.push(name);
+    }
   }
   public remove( event: string): void{
     let index = this.camps.indexOf(event);
@@ -138,9 +167,10 @@ export class UpdateVehicleComponent implements OnInit {
       this.filters();
     });
   }
-  onCampaignSelected(event: MatAutocompleteSelectedEvent): void{
-    this.camps.push(event.option.value);
+  onCampaignSelected(event: MatAutocompleteSelectedEvent): void {
+    this.pushCampaign(event.option.value);
     this.id_camp.push(event.option.id);
+    this.form.patchValue({ campaign_2: '' });
   }
 
   onLineSelected(event: MatAutocompleteSelectedEvent): void {
@@ -226,9 +256,147 @@ export class UpdateVehicleComponent implements OnInit {
             });
 
             this.filters();
+            this.syncImagesFromVehicle();
           }, 500);
         }
       });
+  }
+
+  private syncImagesFromVehicle(): void {
+    const imgs = this.vehicle?.images ?? [];
+    this.vehicleImages = imgs.map((img: { uuid: string; sort_id: string; service_image_url: string; service_public_id: string }) => ({
+      id: img.uuid,
+      sort_id: img.sort_id,
+      path: img.service_image_url,
+      path_public: img.service_public_id,
+      external_website: 'no',
+      selected: false,
+    }));
+  }
+
+  private refreshVehicleImages(): void {
+    this._vehicleService.getVehicle(this.vehicle_uuid).subscribe({
+      next: (detailResponse: FullDetailResponse) => {
+        this.vehicle.images = detailResponse.data.images ?? [];
+        this.syncImagesFromVehicle();
+        this.imagesChanged = true;
+      },
+      error: (err) => reload(err, this._router),
+    });
+  }
+
+  dropPhoto(event: CdkDragDrop<ImageOrder[]>): void {
+    const selected = this.vehicleImages.filter((image) => image.selected);
+    if (selected.length > 0) {
+      const remaining = this.vehicleImages.filter((image) => !image.selected);
+      const insertIndex = event.currentIndex;
+      this.vehicleImages = [
+        ...remaining.slice(0, insertIndex),
+        ...selected,
+        ...remaining.slice(insertIndex),
+      ];
+    } else {
+      moveItemInArray(this.vehicleImages, event.previousIndex, event.currentIndex);
+    }
+  }
+
+  savePhotoOrder(): void {
+    this._imagesService.changeOrder(this.vehicleImages).subscribe({
+      next: (resp) => {
+        Swal.fire({
+          icon: 'success',
+          title: resp.message,
+          showConfirmButton: false,
+          timer: 2000,
+        });
+        this.imagesChanged = true;
+      },
+      error: (err) => reload(err, this._router),
+    });
+  }
+
+  openPhotoAi(image: ImageOrder, index: number): void {
+    const ref = this._dialog.open(ImageAiDialogComponent, {
+      width: '640px',
+      maxWidth: '95vw',
+      data: {
+        sourceUrl: image.path,
+        targetType: 'vehicle_image',
+        targetUuid: image.id,
+        title: 'Mejorar foto del vehículo',
+      },
+    });
+    ref.afterClosed().subscribe((result) => {
+      if (result?.saved && result.imageUrl) {
+        this.vehicleImages[index].path = result.imageUrl;
+        this.imagesChanged = true;
+        Swal.fire({
+          icon: 'success',
+          title: 'Imagen actualizada con IA',
+          showConfirmButton: false,
+          timer: 2200,
+        });
+      }
+    });
+  }
+
+  deletePhoto(vehicleImageUuid: string, index: number): void {
+    Swal.fire({
+      title: '¿Eliminar esta imagen?',
+      showCancelButton: true,
+      confirmButtonText: 'Eliminar',
+      confirmButtonColor: '#1c69d4',
+    }).then((result) => {
+      if (!result.isConfirmed) {
+        return;
+      }
+      this._imagesService.deleteImage(vehicleImageUuid).subscribe({
+        next: (resp) => {
+          this.vehicleImages.splice(index, 1);
+          this.imagesChanged = true;
+          Swal.fire(resp.message, '', 'success');
+        },
+        error: (err) => reload(err, this._router),
+      });
+    });
+  }
+
+  onPhotoFiles(event: Event): void {
+    const element = event.currentTarget as HTMLInputElement;
+    const fileList = element.files;
+    if (fileList?.length) {
+      this.photoFiles = Array.from(fileList);
+      this.photoUploadDisabled = false;
+    } else {
+      this.photoFiles = [];
+      this.photoUploadDisabled = true;
+    }
+  }
+
+  uploadPhotos(): void {
+    if (!this.photoFiles.length || this.photoUploading) {
+      return;
+    }
+    this.photoUploading = true;
+    this.photoUploadDisabled = true;
+    this._imagesService.setImage(this.vehicle_uuid, this.photoFiles).subscribe({
+      next: () => {
+        this.photoUploading = false;
+        this.photoFiles = [];
+        Swal.fire({
+          icon: 'success',
+          title: 'Imágenes cargadas',
+          showConfirmButton: false,
+          timer: 2200,
+        });
+        this.refreshVehicleImages();
+      },
+      error: (err) => {
+        this.photoUploading = false;
+        this.photoUploadDisabled = false;
+        reload(err, this._router);
+      },
+    });
   }
 
   public getBrands(): void {
@@ -494,7 +662,11 @@ export class UpdateVehicleComponent implements OnInit {
     return this.form.get('dealership_name')!.invalid && (this.form.get('dealership_name')!.dirty);
   }
 
-  public close():void {
+  public close(): void {
+    if (this.imagesChanged) {
+      this._bottomSheetRef.dismiss({ reload: true });
+      return;
+    }
     this._bottomSheetRef.dismiss();
   }
 

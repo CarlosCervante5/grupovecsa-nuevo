@@ -97,9 +97,8 @@ export class AVehicleComponent {
 
   openUpdateVehicleSheet( uuid:string ): void {
     const bottomSheetRef = this._bottomSheet.open(UpdateVehicleComponent, {
-      data: {
-        uuid
-      }
+      data: { uuid },
+      panelClass: 'vehicle-update-bottom-sheet',
     });   
     bottomSheetRef.afterDismissed().subscribe((dataFromChild) => {      
       if(dataFromChild != undefined && dataFromChild.reload === true ){        

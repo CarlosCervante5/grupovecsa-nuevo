@@ -289,6 +289,7 @@ export class VehiclesComponent implements OnInit {
     openEditVehicleSheet(uuid: string): void {
       const ref = this._bottomSheet.open(UpdateVehicleComponent, {
         data: { uuid },
+        panelClass: 'vehicle-update-bottom-sheet',
       });
       ref.afterDismissed().subscribe((dataFromChild) => {
         if (dataFromChild != undefined && dataFromChild.reload === true) {
