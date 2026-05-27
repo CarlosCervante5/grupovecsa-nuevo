@@ -7,6 +7,8 @@ export type ImageAiActionId = 'studio_white';
 
 export type ImageAiTargetType = 'preview_only' | 'vehicle_image' | 'boutique_product_image';
 
+export type ImageAiEditContext = 'vehicle' | 'product';
+
 export interface ImageAiAction {
   id: ImageAiActionId;
   label: string;
@@ -31,6 +33,8 @@ export interface ImageAiProcessPayload {
   /** Vista previa ya generada; al guardar evita otra llamada a Gemini. */
   processed_base64?: string;
   processed_mime?: string;
+  /** Vehículo o producto boutique (prompt Gemini). */
+  context?: ImageAiEditContext;
 }
 
 export interface ImageAiProcessResult {

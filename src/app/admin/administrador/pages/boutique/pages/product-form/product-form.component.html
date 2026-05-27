@@ -91,6 +91,7 @@
       <!-- Image Manager (only in edit mode) -->
       <div *ngIf="isEditMode" class="form-card">
         <h3 class="section-title">Imágenes del producto</h3>
+        <p class="section-hint">Sube fotos, ordena con arrastre o aplica fondo blanco con IA (solo imágenes ya subidas).</p>
 
         <div class="image-upload-area">
           <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" multiple hidden>
@@ -120,6 +121,12 @@
                 {{ image.status === 'uploaded' ? 'Subida' : image.status === 'pending' ? 'Procesando' : 'Error' }}
               </span>
             </div>
+            <button mat-icon-button type="button" class="btn-image-ia"
+                    matTooltip="Fondo blanco con IA"
+                    [disabled]="!canUseImageAi(image)"
+                    (click)="openProductImageAi(image, i)">
+              <mat-icon>auto_fix_high</mat-icon>
+            </button>
             <button mat-icon-button matTooltip="Eliminar imagen" color="warn" type="button"
                     (click)="deleteImage(image)">
               <mat-icon>delete</mat-icon>

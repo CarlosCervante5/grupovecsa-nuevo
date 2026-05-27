@@ -11,7 +11,9 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
+import { ImageAiDialogComponent } from 'src/app/shared/components/image-ai-dialog/image-ai-dialog.component';
 
 import { BoutiqueAdminProductService } from '../../services/boutique-admin-product.service';
 import { BoutiqueAdminCategoryService } from '../../services/boutique-admin-category.service';
@@ -40,6 +42,7 @@ import { reload } from '@helpers/session.helper';
     MatSnackBarModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
+    MatDialogModule,
   ],
   templateUrl: './product-form.component.html',
   styleUrls: ['./product-form.component.css']
@@ -65,7 +68,8 @@ export class ProductFormComponent implements OnInit {
     private _productService: BoutiqueAdminProductService,
     private _categoryService: BoutiqueAdminCategoryService,
     private _dealershipService: BoutiqueAdminDealershipService,
-    private _snackBar: MatSnackBar
+    private _snackBar: MatSnackBar,
+    private _dialog: MatDialog,
   ) {}
 
   ngOnInit(): void {
@@ -289,6 +293,33 @@ export class ProductFormComponent implements OnInit {
         if (error.error?.message) {
           this.showSnackBar(error.error.message, true);
         }
+      }
+    });
+  }
+
+  canUseImageAi(image: BoutiqueProductImage): boolean {
+    return image.status === 'uploaded' && !!image.uuid && !!image.image_path;
+  }
+
+  openProductImageAi(image: BoutiqueProductImage, index: number): void {
+    if (!this.canUseImageAi(image)) {
+      this.showSnackBar('La imagen debe estar subida antes de usar IA.', true);
+      return;
+    }
+    const ref = this._dialog.open(ImageAiDialogComponent, {
+      width: '640px',
+      maxWidth: '95vw',
+      data: {
+        sourceUrl: image.image_path,
+        targetType: 'boutique_product_image',
+        targetUuid: image.uuid,
+        title: 'Fondo blanco — foto del producto',
+      },
+    });
+    ref.afterClosed().subscribe((result) => {
+      if (result?.saved && result.imageUrl) {
+        this.images[index].image_path = result.imageUrl;
+        this.showSnackBar('Imagen del producto actualizada');
       }
     });
   }
