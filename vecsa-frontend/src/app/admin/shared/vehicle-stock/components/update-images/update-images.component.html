@@ -15,6 +15,9 @@
                     <b>Url:</b> {{ image.path_public }}
                 </div>
                 <div class="trash-content">
+                    <button type="button" class="btn btn-sm btn-outline-primary me-2" (click)="openImageAi(image, i)" title="Editar con IA">
+                        <i class="fas fa-wand-magic-sparkles"></i> IA
+                    </button>
                     <i class="fas fa-solid fa-trash trash" (click)="deleteimage(image.id, i)"></i>
                 </div>
             </div>

@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Settings;
 use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Models\SystemSetting;
+use App\Services\Media\ImageAiProcessingService;
+use App\Support\BoutiqueCheckoutLegalPages;
 use App\Support\BoutiqueCheckoutPaymentMethods;
 use Illuminate\Http\Request;
 
@@ -361,8 +363,57 @@ class SettingsController extends Controller
     }
 
     /**
-     * Admin tienda: datos bancarios para transferencia en checkout boutique.
+     * Admin tienda: rutas/URLs de condiciones, privacidad y devoluciones en el checkout boutique.
      */
+    public function updateBoutiqueCheckoutLegalPages(Request $request)
+    {
+        try {
+            $data = $request->validate([
+                'boutique_checkout_legal_terms_url' => 'nullable|string|max:500',
+                'boutique_checkout_legal_privacy_url' => 'nullable|string|max:500',
+                'boutique_checkout_legal_returns_url' => 'nullable|string|max:500',
+            ]);
+
+            $map = [
+                'boutique_checkout_legal_terms_url' => BoutiqueCheckoutLegalPages::SETTING_TERMS,
+                'boutique_checkout_legal_privacy_url' => BoutiqueCheckoutLegalPages::SETTING_PRIVACY,
+                'boutique_checkout_legal_returns_url' => BoutiqueCheckoutLegalPages::SETTING_RETURNS,
+            ];
+
+            foreach ($map as $inputKey => $settingKey) {
+                if (! array_key_exists($inputKey, $data)) {
+                    continue;
+                }
+                $trim = trim((string) ($data[$inputKey] ?? ''));
+                if ($trim === '') {
+                    SystemSetting::set($settingKey, '');
+
+                    continue;
+                }
+                if (! BoutiqueCheckoutLegalPages::isAllowedUrl($trim)) {
+                    return ApiResponseHelper::apiError(
+                        "URL o ruta no válida en {$inputKey}. Usa una ruta que empiece con / (ej. /condiciones-uso) o una URL https:// completa.",
+                        null,
+                        422,
+                        'INVALID_LEGAL_PAGE_URL'
+                    );
+                }
+                $normalized = str_starts_with($trim, 'http') ? $trim : (str_starts_with($trim, '/') ? $trim : '/'.$trim);
+                SystemSetting::set($settingKey, $normalized);
+            }
+
+            return ApiResponseHelper::apiSuccess(
+                200,
+                'Enlaces legales del checkout actualizados',
+                BoutiqueCheckoutPaymentMethods::adminConfigPayload()
+            );
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al guardar enlaces legales', $e->getMessage(), 500);
+        }
+    }
+
     public function updateBoutiqueTransferBankDetails(Request $request)
     {
         try {
@@ -411,6 +462,71 @@ class SettingsController extends Controller
             return ApiResponseHelper::apiSuccess(200, 'Tipos de embalaje boutique', ['types' => $types]);
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al leer tipos de embalaje', $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Gemini API (Google AI Studio) — edición de fotos vehículos / boutique vía Gemini.
+     */
+    public function geminiImageAi(Request $request)
+    {
+        try {
+            $rawKey = trim((string) SystemSetting::getEncrypted('gemini_api_key', ''));
+
+            return ApiResponseHelper::apiSuccess(200, 'Configuración Gemini — edición de fotos', [
+                'gemini_api_key' => $rawKey !== '' ? $this->mask($rawKey) : '',
+                'gemini_image_model' => SystemSetting::get('gemini_image_model', ''),
+                'image_ai_enabled' => filter_var(SystemSetting::get('image_ai_enabled', '1'), FILTER_VALIDATE_BOOLEAN),
+                'default_model_hint' => ImageAiProcessingService::DEFAULT_IMAGE_MODEL,
+                'configured' => $rawKey !== '',
+            ]);
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al obtener la configuración de Gemini', $e->getMessage(), 500);
+        }
+    }
+
+    public function updateGeminiImageAi(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'gemini_api_key' => 'nullable|string|max:512',
+                'gemini_image_model' => 'nullable|string|max:160',
+                'image_ai_enabled' => 'sometimes|boolean',
+            ]);
+
+            if (array_key_exists('image_ai_enabled', $validated)) {
+                SystemSetting::set('image_ai_enabled', ! empty($validated['image_ai_enabled']) ? '1' : '0');
+            }
+
+            if (array_key_exists('gemini_image_model', $validated)) {
+                $model = trim((string) $validated['gemini_image_model']);
+                if ($model !== '' && ! preg_match('/^[a-zA-Z0-9._\-]+$/', $model)) {
+                    return response()->json([
+                        'status' => 422,
+                        'message' => 'Error de validación',
+                        'errors' => ['gemini_image_model' => ['El nombre del modelo tiene caracteres no permitidos']],
+                    ], 422);
+                }
+                SystemSetting::set('gemini_image_model', $model);
+            }
+
+            $key = $request->input('gemini_api_key');
+            if ($key !== null && $key !== '' && ! str_starts_with((string) $key, '•••')) {
+                if (strlen((string) $key) < 20) {
+                    return response()->json([
+                        'status' => 422,
+                        'message' => 'Error de validación',
+                        'errors' => ['gemini_api_key' => ['La llave API parece inválida (demasiado corta)']],
+                    ], 422);
+                }
+                SystemSetting::setEncrypted('gemini_api_key', trim((string) $key));
+            }
+
+            return ApiResponseHelper::apiSuccess(200, 'Configuración Gemini actualizada');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al actualizar Gemini', $e->getMessage(), 500);
         }
     }
 

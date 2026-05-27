@@ -13,6 +13,7 @@ import { MatInputModule } from "@angular/material/input";
 import { UpdateUserComponent } from './components/update-user/update-user.component';
 import { AdminLayoutComponent } from './pages/layout/admin-layout.component';
 import { ExperienceStoriesSharedModule } from '../shared/experience-stories/experience-stories-shared.module';
+import { AssistantChatsSharedModule } from '../shared/assistant-chats/assistant-chats-shared.module';
 import { VehicleStockModule } from '../shared/vehicle-stock/vehicle-stock.module';
 import { BenchmarkModule } from '../shared/benchmark/benchmark.module';
 import { AdminManualsComponent } from './pages/manuales/admin-manuals.component';
@@ -41,6 +42,7 @@ import { AdminDealershipsComponent } from './pages/admin-dealerships/admin-deale
         MatInputModule,
         FormsModule,
         ExperienceStoriesSharedModule,
+        AssistantChatsSharedModule,
         VehicleStockModule,
         BenchmarkModule,
     ]

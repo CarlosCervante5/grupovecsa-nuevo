@@ -1,4 +1,6 @@
 import { Component, OnInit, AfterViewInit, ElementRef, ViewChild, OnDestroy } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { ImageAiDialogComponent } from 'src/app/shared/components/image-ai-dialog/image-ai-dialog.component';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/auth/services/auth.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -159,6 +161,18 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   checkoutPayTransferencia = true;
   checkoutPaySucursal = true;
 
+  /** Formulario admin: rutas/URLs de avisos legales del checkout (vacío = usar defecto del sistema). */
+  checkoutLegalFormTermsUrl = '';
+  checkoutLegalFormPrivacyUrl = '';
+  checkoutLegalFormReturnsUrl = '';
+  /** URLs efectivas mostradas al cliente (solo referencia en el panel). */
+  checkoutLegalEffectiveTerms = '';
+  checkoutLegalEffectivePrivacy = '';
+  checkoutLegalEffectiveReturns = '';
+  checkoutLegalPagesSaving = false;
+  checkoutLegalPagesSuccess = '';
+  checkoutLegalPagesError = '';
+
   boutiqueDealershipRows: {
     id: number;
     name: string;
@@ -210,6 +224,7 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     private storeService: StoreService,
     private http: HttpClient,
     private auth: AuthService,
+    private dialog: MatDialog,
   ) {}
 
   ngOnInit(): void {
@@ -1321,6 +1336,35 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  openProductImageAi(img: { uuid?: string; image_path?: string }): void {
+    const uuid = String(img?.uuid ?? '').trim();
+    const sourceUrl = String(img?.image_path ?? '').trim();
+    if (!uuid || !sourceUrl) {
+      this.productSaveError = 'La imagen debe estar subida antes de usar IA.';
+      return;
+    }
+    const ref = this.dialog.open(ImageAiDialogComponent, {
+      width: '640px',
+      maxWidth: '95vw',
+      data: {
+        sourceUrl,
+        targetType: 'boutique_product_image',
+        targetUuid: uuid,
+        title: 'Mejorar foto del producto',
+      },
+    });
+    ref.afterClosed().subscribe((result) => {
+      if (result?.saved && result.imageUrl && this.selectedProduct?.images) {
+        const idx = this.selectedProduct.images.findIndex((i: { uuid?: string }) => i.uuid === uuid);
+        if (idx >= 0) {
+          this.selectedProduct.images[idx].image_path = result.imageUrl;
+        }
+        this.productSaveSuccess = 'Imagen del producto actualizada con IA';
+        setTimeout(() => (this.productSaveSuccess = ''), 4000);
+      }
+    });
+  }
+
   uploadProductImage(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (!input.files?.length || !this.selectedProduct?.uuid) return;
@@ -1666,6 +1710,18 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
           this.transferAccountNumber = tb.account_number || '';
           this.transferInstructions = tb.instructions || '';
         }
+        const inputs = d.legal_pages_inputs as Record<string, string> | undefined;
+        if (inputs && typeof inputs === 'object') {
+          this.checkoutLegalFormTermsUrl = String(inputs.boutique_checkout_legal_terms_url ?? '');
+          this.checkoutLegalFormPrivacyUrl = String(inputs.boutique_checkout_legal_privacy_url ?? '');
+          this.checkoutLegalFormReturnsUrl = String(inputs.boutique_checkout_legal_returns_url ?? '');
+        }
+        const lp = d.legal_pages as { terms_url?: string; privacy_url?: string; returns_url?: string } | undefined;
+        if (lp && typeof lp === 'object') {
+          this.checkoutLegalEffectiveTerms = String(lp.terms_url ?? '');
+          this.checkoutLegalEffectivePrivacy = String(lp.privacy_url ?? '');
+          this.checkoutLegalEffectiveReturns = String(lp.returns_url ?? '');
+        }
         this.checkoutPayLoading = false;
       },
       error: (err: any) => {
@@ -1709,6 +1765,36 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
         error: (err: any) => {
           this.transferBankError = err?.error?.message || 'Error al guardar datos bancarios';
           this.transferBankSaving = false;
+        },
+      });
+  }
+
+  saveCheckoutLegalPages(): void {
+    this.checkoutLegalPagesSaving = true;
+    this.checkoutLegalPagesError = '';
+    this.checkoutLegalPagesSuccess = '';
+    this.storeService
+      .updateCheckoutLegalPages({
+        boutique_checkout_legal_terms_url: this.checkoutLegalFormTermsUrl.trim(),
+        boutique_checkout_legal_privacy_url: this.checkoutLegalFormPrivacyUrl.trim(),
+        boutique_checkout_legal_returns_url: this.checkoutLegalFormReturnsUrl.trim(),
+      })
+      .subscribe({
+        next: () => {
+          this.checkoutLegalPagesSuccess = 'Enlaces legales del checkout guardados';
+          this.checkoutLegalPagesSaving = false;
+          this.loadCheckoutPaymentMethodsConfig();
+          setTimeout(() => (this.checkoutLegalPagesSuccess = ''), 4000);
+        },
+        error: (err: any) => {
+          const e = err?.error;
+          const msg =
+            e?.error_code === 'INVALID_LEGAL_PAGE_URL'
+              ? String(e?.message || 'URL o ruta no válida. Usa una ruta que empiece con / o una URL https completa.')
+              : String(e?.message || 'Error al guardar enlaces legales');
+          this.checkoutLegalPagesError = msg;
+          this.checkoutLegalPagesSaving = false;
+          this.loadCheckoutPaymentMethodsConfig();
         },
       });
   }

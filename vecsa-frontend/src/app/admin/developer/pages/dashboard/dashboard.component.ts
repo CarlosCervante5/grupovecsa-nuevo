@@ -84,6 +84,15 @@ export class DeveloperDashboardComponent implements OnInit, AfterViewInit, OnDes
   openpayError = '';
   openpaySuccess = '';
 
+  /** Gemini API (Google AI Studio) — edición de fotos con IA. */
+  geminiAiConfig: Record<string, unknown> = {};
+  geminiAiFeatureEnabled = true;
+  geminiAiDefaultModelHint = 'gemini-3.1-flash-image-preview';
+  geminiAiLoading = false;
+  geminiAiSaving = false;
+  geminiAiError = '';
+  geminiAiSuccess = '';
+
   stats: { label: string; value: string | number; icon: string; color: string; loading: boolean }[] = [
     { label: 'Vehículos publicados', value: '—', icon: 'directions_car', color: '#1c69d4', loading: true },
     { label: 'Productos Boutique', value: '—', icon: 'inventory_2', color: '#7c3aed', loading: true },
@@ -554,6 +563,8 @@ export class DeveloperDashboardComponent implements OnInit, AfterViewInit, OnDes
       this.loadStripeConfig();
     } else if (key === 'openpay_config') {
       this.loadOpenpayConfig();
+    } else if (key === 'gemini_ai_config') {
+      this.loadGeminiAiConfig();
     } else {
       this.loadData();
       if (key === 'users' && this.dealershipOptions.length === 0) {
@@ -1098,6 +1109,61 @@ export class DeveloperDashboardComponent implements OnInit, AfterViewInit, OnDes
 
   toggleOpenpayPasarela(): void {
     this.openpayPasarelaEnabled = !this.openpayPasarelaEnabled;
+  }
+
+  loadGeminiAiConfig(): void {
+    this.geminiAiLoading = true;
+    this.geminiAiError = '';
+    this.geminiAiSuccess = '';
+    this.crud.fetch('settings/gemini_image_ai', 'POST', {}).subscribe({
+      next: (res: any) => {
+        const d = res?.data || {};
+        this.geminiAiConfig = { ...d };
+        this.geminiAiFeatureEnabled = d.image_ai_enabled !== false;
+        if (typeof d.default_model_hint === 'string') {
+          this.geminiAiDefaultModelHint = d.default_model_hint;
+        }
+        this.geminiAiLoading = false;
+      },
+      error: (err: any) => {
+        this.geminiAiError = err?.error?.message || 'Error al cargar Gemini';
+        this.geminiAiLoading = false;
+      },
+    });
+  }
+
+  saveGeminiAiConfig(): void {
+    this.geminiAiSaving = true;
+    this.geminiAiError = '';
+    this.geminiAiSuccess = '';
+    const payload: Record<string, unknown> = {
+      image_ai_enabled: this.geminiAiFeatureEnabled,
+    };
+    const model = String(this.geminiAiConfig['gemini_image_model'] ?? '').trim();
+    payload['gemini_image_model'] = model;
+    const rawKey = String(this.geminiAiConfig['gemini_api_key'] ?? '').trim();
+    if (rawKey && !rawKey.startsWith('••')) {
+      payload['gemini_api_key'] = rawKey;
+    }
+    this.crud.fetch('settings/gemini_image_ai/update', 'POST', payload).subscribe({
+      next: () => {
+        this.geminiAiSuccess = 'Configuración Gemini guardada';
+        this.geminiAiSaving = false;
+        this.loadGeminiAiConfig();
+        setTimeout(() => (this.geminiAiSuccess = ''), 4000);
+      },
+      error: (err: any) => {
+        const errors = err?.error?.errors;
+        this.geminiAiError = errors
+          ? ([] as string[]).concat(...(Object.values(errors) as string[][])).join(', ')
+          : err?.error?.message || 'Error al guardar';
+        this.geminiAiSaving = false;
+      },
+    });
+  }
+
+  toggleGeminiAiFeature(): void {
+    this.geminiAiFeatureEnabled = !this.geminiAiFeatureEnabled;
   }
 
   get benchmarkPanelUrl(): string {

@@ -3,7 +3,8 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "build": "vite build"
+        "build": "vite build",
+        "gantt:sync": "node ../scripts/sync-gantt-tasks.mjs"
     },
     "devDependencies": {
         "axios": "^1.6.4",

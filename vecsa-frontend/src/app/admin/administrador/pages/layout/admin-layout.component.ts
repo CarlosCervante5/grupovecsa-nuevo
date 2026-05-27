@@ -31,6 +31,11 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
       icon: 'cloud_download',
       route: '/admin/administrator/experience-wordpress',
     },
+    {
+      label: 'Chats asistente',
+      icon: 'forum',
+      route: '/admin/administrator/assistant-chats',
+    },
   ];
 
   dynamicItems: { label: string; icon: string; route: string }[] = [];

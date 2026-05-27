@@ -11,12 +11,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 import { environment } from '@environments/environment';
 import { BoutiqueCartService } from '../../services/boutique-cart.service';
 import { BoutiqueCheckoutService } from '../../services/boutique-checkout.service';
 import {
   BoutiqueCart,
+  BoutiqueCheckoutLegalPagesPayload,
   BoutiqueOpenPayPublicConfig,
   BoutiquePaymentMethodsPublicPayload,
   BoutiqueTransferBankDetails,
@@ -52,6 +54,7 @@ interface Dealership extends BoutiqueDealershipContact {
     MatSnackBarModule,
     MatRadioModule,
     MatSelectModule,
+    MatCheckboxModule,
     OpenpayPaymentComponent,
   ],
   templateUrl: './checkout.component.html',
@@ -90,6 +93,16 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   /** OpenPay visible solo si el backend expone merchant + llave pública para el modo actual. */
   openPayAvailable = false;
   openPayPublicConfig: BoutiqueOpenPayPublicConfig | null = null;
+
+  /** Obligatorio para confirmar pedido o usar WhatsApp de ventas. */
+  acceptCheckoutTerms = false;
+
+  /** Enlaces del aviso legal (admin tienda o rutas por defecto). */
+  checkoutLegalPages: BoutiqueCheckoutLegalPagesPayload = {
+    terms_url: '/condiciones-uso',
+    privacy_url: '/aviso-privacidad',
+    returns_url: '/politicas-devolucion',
+  };
 
   // Order creation
   creatingOrder = false;
@@ -180,6 +193,14 @@ export class CheckoutComponent implements OnInit, OnDestroy {
           this.openPayPublicConfig = null;
           this.openPayAvailable = false;
         }
+        const lp = d?.legal_pages;
+        if (lp) {
+          this.checkoutLegalPages = {
+            terms_url: (lp.terms_url || '').trim() || '/condiciones-uso',
+            privacy_url: (lp.privacy_url || '').trim() || '/aviso-privacidad',
+            returns_url: (lp.returns_url || '').trim() || '/politicas-devolucion',
+          };
+        }
         this.ensureValidSelectedPaymentMethod();
       },
       error: () => this.applyPaymentMethodsFallback(),
@@ -193,7 +214,17 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     this.sucursalAvailable = true;
     this.openPayAvailable = false;
     this.openPayPublicConfig = null;
+    this.checkoutLegalPages = {
+      terms_url: '/condiciones-uso',
+      privacy_url: '/aviso-privacidad',
+      returns_url: '/politicas-devolucion',
+    };
     this.ensureValidSelectedPaymentMethod();
+  }
+
+  /** Enlace absoluto (https) vs ruta SPA para mat-checkbox / enlaces legales. */
+  isExternalLegalUrl(url: string): boolean {
+    return /^https?:\/\//i.test(String(url || '').trim());
   }
 
   private ensureValidSelectedPaymentMethod(): void {
@@ -247,6 +278,9 @@ export class CheckoutComponent implements OnInit, OnDestroy {
         return false;
       }
     } else if (!this.selectedDealership) {
+      return false;
+    }
+    if (!this.acceptCheckoutTerms) {
       return false;
     }
     return true;
@@ -404,11 +438,13 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
   openSalesWhatsApp(): void {
     if (!this.canContactSalesWhatsApp) {
-      this.snackBar.open(
-        'Completa tus datos y la entrega antes de contactar a ventas.',
-        'Cerrar',
-        { duration: 5000 },
-      );
+      const msg =
+        !this.cart?.items?.length || !this.guestConfirmed
+          ? 'Completa tus datos y la entrega antes de contactar a ventas.'
+          : !this.acceptCheckoutTerms
+            ? 'Para continuar debes leer y aceptar los términos y avisos legales.'
+            : 'Completa tus datos y la entrega antes de contactar a ventas.';
+      this.snackBar.open(msg, 'Cerrar', { duration: 5000 });
       return;
     }
     const phone = resolveBoutiqueSalesWhatsAppPhone({
@@ -496,11 +532,16 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
     if (!this.paymentMethod) return false;
     if (!this.hasAnyPaymentMethod || !this.selectedPaymentMethodAllowed()) return false;
+    if (!this.acceptCheckoutTerms) return false;
     return true;
   }
 
   confirmOrder(): void {
     if (!this.canConfirm || this.creatingOrder) return;
+    if (!this.acceptCheckoutTerms) {
+      this.snackBar.open('Debes aceptar los términos para confirmar tu pedido.', 'Cerrar', { duration: 5000 });
+      return;
+    }
     if (
       this.paymentMethod === 'openpay' &&
       (!this.openPayPublicConfig?.merchant_id || !this.openPayPublicConfig?.public_key)

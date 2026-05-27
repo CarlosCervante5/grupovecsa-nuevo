@@ -7,6 +7,13 @@ export interface BoutiqueOpenPayPublicConfig {
   available: boolean;
 }
 
+/** Enlaces efectivos del checkbox legal del checkout (rutas internas o URLs absolutas). */
+export interface BoutiqueCheckoutLegalPagesPayload {
+  terms_url: string;
+  privacy_url: string;
+  returns_url: string;
+}
+
 /** Respuesta de POST /api/boutique/checkout/payment_methods_public */
 export interface BoutiquePaymentMethodsPublicPayload {
   methods: {
@@ -17,6 +24,7 @@ export interface BoutiquePaymentMethodsPublicPayload {
   };
   openpay: BoutiqueOpenPayPublicConfig;
   transfer_bank?: BoutiqueTransferBankDetails;
+  legal_pages?: BoutiqueCheckoutLegalPagesPayload;
 }
 
 export interface BoutiqueTransferBankDetails {

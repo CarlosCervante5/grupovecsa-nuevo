@@ -13,6 +13,7 @@ import { HomeTestimonialsComponent } from './pages/home-testimonials/home-testim
 import { BoutiqueBannersComponent } from './pages/boutique-banners/boutique-banners.component';
 import { MarketingLayoutComponent } from './pages/layout/marketing-layout.component';
 import { ExperienceStoriesSharedModule } from '../shared/experience-stories/experience-stories-shared.module';
+import { AssistantChatsSharedModule } from '../shared/assistant-chats/assistant-chats-shared.module';
 import { VehicleStockModule } from '../shared/vehicle-stock/vehicle-stock.module';
 import { BenchmarkModule } from '../shared/benchmark/benchmark.module';
 
@@ -34,6 +35,7 @@ import { BenchmarkModule } from '../shared/benchmark/benchmark.module';
     ReactiveFormsModule,
     SkCubeComponent,
     ExperienceStoriesSharedModule,
+    AssistantChatsSharedModule,
     VehicleStockModule,
     BenchmarkModule,
   ],

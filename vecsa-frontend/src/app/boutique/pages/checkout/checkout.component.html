@@ -398,6 +398,36 @@
           <span>{{ total | currency:'MXN':'symbol-narrow' }}</span>
         </div>
 
+        <div class="checkout-terms">
+          <mat-checkbox
+            [(ngModel)]="acceptCheckoutTerms"
+            color="primary"
+            class="checkout-terms-checkbox"
+          >
+            <span class="checkout-terms-label">
+              He leído y acepto las
+              @if (isExternalLegalUrl(checkoutLegalPages.terms_url)) {
+                <a [href]="checkoutLegalPages.terms_url" target="_blank" rel="noopener noreferrer">condiciones de uso</a>
+              } @else {
+                <a [routerLink]="checkoutLegalPages.terms_url" target="_blank" rel="noopener noreferrer">condiciones de uso</a>
+              },
+              el
+              @if (isExternalLegalUrl(checkoutLegalPages.privacy_url)) {
+                <a [href]="checkoutLegalPages.privacy_url" target="_blank" rel="noopener noreferrer">aviso de privacidad</a>
+              } @else {
+                <a [routerLink]="checkoutLegalPages.privacy_url" target="_blank" rel="noopener noreferrer">aviso de privacidad</a>
+              }
+              y las
+              @if (isExternalLegalUrl(checkoutLegalPages.returns_url)) {
+                <a [href]="checkoutLegalPages.returns_url" target="_blank" rel="noopener noreferrer">políticas de devolución</a>
+              } @else {
+                <a [routerLink]="checkoutLegalPages.returns_url" target="_blank" rel="noopener noreferrer">políticas de devolución</a>
+              }
+              aplicables a la Boutique VECSA.
+            </span>
+          </mat-checkbox>
+        </div>
+
         @if (showSalesWhatsAppCta && !hasAnyPaymentMethod) {
           <button
             type="button"

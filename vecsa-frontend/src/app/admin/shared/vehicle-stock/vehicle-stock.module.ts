@@ -6,6 +6,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { AngularMaterialModule } from '../../../angular-material/angular-material.module';
 import { AdminModule } from '../../admin.module';
 import { SkCubeComponent } from '@components/sk-cube/sk-cube.component';
+import { ImageAiDialogComponent } from 'src/app/shared/components/image-ai-dialog/image-ai-dialog.component';
 import { VehiclesComponent } from './pages/vehicles/vehicles.component';
 import { LoadImagesComponent } from './components/load-images/load-images.component';
 import { UpdateImagesComponent } from './components/update-images/update-images.component';
@@ -31,6 +32,7 @@ import { AVehicleComponent } from './components/a-vehicle/a-vehicle.component';
     AdminModule,
     DragDropModule,
     SkCubeComponent,
+    ImageAiDialogComponent,
   ],
   exports: [VehiclesComponent],
 })
