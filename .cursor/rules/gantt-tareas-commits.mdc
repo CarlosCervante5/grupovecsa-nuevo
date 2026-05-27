@@ -1,0 +1,32 @@
+---
+description: Tareas Gantt y formato de commits con issues de GitHub
+globs:
+alwaysApply: true
+---
+
+# Gantt — tareas y commits (Cursor IDE)
+
+## Antes de implementar
+
+1. Ejecutar `npm run gantt:sync` (con `GANTT_API_URL` y `GANTT_GITHUB_USER`).
+2. Leer `.gantt/TAREAS.md` para ver tareas asignadas a este repo y sus números de issue.
+
+## Convención de commits
+
+| Acción | Formato |
+|--------|---------|
+| Avance (+10% por commit que mencione el issue) | `descripción #N` |
+| Tarea terminada (100%, en rama producción: main, etc.) | `gantt:done #N: descripción` |
+
+El porcentaje del proyecto en Gantt sube con commits que incluyen `#N`. Solo llega a 100% con `gantt:done #N` en producción.
+
+## Al commitear cambios del agente
+
+- Usar el issue de la tarea en curso (p. ej. `#1`).
+- Si el usuario indica tarea activa, respetar `.gantt/active-task.json`.
+- Generar mensaje: `node scripts/gantt-commit-msg.mjs --summary '...' --issue N`
+- Al cerrar tarea en producción: añadir `--done`.
+
+## Ejemplo en chat
+
+> Lee `.gantt/TAREAS.md`. Estoy en la tarea #1. Implementa [cambio] y al commitear usa `#1` o `gantt:done #1` si terminamos en main.
