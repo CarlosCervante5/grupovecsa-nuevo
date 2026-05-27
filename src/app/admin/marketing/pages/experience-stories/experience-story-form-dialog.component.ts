@@ -9,7 +9,7 @@ import {
   ExperienceStoryPostTypeOption,
   ExperienceStoryRow,
 } from '@services/experience-stories-admin.service';
-import { IMAGE_UPLOAD_ACCEPT } from '@shared/constants/image-upload';
+import { IMAGE_UPLOAD_ACCEPT } from '../../../../shared/constants/image-upload';
 
 export interface ExperienceStoryFormDialogData {
   editing: ExperienceStoryRow | null;
