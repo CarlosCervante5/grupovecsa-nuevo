@@ -206,10 +206,9 @@ export class UpdateUserComponent implements OnDestroy {
                 this._bottomSheetRef.dismiss({ reload: true });
             },
             error: (error) => {
-                const validation = error?.error?.errors;
-                const detail = validation
-                    ? Object.values(validation).flat().join('\n')
-                    : (error?.error?.message || 'No se pudo actualizar el usuario.');
+                const detail = this.formatValidationErrors(error?.error?.errors)
+                    || error?.error?.message
+                    || 'No se pudo actualizar el usuario.';
                 Swal.fire({
                     icon: 'error',
                     title: 'Error al actualizar',
@@ -236,5 +235,20 @@ export class UpdateUserComponent implements OnDestroy {
                 this.dealership = response.data ?? [];
             },
         });
+    }
+
+    private formatValidationErrors(errors: unknown): string {
+        if (!errors || typeof errors !== 'object') {
+            return '';
+        }
+        const messages: string[] = [];
+        for (const value of Object.values(errors as Record<string, unknown>)) {
+            if (Array.isArray(value)) {
+                value.forEach((msg) => messages.push(String(msg)));
+            } else if (value != null) {
+                messages.push(String(value));
+            }
+        }
+        return messages.join('\n');
     }
 }
