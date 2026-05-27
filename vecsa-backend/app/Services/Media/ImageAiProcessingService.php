@@ -27,16 +27,21 @@ final class ImageAiProcessingService
     /**
      * @return array{processed_base64: string, mime_type: string, public_id: null}
      */
-    public function process(string $sourceUrl, string $action): array
+    /**
+     * @param  'vehicle'|'product'  $context
+     */
+    public function process(string $sourceUrl, string $action, string $context = 'vehicle'): array
     {
         if (! $this->isConfigured()) {
             throw new \RuntimeException('No hay llave API de Gemini configurada. Configúrala en Panel desarrollo → Gemini (edición de fotos).');
         }
 
+        $context = $context === 'product' ? 'product' : 'vehicle';
+
         [$body, $headerMime] = $this->downloadSourceImage($sourceUrl);
         $mime = $this->normalizeImageMime($headerMime, $sourceUrl);
         $b64Input = base64_encode($body);
-        $payload = $this->buildGeminiPayload($mime, $b64Input, $action);
+        $payload = $this->buildGeminiPayload($mime, $b64Input, $action, $context);
 
         $lastHint = '';
         foreach ($this->modelCandidates() as $model) {
@@ -259,12 +264,16 @@ final class ImageAiProcessingService
     /**
      * @return array<string, mixed>
      */
-    private function buildGeminiPayload(string $mime, string $b64Input, string $action): array
+    /**
+     * @param  'vehicle'|'product'  $context
+     * @return array<string, mixed>
+     */
+    private function buildGeminiPayload(string $mime, string $b64Input, string $action, string $context): array
     {
         return [
             'systemInstruction' => [
                 'parts' => [
-                    ['text' => $this->systemInstructionForVehicleEdit()],
+                    ['text' => $this->systemInstructionForEdit($context)],
                 ],
             ],
             'contents' => [
@@ -276,7 +285,7 @@ final class ImageAiProcessingService
                                 'data' => $b64Input,
                             ],
                         ],
-                        ['text' => $this->promptForAction($action)],
+                        ['text' => $this->promptForAction($action, $context)],
                     ],
                 ],
             ],
@@ -287,8 +296,23 @@ final class ImageAiProcessingService
         ];
     }
 
-    private function systemInstructionForVehicleEdit(): string
+    /**
+     * @param  'vehicle'|'product'  $context
+     */
+    private function systemInstructionForEdit(string $context): string
     {
+        if ($context === 'product') {
+            return <<<'TEXT'
+You are a conservative e-commerce product photo retoucher. You edit photographs; you never synthesize a new product.
+
+Hard rules:
+- The product in the output must be the same item as in the input photograph.
+- Never invent, add, complete, or "fix" parts, labels, tags, packaging, logos, or accessories.
+- Do not add price tags, brand labels, extra items, mannequin parts, or props unless they are clearly and fully visible in the input.
+- Only background pixels may be replaced. Product pixels stay faithful to the source.
+TEXT;
+        }
+
         return <<<'TEXT'
 You are a conservative automotive inventory photo retoucher. You edit photographs; you never synthesize a new vehicle.
 
@@ -301,8 +325,32 @@ Hard rules:
 TEXT;
     }
 
-    private function promptForAction(string $action): string
+    /**
+     * @param  'vehicle'|'product'  $context
+     */
+    private function promptForAction(string $action, string $context): string
     {
+        if ($context === 'product') {
+            return <<<'PROMPT'
+Using the photograph above (the only source of truth), produce ONE edited version.
+
+ALLOWED:
+1. Replace the background with pure seamless white (#FFFFFF) studio backdrop.
+2. Subtle catalog lighting on the existing product only: light exposure/white-balance correction, soft contact shadow if appropriate. No relighting that changes how the product looks.
+
+ZERO INVENTION — do not add anything not in the photo:
+- No new labels, tags, logos, packaging, strings, hangers, mannequin limbs, or extra items.
+- No "cleaning up" edges by drawing new product details.
+- If something is absent, cropped, or unclear in the input, leave it absent or unclear. Do not guess.
+
+PRESERVE EXACTLY:
+- Same product identity, colors, materials, textures, shape, angle, framing, scale, wrinkles, seams, and all visible branding that exists in the input.
+- Do not change the product type or generate a different item.
+
+Output: one photorealistic catalog photo. Background white; product unchanged except subtle light correction.
+PROMPT;
+        }
+
         return <<<'PROMPT'
 Using the photograph above (the only source of truth), produce ONE edited version.
 

@@ -58,6 +58,13 @@
   color: #f9fafb;
 }
 
+.section-hint {
+  margin: -12px 0 16px;
+  font-size: 0.8125rem;
+  color: #9ca3af;
+  line-height: 1.45;
+}
+
 .form-row {
   margin-bottom: 8px;
 }
@@ -192,6 +199,14 @@
 
 .status-failed {
   color: #fca5a5;
+}
+
+.btn-image-ia {
+  color: #93c5fd;
+}
+
+.btn-image-ia:disabled {
+  color: #4b5563;
 }
 
 /* CDK Drag and Drop */

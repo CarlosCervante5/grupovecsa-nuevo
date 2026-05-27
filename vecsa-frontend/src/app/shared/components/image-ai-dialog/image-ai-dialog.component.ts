@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { ImageAiService, ImageAiTargetType } from '../../services/image-ai.service';
+import { ImageAiEditContext, ImageAiService, ImageAiTargetType } from '../../services/image-ai.service';
 
 export interface ImageAiDialogData {
   sourceUrl: string;
@@ -83,6 +83,7 @@ export class ImageAiDialogComponent implements OnInit {
         replace_original: true,
         processed_base64: this.previewBase64,
         processed_mime: this.previewMime,
+        context: this.editContext(),
       })
       .subscribe({
         next: (res) => {
@@ -113,6 +114,7 @@ export class ImageAiDialogComponent implements OnInit {
         source_url: this.data.sourceUrl,
         target_type: 'preview_only',
         replace_original: false,
+        context: this.editContext(),
       })
       .subscribe({
         next: (res) => {
@@ -155,6 +157,10 @@ export class ImageAiDialogComponent implements OnInit {
 
   get canSave(): boolean {
     return !!this.previewBase64 && !!this.data.targetUuid && this.data.targetType !== 'preview_only';
+  }
+
+  private editContext(): ImageAiEditContext {
+    return this.data.targetType === 'boutique_product_image' ? 'product' : 'vehicle';
   }
 
   close(): void {

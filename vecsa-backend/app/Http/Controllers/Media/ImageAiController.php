@@ -57,6 +57,7 @@ class ImageAiController extends Controller
                 'replace_original' => 'nullable|boolean',
                 'processed_base64' => 'nullable|string',
                 'processed_mime' => 'nullable|string|max:128',
+                'context' => ['nullable', 'string', Rule::in(['vehicle', 'product'])],
             ]);
 
             $sourceUrl = trim($data['source_url']);
@@ -73,6 +74,8 @@ class ImageAiController extends Controller
 
             $this->assertTargetAccess($request, $targetType, $data['target_uuid'] ?? null);
 
+            $editContext = $this->resolveEditContext($targetType, $data['context'] ?? null);
+
             $previewBase64 = trim((string) ($data['processed_base64'] ?? ''));
             if (
                 $previewBase64 !== ''
@@ -88,7 +91,7 @@ class ImageAiController extends Controller
                 );
             }
 
-            $aiResult = $this->processing->process($sourceUrl, $data['action']);
+            $aiResult = $this->processing->process($sourceUrl, $data['action'], $editContext);
             $publicId = $aiResult['public_id'] ?? null;
             $mime = (string) ($aiResult['mime_type'] ?? 'image/png');
             $rawBase64 = $aiResult['processed_base64'] ?? null;
@@ -191,6 +194,15 @@ class ImageAiController extends Controller
                 'IMAGE_AI_ERROR'
             );
         }
+    }
+
+    private function resolveEditContext(string $targetType, ?string $explicit): string
+    {
+        if ($explicit === 'product' || $explicit === 'vehicle') {
+            return $explicit;
+        }
+
+        return $targetType === 'boutique_product_image' ? 'product' : 'vehicle';
     }
 
     private function saveFromPreviewBase64(
