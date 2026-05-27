@@ -22,7 +22,7 @@
       }
     </div>
 
-    <p class="image-ai-hint">Genera una vista previa con Gemini; al guardar se sube esa misma imagen vía Cloudinary (como el resto del inventario).</p>
+    <p class="image-ai-hint">Genera una vista previa con Gemini; al guardar se sube esa misma imagen a Cloudinary.</p>
 
     <mat-radio-group [(ngModel)]="selectedAction" class="image-ai-actions" (ngModelChange)="clearPreview()">
       @for (action of actions; track action.id) {
