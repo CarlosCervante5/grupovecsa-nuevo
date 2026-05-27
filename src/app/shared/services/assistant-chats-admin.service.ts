@@ -9,6 +9,10 @@ export interface AssistantChatListRow {
   visitor_name: string;
   visitor_email: string | null;
   page_url: string | null;
+  dealership_id: number | null;
+  dealership_name: string | null;
+  assigned_user_id: number | null;
+  assigned_user_name: string | null;
   messages_count: number;
   last_message_at: string | null;
   created_at: string;

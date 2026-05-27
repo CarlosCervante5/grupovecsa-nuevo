@@ -26,21 +26,44 @@
   </div>
 
   <div class="chat-messages">
-    <div class="chat-welcome" *ngIf="messages.length === 0">
-      <div class="chat-welcome-icon">👋</div>
-      <p>¡Hola! Soy el asistente virtual de Grupo VECSA. ¿En qué puedo ayudarte?</p>
-    </div>
-    <div *ngFor="let msg of messages" class="chat-msg" [class.user]="msg.role === 'user'" [class.assistant]="msg.role === 'assistant'">
-      <div class="chat-bubble">{{ msg.text }}</div>
-    </div>
-    <div class="chat-msg assistant" *ngIf="sending">
-      <div class="chat-bubble chat-typing">
-        <span></span><span></span><span></span>
+    <!-- Paso: elegir sucursal -->
+    <div class="chat-dealership-step" *ngIf="phase === 'dealership'">
+      <div class="chat-welcome-icon">📍</div>
+      <p class="chat-dealership-title">¿Con qué sucursal deseas contactar?</p>
+      <p class="chat-dealership-hint">Te enlazaremos con el equipo de la sucursal que elijas.</p>
+      <div class="chat-dealership-loading" *ngIf="loadingDealerships">Cargando sucursales…</div>
+      <div class="chat-dealership-list" *ngIf="!loadingDealerships">
+        <button
+          type="button"
+          class="chat-dealership-btn"
+          *ngFor="let d of dealerships"
+          (click)="selectDealership(d)"
+        >
+          <span class="chat-dealership-name">{{ d.name }}</span>
+          <span class="chat-dealership-loc" *ngIf="d.location">{{ d.location }}</span>
+        </button>
+        <p class="chat-dealership-empty" *ngIf="dealerships.length === 0">No hay sucursales disponibles.</p>
       </div>
     </div>
+
+    <!-- Paso: conversación -->
+    <ng-container *ngIf="phase === 'chat'">
+      <div class="chat-welcome" *ngIf="messages.length === 0">
+        <div class="chat-welcome-icon">👋</div>
+        <p>¡Hola! Soy el asistente virtual de Grupo VECSA. ¿En qué puedo ayudarte?</p>
+      </div>
+      <div *ngFor="let msg of messages" class="chat-msg" [class.user]="msg.role === 'user'" [class.assistant]="msg.role === 'assistant'">
+        <div class="chat-bubble">{{ msg.text }}</div>
+      </div>
+      <div class="chat-msg assistant" *ngIf="sending">
+        <div class="chat-bubble chat-typing">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+    </ng-container>
   </div>
 
-  <div class="chat-input-area">
+  <div class="chat-input-area" *ngIf="phase === 'chat'">
     <input class="chat-input" type="text" placeholder="Escribe tu mensaje..."
       [(ngModel)]="message" (keyup.enter)="send()" [disabled]="sending" />
     <button class="chat-send" (click)="send()" [disabled]="sending || !message.trim()">

@@ -38,6 +38,8 @@
           <thead>
             <tr>
               <th>Visitante</th>
+              <th>Sucursal</th>
+              <th>Asesor</th>
               <th>Última consulta</th>
               <th>Mensajes</th>
               <th>Última actividad</th>
@@ -58,6 +60,8 @@
                   </span>
                 </div>
               </td>
+              <td>{{ row.dealership_name || '—' }}</td>
+              <td>{{ row.assigned_user_name || '—' }}</td>
               <td class="preview-cell">{{ row.preview || '—' }}</td>
               <td>{{ row.messages_count }}</td>
               <td>{{ formatDate(row.last_message_at) }}</td>
@@ -93,6 +97,14 @@
           <p class="detail-meta" *ngIf="selected.page_url">
             <span class="material-icons">link</span>
             {{ selected.page_url }}
+          </p>
+          <p class="detail-meta" *ngIf="selected.dealership_name">
+            <span class="material-icons">store</span>
+            Sucursal: {{ selected.dealership_name }}
+          </p>
+          <p class="detail-meta" *ngIf="selected.assigned_user_name">
+            <span class="material-icons">person</span>
+            Asesor asignado: {{ selected.assigned_user_name }}
           </p>
           <p class="detail-meta">
             Inicio: {{ formatDate(selected.created_at) }} · Último: {{ formatDate(selected.last_message_at) }}
