@@ -3,14 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatRadioModule } from '@angular/material/radio';
-import { FormsModule } from '@angular/forms';
-import {
-  ImageAiAction,
-  ImageAiActionId,
-  ImageAiService,
-  ImageAiTargetType,
-} from '../../services/image-ai.service';
+import { ImageAiService, ImageAiTargetType } from '../../services/image-ai.service';
 
 export interface ImageAiDialogData {
   sourceUrl: string;
@@ -22,7 +15,7 @@ export interface ImageAiDialogData {
 @Component({
   selector: 'app-image-ai-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatDialogModule, MatButtonModule, MatIconModule, MatRadioModule],
+  imports: [CommonModule, MatDialogModule, MatButtonModule, MatIconModule],
   templateUrl: './image-ai-dialog.component.html',
   styleUrls: ['./image-ai-dialog.component.css'],
 })
@@ -30,8 +23,7 @@ export class ImageAiDialogComponent implements OnInit {
   loadingConfig = true;
   processing = false;
   enabled = false;
-  actions: ImageAiAction[] = [];
-  selectedAction: ImageAiActionId = 'remove_background';
+  private readonly action = 'studio_white' as const;
   previewUrl: string | null = null;
   private previewBase64: string | null = null;
   private previewMime = 'image/jpeg';
@@ -48,10 +40,6 @@ export class ImageAiDialogComponent implements OnInit {
       next: (res) => {
         const cfg = res.data;
         this.enabled = !!cfg?.enabled && !!cfg?.configured;
-        this.actions = cfg?.actions ?? [];
-        if (this.actions.length > 0) {
-          this.selectedAction = this.actions[0].id;
-        }
         this.loadingConfig = false;
       },
       error: () => {
@@ -88,7 +76,7 @@ export class ImageAiDialogComponent implements OnInit {
 
     this.imageAi
       .process({
-        action: this.selectedAction,
+        action: this.action,
         source_url: this.data.sourceUrl,
         target_type: this.data.targetType,
         target_uuid: this.data.targetUuid,
@@ -121,7 +109,7 @@ export class ImageAiDialogComponent implements OnInit {
 
     this.imageAi
       .process({
-        action: this.selectedAction,
+        action: this.action,
         source_url: this.data.sourceUrl,
         target_type: 'preview_only',
         replace_original: false,

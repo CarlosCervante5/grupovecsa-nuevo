@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '@environments/environment';
 
-export type ImageAiActionId = 'remove_background' | 'enhance' | 'studio_white';
+export type ImageAiActionId = 'studio_white';
 
 export type ImageAiTargetType = 'preview_only' | 'vehicle_image' | 'boutique_product_image';
 
