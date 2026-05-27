@@ -29,7 +29,7 @@ class StoreQuizRequest extends FormRequest
             'question_type' => 'required|string|max:255',
             'element_type' => 'nullable|string',
             'group_name' => 'required|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|file|uploadable_image|max:2048',
         ];
     }
 

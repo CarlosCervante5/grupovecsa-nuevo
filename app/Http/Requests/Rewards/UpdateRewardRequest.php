@@ -33,7 +33,7 @@ class UpdateRewardRequest extends FormRequest
             'end_date' => 'nullable|max:255|string',
             'type' => 'nullable|max:255|string',
             'category' => 'nullable|max:255|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,pdf|max:5128',
+            'image' => 'nullable|file|uploadable_image:pdf|max:5128',
         ];
     }
 }

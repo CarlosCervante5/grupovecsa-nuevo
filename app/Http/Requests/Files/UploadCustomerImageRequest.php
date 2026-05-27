@@ -23,7 +23,7 @@ class UploadCustomerImageRequest extends FormRequest
     {
         return [
             'customer_uuid' => 'required|uuid',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,pdf|max:10128',
+            'image' => 'required|file|uploadable_image:pdf|max:10128',
         ];
     }
 }

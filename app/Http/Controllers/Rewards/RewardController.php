@@ -70,7 +70,7 @@ class RewardController extends Controller
 
                 $image = $request->file('image');
 
-                $path = $image->store('temp_images');
+                $path = \App\Support\UploadableImage::storeTemp($image);
 
                 UploadRewardImage::dispatchSync($path, $reward, $image->getClientOriginalName());
             }
@@ -244,7 +244,7 @@ class RewardController extends Controller
 
                 $image = $request->file('image');
 
-                $path = $image->store('temp_images');
+                $path = \App\Support\UploadableImage::storeTemp($image);
 
                 UploadRewardImage::dispatchSync($path, $reward, $image->getClientOriginalName());
             }

@@ -58,13 +58,13 @@ class HomeSlideController extends Controller
 
             if ($request->hasFile('desktop_image')) {
                 $image = $request->file('desktop_image');
-                $path = $image->store('temp_images');
+                $path = \App\Support\UploadableImage::storeTemp($image);
                 UploadHomeSlideImage::dispatch($path, $slide->uuid, 'desktop', $image->getClientOriginalName());
             }
 
             if ($request->hasFile('mobile_image')) {
                 $image = $request->file('mobile_image');
-                $path = $image->store('temp_images');
+                $path = \App\Support\UploadableImage::storeTemp($image);
                 UploadHomeSlideImage::dispatch($path, $slide->uuid, 'mobile', $image->getClientOriginalName());
             }
 
@@ -106,13 +106,13 @@ class HomeSlideController extends Controller
 
             if ($request->hasFile('desktop_image')) {
                 $image = $request->file('desktop_image');
-                $path = $image->store('temp_images');
+                $path = \App\Support\UploadableImage::storeTemp($image);
                 UploadHomeSlideImage::dispatch($path, $slide->uuid, 'desktop', $image->getClientOriginalName());
             }
 
             if ($request->hasFile('mobile_image')) {
                 $image = $request->file('mobile_image');
-                $path = $image->store('temp_images');
+                $path = \App\Support\UploadableImage::storeTemp($image);
                 UploadHomeSlideImage::dispatch($path, $slide->uuid, 'mobile', $image->getClientOriginalName());
             }
 

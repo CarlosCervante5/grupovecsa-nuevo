@@ -51,12 +51,12 @@ class BoutiqueBannerController extends Controller
 
             if ($request->hasFile('desktop_image')) {
                 $image = $request->file('desktop_image');
-                $path = $image->store('temp_images');
+                $path = \App\Support\UploadableImage::storeTemp($image);
                 UploadBoutiqueBannerImage::dispatch($path, $banner->uuid, 'desktop', $image->getClientOriginalName());
             }
             if ($request->hasFile('mobile_image')) {
                 $image = $request->file('mobile_image');
-                $path = $image->store('temp_images');
+                $path = \App\Support\UploadableImage::storeTemp($image);
                 UploadBoutiqueBannerImage::dispatch($path, $banner->uuid, 'mobile', $image->getClientOriginalName());
             }
 
@@ -87,12 +87,12 @@ class BoutiqueBannerController extends Controller
 
             if ($request->hasFile('desktop_image')) {
                 $image = $request->file('desktop_image');
-                $path = $image->store('temp_images');
+                $path = \App\Support\UploadableImage::storeTemp($image);
                 UploadBoutiqueBannerImage::dispatch($path, $banner->uuid, 'desktop', $image->getClientOriginalName());
             }
             if ($request->hasFile('mobile_image')) {
                 $image = $request->file('mobile_image');
-                $path = $image->store('temp_images');
+                $path = \App\Support\UploadableImage::storeTemp($image);
                 UploadBoutiqueBannerImage::dispatch($path, $banner->uuid, 'mobile', $image->getClientOriginalName());
             }
 

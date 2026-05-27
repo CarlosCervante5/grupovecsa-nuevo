@@ -50,7 +50,7 @@ class HomeTestimonialController extends Controller
 
             if ($request->hasFile('image')) {
                 $image = $request->file('image');
-                $path = $image->store('temp_images');
+                $path = \App\Support\UploadableImage::storeTemp($image);
                 UploadHomeTestimonialImage::dispatch($path, $testimonial->uuid, $sort_id, $image->getClientOriginalName());
             }
 

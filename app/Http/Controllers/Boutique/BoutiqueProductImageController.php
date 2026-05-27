@@ -41,7 +41,7 @@ class BoutiqueProductImageController extends Controller
 
             if ($request->hasFile('image')) {
                 $image = $request->file('image');
-                $path = $image->store('temp_images');
+                $path = \App\Support\UploadableImage::storeTemp($image);
                 UploadBoutiqueProductImage::dispatch($path, $product->uuid, $image->getClientOriginalName());
             }
 

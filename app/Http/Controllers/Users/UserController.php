@@ -122,7 +122,7 @@ class UserController extends Controller
 
                 if ($image->isValid()) {
 
-                    $path = $image->store('temp_images');
+                    $path = \App\Support\UploadableImage::storeTemp($image);
     
                     UploadProfileImage::dispatchSync($path, $user, $image->getClientOriginalName());
                 }
@@ -260,7 +260,7 @@ class UserController extends Controller
 
                 if ($image->isValid()) {
 
-                    $path = $image->store('temp_images');
+                    $path = \App\Support\UploadableImage::storeTemp($image);
 
                     UploadProfileImage::dispatchSync($path, $user, $image->getClientOriginalName());
                 }

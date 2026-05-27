@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Helpers\ApiResponseHelper;
 use App\Models\Boutique\BoutiqueProduct;
+use App\Support\UploadableImage;
 use App\Models\Boutique\BoutiqueProductImage;
 use Cloudinary\Cloudinary;
 use Exception;
@@ -70,10 +71,7 @@ class UploadBoutiqueProductImage implements ShouldQueue
             $cloudinary_file = $cloudinary->uploadApi()->upload(storage_path('app/' . $this->path), [
                 'public_id' => $name,
                 'folder' => $this->base_folder . '/' . $product->uuid,
-                'transformation' => [
-                    'quality' => 'auto',
-                    'fetch_format' => 'jpg',
-                ],
+                'transformation' => UploadableImage::cloudinaryJpgTransformation(),
             ]);
 
             $s3_path = $this->base_folder . '/' . $product->uuid . '/' . $name . '.jpg';

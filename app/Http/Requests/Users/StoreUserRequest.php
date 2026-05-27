@@ -41,7 +41,7 @@ class StoreUserRequest extends FormRequest
                 'min:8',
                 'regex:/^(?=.*[a-zñ])(?=.*[A-ZÑ])(?=.*\d)(?=.*[@$!%*?&])[A-Za-zÑñ\d@$!%*?&]+$/u'
             ],
-            'image' => 'sometimes|image|mimes:jpeg,png,jpg,gif,webp|max:10128',
+            'image' => 'sometimes|file|uploadable_image|max:10128',
         ];
     }
 

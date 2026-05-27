@@ -91,7 +91,7 @@ class CampaignController extends Controller
 
                 $image = $request->file('image');
 
-                $path = $image->store('temp_images');
+                $path = \App\Support\UploadableImage::storeTemp($image);
 
                 UploadCampaignImage::dispatchSync($path, $campaign, $image->getClientOriginalName());
             }

@@ -92,7 +92,7 @@ class BlogController extends Controller
 
             $image = $request->file('image');
 
-            $path = $image->store('temp_images');
+            $path = \App\Support\UploadableImage::storeTemp($image);
 
             UploadMarketingPostImage::dispatchSync($path, $post, $image->getClientOriginalName());
 
@@ -125,7 +125,7 @@ class BlogController extends Controller
             if (isset($data['content_multimedia_1']) && $request->hasFile('content_multimedia_1')) {
 
                 $image = $request->file('content_multimedia_1');
-                $path = $image->store('temp_images');
+                $path = \App\Support\UploadableImage::storeTemp($image);
 
                 UploadPostContentImage::dispatch($path, $content, $image->getClientOriginalName(), 'content_multimedia_1');
 
@@ -134,7 +134,7 @@ class BlogController extends Controller
             if (isset($data['content_multimedia_2']) && $request->hasFile('content_multimedia_2')) {
 
                 $image = $request->file('content_multimedia_2');
-                $path = $image->store('temp_images');
+                $path = \App\Support\UploadableImage::storeTemp($image);
 
                 UploadPostContentImage::dispatch($path, $content, $image->getClientOriginalName(), 'content_multimedia_2');
 
