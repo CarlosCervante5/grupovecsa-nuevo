@@ -50,7 +50,7 @@ class ImageAiController extends Controller
             }
 
             $data = $request->validate([
-                'action' => ['required', 'string', Rule::in(['remove_background', 'enhance', 'studio_white'])],
+                'action' => ['required', 'string', Rule::in(['studio_white'])],
                 'source_url' => 'required|string|max:2000',
                 'target_type' => ['required', 'string', Rule::in(['preview_only', 'vehicle_image', 'boutique_product_image'])],
                 'target_uuid' => 'nullable|string|max:64',
