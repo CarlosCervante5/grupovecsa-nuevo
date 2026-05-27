@@ -796,6 +796,7 @@ Route::prefix('benchmark')->middleware(['bandwidth_usage', 'auth:sanctum', 'perm
 // Segmento Asistente Virtual
 
 Route::prefix('assistant')->middleware('bandwidth_usage')->group(function () {
+    Route::get('/dealerships', [AssistantController::class, 'dealerships']);
     Route::post('/chat', [AssistantController::class, 'chat']);
 
     Route::middleware('auth:sanctum')->group(function () {
