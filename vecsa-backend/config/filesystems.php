@@ -73,4 +73,13 @@ return [
         public_path('storage') => storage_path('app/public'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | VECSA — URLs y prefijos S3 (usar config(), no env(), en runtime)
+    |--------------------------------------------------------------------------
+    */
+    'cloudfront_url' => env('AWS_CLOUDFRONT_URL', ''),
+    'vehicles_folder_base' => env('AWS_VEHICLES_FOLDER_BASE', 'default_folder'),
+    'boutique_folder_base' => env('CLOUDINARY_BOUTIQUE_FOLDER_BASE', 'vecsa_boutique_products'),
+
 ];
