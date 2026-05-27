@@ -8,6 +8,7 @@ use App\Jobs\UploadMarketingPostImage;
 use App\Models\MarketingEvent;
 use App\Models\MarketingPost;
 use App\Services\WordPressExperienceImportService;
+use App\Support\UploadableImage;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -426,14 +427,9 @@ class ExperienceController extends Controller
                 'wp_category_label' => $wpCategoryLabel,
             ]);
 
-            if ($request->hasFile('image')) {
-                $image = $request->file('image');
-                $path = \App\Support\UploadableImage::storeTemp($image);
-                UploadMarketingPostImage::dispatchSync($path, $post, $image->getClientOriginalName());
-                $post->refresh();
-            }
+            $this->syncFeaturedImageFromRequest($request, $post);
 
-            return ApiResponseHelper::apiSuccess(201, 'Historia creada exitosamente', ['post' => $post]);
+            return ApiResponseHelper::apiSuccess(201, 'Historia creada exitosamente', ['post' => $post->fresh()]);
         } catch (\Throwable $e) {
             Log::error('CREATE_EXPERIENCE_STORY_ERROR', [
                 'message' => $e->getMessage(),
@@ -458,7 +454,7 @@ class ExperienceController extends Controller
             'excerpt' => 'nullable|string|max:2000',
             'body_html' => 'nullable|string',
             'image_url' => 'nullable|string|max:2000',
-            'image' => 'nullable|image|max:8192',
+            'image' => ['nullable', 'file', 'uploadable_image', 'max:8192'],
             'status' => 'nullable|string|in:published,draft,unpublished',
             'event_begin_date' => 'nullable|date',
             'event_end_date' => 'nullable|date',
@@ -493,8 +489,11 @@ class ExperienceController extends Controller
             if (array_key_exists('status', $data)) {
                 $updates['status'] = $data['status'];
             }
-            if (array_key_exists('image_url', $data)) {
-                $updates['image_path'] = $data['image_url'];
+            if (array_key_exists('image_url', $data) && ! $request->hasFile('image')) {
+                $externalUrl = trim((string) ($data['image_url'] ?? ''));
+                if ($externalUrl !== '') {
+                    $updates['image_path'] = $externalUrl;
+                }
             }
             if (! empty($data['url_name'])) {
                 $updates['url_name'] = strtolower(preg_replace('/[^a-z0-9-]/', '', str_replace(' ', '-', $data['url_name'])));
@@ -525,12 +524,7 @@ class ExperienceController extends Controller
                 $post->update($updates);
             }
 
-            if ($request->hasFile('image')) {
-                $image = $request->file('image');
-                $path = \App\Support\UploadableImage::storeTemp($image);
-                UploadMarketingPostImage::dispatchSync($path, $post, $image->getClientOriginalName());
-                $post->refresh();
-            }
+            $this->syncFeaturedImageFromRequest($request, $post);
 
             return ApiResponseHelper::apiSuccess(200, 'Historia actualizada exitosamente', ['post' => $post->fresh()]);
         } catch (\Throwable $e) {
@@ -634,5 +628,26 @@ class ExperienceController extends Controller
         $first = is_string($first) ? trim($first) : 'evento';
 
         return $first !== '' ? $first : 'evento';
+    }
+
+    /**
+     * Sube imagen destacada multipart y actualiza image_path; falla si el archivo no se procesó.
+     */
+    private function syncFeaturedImageFromRequest(Request $request, MarketingPost $post): void
+    {
+        if (! $request->hasFile('image')) {
+            return;
+        }
+
+        $image = $request->file('image');
+        $path = UploadableImage::storeTemp($image);
+        UploadMarketingPostImage::dispatchSync($path, $post, $image->getClientOriginalName());
+        $post->refresh();
+
+        if (trim((string) ($post->image_path ?? '')) === '') {
+            throw new \RuntimeException(
+                'La imagen no se guardó en el servidor. Revise Cloudinary/S3 o el formato del archivo.'
+            );
+        }
     }
 }

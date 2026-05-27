@@ -2,8 +2,8 @@
 
 namespace App\Jobs;
 
-use App\Helpers\ApiResponseHelper;
 use App\Models\MarketingPost;
+use App\Support\UploadableImage;
 use Cloudinary\Cloudinary;
 use Exception;
 use Illuminate\Bus\Queueable;
@@ -55,10 +55,7 @@ class UploadMarketingPostImage
             $cloudinary_file = $cloudinary->uploadApi()->upload(storage_path('app/' . $this->path), [
                 'public_id' => $name,
                 'folder' => $this->base_folder . '/' . $this->post->uuid,
-                'transformation' => [
-                    'quality' => 'auto',
-                    'fetch_format' => 'jpg'
-                ]
+                'transformation' => UploadableImage::cloudinaryJpgTransformation(),
             ]);
 
             $s3_path = $this->base_folder . '/' . $this->post->uuid . '/' . $name . '.jpg';
@@ -79,13 +76,14 @@ class UploadMarketingPostImage
 
             Storage::delete($this->path);
 
-            ApiResponseHelper::imageSuccess(200, 'Imagen subida correctamente al servicio externo', ['url' => $this->aws_url . '/' . $s3_path]);
-
         } catch (\Exception $e) {
-        
-            ApiResponseHelper::imageError('Error en el job para subir la imagen para uuid: '.$this->post->uuid, $e->getMessage(), 500, 'UPLOAD_IMAGE_ERROR');
+            Log::error('UploadMarketingPostImage failed', [
+                'post_uuid' => $this->post->uuid,
+                'path' => $this->path,
+                'message' => $e->getMessage(),
+            ]);
 
-            ApiResponseHelper::imageError('Imagen guardada localmente para el post uuid: '.$this->post->uuid, 'Guardada en: ' . $this->path, 500, 'SAVE_LOCAL_IMAGE_ERROR');
+            throw $e;
         }
     }
 
