@@ -103,9 +103,14 @@ class UploadVehicleImage implements ShouldQueue
             ApiResponseHelper::imageSuccess(200, 'Imagen subida correctamente al servicio externo', ['url' => $this->aws_url . '/' . $s3_path]); 
 
         } catch (\Exception $e) {
-            ApiResponseHelper::imageError('Error en el job para subir la imagen para id: '.$this->vehicle_id, $e->getMessage(), 500, 'UPLOAD_IMAGE_ERROR');
+            Log::error('UploadVehicleImage failed', [
+                'vehicle_id' => $this->vehicle_id,
+                'vehicle_uuid' => $this->vehicle_uuid,
+                'path' => $this->path,
+                'message' => $e->getMessage(),
+            ]);
 
-            ApiResponseHelper::imageError('Imagen guardada localmente para vehículo uuid: '.$this->vehicle_uuid, 'Guardada en: ' . $this->path, 500, 'SAVE_LOCAL_IMAGE_ERROR');
+            throw $e;
         }
     }
 
