@@ -276,7 +276,7 @@ Route::prefix('vehicle_images')->middleware(['bandwidth_usage', 'auth:sanctum'])
 // Fin Segmento Imágenes de Vehículos
 
 
-// Procesamiento de imágenes con IA (Cloudinary)
+// Procesamiento de imágenes con IA (Gemini + guardado vía Cloudinary → S3)
 Route::prefix('image_ai')->middleware(['bandwidth_usage', 'auth:sanctum'])->group(function () {
     Route::post('/config', [ImageAiController::class, 'config']);
     Route::post('/process', [ImageAiController::class, 'process']);

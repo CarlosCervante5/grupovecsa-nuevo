@@ -55,6 +55,8 @@ class ImageAiController extends Controller
                 'target_type' => ['required', 'string', Rule::in(['preview_only', 'vehicle_image', 'boutique_product_image'])],
                 'target_uuid' => 'nullable|string|max:64',
                 'replace_original' => 'nullable|boolean',
+                'processed_base64' => 'nullable|string',
+                'processed_mime' => 'nullable|string|max:128',
             ]);
 
             $sourceUrl = trim($data['source_url']);
@@ -70,6 +72,21 @@ class ImageAiController extends Controller
             }
 
             $this->assertTargetAccess($request, $targetType, $data['target_uuid'] ?? null);
+
+            $previewBase64 = trim((string) ($data['processed_base64'] ?? ''));
+            if (
+                $previewBase64 !== ''
+                && $targetType !== 'preview_only'
+                && $replaceOriginal
+            ) {
+                return $this->saveFromPreviewBase64(
+                    $previewBase64,
+                    (string) ($data['processed_mime'] ?? 'image/jpeg'),
+                    $targetType,
+                    (string) $data['target_uuid'],
+                    $data['action']
+                );
+            }
 
             $aiResult = $this->processing->process($sourceUrl, $data['action']);
             $publicId = $aiResult['public_id'] ?? null;
@@ -174,6 +191,43 @@ class ImageAiController extends Controller
                 'IMAGE_AI_ERROR'
             );
         }
+    }
+
+    private function saveFromPreviewBase64(
+        string $rawBase64,
+        string $mime,
+        string $targetType,
+        string $targetUuid,
+        string $action
+    ) {
+        $binary = base64_decode($rawBase64, true);
+        if ($binary === false || $binary === '') {
+            return ApiResponseHelper::apiError(
+                'La vista previa no es válida. Genera la vista previa de nuevo.',
+                null,
+                422,
+                'INVALID_PREVIEW_BASE64'
+            );
+        }
+
+        if (strlen($binary) > 15 * 1024 * 1024) {
+            return ApiResponseHelper::apiError('La imagen es demasiado grande (máx. ~15 MB).', null, 422, 'PREVIEW_TOO_LARGE');
+        }
+
+        $format = $this->formatFromMime($mime);
+
+        $finalUrl = $this->persistProcessedImage($targetType, $targetUuid, $binary, $format);
+
+        return ApiResponseHelper::apiSuccess(200, 'Imagen guardada (misma vista previa, vía Cloudinary)', [
+            'image_url' => $finalUrl,
+            'action' => $action,
+            'saved' => true,
+        ]);
+    }
+
+    private function formatFromMime(string $mime): string
+    {
+        return str_contains(strtolower($mime), 'png') ? 'png' : 'jpg';
     }
 
     private function assertTargetAccess(Request $request, string $targetType, ?string $targetUuid): void
