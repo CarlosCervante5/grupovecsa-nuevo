@@ -14,6 +14,7 @@ use App\Jobs\UploadVehicleImage;
 use App\Models\Vehicle;
 use App\Models\VehicleImage;
 use App\Support\PendingMediaUploadGuard;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class VehicleImageController extends Controller
@@ -38,11 +39,7 @@ class VehicleImageController extends Controller
                 return ApiResponseHelper::apiError('El vehiculo no existe', 'No existe el id: '. $vehicle_uuid ,404, 'CREATE_VEHICLE_IMAGES_ERROR');
             }
 
-            $jobs_in_queue = DB::table('jobs')
-                ->where('payload', 'like', '%'.$vehicle_uuid.'%')
-                ->exists();
-            
-            if ($jobs_in_queue) {
+            if (PendingMediaUploadGuard::hasPendingVehicleImageUpload($vehicle_uuid)) {
                 return ApiResponseHelper::apiError('Ya hay una carga de imágenes en progreso para este vehículo. Por favor espere a que se complete.', null, 429, 'IMAGE_UPLOAD_IN_PROGRESS');
             }
 
