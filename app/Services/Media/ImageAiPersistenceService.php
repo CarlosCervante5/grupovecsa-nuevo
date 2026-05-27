@@ -15,15 +15,15 @@ final class ImageAiPersistenceService
 {
     public function persistVehicleImage(VehicleImage $vehicleImage, string $vehicleUuid, string $imageContents, string $extension = 'jpg'): string
     {
-        $baseFolder = trim((string) env('AWS_VEHICLES_FOLDER_BASE', 'default_folder'));
-        $awsUrl = rtrim((string) env('AWS_CLOUDFRONT_URL'), '/');
+        $baseFolder = $this->vehiclesFolderBase();
+        $awsUrl = $this->cloudfrontBaseUrl();
         $ext = $extension === 'png' ? 'png' : 'jpg';
         $name = time().'_ai_'.$vehicleImage->sort_id;
         $s3Path = "{$baseFolder}/{$vehicleUuid}/{$name}.{$ext}";
 
         $this->putOnS3($s3Path, $imageContents);
 
-        $url = $awsUrl.'/'.$s3Path;
+        $url = $awsUrl !== '' ? $awsUrl.'/'.$s3Path : $s3Path;
         $vehicleImage->update(['service_image_url' => $url]);
 
         return $url;
@@ -35,15 +35,15 @@ final class ImageAiPersistenceService
         string $imageContents,
         string $extension = 'jpg'
     ): string {
-        $baseFolder = trim((string) env('CLOUDINARY_BOUTIQUE_FOLDER_BASE', 'vecsa_boutique_products'));
-        $awsUrl = rtrim((string) env('AWS_CLOUDFRONT_URL'), '/');
+        $baseFolder = $this->boutiqueFolderBase();
+        $awsUrl = $this->cloudfrontBaseUrl();
         $ext = $extension === 'png' ? 'png' : 'jpg';
         $name = time().'_ai_'.$productImage->sort_id;
         $s3Path = "{$baseFolder}/{$productUuid}/{$name}.{$ext}";
 
         $this->putOnS3($s3Path, $imageContents);
 
-        $url = $awsUrl.'/'.$s3Path;
+        $url = $awsUrl !== '' ? $awsUrl.'/'.$s3Path : $s3Path;
         $productImage->update([
             'image_path' => $url,
             'status' => 'uploaded',
@@ -54,8 +54,11 @@ final class ImageAiPersistenceService
 
     private function putOnS3(string $s3Path, string $contents): void
     {
-        if (trim((string) env('AWS_BUCKET', '')) === '') {
-            throw new \RuntimeException('AWS_BUCKET no está configurado en el servidor.');
+        $bucket = (string) config('filesystems.disks.s3.bucket', '');
+        if ($bucket === '') {
+            throw new \RuntimeException(
+                'El disco S3 no tiene bucket configurado. En Railway define AWS_BUCKET (y credenciales AWS) en el servicio backend.'
+            );
         }
 
         try {
@@ -72,8 +75,23 @@ final class ImageAiPersistenceService
 
         if (! $ok) {
             throw new \RuntimeException(
-                'No se pudo guardar la imagen en S3. Revisa AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_BUCKET y AWS_DEFAULT_REGION.'
+                'No se pudo guardar la imagen en S3. Revisa AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_BUCKET y AWS_DEFAULT_REGION en el servidor.'
             );
         }
+    }
+
+    private function cloudfrontBaseUrl(): string
+    {
+        return rtrim((string) config('filesystems.cloudfront_url', ''), '/');
+    }
+
+    private function vehiclesFolderBase(): string
+    {
+        return trim((string) config('filesystems.vehicles_folder_base', 'default_folder'));
+    }
+
+    private function boutiqueFolderBase(): string
+    {
+        return trim((string) config('filesystems.boutique_folder_base', 'vecsa_boutique_products'));
     }
 }
