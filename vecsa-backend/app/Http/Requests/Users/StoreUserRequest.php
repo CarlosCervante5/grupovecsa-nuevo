@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Users;
 
+use App\Support\UserDealershipRules;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreUserRequest extends FormRequest
@@ -21,6 +22,8 @@ class StoreUserRequest extends FormRequest
      */
     public function rules(): array
     {
+        $prefix = env('DB_TABLE_PREFIX', '');
+
         return [
             'name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
@@ -28,7 +31,9 @@ class StoreUserRequest extends FormRequest
             'phone_1' => 'nullable|string|max:20',
             'phone_2' => 'nullable|string|max:20',
             'gender' => 'nullable|in:male,female,H,M',
-            'location' => 'required|string|max:255',
+            'location' => 'nullable|string|max:90',
+            'dealership_ids' => 'sometimes|array',
+            'dealership_ids.*' => 'integer|exists:' . $prefix . 'dealerships,id',
             'role_name' => 'required|string|max:255',
             'password' => [
                 'required',
@@ -36,8 +41,30 @@ class StoreUserRequest extends FormRequest
                 'min:8',
                 'regex:/^(?=.*[a-zñ])(?=.*[A-ZÑ])(?=.*\d)(?=.*[@$!%*?&])[A-Za-zÑñ\d@$!%*?&]+$/u'
             ],
-            'image' => 'sometimes|required|image|mimes:jpeg,png,jpg,gif,pdf|max:10128',
+            'image' => 'sometimes|image|mimes:jpeg,png,jpg,gif,webp|max:10128',
         ];
+    }
+
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            $role = strtolower(trim((string) $this->input('role_name', '')));
+            if (in_array($role, ['administrator', 'developer'], true)) {
+                return;
+            }
+            $ids = $this->input('dealership_ids', []);
+            $location = trim((string) $this->input('location', ''));
+            if ((! is_array($ids) || count($ids) === 0) && $location === '') {
+                $validator->errors()->add('dealership_ids', 'Asigna al menos una sucursal.');
+            }
+            if (
+                is_array($ids)
+                && count($ids) > 1
+                && ! UserDealershipRules::allowsMultipleDealerships($role)
+            ) {
+                $validator->errors()->add('dealership_ids', 'Este rol solo puede tener una sucursal asignada.');
+            }
+        });
     }
 
     /**

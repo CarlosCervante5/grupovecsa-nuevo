@@ -77,13 +77,18 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         try {
-            $credentials = $request->only('email', 'password');
+            $email = strtolower(trim((string) $request->input('email', '')));
+            $password = $request->input('password');
 
-            if (!auth()->attempt($credentials)) {
+            if ($email === '' || $password === null || $password === '') {
                 return ApiResponseHelper::authError('Credenciales inválidas', null, 401, 'INVALID_CREDENTIALS');
             }
 
-            $user = auth()->user();
+            $user = User::query()->whereRaw('LOWER(email) = ?', [$email])->first();
+            if (!$user || !Hash::check($password, $user->password)) {
+                return ApiResponseHelper::authError('Credenciales inválidas', null, 401, 'INVALID_CREDENTIALS');
+            }
+            auth()->login($user);
 
             // Solo rol + perfil en login; permisos en GET /api/auth/me (menos trabajo antes de emitir token)
             $user->loadMissing(['roles']);
@@ -118,13 +123,18 @@ class AuthController extends Controller
     public function stregaLogin(Request $request)
     {
         try {
-            $credentials = $request->only('email', 'password');
+            $email = strtolower(trim((string) $request->input('email', '')));
+            $password = $request->input('password');
 
-            if (!auth()->attempt($credentials)) {
+            if ($email === '' || $password === null || $password === '') {
                 return ApiResponseHelper::authError('Credenciales inválidas', null, 401, 'INVALID_CREDENTIALS');
             }
 
-            $user = auth()->user();
+            $user = User::query()->whereRaw('LOWER(email) = ?', [$email])->first();
+            if (!$user || !Hash::check($password, $user->password)) {
+                return ApiResponseHelper::authError('Credenciales inválidas', null, 401, 'INVALID_CREDENTIALS');
+            }
+            auth()->login($user);
 
             $user->loadMissing(['roles', 'userProfile']);
 

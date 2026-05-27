@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Users;
 
 use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
+use App\Models\Dealership;
 use App\Models\User;
+use App\Support\UserDealershipRules;
 use Illuminate\Http\Request;
 
 class UserDealershipController extends Controller
@@ -25,7 +27,27 @@ class UserDealershipController extends Controller
                 return ApiResponseHelper::apiError('Usuario no encontrado', null, 404, 'USER_NOT_FOUND');
             }
 
-            $user->dealerships()->sync($data['dealership_ids']);
+            $ids = array_values(array_unique(array_map('intval', $data['dealership_ids'])));
+            $role = $user->getRoleNames()->first();
+            if (! UserDealershipRules::allowsMultipleDealerships($role) && count($ids) > 1) {
+                $ids = array_slice($ids, 0, 1);
+            }
+
+            $user->dealerships()->sync($ids);
+
+            $profileData = $user->getRoleProfile();
+            $profile = $profileData['profile'] ?? null;
+            if ($profile && $ids !== []) {
+                $names = Dealership::query()
+                    ->whereIn('id', $ids)
+                    ->orderBy('name')
+                    ->pluck('name')
+                    ->implode(', ');
+                if ($names !== '') {
+                    $profile->location = $names;
+                    $profile->save();
+                }
+            }
 
             return ApiResponseHelper::apiSuccess(200, 'Sucursales asignadas exitosamente', [
                 'dealerships' => $user->dealerships()->get(['id', 'name']),

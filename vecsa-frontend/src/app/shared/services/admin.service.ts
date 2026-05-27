@@ -514,7 +514,7 @@ export class AdminService {
         return this._http.get<UsersResponse>(`${this.baseUrl}/api/users`, { headers, params });
     }
 
-    public addUser( name: string,last_name: string,phone_1: string,phone_2: string,gender: string,email: string,location: string,role_name: string,picture: File[],password: string,
+    public addUser( name: string,last_name: string,phone_1: string,phone_2: string,gender: string,email: string,location: string,role_name: string,picture: File[],password: string, dealershipIds: number[] = [],
     ): Observable<GralResponse>{
         const formData: FormData = new FormData();    
         formData.append('name', `${name}`);     
@@ -524,6 +524,7 @@ export class AdminService {
         formData.append('gender', `${gender}`);         
         formData.append('email', `${email}`);         
         formData.append('location', `${location}`);
+        dealershipIds.forEach((id) => formData.append('dealership_ids[]', String(id)));
         formData.append('role_name', `${role_name}`);
         if(picture != null){
             picture.forEach((file, index) => formData.append(`image`, file));
@@ -543,22 +544,24 @@ export class AdminService {
         return this._http.post<DetailResponsive>(`${this.baseUrl}/api/users/detail`,body , { headers });
     }
 
-    public updateUser(user_uuid:string,name: string,last_name: string,phone_1: string,phone_2: string,gender: string,email: string,location: string,role_name: string,picture: File[],password: string){
+    public updateUser(user_uuid:string,name: string,last_name: string,phone_1: string,phone_2: string,gender: string,email: string,location: string,role_name: string,picture: File[],password: string, dealershipIds: number[] = []){
         const formData: FormData = new FormData();    
         formData.append('user_uuid', `${user_uuid}`);
         formData.append('name', `${name}`);     
         formData.append('last_name', `${last_name}`);    
         formData.append('phone_1', `${phone_1}`);   
-        formData.append('phone_2', `${phone_1}`);
+        formData.append('phone_2', `${phone_2}`);
         formData.append('gender', `${gender}`);         
         formData.append('email', `${email}`);         
         formData.append('location', `${location}`);
+        dealershipIds.forEach((id) => formData.append('dealership_ids[]', String(id)));
         formData.append('role_name', `${role_name}`);
-        console.log(picture);
-        if(picture != null){
-        picture.forEach((file, index) => formData.append(`image`, file));
+        if (picture?.length) {
+            picture.forEach((file) => formData.append('image', file));
         }
-        formData.append('password', `${password}`);   
+        if (password?.trim()) {
+            formData.append('password', password.trim());
+        }
         let user_token = localStorage.getItem('user_token');
         let headers = new HttpHeaders().set('Authorization', `Bearer ${user_token}`);
         return this._http.post<GralResponse>(`${this.baseUrl}/api/users/update`,formData , { headers });
@@ -574,6 +577,15 @@ export class AdminService {
         let user_token = localStorage.getItem('user_token');
         let headers = new HttpHeaders().set('Authorization', `Bearer ${user_token}`);
         return this._http.post<DealerShipResponse>(`${this.baseUrl}/api/dealerships/search` , { headers });
+    }
+
+    public assignUserDealerships(userUuid: string, dealershipIds: number[]) {
+        const user_token = localStorage.getItem('user_token');
+        const headers = new HttpHeaders().set('Authorization', `Bearer ${user_token}`);
+        return this._http.post<GralResponse>(`${this.baseUrl}/api/users/assign_dealerships`, {
+            user_uuid: userUuid,
+            dealership_ids: dealershipIds,
+        }, { headers });
     }
 
     public deleteUser(uuid:string){

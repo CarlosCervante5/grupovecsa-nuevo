@@ -57,7 +57,7 @@ export class RewardsHomeComponent implements OnInit {
     this.isLoading = true;
     this.loginError = '';
 
-    this.authService.login(this.loginForm as any).subscribe({
+    this.authService.login(this.loginForm).subscribe({
       next: () => {
         this.isLoggedIn = true;
         this.isLoading = false;

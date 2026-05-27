@@ -52,13 +52,35 @@
           <span class="field-error" *ngIf="phoneTwoInvalid">10 dígitos numéricos u opcional vacío.</span>
         </div>
 
-        <div class="field-group">
-          <label class="field-label" for="update-user-location">Sucursal</label>
-          <select id="update-user-location" class="field-input" formControlName="location">
+        <div class="field-group" [class.field-span-full]="multiDealership">
+          <label class="field-label" for="update-user-dealership">
+            {{ multiDealership ? 'Sucursales (puedes elegir varias)' : 'Sucursal' }}
+          </label>
+          <select
+            *ngIf="!multiDealership"
+            id="update-user-dealership"
+            class="field-input"
+            [value]="form.get('dealership_ids')?.value?.[0] ?? ''"
+            (change)="onSingleDealershipChange($event)"
+          >
             <option value="">— Seleccionar —</option>
-            <option *ngFor="let location of dealership" [value]="location.name">{{ location.name }}</option>
+            <option *ngFor="let d of dealership" [value]="d.id">{{ d.name }}</option>
           </select>
-          <span class="field-error" *ngIf="locationInvalid">Selecciona sucursal.</span>
+          <select
+            *ngIf="multiDealership"
+            id="update-user-dealership-multi"
+            class="field-input field-multi"
+            multiple
+            (change)="onMultiDealershipChange($event)"
+          >
+            <option
+              *ngFor="let d of dealership"
+              [value]="d.id"
+              [selected]="form.get('dealership_ids')?.value?.includes(d.id)"
+            >{{ d.name }}</option>
+          </select>
+          <span class="field-hint" *ngIf="multiDealership">Mantén Ctrl (Windows) o Cmd (Mac) para seleccionar varias.</span>
+          <span class="field-error" *ngIf="dealershipsInvalid">Selecciona al menos una sucursal.</span>
         </div>
 
         <div class="field-group">

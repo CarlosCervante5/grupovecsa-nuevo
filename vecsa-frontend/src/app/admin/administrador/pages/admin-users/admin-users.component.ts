@@ -53,7 +53,7 @@ export class AdminUsersComponent {
           name: user.profile?.name,
           last_name: user.profile?.last_name,
           rol: user.role,
-          location: user.profile?.location,
+          location: user.dealership_names || user.profile?.location,
           picture: user.profile?.picture,
         }));
       }

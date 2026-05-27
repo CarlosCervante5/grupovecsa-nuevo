@@ -567,6 +567,8 @@ export interface Datum {
     created_at: Date;
     role:       string;
     profile:    Profile | null;
+    dealership_ids?: number[];
+    dealership_names?: string;
 }
 
 export interface Profile {
@@ -604,6 +606,8 @@ export interface DataDetailUser {
     user:    UserInfo;
     role:    string;
     profile: Profile;
+    dealership_ids?: number[];
+    dealership_names?: string | null;
 }
 
 export interface UserInfo {
@@ -635,6 +639,7 @@ export interface DealerShipResponse{
 }
 
 export interface Dealership {
+    id?:         number;
     name:        string;
     location:    string;
     description: null;
