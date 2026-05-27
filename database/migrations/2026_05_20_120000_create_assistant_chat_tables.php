@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        $prefix = env('DB_TABLE_PREFIX', '');
+        $prefix = (string) config('vecsa.db_table_prefix', '');
         $conversations = $prefix.'assistant_conversations';
         $messages = $prefix.'assistant_messages';
 
@@ -47,7 +47,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        $prefix = env('DB_TABLE_PREFIX', '');
+        $prefix = (string) config('vecsa.db_table_prefix', '');
         Schema::dropIfExists($prefix.'assistant_messages');
         Schema::dropIfExists($prefix.'assistant_conversations');
     }

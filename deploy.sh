@@ -3,6 +3,10 @@ set -e
 
 echo "🚀 Running deploy script..."
 
+# Leer DB_TABLE_PREFIX y demás vars de Railway antes de migrate (evita config cache del build sin prefijo)
+echo "⚡ Limpiando caché de config antes de migrate..."
+php artisan config:clear 2>/dev/null || true
+
 # Run migrations (falla el script si la migración falla; no ocultar errores)
 echo "📦 Running migrations..."
 php artisan migrate --force --no-interaction
