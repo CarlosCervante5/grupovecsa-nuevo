@@ -11,6 +11,7 @@ use App\Http\Controllers\Quizzes\QuizController;
 use App\Http\Controllers\Events\EventController;
 use App\Http\Controllers\Promotions\PromotionController;
 use App\Http\Controllers\Leads\LeadController;
+use App\Http\Controllers\Media\ImageAiController;
 use App\Http\Controllers\Multimedia\MultimediaController;
 use App\Http\Controllers\Repairs\RepairController;
 use App\Http\Controllers\Rewards\RewardController;
@@ -49,6 +50,7 @@ use App\Http\Controllers\Boutique\BoutiqueAttributeController;
 use App\Http\Controllers\Boutique\BoutiqueBannerController;
 use App\Http\Controllers\Experience\ExperienceController;
 use App\Http\Controllers\Benchmark\BenchmarkAdsController;
+use App\Http\Controllers\Assistant\AssistantChatAdminController;
 use App\Http\Controllers\Assistant\AssistantController;
 use App\Http\Controllers\StoreManagement\StoreManagementController;
 use App\Http\Controllers\StoreManagement\StoreCustomerController;
@@ -273,6 +275,12 @@ Route::prefix('vehicle_images')->middleware(['bandwidth_usage', 'auth:sanctum'])
 
 // Fin Segmento Imágenes de Vehículos
 
+
+// Procesamiento de imágenes con IA (Cloudinary)
+Route::prefix('image_ai')->middleware(['bandwidth_usage', 'auth:sanctum'])->group(function () {
+    Route::post('/config', [ImageAiController::class, 'config']);
+    Route::post('/process', [ImageAiController::class, 'process']);
+});
 
 // Segmento Leads
 
@@ -698,6 +706,7 @@ Route::prefix('boutique/admin')->middleware(['bandwidth_usage', 'auth:sanctum'])
     // Checkout boutique: qué métodos mostrar (transferencia / sucursal; Stripe/OpenPay por llaves)
     Route::post('/checkout_payment_methods/config', [SettingsController::class, 'boutiqueCheckoutPaymentMethodsConfig']);
     Route::post('/checkout_payment_methods/update', [SettingsController::class, 'updateBoutiqueCheckoutPaymentMethods']);
+    Route::post('/checkout_legal_pages/update', [SettingsController::class, 'updateBoutiqueCheckoutLegalPages']);
     Route::post('/transfer_bank_details/update', [SettingsController::class, 'updateBoutiqueTransferBankDetails']);
 
     // OpenPay (config tienda; documentación https://documents.openpay.mx/docs/api/)
@@ -788,6 +797,11 @@ Route::prefix('benchmark')->middleware(['bandwidth_usage', 'auth:sanctum', 'perm
 
 Route::prefix('assistant')->middleware('bandwidth_usage')->group(function () {
     Route::post('/chat', [AssistantController::class, 'chat']);
+
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/admin/conversations/search', [AssistantChatAdminController::class, 'search']);
+        Route::post('/admin/conversations/detail', [AssistantChatAdminController::class, 'detail']);
+    });
 });
 
 // Fin Asistente Virtual
@@ -842,6 +856,8 @@ Route::prefix('settings')->middleware(['bandwidth_usage', 'auth:sanctum'])->grou
     Route::post('/stripe/publishable_key', [SettingsController::class, 'publishableKey']);
     Route::post('/openpay', [SettingsController::class, 'openpay'])->middleware('role:developer|administrator');
     Route::post('/openpay/update', [SettingsController::class, 'updateOpenpay'])->middleware('role:developer|administrator');
+    Route::post('/gemini_image_ai', [SettingsController::class, 'geminiImageAi'])->middleware('role:developer|administrator');
+    Route::post('/gemini_image_ai/update', [SettingsController::class, 'updateGeminiImageAi'])->middleware('role:developer|administrator');
 });
 
 // Fin Settings

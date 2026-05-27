@@ -54,6 +54,7 @@ final class BoutiqueCheckoutPaymentMethods
                 'sandbox' => $openpayMode !== 'production',
                 'available' => $openpayOn,
             ],
+            'legal_pages' => BoutiqueCheckoutLegalPages::publicPayload(),
         ];
     }
 
@@ -69,6 +70,12 @@ final class BoutiqueCheckoutPaymentMethods
 
         return array_merge($public, [
             'transfer_bank' => BoutiqueTransferBankDetails::publicPayload(),
+            /** Valores guardados en BD (vacío = usar ruta por defecto del checkout). */
+            'legal_pages_inputs' => [
+                'boutique_checkout_legal_terms_url' => trim((string) SystemSetting::get(BoutiqueCheckoutLegalPages::SETTING_TERMS, '')),
+                'boutique_checkout_legal_privacy_url' => trim((string) SystemSetting::get(BoutiqueCheckoutLegalPages::SETTING_PRIVACY, '')),
+                'boutique_checkout_legal_returns_url' => trim((string) SystemSetting::get(BoutiqueCheckoutLegalPages::SETTING_RETURNS, '')),
+            ],
             'admin' => [
                 'keys_configured' => [
                     'stripe' => false,
