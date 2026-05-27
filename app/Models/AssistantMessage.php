@@ -13,7 +13,7 @@ class AssistantMessage extends Model
     public function __construct(array $attributes = [])
     {
         parent::__construct($attributes);
-        $this->table = env('DB_TABLE_PREFIX', '').'assistant_messages';
+        $this->table = (string) config('vecsa.db_table_prefix', '').'assistant_messages';
     }
 
     protected $fillable = [

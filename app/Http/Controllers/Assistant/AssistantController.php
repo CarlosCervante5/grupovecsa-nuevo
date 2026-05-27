@@ -10,10 +10,26 @@ class AssistantController extends Controller
 {
     public function __construct(protected AssistantChatService $chatService) {}
 
+    public function dealerships()
+    {
+        return response()->json([
+            'dealerships' => $this->chatService->listDealershipsForChat(),
+        ]);
+    }
+
     public function chat(Request $request)
     {
-        $payload = $this->chatService->chat($request);
+        try {
+            $payload = $this->chatService->chat($request);
 
-        return response()->json($payload);
+            return response()->json($payload);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'message' => 'Validación',
+                'errors' => $e->errors(),
+                'needs_dealership' => true,
+                'dealerships' => $this->chatService->listDealershipsForChat(),
+            ], 422);
+        }
     }
 }

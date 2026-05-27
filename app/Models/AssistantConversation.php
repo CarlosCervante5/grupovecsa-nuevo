@@ -15,7 +15,7 @@ class AssistantConversation extends Model
     public function __construct(array $attributes = [])
     {
         parent::__construct($attributes);
-        $this->table = env('DB_TABLE_PREFIX', '').'assistant_conversations';
+        $this->table = (string) config('vecsa.db_table_prefix', '').'assistant_conversations';
     }
 
     protected static function boot(): void
@@ -33,6 +33,8 @@ class AssistantConversation extends Model
         'uuid',
         'session_key',
         'user_id',
+        'dealership_id',
+        'assigned_user_id',
         'visitor_name',
         'visitor_email',
         'page_url',
@@ -50,6 +52,16 @@ class AssistantConversation extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function dealership(): BelongsTo
+    {
+        return $this->belongsTo(Dealership::class);
+    }
+
+    public function assignedUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'assigned_user_id');
     }
 
     public function messages(): HasMany

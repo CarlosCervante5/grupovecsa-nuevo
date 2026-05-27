@@ -5,9 +5,11 @@ namespace App\Services\Assistant;
 use App\Models\AssistantConversation;
 use App\Models\AssistantMessage;
 use App\Models\Customer;
+use App\Models\Dealership;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\PersonalAccessToken;
 use OpenAI\Laravel\Facades\OpenAI;
 
@@ -15,30 +17,65 @@ class AssistantChatService
 {
     private const SYSTEM_PROMPT = 'Eres el asistente virtual de Grupo VECSA, concesionario autorizado de BMW, MINI y BMW Motorrad en México. '
         .'Ayudas a los clientes con información sobre vehículos, servicios, citas, boutique, rewards y sucursales. '
-        .'Sucursales: BMW Puebla Angelópolis, BMW Pachuca, BMW Oaxaca, BMW Veracruz. '
-        .'Responde de forma amable, concisa y profesional. Si no sabes algo, sugiere contactar al equipo. '
+        .'Responde de forma amable, concisa y profesional. Si no sabes algo, sugiere contactar al equipo de la sucursal. '
         .'Responde siempre en español.';
+
+    public function __construct(
+        private readonly AssistantDealershipAssigner $dealershipAssigner
+    ) {}
+
+    /**
+     * @return list<array{id: int, name: string, location: string|null, state: string|null}>
+     */
+    public function listDealershipsForChat(): array
+    {
+        return Dealership::query()
+            ->orderBy('name')
+            ->get(['id', 'name', 'location', 'state'])
+            ->map(fn (Dealership $d) => [
+                'id' => (int) $d->id,
+                'name' => $d->name,
+                'location' => $d->location,
+                'state' => $d->state,
+            ])
+            ->values()
+            ->all();
+    }
 
     public function chat(Request $request): array
     {
+        $dealershipTable = (new Dealership)->getTable();
+
         $data = $request->validate([
             'message' => 'required|string|max:500',
             'conversation_uuid' => 'nullable|string|max:64',
             'session_key' => 'nullable|string|max:64',
             'page_url' => 'nullable|string|max:500',
+            'dealership_id' => 'nullable|integer|exists:'.$dealershipTable.',id',
         ]);
 
         $user = $this->resolveUser($request);
+
+        if (empty($data['conversation_uuid']) && empty($data['dealership_id'])) {
+            return [
+                'needs_dealership' => true,
+                'dealerships' => $this->listDealershipsForChat(),
+                'reply' => 'Por favor elige la sucursal con la que deseas contactar:',
+            ];
+        }
+
         $conversation = $this->resolveConversation($data, $request, $user);
 
         $userText = trim($data['message']);
-        $reply = $this->generateReply($userText);
+        $reply = $this->generateReply($userText, $conversation);
 
         $this->persistMessages($conversation, $userText, $reply, $data, $user);
 
         return [
             'reply' => $reply,
             'conversation_uuid' => $conversation->uuid,
+            'dealership_id' => $conversation->dealership_id,
+            'dealership_name' => $conversation->dealership?->name,
         ];
     }
 
@@ -62,12 +99,17 @@ class AssistantChatService
         if (! empty($data['conversation_uuid'])) {
             $existing = AssistantConversation::findByUuid($data['conversation_uuid']);
             if ($existing) {
-                if ($user && ! $existing->user_id) {
-                    $existing->update($this->visitorAttributes($user));
-                }
+                $this->syncConversationMeta($existing, $data, $user);
 
                 return $existing;
             }
+        }
+
+        $dealershipId = isset($data['dealership_id']) ? (int) $data['dealership_id'] : null;
+        if (! $dealershipId) {
+            throw ValidationException::withMessages([
+                'dealership_id' => ['Selecciona una sucursal para iniciar la conversación.'],
+            ]);
         }
 
         $sessionKey = trim((string) ($data['session_key'] ?? ''));
@@ -75,13 +117,43 @@ class AssistantChatService
             $sessionKey = (string) Str::uuid();
         }
 
+        $assignedUserId = $this->dealershipAssigner->assignUserIdForDealership($dealershipId);
+
         return AssistantConversation::create([
             'session_key' => Str::limit($sessionKey, 64, ''),
             'user_id' => $user?->id,
+            'dealership_id' => $dealershipId,
+            'assigned_user_id' => $assignedUserId,
             'page_url' => isset($data['page_url']) ? Str::limit(trim((string) $data['page_url']), 500, '') : null,
             'ip_address' => $request->ip(),
             ...$this->visitorAttributes($user),
         ]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private function syncConversationMeta(AssistantConversation $conversation, array $data, ?User $user): void
+    {
+        $updates = [];
+
+        if ($user && ! $conversation->user_id) {
+            $updates['user_id'] = $user->id;
+            $updates = array_merge($updates, $this->visitorAttributes($user));
+        }
+
+        if (! $conversation->dealership_id && ! empty($data['dealership_id'])) {
+            $dealershipId = (int) $data['dealership_id'];
+            $updates['dealership_id'] = $dealershipId;
+            if (! $conversation->assigned_user_id) {
+                $updates['assigned_user_id'] = $this->dealershipAssigner->assignUserIdForDealership($dealershipId);
+            }
+        }
+
+        if ($updates !== []) {
+            $conversation->update($updates);
+            $conversation->refresh();
+        }
     }
 
     /**
@@ -103,13 +175,22 @@ class AssistantChatService
         ];
     }
 
-    private function generateReply(string $userText): string
+    private function generateReply(string $userText, AssistantConversation $conversation): string
     {
+        $system = self::SYSTEM_PROMPT;
+        $conversation->loadMissing('dealership');
+        if ($conversation->dealership) {
+            $system .= ' El cliente está en contacto con la sucursal '
+                .$conversation->dealership->name
+                .($conversation->dealership->location ? ' ('.$conversation->dealership->location.')' : '')
+                .'.';
+        }
+
         try {
             $result = OpenAI::chat()->create([
                 'model' => 'gpt-4o-mini',
                 'messages' => [
-                    ['role' => 'system', 'content' => self::SYSTEM_PROMPT],
+                    ['role' => 'system', 'content' => $system],
                     ['role' => 'user', 'content' => $userText],
                 ],
                 'max_tokens' => 300,
