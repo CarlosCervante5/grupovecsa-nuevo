@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Users;
 
+use App\Models\Dealership;
 use App\Models\User;
+use App\Support\UserDealershipRules;
 use Illuminate\Support\Facades\Hash;
 use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
@@ -112,6 +114,8 @@ class UserController extends Controller
 
             $user = $this->userService->createNewUser($data);
 
+            $this->syncUserDealerships($user, $data, $data['role_name'] ?? null);
+
             if(isset($data['image'])){
 
                 $image = $request->file('image');
@@ -167,6 +171,7 @@ class UserController extends Controller
                 return ApiResponseHelper::authError('El usuario no se encuentra registrado', null, 401, 'GET_USER_ERROR');
             }
 
+            $user->load('dealerships');
             $profile = $user->getRoleProfile();
 
             // Retornar el usuario encontrado
@@ -178,7 +183,9 @@ class UserController extends Controller
                     'created_at' => $user->created_at,
                 ],
                 'role' => $profile['role'],
-                'profile' =>  $profile['profile']
+                'profile' =>  $profile['profile'],
+                'dealership_ids' => $user->dealerships->pluck('id')->values()->all(),
+                'dealership_names' => $user->dealerships->pluck('name')->implode(', ') ?: null,
             ]);
 
         } catch (ValidationException $e) {
@@ -240,6 +247,12 @@ class UserController extends Controller
             if (isset($data['role_name']) && $data['role_name']) {
                 $user->syncRoles($data['role_name']);
             }
+
+            $this->syncUserDealerships(
+                $user,
+                $data,
+                $data['role_name'] ?? $profile['role'] ?? null
+            );
 
             if(isset($data['image'])){
 
@@ -316,5 +329,47 @@ class UserController extends Controller
 
         return ApiResponseHelper::apiSuccess(200, 'Usuarios obtenidos exitosamente', ['users' => $users]);
 
+    }
+
+    /**
+     * Sincroniza sucursales (pivote) y refleja nombres en user_profiles.location.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    protected function syncUserDealerships(User $user, array $data, ?string $roleName = null): void
+    {
+        if (! array_key_exists('dealership_ids', $data)) {
+            return;
+        }
+
+        $role = $roleName ?? $user->getRoleNames()->first();
+        $ids = array_values(array_unique(array_map('intval', $data['dealership_ids'] ?? [])));
+
+        if (! UserDealershipRules::allowsMultipleDealerships($role) && count($ids) > 1) {
+            $ids = array_slice($ids, 0, 1);
+        }
+
+        $user->dealerships()->sync($ids);
+
+        $profileData = $user->getRoleProfile();
+        $profile = $profileData['profile'] ?? null;
+        if (! $profile) {
+            return;
+        }
+
+        if ($ids === []) {
+            return;
+        }
+
+        $names = Dealership::query()
+            ->whereIn('id', $ids)
+            ->orderBy('name')
+            ->pluck('name')
+            ->implode(', ');
+
+        if ($names !== '') {
+            $profile->location = $names;
+            $profile->save();
+        }
     }
 }
