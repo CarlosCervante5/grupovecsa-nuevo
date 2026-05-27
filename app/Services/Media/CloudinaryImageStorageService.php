@@ -87,7 +87,7 @@ final class CloudinaryImageStorageService
             $secureUrl = (string) ($cloudinaryFile['secure_url'] ?? '');
 
             if ($secureUrl === '') {
-                throw new \RuntimeException('Cloudinary no devolvió URL de la imagen.');
+                throw new \RuntimeException('No se pudo publicar la imagen procesada.');
             }
 
             if ($this->s3IsConfigured()) {
@@ -122,7 +122,7 @@ final class CloudinaryImageStorageService
         $s3Path = $folder.'/'.$name.'.'.$format;
         $imageContents = file_get_contents((string) $cloudinaryFile['secure_url']);
         if ($imageContents === false || $imageContents === '') {
-            throw new \RuntimeException('No se pudo obtener la imagen desde Cloudinary.');
+            throw new \RuntimeException('No se pudo obtener la imagen procesada.');
         }
 
         try {
@@ -130,13 +130,11 @@ final class CloudinaryImageStorageService
         } catch (FilesystemException $e) {
             Log::error('S3 put after Cloudinary failed', ['path' => $s3Path, 'message' => $e->getMessage()]);
 
-            throw new \RuntimeException('Error al guardar en S3 tras Cloudinary: '.$e->getMessage(), 0, $e);
+            throw new \RuntimeException('Error al guardar la imagen: '.$e->getMessage(), 0, $e);
         }
 
         if (! $ok) {
-            throw new \RuntimeException(
-                'No se pudo guardar en S3 tras Cloudinary. Revisa credenciales AWS y permisos del bucket.'
-            );
+            throw new \RuntimeException('No se pudo guardar la imagen en el servidor.');
         }
 
         if ($publicId !== '') {
@@ -161,7 +159,7 @@ final class CloudinaryImageStorageService
     {
         if (trim((string) config('cloudinary.url', '')) === '') {
             throw new \RuntimeException(
-                'CLOUDINARY_URL no está configurado en el servidor.'
+                'El almacenamiento de imágenes no está configurado en el servidor.'
             );
         }
     }

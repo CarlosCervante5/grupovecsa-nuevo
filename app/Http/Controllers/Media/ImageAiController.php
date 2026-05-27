@@ -218,7 +218,7 @@ class ImageAiController extends Controller
 
         $finalUrl = $this->persistProcessedImage($targetType, $targetUuid, $binary, $format);
 
-        return ApiResponseHelper::apiSuccess(200, 'Imagen guardada en Cloudinary', [
+        return ApiResponseHelper::apiSuccess(200, 'Imagen guardada correctamente', [
             'image_url' => $finalUrl,
             'action' => $action,
             'saved' => true,
