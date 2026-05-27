@@ -240,9 +240,7 @@ final class ImageAiProcessingService
                 if ($data === '') {
                     continue;
                 }
-                $outMime = $inline['mimeType'] ?? $inline['mime_type'] ?? (
-                    str_contains(strtolower($action), 'background') ? 'image/png' : 'image/jpeg'
-                );
+                $outMime = $inline['mimeType'] ?? $inline['mime_type'] ?? 'image/jpeg';
 
                 return [
                     'processed_base64' => (string) $data,
@@ -264,16 +262,6 @@ final class ImageAiProcessingService
     {
         return [
             [
-                'id' => 'remove_background',
-                'label' => 'Quitar fondo',
-                'description' => 'Dejar el producto/objeto sobre fondo transparente (PNG).',
-            ],
-            [
-                'id' => 'enhance',
-                'label' => 'Mejorar imagen',
-                'description' => 'Mejorar luz, color y nitidez sin cambiar encuadre.',
-            ],
-            [
                 'id' => 'studio_white',
                 'label' => 'Fondo blanco (estudio)',
                 'description' => 'Fondo blanco tipo catálogo con iluminación suave.',
@@ -288,14 +276,8 @@ final class ImageAiProcessingService
 
     private function promptForAction(string $action): string
     {
-        return match ($action) {
-            'remove_background' => 'Edit this image: remove the entire background completely. Keep only the main subject with clean edges '
-                .'and transparency where the background was (PNG alpha). Do not crop the subject. Preserve realism and proportions.',
-            'studio_white' => 'Edit this e-commerce/product photo: remove the original background and place the subject centered on '
-                .'a pure seamless white (#FFFFFF) studio backdrop with soft even catalog lighting. No harsh shadows.',
-            default => 'Enhance this image for publication: balanced exposure and white balance, natural colors, moderate sharpening, '
-                .'minimal noise reduction. Keep the framing and composition the same.',
-        };
+        return 'Edit this e-commerce/product photo: remove the original background and place the subject centered on '
+            .'a pure seamless white (#FFFFFF) studio backdrop with soft even catalog lighting. No harsh shadows.';
     }
 
     private function normalizeImageMime(string $headerMime, string $sourceUrl): string
