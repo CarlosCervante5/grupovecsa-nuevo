@@ -17,10 +17,11 @@ php artisan db:seed --class=VehicleDataSeeder --force 2>/dev/null || echo "⚠�
 php artisan db:seed --class=VehicleInventorySeeder --force 2>/dev/null || echo "⚠️ VehicleInventorySeeder skipped"
 php artisan db:seed --class=BoutiqueProductsSeeder --force 2>/dev/null || echo "⚠️ BoutiqueProductsSeeder skipped"
 
-# Cache config and routes for production
-echo "⚡ Caching config and routes..."
+# En Railway las variables (AWS_*, etc.) se inyectan en runtime; config:cache las
+# congela en el release y deja bucket/credenciales vacíos si se añadieron después.
+echo "⚡ Limpiando caché de config y cacheando rutas..."
 php artisan permission:cache-reset 2>/dev/null || echo "⚠️ Permission cache reset skipped"
-php artisan config:cache 2>/dev/null || true
+php artisan config:clear 2>/dev/null || true
 php artisan route:cache 2>/dev/null || true
 
 echo "✅ Deploy complete!"

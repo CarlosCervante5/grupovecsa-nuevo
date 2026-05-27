@@ -54,12 +54,7 @@ final class ImageAiPersistenceService
 
     private function putOnS3(string $s3Path, string $contents): void
     {
-        $bucket = (string) config('filesystems.disks.s3.bucket', '');
-        if ($bucket === '') {
-            throw new \RuntimeException(
-                'El disco S3 no tiene bucket configurado. En Railway define AWS_BUCKET (y credenciales AWS) en el servicio backend.'
-            );
-        }
+        $this->assertS3Configured();
 
         try {
             $ok = Storage::disk('s3')->put($s3Path, $contents);
@@ -75,9 +70,51 @@ final class ImageAiPersistenceService
 
         if (! $ok) {
             throw new \RuntimeException(
-                'No se pudo guardar la imagen en S3. Revisa AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_BUCKET y AWS_DEFAULT_REGION en el servidor.'
+                'No se pudo escribir en S3 (permisos o credenciales incorrectas). '
+                .'Revisa que la llave IAM tenga s3:PutObject en el bucket '.$this->maskedBucket().'.'
             );
         }
+    }
+
+    private function assertS3Configured(): void
+    {
+        $missing = [];
+        if ($this->s3ConfigValue('bucket') === '') {
+            $missing[] = 'AWS_BUCKET';
+        }
+        if ($this->s3ConfigValue('key') === '') {
+            $missing[] = 'AWS_ACCESS_KEY_ID';
+        }
+        if ($this->s3ConfigValue('secret') === '') {
+            $missing[] = 'AWS_SECRET_ACCESS_KEY';
+        }
+        if ($this->s3ConfigValue('region') === '') {
+            $missing[] = 'AWS_DEFAULT_REGION';
+        }
+
+        if ($missing === []) {
+            return;
+        }
+
+        $redeployHint = file_exists(base_path('bootstrap/cache/config.php'))
+            ? ' Hay config en caché: haz Redeploy del backend (deploy.sh ya no usa config:cache).'
+            : ' Tras añadir variables en Railway, haz Redeploy del servicio backend.';
+
+        throw new \RuntimeException(
+            'Faltan variables S3 en el servidor: '.implode(', ', $missing).'.'.$redeployHint
+        );
+    }
+
+    private function s3ConfigValue(string $key): string
+    {
+        return trim((string) config('filesystems.disks.s3.'.$key, ''));
+    }
+
+    private function maskedBucket(): string
+    {
+        $bucket = $this->s3ConfigValue('bucket');
+
+        return $bucket !== '' ? $bucket : '(sin bucket)';
     }
 
     private function cloudfrontBaseUrl(): string
