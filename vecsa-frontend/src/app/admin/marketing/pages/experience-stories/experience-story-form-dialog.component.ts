@@ -5,9 +5,11 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { reload } from '@helpers/session.helper';
 import {
   ExperienceStoriesAdminService,
+  ExperienceStoryMutationResponse,
   ExperienceStoryPostTypeOption,
   ExperienceStoryRow,
 } from '@services/experience-stories-admin.service';
+import { IMAGE_UPLOAD_ACCEPT } from '@shared/constants/image-upload';
 
 export interface ExperienceStoryFormDialogData {
   editing: ExperienceStoryRow | null;
@@ -30,6 +32,7 @@ const DEFAULT_POST_TYPES: ExperienceStoryPostTypeOption[] = [
 })
 export class ExperienceStoryFormDialogComponent implements OnInit, OnDestroy {
   readonly otherCategoryValue = '__other__';
+  readonly featuredImageAccept = IMAGE_UPLOAD_ACCEPT;
 
   editing: ExperienceStoryRow | null;
 
@@ -175,8 +178,11 @@ export class ExperienceStoryFormDialogComponent implements OnInit, OnDestroy {
     if (!file) {
       return;
     }
-    if (!file.type.startsWith('image/')) {
-      this.snack.open('El archivo debe ser una imagen (JPEG, PNG, WebP, GIF…)', 'OK', { duration: 4000 });
+    const name = file.name.toLowerCase();
+    const allowedExt = /\.(jpe?g|png|gif|webp|heic|heif)$/i.test(name);
+    const allowedMime = !file.type || file.type.startsWith('image/');
+    if (!allowedExt && !allowedMime) {
+      this.snack.open('El archivo debe ser una imagen (JPEG, PNG, WebP, GIF, HEIC…)', 'OK', { duration: 4000 });
       input.value = '';
       return;
     }
@@ -323,8 +329,17 @@ export class ExperienceStoryFormDialogComponent implements OnInit, OnDestroy {
     }
 
     req.subscribe({
-      next: () => {
+      next: (res: ExperienceStoryMutationResponse) => {
         this.saving = false;
+        const savedPath = res?.data?.post?.image_path?.trim() ?? '';
+        if (this.featuredImageFile && !savedPath) {
+          this.snack.open(
+            'Se guardó el texto pero la imagen no se subió. Comprueba el formato o vuelve a intentar.',
+            'OK',
+            { duration: 6000 }
+          );
+          return;
+        }
         this.snack.open(this.editing ? 'Historia actualizada' : 'Historia creada', 'OK', { duration: 2500 });
         this.ref.close({ saved: true });
       },
