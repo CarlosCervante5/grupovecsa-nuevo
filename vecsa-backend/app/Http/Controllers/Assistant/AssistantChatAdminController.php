@@ -107,16 +107,17 @@ class AssistantChatAdminController extends Controller
 
     private function assistantTablesReady(): bool
     {
-        $prefix = (string) config('vecsa.db_table_prefix', '');
-        if ($prefix === '') {
-            $envPrefix = getenv('DB_TABLE_PREFIX');
-            if (is_string($envPrefix) && $envPrefix !== '') {
-                $prefix = $envPrefix;
+        foreach (['app_vecsa_', (string) config('vecsa.db_table_prefix', ''), getenv('DB_TABLE_PREFIX') ?: ''] as $candidate) {
+            if (! is_string($candidate) || $candidate === '') {
+                continue;
+            }
+            if (Schema::hasTable($candidate.'assistant_conversations')
+                && Schema::hasTable($candidate.'assistant_messages')) {
+                return true;
             }
         }
 
-        return Schema::hasTable($prefix.'assistant_conversations')
-            && Schema::hasTable($prefix.'assistant_messages');
+        return false;
     }
 
     /**
