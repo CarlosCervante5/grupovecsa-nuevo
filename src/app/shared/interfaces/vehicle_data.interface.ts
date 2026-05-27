@@ -292,8 +292,11 @@ export interface Specification {
 }
 
 export interface Image {
-    service_image_url: string;
-    created_at:        Date;
+    uuid?:              string;
+    sort_id?:           string;
+    service_image_url:  string;
+    service_public_id?: string;
+    created_at?:        Date;
 }
 
 export interface ImageCarousel {

@@ -264,11 +264,11 @@ export class UpdateVehicleComponent implements OnInit {
 
   private syncImagesFromVehicle(): void {
     const imgs = this.vehicle?.images ?? [];
-    this.vehicleImages = imgs.map((img: { uuid: string; sort_id: string; service_image_url: string; service_public_id: string }) => ({
-      id: img.uuid,
-      sort_id: img.sort_id,
+    this.vehicleImages = imgs.map((img) => ({
+      id: img.uuid ?? '',
+      sort_id: String(img.sort_id ?? ''),
       path: img.service_image_url,
-      path_public: img.service_public_id,
+      path_public: img.service_public_id ?? '',
       external_website: 'no',
       selected: false,
     }));
