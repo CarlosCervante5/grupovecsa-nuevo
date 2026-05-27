@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -15,8 +15,7 @@ import { adminRouteSegmentForRole } from 'src/app/admin/utils/admin-route.util';
     styleUrls: ['./login2.component.css'],
     standalone: false
 })
-export class Login2Component {
-
+export class Login2Component implements OnInit {
 
     // References of Help
     public hide: boolean = true;
@@ -38,6 +37,22 @@ export class Login2Component {
 
         // Create form
         this.createForm();
+    }
+
+    ngOnInit(): void {
+        const token = localStorage.getItem('user_token');
+        const role = localStorage.getItem('role');
+        if (!token || !role) {
+            return;
+        }
+        const dest =
+            role === 'client'
+                ? '/auth/mi-cuenta'
+                : `/admin/${adminRouteSegmentForRole(role)}`;
+        if (dest === '/admin/') {
+            return;
+        }
+        void this._router.navigateByUrl(dest);
     }
 
     /**
@@ -102,14 +117,14 @@ export class Login2Component {
 
                 afterCartSync$.pipe(
                     finalize(() => {
+                        sessionStorage.removeItem('vecsa_chunk_reload');
                         if (safeReturnUrl) {
-                            void this._router.navigateByUrl(safeReturnUrl);
+                            window.location.assign(safeReturnUrl);
+                        } else if (loginResponse.data.role === 'client') {
+                            window.location.assign('/auth/mi-cuenta');
                         } else {
-                            const dest =
-                                loginResponse.data.role === 'client'
-                                    ? ['/auth/mi-cuenta']
-                                    : ['/admin', adminRouteSegmentForRole(loginResponse.data.role)];
-                            void this._router.navigate(dest);
+                            const seg = adminRouteSegmentForRole(loginResponse.data.role);
+                            window.location.assign(seg ? `/admin/${seg}` : '/');
                         }
                         this.spinner = false;
                     }),
@@ -121,11 +136,16 @@ export class Login2Component {
 
             },
             error: ( errorResponse ) => {
+                const status = errorResponse?.status ?? 0;
+                const msg =
+                    status === 401
+                        ? 'Correo o contraseña incorrectos. En sandbox la cuenta debe existir en la base de datos de pruebas (no es la misma que producción).'
+                        : (errorResponse?.error?.message || 'No se pudo iniciar sesión. Intenta de nuevo.');
 
                 Swal.fire({
                     icon: 'error',
                     title: 'Error al autenticar usuario',
-                    text: errorResponse.error.message,
+                    text: msg,
                     showConfirmButton: true,
                     confirmButtonColor: '#EEB838'
                 });

@@ -144,8 +144,16 @@ export class AuthService {
     /**
      * API Login (POST login + GET /me para permisos)
      */
-    public login(user: UntypedFormGroup): Observable<LoginResponse> {
-        return this._http.post<LoginResponse>(`${this.url}/api/auth/login`, user, { headers: this.headers }).pipe(
+    public login(credentials: UntypedFormGroup | { email?: string; password?: string }): Observable<LoginResponse> {
+        const raw =
+            credentials && typeof credentials === 'object' && 'value' in credentials
+                ? (credentials as UntypedFormGroup).value
+                : credentials;
+        const body = {
+            email: String(raw?.email ?? '').trim().toLowerCase(),
+            password: String(raw?.password ?? ''),
+        };
+        return this._http.post<LoginResponse>(`${this.url}/api/auth/login`, body, { headers: this.headers }).pipe(
             switchMap((response) => {
                 if (!response.data?.token) {
                     return of(response);
