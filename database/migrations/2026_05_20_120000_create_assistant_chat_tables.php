@@ -12,10 +12,7 @@ return new class extends Migration
         $conversations = $prefix.'assistant_conversations';
         $messages = $prefix.'assistant_messages';
 
-        if (Schema::hasTable($conversations)) {
-            return;
-        }
-
+        if (! Schema::hasTable($conversations)) {
         Schema::create($conversations, function (Blueprint $table) {
             $table->id();
             $table->uuid()->unique();
@@ -30,7 +27,9 @@ return new class extends Migration
             $table->timestamp('last_message_at')->nullable();
             $table->timestamps();
         });
+        }
 
+        if (! Schema::hasTable($messages)) {
         Schema::create($messages, function (Blueprint $table) use ($conversations) {
             $table->id();
             $table->unsignedBigInteger('conversation_id')->index();
@@ -43,6 +42,7 @@ return new class extends Migration
                 ->on($conversations)
                 ->cascadeOnDelete();
         });
+        }
     }
 
     public function down(): void
