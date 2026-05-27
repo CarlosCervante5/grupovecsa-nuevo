@@ -10,9 +10,12 @@ use App\Services\DealershipAccessService;
 use App\Services\Media\ImageAiPersistenceService;
 use App\Services\Media\ImageAiProcessingService;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
+use League\Flysystem\FilesystemException;
 
 class ImageAiController extends Controller
 {
@@ -137,10 +140,39 @@ class ImageAiController extends Controller
             return ApiResponseHelper::apiError($e->getMessage(), null, 403, 'IMAGE_AI_FORBIDDEN');
         } catch (\Illuminate\Validation\ValidationException $e) {
             throw $e;
+        } catch (ConnectionException $e) {
+            return ApiResponseHelper::apiError(
+                'No se pudo conectar con un servicio externo (imagen o Gemini).',
+                ['detail' => $e->getMessage()],
+                502,
+                'IMAGE_AI_NETWORK'
+            );
+        } catch (FilesystemException $e) {
+            return ApiResponseHelper::apiError(
+                'No se pudo guardar la imagen en almacenamiento.',
+                ['detail' => $e->getMessage()],
+                502,
+                'IMAGE_AI_STORAGE'
+            );
         } catch (\RuntimeException $e) {
-            return ApiResponseHelper::apiError($e->getMessage(), null, 502, 'IMAGE_AI_PROCESS_FAILED');
-        } catch (\Exception $e) {
-            return ApiResponseHelper::apiError('Error al procesar imagen con IA', $e->getMessage(), 500, 'IMAGE_AI_ERROR');
+            return ApiResponseHelper::apiError(
+                $e->getMessage(),
+                ['detail' => $e->getMessage()],
+                502,
+                'IMAGE_AI_PROCESS_FAILED'
+            );
+        } catch (\Throwable $e) {
+            Log::error('image_ai/process unexpected error', [
+                'class' => $e::class,
+                'message' => $e->getMessage(),
+            ]);
+
+            return ApiResponseHelper::apiError(
+                'Error al procesar imagen con IA',
+                ['detail' => $e->getMessage()],
+                500,
+                'IMAGE_AI_ERROR'
+            );
         }
     }
 
@@ -172,7 +204,12 @@ class ImageAiController extends Controller
 
     private function downloadProcessedImage(string $url): string
     {
-        $response = Http::timeout(120)->get($url);
+        try {
+            $response = Http::timeout(120)->get($url);
+        } catch (ConnectionException $e) {
+            throw new \RuntimeException('No se pudo descargar la imagen procesada (red).', 0, $e);
+        }
+
         if (! $response->successful()) {
             throw new \RuntimeException('No se pudo descargar la imagen procesada.');
         }

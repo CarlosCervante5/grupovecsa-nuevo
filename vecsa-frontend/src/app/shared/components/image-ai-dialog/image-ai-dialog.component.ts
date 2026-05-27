@@ -105,11 +105,13 @@ export class ImageAiDialogComponent implements OnInit {
       error: (err) => {
         this.processing = false;
         const e = err?.error;
-        this.error =
+        const detail = typeof e?.data?.detail === 'string' ? e.data.detail : '';
+        const base =
           e?.message ||
           (e?.error_code === 'IMAGE_AI_DISABLED'
             ? 'El procesamiento con IA no está habilitado.'
             : 'No se pudo procesar la imagen.');
+        this.error = detail && !base.includes(detail) ? `${base} ${detail}` : base;
       },
     });
   }
