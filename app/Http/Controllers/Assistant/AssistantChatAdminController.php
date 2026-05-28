@@ -117,21 +117,213 @@ class AssistantChatAdminController extends Controller
             }
 
             return ApiResponseHelper::apiSuccess(200, 'Detalle de conversación', [
-                'conversation' => [
-                    ...$this->listRow($conversation),
-                    'session_key' => $conversation->session_key,
-                    'ip_address' => $conversation->ip_address,
-                    'messages' => $conversation->messages->map(fn (AssistantMessage $m) => [
-                        'id' => $m->id,
-                        'role' => $m->role,
-                        'content' => $m->content,
-                        'created_at' => $m->created_at,
-                    ])->values(),
-                ],
+                'conversation' => $this->detailPayload($conversation),
             ]);
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al obtener conversación', $e->getMessage(), 500);
         }
+    }
+
+    public function takeOver(Request $request)
+    {
+        try {
+            if (! $this->assistantTablesReady()) {
+                return ApiResponseHelper::apiError(
+                    'El módulo de chats del asistente no está disponible (falta migración en el servidor)',
+                    null,
+                    503,
+                    'ASSISTANT_TABLES_MISSING'
+                );
+            }
+
+            $data = $request->validate([
+                'uuid' => 'required|string|max:64',
+            ]);
+
+            $viewer = $this->resolveViewer($request);
+            if (! $viewer) {
+                return ApiResponseHelper::apiError('No autenticado', null, 401);
+            }
+
+            $conversation = $this->findConversationForViewer($data['uuid'], $viewer);
+            if (! $conversation) {
+                return ApiResponseHelper::apiError('Conversación no encontrada', null, 404);
+            }
+
+            if (! $conversation->isHumanHandoff()) {
+                $dealershipName = $conversation->dealership?->name ?? 'Grupo VECSA';
+                AssistantMessage::create([
+                    'conversation_id' => $conversation->id,
+                    'role' => 'assistant',
+                    'content' => 'Un asesor de '.$dealershipName.' ha tomado la conversación. Te atenderá en breve.',
+                ]);
+
+                $conversation->update([
+                    'human_handoff_at' => now(),
+                    'assigned_user_id' => $viewer->id,
+                    'messages_count' => (int) $conversation->messages_count + 1,
+                    'last_message_at' => now(),
+                ]);
+            } elseif ((int) $conversation->assigned_user_id !== (int) $viewer->id) {
+                $conversation->update(['assigned_user_id' => $viewer->id]);
+            }
+
+            $conversation->refresh()->load(['user', 'dealership', 'assignedUser.userProfile', 'messages']);
+
+            return ApiResponseHelper::apiSuccess(200, 'Conversación asignada', [
+                'conversation' => $this->detailPayload($conversation),
+            ]);
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al tomar la conversación', $e->getMessage(), 500);
+        }
+    }
+
+    public function reply(Request $request)
+    {
+        try {
+            if (! $this->assistantTablesReady()) {
+                return ApiResponseHelper::apiError(
+                    'El módulo de chats del asistente no está disponible (falta migración en el servidor)',
+                    null,
+                    503,
+                    'ASSISTANT_TABLES_MISSING'
+                );
+            }
+
+            $data = $request->validate([
+                'uuid' => 'required|string|max:64',
+                'message' => 'required|string|max:2000',
+            ]);
+
+            $viewer = $this->resolveViewer($request);
+            if (! $viewer) {
+                return ApiResponseHelper::apiError('No autenticado', null, 401);
+            }
+
+            $conversation = $this->findConversationForViewer($data['uuid'], $viewer);
+            if (! $conversation) {
+                return ApiResponseHelper::apiError('Conversación no encontrada', null, 404);
+            }
+
+            if (! $conversation->isHumanHandoff()) {
+                return ApiResponseHelper::apiError(
+                    'Debes tomar la conversación antes de responder',
+                    null,
+                    422
+                );
+            }
+
+            $text = trim($data['message']);
+            AssistantMessage::create([
+                'conversation_id' => $conversation->id,
+                'role' => 'agent',
+                'content' => $text,
+            ]);
+
+            $conversation->update([
+                'messages_count' => (int) $conversation->messages_count + 1,
+                'last_message_at' => now(),
+                'preview' => \Illuminate\Support\Str::limit($text, 500, ''),
+            ]);
+
+            $conversation->refresh()->load(['user', 'dealership', 'assignedUser.userProfile', 'messages']);
+
+            return ApiResponseHelper::apiSuccess(200, 'Mensaje enviado', [
+                'conversation' => $this->detailPayload($conversation),
+            ]);
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al enviar mensaje', $e->getMessage(), 500);
+        }
+    }
+
+    public function release(Request $request)
+    {
+        try {
+            if (! $this->assistantTablesReady()) {
+                return ApiResponseHelper::apiError(
+                    'El módulo de chats del asistente no está disponible (falta migración en el servidor)',
+                    null,
+                    503,
+                    'ASSISTANT_TABLES_MISSING'
+                );
+            }
+
+            $data = $request->validate([
+                'uuid' => 'required|string|max:64',
+            ]);
+
+            $viewer = $this->resolveViewer($request);
+            if (! $viewer) {
+                return ApiResponseHelper::apiError('No autenticado', null, 401);
+            }
+
+            $conversation = $this->findConversationForViewer($data['uuid'], $viewer);
+            if (! $conversation) {
+                return ApiResponseHelper::apiError('Conversación no encontrada', null, 404);
+            }
+
+            if ($conversation->isHumanHandoff()) {
+                AssistantMessage::create([
+                    'conversation_id' => $conversation->id,
+                    'role' => 'assistant',
+                    'content' => 'La conversación vuelve al asistente virtual. ¿En qué más puedo ayudarte?',
+                ]);
+
+                $conversation->update([
+                    'human_handoff_at' => null,
+                    'messages_count' => (int) $conversation->messages_count + 1,
+                    'last_message_at' => now(),
+                ]);
+            }
+
+            $conversation->refresh()->load(['user', 'dealership', 'assignedUser.userProfile', 'messages']);
+
+            return ApiResponseHelper::apiSuccess(200, 'Conversación liberada', [
+                'conversation' => $this->detailPayload($conversation),
+            ]);
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al liberar conversación', $e->getMessage(), 500);
+        }
+    }
+
+    private function findConversationForViewer(string $uuid, User $viewer): ?AssistantConversation
+    {
+        $scopeIds = $this->dealershipAccess->inventoryDealershipIds($viewer);
+
+        $conversation = AssistantConversation::query()
+            ->with(['user', 'dealership', 'assignedUser.userProfile', 'messages'])
+            ->where('uuid', $uuid)
+            ->first();
+
+        if (! $conversation) {
+            return null;
+        }
+
+        if ($scopeIds !== null
+            && ! in_array((int) $conversation->dealership_id, $scopeIds, true)
+            && (int) $conversation->assigned_user_id !== (int) $viewer->id) {
+            return null;
+        }
+
+        return $conversation;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function detailPayload(AssistantConversation $conversation): array
+    {
+        return [
+            ...$this->listRow($conversation),
+            'session_key' => $conversation->session_key,
+            'ip_address' => $conversation->ip_address,
+            'messages' => $conversation->messages->map(fn (AssistantMessage $m) => [
+                'id' => $m->id,
+                'role' => $m->role,
+                'content' => $m->content,
+                'created_at' => $m->created_at,
+            ])->values(),
+        ];
     }
 
     private function resolveViewer(Request $request): ?User
@@ -185,6 +377,8 @@ class AssistantChatAdminController extends Controller
             'last_message_at' => $c->last_message_at,
             'created_at' => $c->created_at,
             'is_registered' => (bool) $c->user_id,
+            'is_human_handoff' => $c->isHumanHandoff(),
+            'human_handoff_at' => $c->human_handoff_at,
         ];
     }
 }

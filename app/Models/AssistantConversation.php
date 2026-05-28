@@ -35,6 +35,7 @@ class AssistantConversation extends Model
         'user_id',
         'dealership_id',
         'assigned_user_id',
+        'human_handoff_at',
         'visitor_name',
         'visitor_email',
         'page_url',
@@ -47,7 +48,13 @@ class AssistantConversation extends Model
     protected $casts = [
         'messages_count' => 'integer',
         'last_message_at' => 'datetime',
+        'human_handoff_at' => 'datetime',
     ];
+
+    public function isHumanHandoff(): bool
+    {
+        return $this->human_handoff_at !== null;
+    }
 
     public function user(): BelongsTo
     {
