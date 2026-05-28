@@ -16,6 +16,34 @@ class AssistantDealershipAssigner
         'appointment_manager',
     ];
 
+    /** @var list<string> */
+    private const SALES_ROLES = [
+        'seller',
+        'marketing',
+        'receptionist',
+        'gestor',
+        'appointment_manager',
+    ];
+
+    public function assignSalesUserIdForDealership(int $dealershipId): ?int
+    {
+        $dealershipTable = (new Dealership)->getTable();
+
+        foreach (self::SALES_ROLES as $role) {
+            $userId = User::query()
+                ->whereHas('roles', fn ($q) => $q->where('name', $role))
+                ->whereHas('dealerships', fn ($q) => $q->where($dealershipTable.'.id', $dealershipId))
+                ->orderBy('id')
+                ->value('id');
+
+            if ($userId) {
+                return (int) $userId;
+            }
+        }
+
+        return $this->assignUserIdForDealership($dealershipId);
+    }
+
     public function assignUserIdForDealership(int $dealershipId): ?int
     {
         $dealershipTable = (new Dealership)->getTable();
