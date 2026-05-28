@@ -100,10 +100,9 @@ class AssistantChatService
         $pageUrl = $this->resolvePageUrl($data, $conversation);
 
         if ($conversation->isHumanHandoff()) {
-            $reply = 'Tu mensaje fue enviado al asesor. Te responderá en breve.';
-            $this->persistMessages($conversation, $userText, $reply, $data, $user);
+            $this->persistUserMessageOnly($conversation, $userText, $data, $user);
 
-            return $this->chatPayload($conversation, $reply, true);
+            return $this->chatPayload($conversation, '', true);
         }
 
         if ($this->boutique->isBoutiqueSection($pageUrl)
@@ -152,6 +151,8 @@ class AssistantChatService
             'conversation_uuid' => 'required|string|max:64',
             'session_key' => 'required|string|max:64',
             'after_id' => 'nullable|integer|min:0',
+            'mark_read' => 'sometimes|boolean',
+            'last_read_message_id' => 'nullable|integer|min:0',
         ]);
 
         $conversation = AssistantConversation::findByUuid($data['conversation_uuid']);
@@ -159,6 +160,14 @@ class AssistantChatService
             throw ValidationException::withMessages([
                 'conversation_uuid' => ['Conversación no válida.'],
             ]);
+        }
+
+        if (! empty($data['mark_read'])) {
+            $readId = isset($data['last_read_message_id'])
+                ? (int) $data['last_read_message_id']
+                : null;
+            $conversation->markVisitorRead($readId);
+            $conversation->refresh();
         }
 
         $query = $conversation->messages();
@@ -180,6 +189,25 @@ class AssistantChatService
             'messages' => $messages,
             'human_handoff' => $conversation->isHumanHandoff(),
             'conversation_uuid' => $conversation->uuid,
+            'unread_count' => $conversation->countUnreadForVisitor(),
+        ];
+    }
+
+    /**
+     * @return array{unread_count: int, conversations_with_unread: int}
+     */
+    public function visitorUnreadSummary(string $conversationUuid, string $sessionKey): array
+    {
+        $conversation = AssistantConversation::findByUuid($conversationUuid);
+        if (! $conversation || $conversation->session_key !== $sessionKey) {
+            return ['unread_count' => 0, 'conversations_with_unread' => 0];
+        }
+
+        $unread = $conversation->countUnreadForVisitor();
+
+        return [
+            'unread_count' => $unread,
+            'conversations_with_unread' => $unread > 0 ? 1 : 0,
         ];
     }
 
@@ -190,13 +218,18 @@ class AssistantChatService
     {
         $conversation->loadMissing('dealership');
 
-        return [
-            'reply' => $reply,
+        $payload = [
             'conversation_uuid' => $conversation->uuid,
             'dealership_id' => $conversation->dealership_id,
             'dealership_name' => $conversation->dealership?->name,
             'human_handoff' => $humanHandoff,
         ];
+
+        if ($reply !== '') {
+            $payload['reply'] = $reply;
+        }
+
+        return $payload;
     }
 
     private function resolveUser(Request $request): ?User
@@ -390,6 +423,44 @@ class AssistantChatService
 
         return 'No pude procesar tu mensaje: falta configurar la IA del chat en Panel desarrollo '
             .'(Gemini u OpenAI). Si el problema continúa, usa el botón para elegir sucursal y hablar con un asesor.';
+    }
+
+    /**
+     * Solo guarda el mensaje del visitante cuando un asesor ya atiende la conversación.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    private function persistUserMessageOnly(
+        AssistantConversation $conversation,
+        string $userText,
+        array $data,
+        ?User $user
+    ): void {
+        AssistantMessage::create([
+            'conversation_id' => $conversation->id,
+            'role' => 'user',
+            'content' => $userText,
+        ]);
+
+        $updates = [
+            'messages_count' => (int) $conversation->messages_count + 1,
+            'last_message_at' => now(),
+        ];
+
+        if (! $conversation->preview) {
+            $updates['preview'] = Str::limit($userText, 500, '');
+        }
+
+        if (empty($conversation->page_url) && ! empty($data['page_url'])) {
+            $updates['page_url'] = Str::limit(trim((string) $data['page_url']), 500, '');
+        }
+
+        if ($user && ! $conversation->user_id) {
+            $updates['user_id'] = $user->id;
+            $updates = array_merge($updates, $this->visitorAttributes($user));
+        }
+
+        $conversation->update($updates);
     }
 
     /**

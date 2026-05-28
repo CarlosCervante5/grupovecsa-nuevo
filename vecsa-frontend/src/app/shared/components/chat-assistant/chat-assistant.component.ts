@@ -1,6 +1,7 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { environment } from '@environments/environment';
+import { ChatNotificationSoundService } from '@services/chat-notification-sound.service';
 
 const SESSION_KEY = 'vecsa_assistant_session';
 const CONVERSATION_KEY = 'vecsa_assistant_conversation';
@@ -33,6 +34,11 @@ interface PollMessagesResponse {
   messages?: PollMessageRow[];
   human_handoff?: boolean;
   conversation_uuid?: string;
+  unread_count?: number;
+}
+
+interface VisitorUnreadSummary {
+  unread_count?: number;
 }
 
 interface AssistantChatResponse {
@@ -49,8 +55,9 @@ interface AssistantChatResponse {
   styleUrls: ['./chat-assistant.component.css'],
   standalone: false,
 })
-export class ChatAssistantComponent implements OnDestroy {
+export class ChatAssistantComponent implements OnInit, OnDestroy {
   open = false;
+  unreadCount = 0;
   message = '';
   sending = false;
   loadingDealerships = false;
@@ -69,8 +76,13 @@ export class ChatAssistantComponent implements OnDestroy {
   private conversationUuid: string | null = this.loadConversationUuid();
   private lastMessageId = 0;
   private pollTimer: ReturnType<typeof setInterval> | null = null;
+  private backgroundUnreadTimer: ReturnType<typeof setInterval> | null = null;
+  private unreadBaselineReady = false;
 
-  constructor(private http: HttpClient) {
+  constructor(
+    private http: HttpClient,
+    private sound: ChatNotificationSoundService,
+  ) {
     const stored = this.loadDealershipId();
     if (stored) {
       this.selectedDealershipId = stored;
@@ -79,19 +91,31 @@ export class ChatAssistantComponent implements OnDestroy {
     this.humanHandoff = this.loadHumanHandoff();
   }
 
+  ngOnInit(): void {
+    this.startBackgroundUnreadCheck();
+  }
+
   ngOnDestroy(): void {
     this.stopPolling();
+    this.stopBackgroundUnreadCheck();
   }
 
   toggle(): void {
+    this.sound.unlock();
     this.open = !this.open;
     if (this.open) {
+      this.unreadCount = 0;
+      this.stopBackgroundUnreadCheck();
       this.ensureDealershipsLoaded();
-      if (this.conversationUuid && this.humanHandoff) {
-        this.startPolling();
+      if (this.conversationUuid) {
+        if (this.humanHandoff) {
+          this.startPolling();
+        }
+        this.markVisitorRead();
       }
     } else {
       this.stopPolling();
+      this.startBackgroundUnreadCheck();
     }
   }
 
@@ -191,16 +215,24 @@ export class ChatAssistantComponent implements OnDestroy {
     if (res.conversation_uuid) {
       this.conversationUuid = res.conversation_uuid;
       this.saveConversationUuid(res.conversation_uuid);
+      if (!this.open) {
+        this.startBackgroundUnreadCheck();
+      }
     }
     if (res.human_handoff) {
       this.setHumanHandoff(true);
       this.startPolling();
+      this.stopBackgroundUnreadCheck();
+      this.startBackgroundUnreadCheck();
     }
-    if (res.reply) {
+    if (res.reply?.trim()) {
       this.messages.push({ role: 'assistant', text: res.reply });
       if (this.conversationUuid) {
         this.syncPollCursor();
       }
+    } else if (this.humanHandoff && this.conversationUuid) {
+      this.syncPollCursor();
+      setTimeout(() => this.pollMessages(), 150);
     }
     this.sending = false;
     setTimeout(() => this.scrollToBottom(), 50);
@@ -460,7 +492,81 @@ export class ChatAssistantComponent implements OnDestroy {
             added = true;
           }
           if (added) {
+            this.sound.playNewMessage();
             setTimeout(() => this.scrollToBottom(), 50);
+          }
+          if (typeof res.unread_count === 'number') {
+            this.unreadCount = res.unread_count;
+          }
+          if (this.open) {
+            this.markVisitorRead(this.lastMessageId);
+          }
+        },
+      });
+  }
+
+  private startBackgroundUnreadCheck(): void {
+    this.stopBackgroundUnreadCheck();
+    if (!this.conversationUuid) {
+      return;
+    }
+    this.refreshUnreadCount();
+    this.backgroundUnreadTimer = setInterval(
+      () => this.refreshUnreadCount(),
+      12000
+    );
+  }
+
+  private stopBackgroundUnreadCheck(): void {
+    if (this.backgroundUnreadTimer) {
+      clearInterval(this.backgroundUnreadTimer);
+      this.backgroundUnreadTimer = null;
+    }
+  }
+
+  private refreshUnreadCount(): void {
+    if (this.open || !this.conversationUuid) {
+      return;
+    }
+    this.http
+      .post<VisitorUnreadSummary>(`${this.url}/api/assistant/unread-summary`, {
+        conversation_uuid: this.conversationUuid,
+        session_key: this.sessionKey,
+      })
+      .subscribe({
+        next: (res) => {
+          const n = Number(res?.unread_count ?? 0);
+          const safe = Number.isFinite(n) ? n : 0;
+          if (this.unreadBaselineReady && safe > this.unreadCount) {
+            this.sound.playNewMessage();
+          }
+          this.unreadCount = safe;
+          this.unreadBaselineReady = true;
+        },
+      });
+  }
+
+  private markVisitorRead(messageId?: number): void {
+    if (!this.conversationUuid) {
+      return;
+    }
+    const body: Record<string, string | number | boolean> = {
+      conversation_uuid: this.conversationUuid,
+      session_key: this.sessionKey,
+      mark_read: true,
+    };
+    if (messageId && messageId > 0) {
+      body['last_read_message_id'] = messageId;
+    }
+    this.http
+      .post<PollMessagesResponse>(`${this.url}/api/assistant/messages`, body, {
+        headers: this.buildHeaders(),
+      })
+      .subscribe({
+        next: (res) => {
+          this.unreadCount = 0;
+          if (typeof res.unread_count === 'number') {
+            this.unreadCount = res.unread_count;
           }
         },
       });

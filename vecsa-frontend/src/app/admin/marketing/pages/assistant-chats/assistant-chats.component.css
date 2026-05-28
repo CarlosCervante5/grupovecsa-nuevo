@@ -158,6 +158,26 @@
 .conv-name {
   font-size: 0.92rem;
   color: #0f172a;
+  flex: 1;
+  min-width: 0;
+}
+
+.conv-unread-badge {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.conv-item.is-active .conv-unread-badge {
+  background: #1c69d4;
 }
 
 .conv-time {

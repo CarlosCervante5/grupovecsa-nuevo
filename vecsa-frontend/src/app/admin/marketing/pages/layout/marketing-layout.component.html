@@ -13,7 +13,9 @@
     </div>
     <nav class="panel-nav">
       <a *ngFor="let item of navItems" class="panel-nav-item" [routerLink]="item.route" routerLinkActive="active" [routerLinkActiveOptions]="{exact: item.route === '/admin/marketing'}">
-        <span class="material-icons">{{ item.icon }}</span> {{ item.label }}
+        <span class="material-icons">{{ item.icon }}</span>
+        <span class="panel-nav-item-label">{{ item.label }}</span>
+        <span class="panel-nav-badge" *ngIf="navBadgeCount(item) > 0">{{ formatBadgeCount(navBadgeCount(item)) }}</span>
       </a>
       <p class="panel-nav-label" *ngIf="dynamicItems.length">Herramientas</p>
       <a *ngFor="let item of dynamicItems" class="panel-nav-item" [routerLink]="item.route" routerLinkActive="active">
