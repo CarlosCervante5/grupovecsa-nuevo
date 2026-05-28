@@ -18,15 +18,26 @@
       <div class="chat-avatar">V</div>
       <div>
         <span class="chat-name">VECSA Asistente</span>
-        <span class="chat-status" *ngIf="selectedDealershipName; else onlineStatus">
-          {{ selectedDealershipName }}
+        <span class="chat-status" *ngIf="selectedDealershipName; else topicStatus">
+          {{ intentLabel() }} · {{ selectedDealershipName }}
         </span>
-        <ng-template #onlineStatus>
-          <span class="chat-status">En línea</span>
+        <ng-template #topicStatus>
+          <span class="chat-status" *ngIf="selectedIntent; else onlineStatus">{{ intentLabel() }}</span>
+          <ng-template #onlineStatus>
+            <span class="chat-status">En línea</span>
+          </ng-template>
         </ng-template>
       </div>
     </div>
     <div class="chat-header-actions">
+      <button
+        type="button"
+        class="chat-change-branch"
+        *ngIf="selectedIntent && !showIntentPicker && !showDealershipPicker"
+        (click)="changeIntent()"
+      >
+        Cambiar tema
+      </button>
       <button
         type="button"
         class="chat-change-branch"
@@ -44,59 +55,110 @@
   </div>
 
   <div class="chat-messages">
-    <div class="chat-welcome" *ngIf="messages.length === 0 && !showDealershipPicker">
-      <div class="chat-welcome-icon">{{ isBoutiqueSection() ? '🛍️' : '👋' }}</div>
-      <p *ngIf="isBoutiqueSection(); else defaultWelcome">{{ boutiqueWelcomeText() }}</p>
-      <ng-template #defaultWelcome>
-        <p>¡Hola! Soy el asistente virtual de Grupo VECSA. ¿En qué puedo ayudarte?</p>
-      </ng-template>
-    </div>
-
-    <div
-      *ngFor="let msg of messages"
-      class="chat-msg"
-      [class.user]="msg.role === 'user'"
-      [class.assistant]="msg.role === 'assistant'"
-      [class.agent]="msg.role === 'agent'"
-    >
-      <span class="chat-msg-label" *ngIf="messageLabel(msg.role)">{{ messageLabel(msg.role) }}</span>
-      <div class="chat-bubble">{{ msg.text }}</div>
-    </div>
-    <p class="chat-handoff-note" *ngIf="humanHandoff">
-      Un asesor está atendiendo tu conversación.
-    </p>
-
-    <div class="chat-msg assistant" *ngIf="sending">
-      <div class="chat-bubble chat-typing">
-        <span></span><span></span><span></span>
+    <!-- Paso 1: qué busca -->
+    <div class="chat-intent-step" *ngIf="showIntentPicker">
+      <div class="chat-welcome-icon">👋</div>
+      <p class="chat-intent-title">¿Qué te gustaría consultar?</p>
+      <p class="chat-intent-hint">Primero elige el tipo de ayuda; después verás las sucursales disponibles.</p>
+      <div class="chat-intent-list">
+        <button
+          type="button"
+          class="chat-intent-btn"
+          *ngFor="let opt of intentOptions"
+          (click)="selectIntent(opt.id)"
+        >
+          <span class="material-icons chat-intent-icon">{{ opt.icon }}</span>
+          <span class="chat-intent-label">{{ opt.label }}</span>
+          <span class="chat-intent-sub">{{ opt.hint }}</span>
+        </button>
       </div>
     </div>
 
-    <!-- Selector de sucursal (siempre visible cuando hace falta elegir) -->
+    <!-- Paso 2: sucursal -->
     <div class="chat-dealership-step" *ngIf="showDealershipPicker">
       <div class="chat-welcome-icon">📍</div>
-      <p class="chat-dealership-title">¿Con qué sucursal deseas contactar?</p>
+      <p class="chat-dealership-title">¿Con qué sucursal deseas continuar?</p>
       <p class="chat-dealership-hint">{{ dealershipPickerHint }}</p>
+      <p class="chat-dealership-topic" *ngIf="selectedIntent">Consulta: <strong>{{ intentLabel() }}</strong></p>
       <div class="chat-dealership-loading" *ngIf="loadingDealerships">Cargando sucursales…</div>
       <div class="chat-dealership-list" *ngIf="!loadingDealerships">
         <button
           type="button"
           class="chat-dealership-btn"
+          [class.no-advisors]="d.advisors_available === false"
           *ngFor="let d of dealerships"
           (click)="selectDealership(d)"
         >
           <span class="chat-dealership-name">{{ d.name }}</span>
           <span class="chat-dealership-loc" *ngIf="d.location">{{ d.location }}</span>
           <span class="chat-dealership-loc" *ngIf="!d.location && d.state">{{ d.state }}</span>
+          <span class="chat-dealership-advisor-hint" *ngIf="dealershipAdvisorHint(d)">
+            {{ dealershipAdvisorHint(d) }}
+          </span>
         </button>
         <p class="chat-dealership-empty" *ngIf="dealerships.length === 0">
           No hay sucursales disponibles. Intenta de nuevo en unos minutos.
         </p>
       </div>
     </div>
+
+    <!-- Chat activo -->
+    <ng-container *ngIf="!showIntentPicker && !showDealershipPicker">
+      <div class="chat-welcome" *ngIf="messages.length === 0">
+        <div class="chat-welcome-icon">💬</div>
+        <p>{{ postDealershipWelcome() }}</p>
+      </div>
+
+      <div
+        *ngFor="let msg of messages"
+        class="chat-msg"
+        [class.user]="msg.role === 'user'"
+        [class.assistant]="msg.role === 'assistant'"
+        [class.agent]="msg.role === 'agent'"
+        [class.has-catalog]="msg.catalogCards?.length"
+      >
+        <span class="chat-msg-label" *ngIf="messageLabel(msg.role)">{{ messageLabel(msg.role) }}</span>
+        <div class="chat-bubble" [class.chat-bubble-wide]="msg.catalogCards?.length">
+          <p class="chat-bubble-text" *ngIf="msg.text">{{ msg.text }}</p>
+          <div class="chat-catalog-carousel" *ngIf="msg.catalogCards?.length">
+            <div class="chat-catalog-track">
+              <a
+                *ngFor="let card of msg.catalogCards"
+                class="chat-catalog-card"
+                [href]="card.url"
+              >
+                <div class="chat-catalog-card-image-wrap">
+                  <img
+                    [src]="cardImageUrl(card)"
+                    [alt]="card.title"
+                    loading="lazy"
+                    (error)="onCatalogImageError($event)"
+                  />
+                </div>
+                <div class="chat-catalog-card-body">
+                  <strong class="chat-catalog-card-title">{{ card.title }}</strong>
+                  <span class="chat-catalog-card-sub" *ngIf="card.subtitle">{{ card.subtitle }}</span>
+                  <span class="chat-catalog-card-price" *ngIf="card.price_label">{{ card.price_label }}</span>
+                  <span class="chat-catalog-card-cta">Ver detalle</span>
+                </div>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="chat-handoff-note" *ngIf="humanHandoff">
+        Un asesor está atendiendo tu conversación.
+      </p>
+
+      <div class="chat-msg assistant" *ngIf="sending">
+        <div class="chat-bubble chat-typing">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+    </ng-container>
   </div>
 
-  <div class="chat-input-area" *ngIf="!showDealershipPicker">
+  <div class="chat-input-area" *ngIf="!showIntentPicker && !showDealershipPicker">
     <input class="chat-input" type="text" placeholder="Escribe tu mensaje..."
       [(ngModel)]="message" (keyup.enter)="send()" [disabled]="sending" />
     <button class="chat-send" (click)="send()" [disabled]="sending || !message.trim()">

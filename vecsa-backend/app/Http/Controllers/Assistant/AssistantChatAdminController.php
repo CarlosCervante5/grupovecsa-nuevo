@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AssistantConversation;
 use App\Models\AssistantMessage;
 use App\Models\User;
+use App\Services\Assistant\AssistantAdvisorAvailabilityService;
 use App\Services\DealershipAccessService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
@@ -15,8 +16,73 @@ use Laravel\Sanctum\PersonalAccessToken;
 class AssistantChatAdminController extends Controller
 {
     public function __construct(
-        private readonly DealershipAccessService $dealershipAccess
+        private readonly DealershipAccessService $dealershipAccess,
+        private readonly AssistantAdvisorAvailabilityService $advisorAvailability
     ) {}
+
+    public function availability(Request $request)
+    {
+        try {
+            $viewer = $this->resolveViewer($request);
+            if (! $viewer) {
+                return ApiResponseHelper::apiError('No autenticado', null, 401);
+            }
+
+            if (! $this->advisorAvailability->tablesReady()) {
+                return ApiResponseHelper::apiError(
+                    'Disponibilidad de asesores no disponible (falta migración en el servidor)',
+                    null,
+                    503,
+                    'ASSISTANT_AVAILABILITY_TABLES_MISSING'
+                );
+            }
+
+            return ApiResponseHelper::apiSuccess(200, 'Disponibilidad por sucursal', [
+                'dealerships' => $this->advisorAvailability->listForUser($viewer),
+            ]);
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al obtener disponibilidad', $e->getMessage(), 500);
+        }
+    }
+
+    public function setAvailability(Request $request)
+    {
+        try {
+            $viewer = $this->resolveViewer($request);
+            if (! $viewer) {
+                return ApiResponseHelper::apiError('No autenticado', null, 401);
+            }
+
+            if (! $this->advisorAvailability->tablesReady()) {
+                return ApiResponseHelper::apiError(
+                    'Disponibilidad de asesores no disponible (falta migración en el servidor)',
+                    null,
+                    503,
+                    'ASSISTANT_AVAILABILITY_TABLES_MISSING'
+                );
+            }
+
+            $data = $request->validate([
+                'dealership_id' => 'required|integer|min:1',
+                'is_available' => 'required|boolean',
+            ]);
+
+            $updated = $this->advisorAvailability->setAvailability(
+                $viewer,
+                (int) $data['dealership_id'],
+                (bool) $data['is_available']
+            );
+
+            return ApiResponseHelper::apiSuccess(200, 'Disponibilidad actualizada', [
+                'availability' => $updated,
+                'dealerships' => $this->advisorAvailability->listForUser($viewer),
+            ]);
+        } catch (\InvalidArgumentException $e) {
+            return ApiResponseHelper::apiError($e->getMessage(), null, 422);
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al actualizar disponibilidad', $e->getMessage(), 500);
+        }
+    }
 
     public function unreadSummary(Request $request)
     {
@@ -197,6 +263,18 @@ class AssistantChatAdminController extends Controller
             $conversation = $this->findConversationForViewer($data['uuid'], $viewer);
             if (! $conversation) {
                 return ApiResponseHelper::apiError('Conversación no encontrada', null, 404);
+            }
+
+            $dealershipId = (int) ($conversation->dealership_id ?? 0);
+            if ($dealershipId > 0
+                && $this->advisorAvailability->tablesReady()
+                && ! $this->advisorAvailability->isUserAvailableAtDealership($viewer, $dealershipId)) {
+                return ApiResponseHelper::apiError(
+                    'Actívate como disponible en esta sucursal para tomar conversaciones del chat.',
+                    null,
+                    422,
+                    'ADVISOR_NOT_AVAILABLE'
+                );
             }
 
             if (! $conversation->isHumanHandoff()) {

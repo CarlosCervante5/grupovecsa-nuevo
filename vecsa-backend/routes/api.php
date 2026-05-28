@@ -802,6 +802,8 @@ Route::prefix('assistant')->middleware('bandwidth_usage')->group(function () {
     Route::post('/unread-summary', [AssistantController::class, 'visitorUnreadSummary']);
 
     Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/admin/availability', [AssistantChatAdminController::class, 'availability']);
+        Route::post('/admin/availability/set', [AssistantChatAdminController::class, 'setAvailability']);
         Route::post('/admin/unread-summary', [AssistantChatAdminController::class, 'unreadSummary']);
         Route::post('/admin/conversations/search', [AssistantChatAdminController::class, 'search']);
         Route::post('/admin/conversations/detail', [AssistantChatAdminController::class, 'detail']);

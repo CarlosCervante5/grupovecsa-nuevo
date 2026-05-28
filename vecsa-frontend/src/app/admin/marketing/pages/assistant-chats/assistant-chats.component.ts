@@ -3,6 +3,7 @@ import { PageEvent } from '@angular/material/paginator';
 import { reload } from '@helpers/session.helper';
 import { Router } from '@angular/router';
 import {
+  AssistantAdvisorAvailabilityRow,
   AssistantChatDetail,
   AssistantChatListRow,
   AssistantChatMessage,
@@ -30,6 +31,11 @@ export class AssistantChatsComponent implements OnDestroy {
   pageSize = 20;
   total = 0;
 
+  availabilityRows: AssistantAdvisorAvailabilityRow[] = [];
+  availabilityLoading = true;
+  availabilitySavingId: number | null = null;
+  availabilityError = '';
+
   private refreshTimer: ReturnType<typeof setInterval> | null = null;
 
   constructor(
@@ -39,11 +45,58 @@ export class AssistantChatsComponent implements OnDestroy {
     private sound: ChatNotificationSoundService,
   ) {
     this.sound.unlock();
+    this.loadAvailability();
     this.loadList();
   }
 
   ngOnDestroy(): void {
     this.stopAutoRefresh();
+  }
+
+  loadAvailability(): void {
+    this.availabilityLoading = true;
+    this.availabilityError = '';
+    this.api.availability().subscribe({
+      next: (res) => {
+        this.availabilityRows = res?.data?.dealerships ?? [];
+        this.availabilityLoading = false;
+      },
+      error: (err) => {
+        this.availabilityLoading = false;
+        this.availabilityError =
+          err?.error?.message || 'No se pudo cargar la disponibilidad por sucursal.';
+        if (err?.status !== 503) {
+          reload(err, this.router);
+        }
+      },
+    });
+  }
+
+  toggleAvailability(row: AssistantAdvisorAvailabilityRow): void {
+    if (this.availabilitySavingId != null) {
+      return;
+    }
+    const next = !row.is_available;
+    this.availabilitySavingId = row.dealership_id;
+    this.api.setAvailability(row.dealership_id, next).subscribe({
+      next: (res) => {
+        this.availabilityRows = res?.data?.dealerships ?? this.availabilityRows;
+        this.availabilitySavingId = null;
+      },
+      error: (err) => {
+        this.availabilitySavingId = null;
+        reload(err, this.router);
+      },
+    });
+  }
+
+  isAvailableAtSelectedDealership(): boolean {
+    const dealershipId = this.selected?.dealership_id;
+    if (!dealershipId) {
+      return true;
+    }
+    const row = this.availabilityRows.find((r) => r.dealership_id === dealershipId);
+    return row?.is_available ?? false;
   }
 
   loadList(): void {
@@ -119,6 +172,11 @@ export class AssistantChatsComponent implements OnDestroy {
       },
       error: (err) => {
         this.actionLoading = false;
+        const msg = err?.error?.message;
+        if (err?.status === 422 && msg) {
+          this.availabilityError = msg;
+          return;
+        }
         reload(err, this.router);
       },
     });

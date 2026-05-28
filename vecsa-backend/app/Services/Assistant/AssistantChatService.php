@@ -22,13 +22,15 @@ class AssistantChatService
 
     public function __construct(
         private readonly AssistantDealershipAssigner $dealershipAssigner,
+        private readonly AssistantAdvisorAvailabilityService $advisorAvailability,
         private readonly AssistantLlmService $llm,
         private readonly AssistantInventorySearchService $inventory,
-        private readonly AssistantBoutiqueSearchService $boutique
+        private readonly AssistantBoutiqueSearchService $boutique,
+        private readonly AssistantMessageCatalogCodec $catalogCodec
     ) {}
 
     /**
-     * @return list<array{id: int, name: string, location: string|null, state: string|null}>
+     * @return list<array{id: int, name: string, location: string|null, state: string|null, advisors_available: bool}>
      */
     public function listDealershipsForChat(): array
     {
@@ -40,6 +42,7 @@ class AssistantChatService
                 'name' => $d->name,
                 'location' => $d->location,
                 'state' => $d->state,
+                'advisors_available' => $this->advisorAvailability->hasAvailableAdvisor((int) $d->id),
             ])
             ->values()
             ->all();
@@ -77,8 +80,13 @@ class AssistantChatService
             'conversation_uuid' => 'nullable|string|max:64',
             'session_key' => 'nullable|string|max:64',
             'page_url' => 'nullable|string|max:500',
+            'chat_topic' => 'nullable|string|in:autos,motos,boutique,general',
             'dealership_id' => 'nullable|integer|exists:'.$dealershipTable.',id',
         ]);
+
+        if (! empty($data['chat_topic']) && empty($data['page_url'])) {
+            $data['page_url'] = $this->pageUrlForChatTopic((string) $data['chat_topic']);
+        }
 
         $user = $this->resolveUser($request);
 
@@ -105,15 +113,14 @@ class AssistantChatService
             return $this->chatPayload($conversation, '', true);
         }
 
-        if ($this->boutique->isBoutiqueSection($pageUrl)
-            && $this->boutique->userAcceptsBoutiqueAdvisor($conversation, $userText)) {
-            $reply = $this->activateSalesHandoff($conversation, 'boutique');
-            $this->persistMessages($conversation, $userText, $reply, $data, $user);
+        if ($this->isBoutiqueChat($pageUrl)) {
+            if ($this->boutique->userAcceptsBoutiqueAdvisor($conversation, $userText)) {
+                $reply = $this->activateSalesHandoff($conversation, 'boutique');
+                $this->persistMessages($conversation, $userText, $reply, $data, $user);
 
-            return $this->chatPayload($conversation, $reply, true);
-        }
-
-        if ($this->inventory->userAcceptsSalesAdvisor($conversation, $userText)) {
+                return $this->chatPayload($conversation, $reply, true);
+            }
+        } elseif ($this->inventory->userAcceptsSalesAdvisor($conversation, $userText)) {
             $reply = $this->activateSalesHandoff($conversation, 'ventas');
             $this->persistMessages($conversation, $userText, $reply, $data, $user);
 
@@ -122,17 +129,41 @@ class AssistantChatService
 
         $boutiqueReply = $this->boutique->tryBuildReply($conversation, $userText, $pageUrl);
         if ($boutiqueReply !== null) {
-            $this->persistMessages($conversation, $userText, $boutiqueReply, $data, $user);
+            $this->persistMessages(
+                $conversation,
+                $userText,
+                $boutiqueReply['text'],
+                $data,
+                $user,
+                $boutiqueReply['catalog_cards']
+            );
 
-            return $this->chatPayload($conversation, $boutiqueReply, false);
+            return $this->chatPayload(
+                $conversation,
+                $boutiqueReply['text'],
+                false,
+                $boutiqueReply['catalog_cards']
+            );
         }
 
-        if (! $this->boutique->isBoutiqueSection($pageUrl)) {
-            $inventoryReply = $this->inventory->tryBuildReply($conversation, $userText);
+        if (! $this->isBoutiqueChat($pageUrl)) {
+            $inventoryReply = $this->inventory->tryBuildReply($conversation, $userText, $pageUrl);
             if ($inventoryReply !== null) {
-                $this->persistMessages($conversation, $userText, $inventoryReply, $data, $user);
+                $this->persistMessages(
+                    $conversation,
+                    $userText,
+                    $inventoryReply['text'],
+                    $data,
+                    $user,
+                    $inventoryReply['catalog_cards']
+                );
 
-                return $this->chatPayload($conversation, $inventoryReply, false);
+                return $this->chatPayload(
+                    $conversation,
+                    $inventoryReply['text'],
+                    false,
+                    $inventoryReply['catalog_cards']
+                );
             }
         }
 
@@ -176,12 +207,17 @@ class AssistantChatService
         }
 
         $messages = $query->get(['id', 'role', 'content', 'created_at'])
-            ->map(fn (AssistantMessage $m) => [
-                'id' => (int) $m->id,
-                'role' => $m->role,
-                'content' => $m->content,
-                'created_at' => $m->created_at,
-            ])
+            ->map(function (AssistantMessage $m) {
+                $decoded = $this->catalogCodec->decode((string) $m->content);
+
+                return [
+                    'id' => (int) $m->id,
+                    'role' => $m->role,
+                    'content' => $decoded['text'],
+                    'catalog_cards' => $decoded['catalog_cards'],
+                    'created_at' => $m->created_at,
+                ];
+            })
             ->values()
             ->all();
 
@@ -214,8 +250,15 @@ class AssistantChatService
     /**
      * @return array<string, mixed>
      */
-    private function chatPayload(AssistantConversation $conversation, string $reply, bool $humanHandoff): array
-    {
+    /**
+     * @param  list<array<string, mixed>>  $catalogCards
+     */
+    private function chatPayload(
+        AssistantConversation $conversation,
+        string $reply,
+        bool $humanHandoff,
+        array $catalogCards = []
+    ): array {
         $conversation->loadMissing('dealership');
 
         $payload = [
@@ -227,9 +270,35 @@ class AssistantChatService
 
         if ($reply !== '') {
             $payload['reply'] = $reply;
+            $lastAssistantId = $conversation->messages()
+                ->where('role', 'assistant')
+                ->orderByDesc('id')
+                ->value('id');
+            if ($lastAssistantId) {
+                $payload['reply_message_id'] = (int) $lastAssistantId;
+            }
+        }
+
+        if ($catalogCards !== []) {
+            $payload['catalog_cards'] = $catalogCards;
         }
 
         return $payload;
+    }
+
+    private function isBoutiqueChat(?string $pageUrl): bool
+    {
+        return $this->boutique->isBoutiqueSection($pageUrl);
+    }
+
+    private function pageUrlForChatTopic(string $topic): string
+    {
+        return match ($topic) {
+            'boutique' => '/boutique',
+            'motos' => '/motorrad',
+            'autos' => '/compra-tu-auto',
+            default => '/',
+        };
     }
 
     private function resolveUser(Request $request): ?User
@@ -295,10 +364,12 @@ class AssistantChatService
             $updates = array_merge($updates, $this->visitorAttributes($user));
         }
 
-        if (! $conversation->dealership_id && ! empty($data['dealership_id'])) {
+        if (! empty($data['dealership_id'])) {
             $dealershipId = (int) $data['dealership_id'];
-            $updates['dealership_id'] = $dealershipId;
-            if (! $conversation->assigned_user_id) {
+            if ((int) $conversation->dealership_id !== $dealershipId) {
+                $updates['dealership_id'] = $dealershipId;
+                $updates['assigned_user_id'] = $this->dealershipAssigner->assignUserIdForDealership($dealershipId);
+            } elseif (! $conversation->assigned_user_id) {
                 $updates['assigned_user_id'] = $this->dealershipAssigner->assignUserIdForDealership($dealershipId);
             }
         }
@@ -333,11 +404,17 @@ class AssistantChatService
      */
     private function syncPageUrl(AssistantConversation $conversation, array $data): void
     {
-        if (empty($data['page_url'])) {
+        $url = null;
+        if (! empty($data['page_url'])) {
+            $url = Str::limit(trim((string) $data['page_url']), 500, '');
+        } elseif (! empty($data['chat_topic'])) {
+            $url = $this->pageUrlForChatTopic((string) $data['chat_topic']);
+        }
+
+        if ($url === null || $url === '') {
             return;
         }
 
-        $url = Str::limit(trim((string) $data['page_url']), 500, '');
         if ($conversation->page_url !== $url) {
             $conversation->update(['page_url' => $url]);
             $conversation->refresh();
@@ -360,12 +437,20 @@ class AssistantChatService
     {
         $conversation->loadMissing('dealership');
         $dealershipName = $conversation->dealership?->name ?? 'Grupo VECSA';
+        $dealershipId = (int) ($conversation->dealership_id ?? 0);
+
+        if ($dealershipId > 0 && ! $this->advisorAvailability->hasAvailableAdvisor($dealershipId)) {
+            return $this->advisorAvailability->unavailableHandoffMessage($dealershipName);
+        }
 
         if (! $conversation->isHumanHandoff()) {
-            $dealershipId = (int) ($conversation->dealership_id ?? 0);
             $assignedUserId = $conversation->assigned_user_id;
             if (! $assignedUserId && $dealershipId > 0) {
                 $assignedUserId = $this->dealershipAssigner->assignSalesUserIdForDealership($dealershipId);
+            }
+
+            if (! $assignedUserId) {
+                return $this->advisorAvailability->unavailableHandoffMessage($dealershipName);
             }
 
             $conversation->update([
@@ -396,15 +481,15 @@ class AssistantChatService
         }
 
         $pageUrl = $conversation->page_url;
-        if ($this->boutique->isBoutiqueSection($pageUrl)) {
+        if ($this->isBoutiqueChat($pageUrl)) {
             $system .= ' El cliente navega la sección Boutique (accesorios y productos). '
                 .'Prioriza preguntar producto y marca si aún no los ha indicado.';
         }
 
-        if (! $this->boutique->isBoutiqueSection($pageUrl) && $this->inventory->isInventoryQuery($userText)) {
-            $inventoryContext = $this->inventory->tryBuildReply($conversation, $userText);
+        if (! $this->isBoutiqueChat($pageUrl)) {
+            $inventoryContext = $this->inventory->tryBuildReply($conversation, $userText, $pageUrl);
             if ($inventoryContext !== null) {
-                $system .= "\n\nDatos de inventario verificados:\n".$inventoryContext;
+                $system .= "\n\nDatos de inventario verificados:\n".$inventoryContext['text'];
             }
         }
 
@@ -466,12 +551,16 @@ class AssistantChatService
     /**
      * @param  array<string, mixed>  $data
      */
+    /**
+     * @param  list<array<string, mixed>>  $catalogCards
+     */
     private function persistMessages(
         AssistantConversation $conversation,
         string $userText,
         string $reply,
         array $data,
-        ?User $user
+        ?User $user,
+        array $catalogCards = []
     ): void {
         AssistantMessage::create([
             'conversation_id' => $conversation->id,
@@ -482,7 +571,7 @@ class AssistantChatService
         AssistantMessage::create([
             'conversation_id' => $conversation->id,
             'role' => 'assistant',
-            'content' => $reply,
+            'content' => $this->catalogCodec->encode($reply, $catalogCards),
         ]);
 
         $updates = [
