@@ -35,6 +35,13 @@ export interface AssistantChatDetail extends AssistantChatListRow {
   messages: AssistantChatMessage[];
 }
 
+export interface AssistantAdvisorAvailabilityRow {
+  dealership_id: number;
+  dealership_name: string;
+  is_available: boolean;
+  available_since: string | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AssistantChatsAdminService {
   private baseUrl = environment.baseUrl;
@@ -99,6 +106,22 @@ export class AssistantChatsAdminService {
     return this.http.post(
       `${this.baseUrl}/api/assistant/admin/unread-summary`,
       {},
+      { headers: this.headers() }
+    );
+  }
+
+  availability(): Observable<any> {
+    return this.http.post(
+      `${this.baseUrl}/api/assistant/admin/availability`,
+      {},
+      { headers: this.headers() }
+    );
+  }
+
+  setAvailability(dealershipId: number, isAvailable: boolean): Observable<any> {
+    return this.http.post(
+      `${this.baseUrl}/api/assistant/admin/availability/set`,
+      { dealership_id: dealershipId, is_available: isAvailable },
       { headers: this.headers() }
     );
   }

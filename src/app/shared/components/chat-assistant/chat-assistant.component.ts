@@ -6,27 +6,51 @@ import { ChatNotificationSoundService } from '@services/chat-notification-sound.
 const SESSION_KEY = 'vecsa_assistant_session';
 const CONVERSATION_KEY = 'vecsa_assistant_conversation';
 const DEALERSHIP_KEY = 'vecsa_assistant_dealership_id';
+const DEALERSHIP_NAME_KEY = 'vecsa_assistant_dealership_name';
 const HUMAN_HANDOFF_KEY = 'vecsa_assistant_human_handoff';
+const CHAT_INTENT_KEY = 'vecsa_assistant_chat_topic';
+
+export type ChatIntent = 'autos' | 'motos' | 'boutique' | 'general';
+
+interface ChatIntentOption {
+  id: ChatIntent;
+  label: string;
+  hint: string;
+  icon: string;
+}
 
 interface ChatDealership {
   id: number;
   name: string;
   location?: string | null;
   state?: string | null;
+  advisors_available?: boolean;
 }
 
 type ChatMessageRole = 'user' | 'assistant' | 'agent';
+
+export interface ChatCatalogCard {
+  type: 'vehicle' | 'boutique_product';
+  uuid: string;
+  title: string;
+  subtitle?: string | null;
+  price_label?: string | null;
+  image_url?: string | null;
+  url: string;
+}
 
 interface ChatMessage {
   id?: number;
   role: ChatMessageRole;
   text: string;
+  catalogCards?: ChatCatalogCard[];
 }
 
 interface PollMessageRow {
   id: number;
   role: string;
   content: string;
+  catalog_cards?: ChatCatalogCard[];
   created_at?: string;
 }
 
@@ -43,6 +67,8 @@ interface VisitorUnreadSummary {
 
 interface AssistantChatResponse {
   reply?: string;
+  reply_message_id?: number;
+  catalog_cards?: ChatCatalogCard[];
   conversation_uuid?: string;
   needs_dealership?: boolean;
   dealerships?: ChatDealership[];
@@ -56,20 +82,51 @@ interface AssistantChatResponse {
   standalone: false,
 })
 export class ChatAssistantComponent implements OnInit, OnDestroy {
+  readonly intentOptions: ChatIntentOption[] = [
+    {
+      id: 'autos',
+      label: 'Autos BMW / MINI',
+      hint: 'Inventario, precios y asesor de ventas',
+      icon: 'directions_car',
+    },
+    {
+      id: 'motos',
+      label: 'Motos BMW Motorrad',
+      hint: 'Inventario y asesor de motos',
+      icon: 'two_wheeler',
+    },
+    {
+      id: 'boutique',
+      label: 'Productos / Boutique',
+      hint: 'Accesorios, ropa y refacciones',
+      icon: 'shopping_bag',
+    },
+    {
+      id: 'general',
+      label: 'Otra consulta',
+      hint: 'Servicios, citas o información general',
+      icon: 'help_outline',
+    },
+  ];
+
   open = false;
   unreadCount = 0;
   message = '';
   sending = false;
   loadingDealerships = false;
-  /** Muestra botones de sucursal (inicio o cuando el API lo pide). */
-  showDealershipPicker = true;
+
+  showIntentPicker = true;
+  showDealershipPicker = false;
   dealershipPickerHint =
-    'Te enlazaremos con el equipo de la sucursal que elijas.';
+    'Elige la sucursal con la que quieres continuar.';
+
+  selectedIntent: ChatIntent | null = null;
   dealerships: ChatDealership[] = [];
   selectedDealershipId: number | null = null;
   selectedDealershipName: string | null = null;
   messages: ChatMessage[] = [];
   humanHandoff = false;
+  readonly catalogPlaceholder = 'assets/images/placeholder-product.svg';
 
   private url = environment.baseUrl;
   private sessionKey = this.ensureSessionKey();
@@ -78,17 +135,16 @@ export class ChatAssistantComponent implements OnInit, OnDestroy {
   private pollTimer: ReturnType<typeof setInterval> | null = null;
   private backgroundUnreadTimer: ReturnType<typeof setInterval> | null = null;
   private unreadBaselineReady = false;
+  private syncingConversation = false;
 
   constructor(
     private http: HttpClient,
     private sound: ChatNotificationSoundService,
   ) {
-    const stored = this.loadDealershipId();
-    if (stored) {
-      this.selectedDealershipId = stored;
-      this.showDealershipPicker = false;
-    }
+    this.selectedIntent = this.loadIntent();
     this.humanHandoff = this.loadHumanHandoff();
+    this.restoreDealershipFromStorage();
+    this.applyOnboardingStep();
   }
 
   ngOnInit(): void {
@@ -106,11 +162,12 @@ export class ChatAssistantComponent implements OnInit, OnDestroy {
     if (this.open) {
       this.unreadCount = 0;
       this.stopBackgroundUnreadCheck();
-      this.ensureDealershipsLoaded();
+      if (this.showDealershipPicker) {
+        this.ensureDealershipsLoaded();
+      }
       if (this.conversationUuid) {
-        if (this.humanHandoff) {
-          this.startPolling();
-        }
+        this.refreshConversationState();
+        this.startPolling();
         this.markVisitorRead();
       }
     } else {
@@ -126,39 +183,77 @@ export class ChatAssistantComponent implements OnInit, OnDestroy {
     return role === 'agent' ? 'Asesor' : '';
   }
 
-  isBoutiqueSection(): boolean {
-    if (typeof window === 'undefined') {
-      return false;
-    }
-    return /\/boutique(?:\/|$)/i.test(window.location.pathname);
+  intentLabel(): string {
+    const opt = this.intentOptions.find((o) => o.id === this.selectedIntent);
+    return opt?.label ?? 'Consulta';
   }
 
-  boutiqueWelcomeText(): string {
-    return '¡Hola! Estás en la Boutique VECSA. ¿Qué producto y marca estás buscando?';
+  postDealershipWelcome(): string {
+    const branch = this.selectedDealershipName ?? 'tu sucursal';
+    switch (this.selectedIntent) {
+      case 'boutique':
+        return `Perfecto, ${branch}. ¿Qué producto y marca buscas? Por ejemplo: maleta BMW o chaleco MINI.`;
+      case 'motos':
+        return `Listo, ${branch}. ¿Qué moto BMW Motorrad te interesa? Puedes indicar modelo o presupuesto.`;
+      case 'autos':
+        return `Listo, ${branch}. ¿Qué auto BMW o MINI buscas? Indica modelo, año o presupuesto.`;
+      default:
+        return `Listo, ${branch}. ¿En qué puedo ayudarte?`;
+    }
+  }
+
+  dealershipAdvisorHint(d: ChatDealership): string | null {
+    if (d.advisors_available === false) {
+      return 'Sin asesor en línea (solo asistente virtual)';
+    }
+    return null;
+  }
+
+  selectIntent(intent: ChatIntent): void {
+    if (this.selectedIntent !== intent) {
+      this.resetConversationSession();
+    }
+    this.selectedIntent = intent;
+    this.saveIntent(intent);
+    this.showIntentPicker = false;
+    this.showDealershipPicker = true;
+    this.dealershipPickerHint =
+      'Elige la sucursal disponible para tu consulta.';
+    this.ensureDealershipsLoaded(true);
+    setTimeout(() => this.scrollToBottom(), 50);
   }
 
   selectDealership(d: ChatDealership): void {
+    const changed =
+      this.selectedDealershipId != null && this.selectedDealershipId !== d.id;
+    if (changed) {
+      this.resetConversationSession();
+    }
+
     this.selectedDealershipId = d.id;
     this.selectedDealershipName = d.name;
-    if (typeof localStorage !== 'undefined') {
-      localStorage.setItem(DEALERSHIP_KEY, String(d.id));
-    }
+    this.persistDealership(d.id, d.name);
     this.showDealershipPicker = false;
-    if (this.messages.length === 0) {
-      const boutiqueHint = this.isBoutiqueSection()
-        ? `Has elegido ${d.name}. ¿Qué producto y marca estás buscando en nuestra Boutique? Por ejemplo: maleta BMW o chaleco MINI.`
-        : `Has elegido ${d.name}. ¿En qué puedo ayudarte hoy?`;
-      this.messages = [
-        {
-          role: 'assistant',
-          text: boutiqueHint,
-        },
-      ];
-    }
+    setTimeout(() => this.scrollToBottom(), 50);
+  }
+
+  changeIntent(): void {
+    this.resetConversationSession();
+    this.selectedIntent = null;
+    this.selectedDealershipId = null;
+    this.selectedDealershipName = null;
+    this.clearStoredIntent();
+    this.clearStoredDealership();
+    this.showIntentPicker = true;
+    this.showDealershipPicker = false;
     setTimeout(() => this.scrollToBottom(), 50);
   }
 
   changeDealership(): void {
+    this.resetConversationSession();
+    this.selectedDealershipId = null;
+    this.selectedDealershipName = null;
+    this.clearStoredDealership();
     this.showDealershipPicker = true;
     this.dealershipPickerHint =
       'Elige otra sucursal para continuar la conversación.';
@@ -169,6 +264,11 @@ export class ChatAssistantComponent implements OnInit, OnDestroy {
   send(): void {
     const text = this.message.trim();
     if (!text || this.sending) {
+      return;
+    }
+
+    if (!this.selectedIntent) {
+      this.showIntentPicker = true;
       return;
     }
 
@@ -188,7 +288,8 @@ export class ChatAssistantComponent implements OnInit, OnDestroy {
     const body: Record<string, string | number> = {
       message: text,
       session_key: this.sessionKey,
-      page_url: typeof window !== 'undefined' ? window.location.pathname : '',
+      page_url: this.pageUrlForIntent(this.selectedIntent),
+      chat_topic: this.selectedIntent,
       dealership_id: this.selectedDealershipId,
     };
     if (this.conversationUuid) {
@@ -218,22 +319,25 @@ export class ChatAssistantComponent implements OnInit, OnDestroy {
       if (!this.open) {
         this.startBackgroundUnreadCheck();
       }
+      this.startPolling();
     }
+
     if (res.human_handoff) {
       this.setHumanHandoff(true);
-      this.startPolling();
       this.stopBackgroundUnreadCheck();
       this.startBackgroundUnreadCheck();
     }
-    if (res.reply?.trim()) {
-      this.messages.push({ role: 'assistant', text: res.reply });
-      if (this.conversationUuid) {
-        this.syncPollCursor();
-      }
+
+    if (res.reply?.trim() || (res.catalog_cards?.length ?? 0) > 0) {
+      this.appendAssistantMessage(
+        res.reply?.trim() ?? '',
+        res.reply_message_id,
+        res.catalog_cards
+      );
     } else if (this.humanHandoff && this.conversationUuid) {
-      this.syncPollCursor();
       setTimeout(() => this.pollMessages(), 150);
     }
+
     this.sending = false;
     setTimeout(() => this.scrollToBottom(), 50);
   }
@@ -246,15 +350,12 @@ export class ChatAssistantComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.messages.push({
-      role: 'assistant',
-      text: 'Lo siento, hubo un error. Intenta de nuevo.',
-    });
+    this.appendAssistantMessage('Lo siento, hubo un error. Intenta de nuevo.');
     this.sending = false;
   }
 
   private applyNeedsDealership(res: AssistantChatResponse): void {
-    this.clearStoredDealership();
+    this.resetConversationSession();
     this.showDealershipPicker = true;
     this.dealershipPickerHint =
       'Selecciona la sucursal con la que deseas contactar.';
@@ -266,7 +367,7 @@ export class ChatAssistantComponent implements OnInit, OnDestroy {
       this.ensureDealershipsLoaded();
     }
     if (res.reply) {
-      this.messages.push({ role: 'assistant', text: res.reply });
+      this.appendAssistantMessage(res.reply);
     }
     setTimeout(() => this.scrollToBottom(), 50);
   }
@@ -293,11 +394,125 @@ export class ChatAssistantComponent implements OnInit, OnDestroy {
       });
   }
 
+  private applyOnboardingStep(): void {
+    if (!this.selectedIntent) {
+      this.showIntentPicker = true;
+      this.showDealershipPicker = false;
+      return;
+    }
+    if (!this.selectedDealershipId) {
+      this.showIntentPicker = false;
+      this.showDealershipPicker = true;
+      return;
+    }
+    this.showIntentPicker = false;
+    this.showDealershipPicker = false;
+  }
+
+  private restoreDealershipFromStorage(): void {
+    const id = this.loadDealershipId();
+    if (id == null) {
+      return;
+    }
+    this.selectedDealershipId = id;
+    if (typeof localStorage !== 'undefined') {
+      this.selectedDealershipName =
+        localStorage.getItem(DEALERSHIP_NAME_KEY) ?? null;
+    }
+  }
+
+  private resetConversationSession(): void {
+    this.stopPolling();
+    this.conversationUuid = null;
+    this.lastMessageId = 0;
+    this.messages = [];
+    this.setHumanHandoff(false);
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem(CONVERSATION_KEY);
+    }
+  }
+
   private clearStoredDealership(): void {
     this.selectedDealershipId = null;
     this.selectedDealershipName = null;
     if (typeof localStorage !== 'undefined') {
       localStorage.removeItem(DEALERSHIP_KEY);
+      localStorage.removeItem(DEALERSHIP_NAME_KEY);
+    }
+  }
+
+  private persistDealership(id: number, name: string): void {
+    if (typeof localStorage === 'undefined') {
+      return;
+    }
+    localStorage.setItem(DEALERSHIP_KEY, String(id));
+    localStorage.setItem(DEALERSHIP_NAME_KEY, name);
+  }
+
+  private pageUrlForIntent(intent: ChatIntent): string {
+    switch (intent) {
+      case 'boutique':
+        return '/boutique';
+      case 'motos':
+        return '/motorrad';
+      case 'autos':
+        return '/compra-tu-auto';
+      default:
+        return '/';
+    }
+  }
+
+  cardImageUrl(card: ChatCatalogCard): string {
+    const url = card.image_url?.trim();
+    return url || this.catalogPlaceholder;
+  }
+
+  onCatalogImageError(event: Event): void {
+    const img = event.target as HTMLImageElement | null;
+    if (img && img.src !== this.catalogPlaceholder) {
+      img.src = this.catalogPlaceholder;
+    }
+  }
+
+  private appendAssistantMessage(
+    text: string,
+    messageId?: number,
+    catalogCards?: ChatCatalogCard[]
+  ): void {
+    const trimmed = text.trim();
+    const cards = catalogCards?.length ? catalogCards : undefined;
+    if (!trimmed && !cards?.length) {
+      return;
+    }
+    if (messageId != null) {
+      const existing = this.messages.find((m) => m.id === messageId);
+      if (existing) {
+        return;
+      }
+    }
+    const last = this.messages[this.messages.length - 1];
+    if (
+      last &&
+      last.role !== 'user' &&
+      last.text === trimmed &&
+      (messageId == null || last.id === messageId)
+    ) {
+      if (messageId != null && last.id == null) {
+        last.id = messageId;
+      }
+      if (cards?.length && !last.catalogCards?.length) {
+        last.catalogCards = cards;
+      }
+      return;
+    }
+    this.messages.push({
+      id: messageId,
+      role: 'assistant',
+      text: trimmed,
+      catalogCards: cards,
+    });
+    if (messageId != null) {
+      this.lastMessageId = Math.max(this.lastMessageId, messageId);
     }
   }
 
@@ -362,28 +577,45 @@ export class ChatAssistantComponent implements OnInit, OnDestroy {
     return Number.isNaN(id) ? null : id;
   }
 
+  private loadIntent(): ChatIntent | null {
+    if (typeof localStorage === 'undefined') {
+      return null;
+    }
+    const raw = localStorage.getItem(CHAT_INTENT_KEY);
+    if (
+      raw === 'autos' ||
+      raw === 'motos' ||
+      raw === 'boutique' ||
+      raw === 'general'
+    ) {
+      return raw;
+    }
+    return null;
+  }
+
+  private saveIntent(intent: ChatIntent): void {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(CHAT_INTENT_KEY, intent);
+    }
+  }
+
+  private clearStoredIntent(): void {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem(CHAT_INTENT_KEY);
+    }
+  }
+
   private saveConversationUuid(uuid: string): void {
     if (typeof localStorage !== 'undefined') {
       localStorage.setItem(CONVERSATION_KEY, uuid);
     }
   }
 
-  private startPolling(): void {
-    this.stopPolling();
-    if (!this.conversationUuid) {
+  private refreshConversationState(): void {
+    if (!this.conversationUuid || this.syncingConversation) {
       return;
     }
-    this.seedPollCursor(() => {
-      this.pollTimer = setInterval(() => this.pollMessages(), 5000);
-      this.pollMessages();
-    });
-  }
-
-  /** Actualiza lastMessageId con lo ya persistido (evita duplicar burbujas del bot). */
-  private syncPollCursor(): void {
-    if (!this.conversationUuid) {
-      return;
-    }
+    this.syncingConversation = true;
     const body = {
       conversation_uuid: this.conversationUuid,
       session_key: this.sessionKey,
@@ -395,42 +627,23 @@ export class ChatAssistantComponent implements OnInit, OnDestroy {
       })
       .subscribe({
         next: (res) => {
-          for (const m of res.messages ?? []) {
-            this.lastMessageId = Math.max(this.lastMessageId, m.id);
-          }
-          if (res.human_handoff) {
-            this.setHumanHandoff(true);
-          }
+          this.applyServerMessages(res.messages ?? [], true);
+          this.setHumanHandoff(!!res.human_handoff);
+          this.syncingConversation = false;
+        },
+        error: () => {
+          this.syncingConversation = false;
         },
       });
   }
 
-  private seedPollCursor(done: () => void): void {
-    if (this.lastMessageId > 0) {
-      done();
+  private startPolling(): void {
+    this.stopPolling();
+    if (!this.conversationUuid) {
       return;
     }
-    const body = {
-      conversation_uuid: this.conversationUuid!,
-      session_key: this.sessionKey,
-      after_id: 0,
-    };
-    this.http
-      .post<PollMessagesResponse>(`${this.url}/api/assistant/messages`, body, {
-        headers: this.buildHeaders(),
-      })
-      .subscribe({
-        next: (res) => {
-          for (const m of res.messages ?? []) {
-            this.lastMessageId = Math.max(this.lastMessageId, m.id);
-          }
-          if (res.human_handoff) {
-            this.setHumanHandoff(true);
-          }
-          done();
-        },
-        error: () => done(),
-      });
+    this.pollTimer = setInterval(() => this.pollMessages(), 5000);
+    this.pollMessages();
   }
 
   private stopPolling(): void {
@@ -455,42 +668,8 @@ export class ChatAssistantComponent implements OnInit, OnDestroy {
       })
       .subscribe({
         next: (res) => {
-          if (res.human_handoff) {
-            this.setHumanHandoff(true);
-          }
-          const incoming = res.messages ?? [];
-          let added = false;
-          for (const m of incoming) {
-            if (m.id <= this.lastMessageId) {
-              continue;
-            }
-            if (this.messages.some((x) => x.id === m.id)) {
-              this.lastMessageId = Math.max(this.lastMessageId, m.id);
-              continue;
-            }
-            if (m.role === 'user') {
-              this.lastMessageId = Math.max(this.lastMessageId, m.id);
-              continue;
-            }
-            const last = this.messages[this.messages.length - 1];
-            if (
-              last &&
-              last.id == null &&
-              last.role !== 'user' &&
-              last.text === m.content
-            ) {
-              last.id = m.id;
-              this.lastMessageId = Math.max(this.lastMessageId, m.id);
-              continue;
-            }
-            this.lastMessageId = Math.max(this.lastMessageId, m.id);
-            this.messages.push({
-              id: m.id,
-              role: m.role === 'agent' ? 'agent' : 'assistant',
-              text: m.content,
-            });
-            added = true;
-          }
+          this.setHumanHandoff(!!res.human_handoff);
+          const added = this.applyServerMessages(res.messages ?? [], false);
           if (added) {
             this.sound.playNewMessage();
             setTimeout(() => this.scrollToBottom(), 50);
@@ -503,6 +682,60 @@ export class ChatAssistantComponent implements OnInit, OnDestroy {
           }
         },
       });
+  }
+
+  private applyServerMessages(
+    rows: PollMessageRow[],
+    replace: boolean
+  ): boolean {
+    if (replace) {
+      this.messages = rows.map((m) => this.rowToChatMessage(m));
+      this.lastMessageId = rows.reduce((max, m) => Math.max(max, m.id), 0);
+      return rows.length > 0;
+    }
+
+    let added = false;
+    for (const m of rows) {
+      if (m.id <= this.lastMessageId) {
+        continue;
+      }
+      if (m.role === 'user') {
+        this.lastMessageId = Math.max(this.lastMessageId, m.id);
+        continue;
+      }
+      if (this.messages.some((x) => x.id === m.id)) {
+        this.lastMessageId = Math.max(this.lastMessageId, m.id);
+        continue;
+      }
+      const last = this.messages[this.messages.length - 1];
+      if (
+        last &&
+        last.id == null &&
+        last.role !== 'user' &&
+        last.text === m.content
+      ) {
+        last.id = m.id;
+        last.role = m.role === 'agent' ? 'agent' : 'assistant';
+        if (m.catalog_cards?.length && !last.catalogCards?.length) {
+          last.catalogCards = m.catalog_cards;
+        }
+        this.lastMessageId = Math.max(this.lastMessageId, m.id);
+        continue;
+      }
+      this.messages.push(this.rowToChatMessage(m));
+      this.lastMessageId = Math.max(this.lastMessageId, m.id);
+      added = true;
+    }
+    return added;
+  }
+
+  private rowToChatMessage(m: PollMessageRow): ChatMessage {
+    return {
+      id: m.id,
+      role: m.role === 'agent' ? 'agent' : m.role === 'user' ? 'user' : 'assistant',
+      text: m.content,
+      catalogCards: m.catalog_cards?.length ? m.catalog_cards : undefined,
+    };
   }
 
   private startBackgroundUnreadCheck(): void {

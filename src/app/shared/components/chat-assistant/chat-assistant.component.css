@@ -137,9 +137,90 @@
   color: #64748b;
   margin-top: 2px;
 }
+.chat-dealership-advisor-hint {
+  display: block;
+  font-size: 10px;
+  color: #b45309;
+  margin-top: 4px;
+  font-weight: 600;
+}
+.chat-dealership-btn.no-advisors {
+  border-color: #fde68a;
+  background: #fffbeb;
+}
 .chat-dealership-empty {
   font-size: 12px;
   color: #94a3b8;
+}
+
+.chat-intent-step {
+  padding: 8px 4px 16px;
+}
+
+.chat-intent-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 6px;
+  text-align: center;
+}
+
+.chat-intent-hint {
+  font-size: 12px;
+  color: #64748b;
+  text-align: center;
+  margin: 0 0 14px;
+  line-height: 1.4;
+}
+
+.chat-intent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chat-intent-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.chat-intent-btn:hover {
+  border-color: #93c5fd;
+  background: #f8fafc;
+}
+
+.chat-intent-icon {
+  font-size: 20px;
+  color: #1c69d4;
+  margin-bottom: 2px;
+}
+
+.chat-intent-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.chat-intent-sub {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.chat-dealership-topic {
+  font-size: 12px;
+  color: #475569;
+  text-align: center;
+  margin: 0 0 10px;
 }
 
 .chat-welcome {
@@ -148,13 +229,112 @@
 .chat-welcome-icon { font-size: 32px; margin-bottom: 8px; }
 .chat-welcome p { margin: 0; line-height: 1.5; }
 
-.chat-msg { display: flex; margin-bottom: 10px; }
-.chat-msg.user { justify-content: flex-end; }
-.chat-msg.assistant { justify-content: flex-start; }
+.chat-msg { display: flex; margin-bottom: 10px; flex-direction: column; }
+.chat-msg.user { align-items: flex-end; }
+.chat-msg.assistant,
+.chat-msg.agent { align-items: flex-start; }
+.chat-msg.has-catalog { width: 100%; }
 
 .chat-bubble {
   max-width: 80%; padding: 10px 14px; border-radius: 14px;
   font-size: 13px; line-height: 1.5; word-break: break-word;
+}
+.chat-bubble-wide {
+  max-width: 100%;
+  width: 100%;
+  padding: 10px 10px 12px;
+}
+.chat-bubble-text {
+  margin: 0 0 8px;
+  white-space: pre-line;
+}
+
+.chat-catalog-carousel {
+  margin: 0 -2px;
+  overflow: hidden;
+}
+.chat-catalog-track {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 2px 2px 6px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+.chat-catalog-track::-webkit-scrollbar {
+  height: 6px;
+}
+.chat-catalog-track::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+.chat-catalog-card {
+  flex: 0 0 168px;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.chat-catalog-card:hover {
+  border-color: #93c5fd;
+  box-shadow: 0 4px 12px rgba(28, 105, 212, 0.12);
+}
+.chat-catalog-card-image-wrap {
+  aspect-ratio: 4 / 3;
+  background: #f1f5f9;
+  overflow: hidden;
+}
+.chat-catalog-card-image-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.chat-catalog-card-body {
+  padding: 8px 10px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-height: 88px;
+}
+.chat-catalog-card-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.chat-catalog-card-sub {
+  font-size: 10px;
+  color: #64748b;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.chat-catalog-card-price {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1c69d4;
+  margin-top: auto;
+}
+.chat-catalog-card-cta {
+  font-size: 10px;
+  font-weight: 600;
+  color: #1c69d4;
 }
 .chat-msg.user .chat-bubble {
   background: #1c69d4; color: #fff; border-bottom-right-radius: 4px;

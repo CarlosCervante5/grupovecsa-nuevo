@@ -8,6 +8,42 @@
     </div>
   </div>
 
+  <section class="availability-panel" aria-label="Disponibilidad por sucursal">
+    <div class="availability-panel-head">
+      <span class="material-icons">support_agent</span>
+      <div>
+        <h2 class="availability-title">Disponibilidad en chat</h2>
+        <p class="availability-hint">
+          Actívate en cada sucursal para que los clientes puedan hablar contigo. Si no estás disponible, el bot sigue atendiendo pero no se enlaza con asesor.
+        </p>
+      </div>
+    </div>
+    <p class="availability-error" *ngIf="availabilityError">{{ availabilityError }}</p>
+    <div class="availability-loading" *ngIf="availabilityLoading">Cargando sucursales…</div>
+    <p class="availability-empty" *ngIf="!availabilityLoading && availabilityRows.length === 0">
+      No tienes sucursales asignadas. Pide a un administrador que te vincule a una sucursal.
+    </p>
+    <ul class="availability-list" *ngIf="!availabilityLoading && availabilityRows.length > 0">
+      <li class="availability-item" *ngFor="let row of availabilityRows">
+        <div class="availability-item-info">
+          <strong>{{ row.dealership_name }}</strong>
+          <span class="availability-status" [class.is-on]="row.is_available">
+            {{ row.is_available ? 'Disponible' : 'No disponible' }}
+          </span>
+        </div>
+        <button
+          type="button"
+          class="availability-toggle"
+          [class.is-active]="row.is_available"
+          [disabled]="availabilitySavingId === row.dealership_id"
+          (click)="toggleAvailability(row)"
+        >
+          {{ row.is_available ? 'Desactivar' : 'Activar' }}
+        </button>
+      </li>
+    </ul>
+  </section>
+
   <div class="filters-bar">
     <input
       type="search"
@@ -105,7 +141,8 @@
               type="button"
               class="btn btn-takeover"
               *ngIf="!selected.is_human_handoff"
-              [disabled]="actionLoading"
+              [disabled]="actionLoading || !isAvailableAtSelectedDealership()"
+              [title]="!isAvailableAtSelectedDealership() ? 'Actívate como disponible en esta sucursal' : ''"
               (click)="takeOver()"
             >
               <span class="material-icons">support_agent</span>
@@ -169,9 +206,13 @@
           </button>
         </footer>
 
-        <div class="chat-composer-hint" *ngIf="!selected.is_human_handoff">
+        <div class="chat-composer-hint" *ngIf="!selected.is_human_handoff && isAvailableAtSelectedDealership()">
           <span class="material-icons">info</span>
           Pulsa <strong>Tomar conversación</strong> para responder como asesor; el bot dejará de contestar automáticamente.
+        </div>
+        <div class="chat-composer-hint chat-composer-hint-warn" *ngIf="!selected.is_human_handoff && !isAvailableAtSelectedDealership()">
+          <span class="material-icons">warning</span>
+          Actívate como <strong>disponible</strong> en {{ selected.dealership_name || 'esta sucursal' }} arriba para tomar esta conversación.
         </div>
       </div>
     </section>
