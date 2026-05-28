@@ -36,7 +36,8 @@ return [
     ],
 
     'incadea' => [
-        'api_url' => env('INCADEA_API_URL', 'http://52.21.121.207/api/incadea/get_spare_parts'),
+        // ?: evita URL vacía si INCADEA_API_URL está definida pero sin valor en Railway
+        'api_url' => env('INCADEA_API_URL') ?: 'http://52.21.121.207/api/incadea/get_spare_parts',
     ],
 
 ];

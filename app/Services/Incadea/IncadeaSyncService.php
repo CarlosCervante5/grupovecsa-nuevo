@@ -11,6 +11,8 @@ use Ramsey\Uuid\Uuid;
 
 class IncadeaSyncService
 {
+    public const DEFAULT_API_URL = 'http://52.21.121.207/api/incadea/get_spare_parts';
+
     protected CategoryMapper $categoryMapper;
 
     public function __construct(CategoryMapper $categoryMapper)
@@ -19,22 +21,106 @@ class IncadeaSyncService
     }
 
     /**
+     * URL efectiva para GET a Incadea (normaliza env vacío y rutas incompletas).
+     */
+    public static function resolveIncadeaApiUrl(): string
+    {
+        $url = config('services.incadea.api_url');
+        if (! is_string($url) || trim($url) === '') {
+            return self::DEFAULT_API_URL;
+        }
+
+        $url = rtrim(trim($url), '/');
+
+        if (preg_match('#/api/incadea$#i', $url)) {
+            return $url.'/get_spare_parts';
+        }
+
+        return $url;
+    }
+
+    public static function maskUrlForDisplay(string $url): string
+    {
+        $parsed = parse_url($url);
+        if (! is_array($parsed) || ! isset($parsed['host'])) {
+            return $url;
+        }
+
+        $scheme = $parsed['scheme'] ?? 'http';
+        $path = $parsed['path'] ?? '';
+
+        return $scheme.'://'.$parsed['host'].$path;
+    }
+
+    /**
+     * Comprueba conectividad desde el servidor actual (p. ej. Railway sandbox).
+     *
+     * @return array{endpoint: string, http_status: int|null, ok: bool, has_spare_parts?: bool, error?: string, hint?: string}
+     */
+    public static function probeApi(): array
+    {
+        $url = self::resolveIncadeaApiUrl();
+        $endpoint = self::maskUrlForDisplay($url);
+
+        try {
+            $response = Http::timeout(15)->get($url);
+            $status = $response->status();
+            $ok = $response->successful();
+            $hasParts = is_array($response->json('data.spare_parts'));
+
+            $result = [
+                'endpoint' => $endpoint,
+                'http_status' => $status,
+                'ok' => $ok && $hasParts,
+                'has_spare_parts' => $hasParts,
+            ];
+
+            if (! $ok) {
+                $result['hint'] = self::hintForHttpStatus($status, $endpoint);
+            } elseif (! $hasParts) {
+                $result['hint'] = 'La API respondió pero el JSON no incluye data.spare_parts.';
+            }
+
+            return $result;
+        } catch (\Throwable $e) {
+            return [
+                'endpoint' => $endpoint,
+                'http_status' => null,
+                'ok' => false,
+                'error' => $e->getMessage(),
+                'hint' => 'No se pudo conectar a Incadea desde este servidor. Revisa INCADEA_API_URL (debe ser HTTP, no HTTPS) y firewall.',
+            ];
+        }
+    }
+
+    private static function hintForHttpStatus(int $status, string $endpoint): string
+    {
+        if ($status === 404) {
+            return 'HTTP 404 en '.$endpoint.'. En Railway usa exactamente: '.self::DEFAULT_API_URL;
+        }
+
+        return 'Incadea respondió HTTP '.$status.' en '.$endpoint.'.';
+    }
+
+    /**
      * Fetch spare parts from the Incadea API.
      */
     public function fetchSpareParts(): array
     {
-        $url = config('services.incadea.api_url');
-        if (! is_string($url) || trim($url) === '') {
-            throw new \RuntimeException(
-                'INCADEA_API_URL no está definida. Configura la variable en Railway (Settings → Variables) o en .env.'
-            );
-        }
-
-        $response = Http::timeout(30)->get($url);
+        $url = self::resolveIncadeaApiUrl();
+        $response = $this->requestSpareParts($url);
 
         if (! $response->successful()) {
+            $displayUrl = self::maskUrlForDisplay($url);
+            Log::error('INCADEA_FETCH_FAILED', [
+                'http_status' => $response->status(),
+                'endpoint' => $displayUrl,
+                'body_preview' => substr($response->body(), 0, 300),
+            ]);
+
             throw new \RuntimeException(
-                'Incadea API respondió HTTP '.$response->status().'. Comprueba INCADEA_API_URL y conectividad desde el servidor.'
+                'Incadea API respondió HTTP '.$response->status().' al solicitar '.$displayUrl.'. '.
+                self::hintForHttpStatus($response->status(), $displayUrl)
             );
         }
 
@@ -52,6 +138,38 @@ class IncadeaSyncService
         }
 
         return $raw;
+    }
+
+    /**
+     * GET con reintento en ruta alternativa si la configurada devuelve 404.
+     */
+    private function requestSpareParts(string $url): \Illuminate\Http\Client\Response
+    {
+        $response = Http::timeout(30)->get($url);
+
+        if ($response->status() !== 404) {
+            return $response;
+        }
+
+        $alternates = [];
+        if (preg_match('#/get_spare_parts$#i', $url)) {
+            $alternates[] = preg_replace('#/get_spare_parts$#i', '/spare_parts', $url);
+        }
+        if (preg_match('#/api/incadea$#i', $url)) {
+            $alternates[] = $url.'/get_spare_parts';
+        }
+
+        foreach (array_unique(array_filter($alternates)) as $alt) {
+            if ($alt === $url) {
+                continue;
+            }
+            $retry = Http::timeout(30)->get($alt);
+            if ($retry->successful()) {
+                return $retry;
+            }
+        }
+
+        return $response;
     }
 
     /**
