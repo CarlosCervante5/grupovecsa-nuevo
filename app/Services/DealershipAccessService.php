@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Dealership;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Builder;
@@ -136,6 +137,42 @@ class DealershipAccessService
             $q->whereHas('vehicles', function (Builder $vq) use ($scopeIds) {
                 $vq->whereIn('dealership_id', $scopeIds);
             });
+        });
+    }
+
+    /**
+     * Inventario de vehículos visible para el usuario (por dealership_id).
+     */
+    public function scopeVehiclesForInventoryUser(Builder $query, ?User $user): Builder
+    {
+        $scopeIds = $this->inventoryDealershipIds($user);
+        if ($scopeIds === null) {
+            return $query;
+        }
+
+        return $query->whereIn('dealership_id', $scopeIds);
+    }
+
+    /**
+     * Eventos cuya ubicación menciona el nombre de alguna sucursal asignada al usuario.
+     */
+    public function scopeEventsForInventoryUser(Builder $query, ?User $user): Builder
+    {
+        $scopeIds = $this->inventoryDealershipIds($user);
+        if ($scopeIds === null) {
+            return $query;
+        }
+
+        $names = Dealership::query()->whereIn('id', $scopeIds)->pluck('name')->filter()->all();
+        if ($names === []) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        return $query->where(function (Builder $q) use ($names) {
+            foreach ($names as $name) {
+                $needle = '%'.strtolower(addcslashes($name, '%_\\')).'%';
+                $q->orWhereRaw('LOWER(location) LIKE ?', [$needle]);
+            }
         });
     }
 }
