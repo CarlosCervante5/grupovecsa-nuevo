@@ -93,6 +93,18 @@ export class DeveloperDashboardComponent implements OnInit, AfterViewInit, OnDes
   geminiAiError = '';
   geminiAiSuccess = '';
 
+  assistantChatConfig: Record<string, unknown> = {};
+  assistantChatEnabled = true;
+  assistantChatProvider = 'gemini';
+  assistantChatGeminiModelHint = 'gemini-2.0-flash';
+  assistantChatOpenAiModelHint = 'gpt-4o-mini';
+  assistantChatGeminiOk = false;
+  assistantChatOpenAiOk = false;
+  assistantChatLoading = false;
+  assistantChatSaving = false;
+  assistantChatError = '';
+  assistantChatSuccess = '';
+
   stats: { label: string; value: string | number; icon: string; color: string; loading: boolean }[] = [
     { label: 'Vehículos publicados', value: '—', icon: 'directions_car', color: '#1c69d4', loading: true },
     { label: 'Productos Boutique', value: '—', icon: 'inventory_2', color: '#7c3aed', loading: true },
@@ -565,6 +577,8 @@ export class DeveloperDashboardComponent implements OnInit, AfterViewInit, OnDes
       this.loadOpenpayConfig();
     } else if (key === 'gemini_ai_config') {
       this.loadGeminiAiConfig();
+    } else if (key === 'assistant_chat_config') {
+      this.loadAssistantChatConfig();
     } else {
       this.loadData();
       if (key === 'users' && this.dealershipOptions.length === 0) {
@@ -1164,6 +1178,79 @@ export class DeveloperDashboardComponent implements OnInit, AfterViewInit, OnDes
 
   toggleGeminiAiFeature(): void {
     this.geminiAiFeatureEnabled = !this.geminiAiFeatureEnabled;
+  }
+
+  loadAssistantChatConfig(): void {
+    this.assistantChatLoading = true;
+    this.assistantChatError = '';
+    this.assistantChatSuccess = '';
+    this.crud.fetch('settings/assistant_chat', 'POST', {}).subscribe({
+      next: (res: any) => {
+        const d = res?.data || {};
+        this.assistantChatConfig = { ...d };
+        this.assistantChatEnabled = d.assistant_chat_enabled !== false;
+        this.assistantChatProvider = d.assistant_chat_provider || 'gemini';
+        this.assistantChatGeminiOk = !!d.gemini_configured;
+        this.assistantChatOpenAiOk = !!d.openai_configured;
+        if (typeof d.default_gemini_model_hint === 'string') {
+          this.assistantChatGeminiModelHint = d.default_gemini_model_hint;
+        }
+        if (typeof d.default_openai_model_hint === 'string') {
+          this.assistantChatOpenAiModelHint = d.default_openai_model_hint;
+        }
+        this.assistantChatLoading = false;
+      },
+      error: (err: any) => {
+        this.assistantChatError = err?.error?.message || 'Error al cargar chat asistente';
+        this.assistantChatLoading = false;
+      },
+    });
+  }
+
+  saveAssistantChatConfig(): void {
+    this.assistantChatSaving = true;
+    this.assistantChatError = '';
+    this.assistantChatSuccess = '';
+    const payload: Record<string, unknown> = {
+      assistant_chat_enabled: this.assistantChatEnabled,
+      assistant_chat_provider: this.assistantChatProvider,
+      assistant_chat_gemini_model: String(this.assistantChatConfig['assistant_chat_gemini_model'] ?? '').trim(),
+      assistant_chat_openai_model: String(this.assistantChatConfig['assistant_chat_openai_model'] ?? '').trim(),
+    };
+    const geminiKey = String(
+      this.assistantChatConfig['assistant_gemini_api_key'] ?? this.assistantChatConfig['gemini_api_key'] ?? ''
+    ).trim();
+    if (geminiKey && !geminiKey.startsWith('••')) {
+      payload['assistant_gemini_api_key'] = geminiKey;
+    }
+    const openaiKey = String(this.assistantChatConfig['openai_api_key'] ?? '').trim();
+    if (openaiKey && !openaiKey.startsWith('••')) {
+      payload['openai_api_key'] = openaiKey;
+    }
+    this.crud.fetch('settings/assistant_chat/update', 'POST', payload).subscribe({
+      next: () => {
+        this.assistantChatSuccess = 'Configuración del chat asistente guardada';
+        this.assistantChatSaving = false;
+        this.loadAssistantChatConfig();
+        setTimeout(() => (this.assistantChatSuccess = ''), 4000);
+      },
+      error: (err: any) => {
+        const errors = err?.error?.errors;
+        this.assistantChatError = errors
+          ? ([] as string[]).concat(...(Object.values(errors) as string[][])).join(', ')
+          : err?.error?.message || 'Error al guardar';
+        this.assistantChatSaving = false;
+      },
+    });
+  }
+
+  toggleAssistantChatEnabled(): void {
+    this.assistantChatEnabled = !this.assistantChatEnabled;
+  }
+
+  onAssistantChatProviderChange(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    this.assistantChatProvider = value || 'gemini';
   }
 
   get benchmarkPanelUrl(): string {
