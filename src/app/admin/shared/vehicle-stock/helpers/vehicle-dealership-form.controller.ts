@@ -6,7 +6,6 @@ import { reload } from '@helpers/session.helper';
 import {
   parseDealershipNamesFromDetail,
   readSignedInUserEmail,
-  readSignedInUserRole,
   readSignedInUserUuid,
   vehicleDealershipFallbackNamesForEmail,
   vehicleDealershipFormModeForEmail,
@@ -38,15 +37,14 @@ export class VehicleDealershipFormController {
 
   applyForSignedInUser(options?: VehicleDealershipFormApplyOptions): void {
     const email = readSignedInUserEmail();
-    const role = readSignedInUserRole();
-    const preferredMode = vehicleDealershipFormModeForEmail(email, role);
+    const preferredMode = vehicleDealershipFormModeForEmail(email);
 
     if (preferredMode === 'manual') {
       this.dealershipMode = 'manual';
       return;
     }
 
-    const fallbackNames = vehicleDealershipFallbackNamesForEmail(email, preferredMode, role);
+    const fallbackNames = vehicleDealershipFallbackNamesForEmail(email, preferredMode);
     this.loadAssignedDealershipsForUser(email, preferredMode, fallbackNames, options);
   }
 
