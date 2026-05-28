@@ -42,6 +42,29 @@ class AssistantChatService
             ->all();
     }
 
+    /**
+     * @param  list<array{id: int, name: string, location: string|null, state: string|null}>  $dealerships
+     */
+    public function formatDealershipPickerReply(array $dealerships): string
+    {
+        if ($dealerships === []) {
+            return 'Por favor elige la sucursal con la que deseas contactar. En este momento no hay sucursales disponibles en el sistema; intenta más tarde.';
+        }
+
+        $lines = ['Por favor elige la sucursal con la que deseas contactar:'];
+        foreach ($dealerships as $index => $d) {
+            $label = $d['name'];
+            if (! empty($d['location'])) {
+                $label .= ' — '.$d['location'];
+            } elseif (! empty($d['state'])) {
+                $label .= ' — '.$d['state'];
+            }
+            $lines[] = ($index + 1).'. '.$label;
+        }
+
+        return implode("\n", $lines);
+    }
+
     public function chat(Request $request): array
     {
         $dealershipTable = (new Dealership)->getTable();
@@ -57,10 +80,12 @@ class AssistantChatService
         $user = $this->resolveUser($request);
 
         if (empty($data['conversation_uuid']) && empty($data['dealership_id'])) {
+            $dealerships = $this->listDealershipsForChat();
+
             return [
                 'needs_dealership' => true,
-                'dealerships' => $this->listDealershipsForChat(),
-                'reply' => 'Por favor elige la sucursal con la que deseas contactar:',
+                'dealerships' => $dealerships,
+                'reply' => $this->formatDealershipPickerReply($dealerships),
             ];
         }
 
