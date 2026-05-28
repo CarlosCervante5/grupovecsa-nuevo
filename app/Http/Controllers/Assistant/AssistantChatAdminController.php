@@ -18,6 +18,52 @@ class AssistantChatAdminController extends Controller
         private readonly DealershipAccessService $dealershipAccess
     ) {}
 
+    public function unreadSummary(Request $request)
+    {
+        try {
+            if (! $this->assistantTablesReady()) {
+                return ApiResponseHelper::apiSuccess(200, 'Resumen de no leídos', [
+                    'total_unread' => 0,
+                    'conversations_with_unread' => 0,
+                ]);
+            }
+
+            $viewer = $this->resolveViewer($request);
+            if (! $viewer) {
+                return ApiResponseHelper::apiError('No autenticado', null, 401);
+            }
+
+            $scopeIds = $this->dealershipAccess->inventoryDealershipIds($viewer);
+
+            $query = AssistantConversation::query();
+
+            if ($scopeIds !== null) {
+                $query->where(function ($q) use ($scopeIds, $viewer) {
+                    $q->whereIn('dealership_id', $scopeIds);
+                    $q->orWhere('assigned_user_id', $viewer->id);
+                });
+            }
+
+            $totalUnread = 0;
+            $conversationsWithUnread = 0;
+
+            foreach ($query->get() as $conversation) {
+                $count = $conversation->countUnreadForStaff();
+                if ($count > 0) {
+                    $totalUnread += $count;
+                    $conversationsWithUnread++;
+                }
+            }
+
+            return ApiResponseHelper::apiSuccess(200, 'Resumen de no leídos', [
+                'total_unread' => $totalUnread,
+                'conversations_with_unread' => $conversationsWithUnread,
+            ]);
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al obtener no leídos', $e->getMessage(), 500);
+        }
+    }
+
     public function search(Request $request)
     {
         try {
@@ -115,6 +161,9 @@ class AssistantChatAdminController extends Controller
                 && (int) $conversation->assigned_user_id !== (int) ($viewer?->id)) {
                 return ApiResponseHelper::apiError('No tienes permiso para ver esta conversación', null, 403);
             }
+
+            $conversation->markStaffRead();
+            $conversation->refresh();
 
             return ApiResponseHelper::apiSuccess(200, 'Detalle de conversación', [
                 'conversation' => $this->detailPayload($conversation),
@@ -379,6 +428,7 @@ class AssistantChatAdminController extends Controller
             'is_registered' => (bool) $c->user_id,
             'is_human_handoff' => $c->isHumanHandoff(),
             'human_handoff_at' => $c->human_handoff_at,
+            'unread_count' => $c->countUnreadForStaff(),
         ];
     }
 }

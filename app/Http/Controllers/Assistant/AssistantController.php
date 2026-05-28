@@ -46,4 +46,26 @@ class AssistantController extends Controller
             ], 422);
         }
     }
+
+    public function visitorUnreadSummary(Request $request)
+    {
+        try {
+            $data = $request->validate([
+                'conversation_uuid' => 'required|string|max:64',
+                'session_key' => 'required|string|max:64',
+            ]);
+
+            return response()->json(
+                $this->chatService->visitorUnreadSummary(
+                    $data['conversation_uuid'],
+                    $data['session_key']
+                )
+            );
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'message' => 'Validación',
+                'errors' => $e->errors(),
+            ], 422);
+        }
+    }
 }
