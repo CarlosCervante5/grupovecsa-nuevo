@@ -42,8 +42,11 @@
 
   <div class="chat-messages">
     <div class="chat-welcome" *ngIf="messages.length === 0 && !showDealershipPicker">
-      <div class="chat-welcome-icon">👋</div>
-      <p>¡Hola! Soy el asistente virtual de Grupo VECSA. ¿En qué puedo ayudarte?</p>
+      <div class="chat-welcome-icon">{{ isBoutiqueSection() ? '🛍️' : '👋' }}</div>
+      <p *ngIf="isBoutiqueSection(); else defaultWelcome">{{ boutiqueWelcomeText() }}</p>
+      <ng-template #defaultWelcome>
+        <p>¡Hola! Soy el asistente virtual de Grupo VECSA. ¿En qué puedo ayudarte?</p>
+      </ng-template>
     </div>
 
     <div

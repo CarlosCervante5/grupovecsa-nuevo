@@ -5,6 +5,7 @@ import { environment } from '@environments/environment';
 const SESSION_KEY = 'vecsa_assistant_session';
 const CONVERSATION_KEY = 'vecsa_assistant_conversation';
 const DEALERSHIP_KEY = 'vecsa_assistant_dealership_id';
+const HUMAN_HANDOFF_KEY = 'vecsa_assistant_human_handoff';
 
 interface ChatDealership {
   id: number;
@@ -75,6 +76,7 @@ export class ChatAssistantComponent implements OnDestroy {
       this.selectedDealershipId = stored;
       this.showDealershipPicker = false;
     }
+    this.humanHandoff = this.loadHumanHandoff();
   }
 
   ngOnDestroy(): void {
@@ -85,7 +87,7 @@ export class ChatAssistantComponent implements OnDestroy {
     this.open = !this.open;
     if (this.open) {
       this.ensureDealershipsLoaded();
-      if (this.conversationUuid) {
+      if (this.conversationUuid && this.humanHandoff) {
         this.startPolling();
       }
     } else {
@@ -100,6 +102,17 @@ export class ChatAssistantComponent implements OnDestroy {
     return role === 'agent' ? 'Asesor' : '';
   }
 
+  isBoutiqueSection(): boolean {
+    if (typeof window === 'undefined') {
+      return false;
+    }
+    return /\/boutique(?:\/|$)/i.test(window.location.pathname);
+  }
+
+  boutiqueWelcomeText(): string {
+    return '¡Hola! Estás en la Boutique VECSA. ¿Qué producto y marca estás buscando?';
+  }
+
   selectDealership(d: ChatDealership): void {
     this.selectedDealershipId = d.id;
     this.selectedDealershipName = d.name;
@@ -108,10 +121,13 @@ export class ChatAssistantComponent implements OnDestroy {
     }
     this.showDealershipPicker = false;
     if (this.messages.length === 0) {
+      const boutiqueHint = this.isBoutiqueSection()
+        ? `Has elegido ${d.name}. ¿Qué producto y marca estás buscando en nuestra Boutique? Por ejemplo: maleta BMW o chaleco MINI.`
+        : `Has elegido ${d.name}. ¿En qué puedo ayudarte hoy?`;
       this.messages = [
         {
           role: 'assistant',
-          text: `Has elegido ${d.name}. ¿En qué puedo ayudarte hoy?`,
+          text: boutiqueHint,
         },
       ];
     }
@@ -177,11 +193,14 @@ export class ChatAssistantComponent implements OnDestroy {
       this.saveConversationUuid(res.conversation_uuid);
     }
     if (res.human_handoff) {
-      this.humanHandoff = true;
+      this.setHumanHandoff(true);
       this.startPolling();
     }
     if (res.reply) {
       this.messages.push({ role: 'assistant', text: res.reply });
+      if (this.conversationUuid) {
+        this.syncPollCursor();
+      }
     }
     this.sending = false;
     setTimeout(() => this.scrollToBottom(), 50);
@@ -281,6 +300,24 @@ export class ChatAssistantComponent implements OnDestroy {
     return localStorage.getItem(CONVERSATION_KEY);
   }
 
+  private loadHumanHandoff(): boolean {
+    if (typeof localStorage === 'undefined') {
+      return false;
+    }
+    return localStorage.getItem(HUMAN_HANDOFF_KEY) === '1';
+  }
+
+  private setHumanHandoff(active: boolean): void {
+    this.humanHandoff = active;
+    if (typeof localStorage !== 'undefined') {
+      if (active) {
+        localStorage.setItem(HUMAN_HANDOFF_KEY, '1');
+      } else {
+        localStorage.removeItem(HUMAN_HANDOFF_KEY);
+      }
+    }
+  }
+
   private loadDealershipId(): number | null {
     if (typeof localStorage === 'undefined') {
       return null;
@@ -310,6 +347,32 @@ export class ChatAssistantComponent implements OnDestroy {
     });
   }
 
+  /** Actualiza lastMessageId con lo ya persistido (evita duplicar burbujas del bot). */
+  private syncPollCursor(): void {
+    if (!this.conversationUuid) {
+      return;
+    }
+    const body = {
+      conversation_uuid: this.conversationUuid,
+      session_key: this.sessionKey,
+      after_id: 0,
+    };
+    this.http
+      .post<PollMessagesResponse>(`${this.url}/api/assistant/messages`, body, {
+        headers: this.buildHeaders(),
+      })
+      .subscribe({
+        next: (res) => {
+          for (const m of res.messages ?? []) {
+            this.lastMessageId = Math.max(this.lastMessageId, m.id);
+          }
+          if (res.human_handoff) {
+            this.setHumanHandoff(true);
+          }
+        },
+      });
+  }
+
   private seedPollCursor(done: () => void): void {
     if (this.lastMessageId > 0) {
       done();
@@ -328,6 +391,9 @@ export class ChatAssistantComponent implements OnDestroy {
         next: (res) => {
           for (const m of res.messages ?? []) {
             this.lastMessageId = Math.max(this.lastMessageId, m.id);
+          }
+          if (res.human_handoff) {
+            this.setHumanHandoff(true);
           }
           done();
         },
@@ -358,7 +424,7 @@ export class ChatAssistantComponent implements OnDestroy {
       .subscribe({
         next: (res) => {
           if (res.human_handoff) {
-            this.humanHandoff = true;
+            this.setHumanHandoff(true);
           }
           const incoming = res.messages ?? [];
           let added = false;
@@ -370,10 +436,22 @@ export class ChatAssistantComponent implements OnDestroy {
               this.lastMessageId = Math.max(this.lastMessageId, m.id);
               continue;
             }
-            this.lastMessageId = Math.max(this.lastMessageId, m.id);
             if (m.role === 'user') {
+              this.lastMessageId = Math.max(this.lastMessageId, m.id);
               continue;
             }
+            const last = this.messages[this.messages.length - 1];
+            if (
+              last &&
+              last.id == null &&
+              last.role !== 'user' &&
+              last.text === m.content
+            ) {
+              last.id = m.id;
+              this.lastMessageId = Math.max(this.lastMessageId, m.id);
+              continue;
+            }
+            this.lastMessageId = Math.max(this.lastMessageId, m.id);
             this.messages.push({
               id: m.id,
               role: m.role === 'agent' ? 'agent' : 'assistant',
