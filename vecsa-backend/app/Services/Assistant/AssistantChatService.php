@@ -90,17 +90,76 @@ class AssistantChatService
         }
 
         $conversation = $this->resolveConversation($data, $request, $user);
+        $conversation->refresh();
 
         $userText = trim($data['message']);
-        $reply = $this->generateReply($userText, $conversation);
 
+        if ($conversation->isHumanHandoff()) {
+            $reply = 'Tu mensaje fue enviado al asesor. Te responderá en breve.';
+            $this->persistMessages($conversation, $userText, $reply, $data, $user);
+
+            return $this->chatPayload($conversation, $reply, true);
+        }
+
+        $reply = $this->generateReply($userText, $conversation);
         $this->persistMessages($conversation, $userText, $reply, $data, $user);
+
+        return $this->chatPayload($conversation, $reply, false);
+    }
+
+    /**
+     * @return array{messages: list<array{id: int, role: string, content: string, created_at: string|null}>}
+     */
+    public function pollMessages(Request $request): array
+    {
+        $data = $request->validate([
+            'conversation_uuid' => 'required|string|max:64',
+            'session_key' => 'required|string|max:64',
+            'after_id' => 'nullable|integer|min:0',
+        ]);
+
+        $conversation = AssistantConversation::findByUuid($data['conversation_uuid']);
+        if (! $conversation || $conversation->session_key !== $data['session_key']) {
+            throw ValidationException::withMessages([
+                'conversation_uuid' => ['Conversación no válida.'],
+            ]);
+        }
+
+        $query = $conversation->messages();
+        if (! empty($data['after_id'])) {
+            $query->where('id', '>', (int) $data['after_id']);
+        }
+
+        $messages = $query->get(['id', 'role', 'content', 'created_at'])
+            ->map(fn (AssistantMessage $m) => [
+                'id' => (int) $m->id,
+                'role' => $m->role,
+                'content' => $m->content,
+                'created_at' => $m->created_at,
+            ])
+            ->values()
+            ->all();
+
+        return [
+            'messages' => $messages,
+            'human_handoff' => $conversation->isHumanHandoff(),
+            'conversation_uuid' => $conversation->uuid,
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function chatPayload(AssistantConversation $conversation, string $reply, bool $humanHandoff): array
+    {
+        $conversation->loadMissing('dealership');
 
         return [
             'reply' => $reply,
             'conversation_uuid' => $conversation->uuid,
             'dealership_id' => $conversation->dealership_id,
             'dealership_name' => $conversation->dealership?->name,
+            'human_handoff' => $humanHandoff,
         ];
     }
 

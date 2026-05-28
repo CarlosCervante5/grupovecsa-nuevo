@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { environment } from '@environments/environment';
 
@@ -26,7 +26,7 @@ interface AssistantChatResponse {
   styleUrls: ['./chat-assistant.component.css'],
   standalone: false,
 })
-export class ChatAssistantComponent {
+export class ChatAssistantComponent implements OnDestroy {
   open = false;
   message = '';
   sending = false;
@@ -38,11 +38,14 @@ export class ChatAssistantComponent {
   dealerships: ChatDealership[] = [];
   selectedDealershipId: number | null = null;
   selectedDealershipName: string | null = null;
-  messages: { role: 'user' | 'assistant'; text: string }[] = [];
+  messages: ChatMessage[] = [];
+  humanHandoff = false;
 
   private url = environment.baseUrl;
   private sessionKey = this.ensureSessionKey();
   private conversationUuid: string | null = this.loadConversationUuid();
+  private lastMessageId = 0;
+  private pollTimer: ReturnType<typeof setInterval> | null = null;
 
   constructor(private http: HttpClient) {
     const stored = this.loadDealershipId();
@@ -52,11 +55,27 @@ export class ChatAssistantComponent {
     }
   }
 
+  ngOnDestroy(): void {
+    this.stopPolling();
+  }
+
   toggle(): void {
     this.open = !this.open;
     if (this.open) {
       this.ensureDealershipsLoaded();
+      if (this.conversationUuid) {
+        this.startPolling();
+      }
+    } else {
+      this.stopPolling();
     }
+  }
+
+  messageLabel(role: ChatMessageRole): string {
+    if (role === 'user') {
+      return '';
+    }
+    return role === 'agent' ? 'Asesor' : '';
   }
 
   selectDealership(d: ChatDealership): void {
@@ -134,6 +153,10 @@ export class ChatAssistantComponent {
     if (res.conversation_uuid) {
       this.conversationUuid = res.conversation_uuid;
       this.saveConversationUuid(res.conversation_uuid);
+    }
+    if (res.human_handoff) {
+      this.humanHandoff = true;
+      this.startPolling();
     }
     if (res.reply) {
       this.messages.push({ role: 'assistant', text: res.reply });
@@ -252,6 +275,95 @@ export class ChatAssistantComponent {
     if (typeof localStorage !== 'undefined') {
       localStorage.setItem(CONVERSATION_KEY, uuid);
     }
+  }
+
+  private startPolling(): void {
+    this.stopPolling();
+    if (!this.conversationUuid) {
+      return;
+    }
+    this.seedPollCursor(() => {
+      this.pollTimer = setInterval(() => this.pollMessages(), 5000);
+      this.pollMessages();
+    });
+  }
+
+  private seedPollCursor(done: () => void): void {
+    if (this.lastMessageId > 0) {
+      done();
+      return;
+    }
+    const body = {
+      conversation_uuid: this.conversationUuid!,
+      session_key: this.sessionKey,
+      after_id: 0,
+    };
+    this.http
+      .post<PollMessagesResponse>(`${this.url}/api/assistant/messages`, body, {
+        headers: this.buildHeaders(),
+      })
+      .subscribe({
+        next: (res) => {
+          for (const m of res.messages ?? []) {
+            this.lastMessageId = Math.max(this.lastMessageId, m.id);
+          }
+          done();
+        },
+        error: () => done(),
+      });
+  }
+
+  private stopPolling(): void {
+    if (this.pollTimer) {
+      clearInterval(this.pollTimer);
+      this.pollTimer = null;
+    }
+  }
+
+  private pollMessages(): void {
+    if (!this.conversationUuid || !this.open) {
+      return;
+    }
+    const body: Record<string, string | number> = {
+      conversation_uuid: this.conversationUuid,
+      session_key: this.sessionKey,
+      after_id: this.lastMessageId,
+    };
+    this.http
+      .post<PollMessagesResponse>(`${this.url}/api/assistant/messages`, body, {
+        headers: this.buildHeaders(),
+      })
+      .subscribe({
+        next: (res) => {
+          if (res.human_handoff) {
+            this.humanHandoff = true;
+          }
+          const incoming = res.messages ?? [];
+          let added = false;
+          for (const m of incoming) {
+            if (m.id <= this.lastMessageId) {
+              continue;
+            }
+            if (this.messages.some((x) => x.id === m.id)) {
+              this.lastMessageId = Math.max(this.lastMessageId, m.id);
+              continue;
+            }
+            this.lastMessageId = Math.max(this.lastMessageId, m.id);
+            if (m.role === 'user') {
+              continue;
+            }
+            this.messages.push({
+              id: m.id,
+              role: m.role === 'agent' ? 'agent' : 'assistant',
+              text: m.content,
+            });
+            added = true;
+          }
+          if (added) {
+            setTimeout(() => this.scrollToBottom(), 50);
+          }
+        },
+      });
   }
 
   private scrollToBottom(): void {

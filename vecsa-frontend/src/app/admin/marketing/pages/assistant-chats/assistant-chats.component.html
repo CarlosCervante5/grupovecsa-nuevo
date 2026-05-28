@@ -1,9 +1,9 @@
 <div class="assistant-chats-page">
   <div class="page-header">
     <div>
-      <h1 class="page-title">Chats del asistente (público)</h1>
+      <h1 class="page-title">Chats del asistente</h1>
       <p class="page-subtitle">
-        Consultas y solicitudes de visitantes en el chat flotante del sitio. {{ total }} conversaciones.
+        Conversaciones del chat público del sitio. {{ total }} en total.
       </p>
     </div>
   </div>
@@ -16,61 +16,50 @@
       [(ngModel)]="searchTerm"
       (keyup.enter)="onSearch()"
     />
-    <button type="button" class="action-btn primary-btn" (click)="onSearch()">
+    <button type="button" class="btn btn-primary" (click)="onSearch()">
       <span class="material-icons">search</span>
       Buscar
     </button>
   </div>
 
-  <div class="layout-grid">
-    <div class="list-panel">
+  <div class="inbox-layout">
+    <!-- Lista -->
+    <aside class="inbox-list">
       <div class="loading-state" *ngIf="loading">
         <div class="spinner"></div>
         <p>Cargando…</p>
       </div>
 
       <p class="empty-hint" *ngIf="!loading && rows.length === 0">
-        Aún no hay conversaciones registradas. Los nuevos mensajes del asistente aparecerán aquí.
+        Aún no hay conversaciones. Los mensajes del asistente aparecerán aquí.
       </p>
 
-      <div class="table-wrap" *ngIf="!loading && rows.length > 0">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Visitante</th>
-              <th>Sucursal</th>
-              <th>Asesor</th>
-              <th>Última consulta</th>
-              <th>Mensajes</th>
-              <th>Última actividad</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              *ngFor="let row of rows"
-              [class.is-selected]="selected?.uuid === row.uuid"
-              (click)="openRow(row)"
-            >
-              <td>
-                <div class="visitor-cell">
-                  <strong>{{ row.visitor_name }}</strong>
-                  <span class="visitor-meta" *ngIf="row.visitor_email">{{ row.visitor_email }}</span>
-                  <span class="badge" [class.badge-user]="row.is_registered">
-                    {{ row.is_registered ? 'Registrado' : 'Anónimo' }}
-                  </span>
-                </div>
-              </td>
-              <td>{{ row.dealership_name || '—' }}</td>
-              <td>{{ row.assigned_user_name || '—' }}</td>
-              <td class="preview-cell">{{ row.preview || '—' }}</td>
-              <td>{{ row.messages_count }}</td>
-              <td>{{ formatDate(row.last_message_at) }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <ul class="conv-list" *ngIf="!loading && rows.length > 0">
+        <li
+          *ngFor="let row of rows"
+          class="conv-item"
+          [class.is-active]="selected?.uuid === row.uuid"
+          (click)="openRow(row)"
+        >
+          <div class="conv-item-top">
+            <strong class="conv-name">{{ row.visitor_name }}</strong>
+            <span class="conv-time">{{ formatDate(row.last_message_at) }}</span>
+          </div>
+          <p class="conv-preview">{{ row.preview || 'Sin mensajes' }}</p>
+          <div class="conv-meta">
+            <span class="badge" [class.badge-user]="row.is_registered">
+              {{ row.is_registered ? 'Registrado' : 'Anónimo' }}
+            </span>
+            <span class="badge badge-branch" *ngIf="row.dealership_name">
+              {{ row.dealership_name }}
+            </span>
+            <span class="badge badge-live" *ngIf="row.is_human_handoff">En vivo</span>
+          </div>
+        </li>
+      </ul>
 
       <mat-paginator
+        class="list-paginator"
         *ngIf="!loading && total > 0"
         [length]="total"
         [pageIndex]="pageIndex"
@@ -78,12 +67,13 @@
         [pageSizeOptions]="[10, 20, 50]"
         (page)="onPage($event)"
       ></mat-paginator>
-    </div>
+    </aside>
 
-    <div class="detail-panel">
-      <div class="detail-placeholder" *ngIf="!selected && !detailLoading">
+    <!-- Detalle / chat -->
+    <section class="inbox-detail">
+      <div class="detail-empty" *ngIf="!selected && !detailLoading">
         <span class="material-icons">forum</span>
-        <p>Selecciona una conversación para ver el historial completo.</p>
+        <p>Selecciona una conversación para ver el historial y responder.</p>
       </div>
 
       <div class="loading-state" *ngIf="detailLoading">
@@ -91,39 +81,96 @@
       </div>
 
       <ng-container *ngIf="selected && !detailLoading">
-        <div class="detail-header">
-          <h2>{{ selected.visitor_name }}</h2>
-          <p *ngIf="selected.visitor_email">{{ selected.visitor_email }}</p>
-          <p class="detail-meta" *ngIf="selected.page_url">
-            <span class="material-icons">link</span>
-            {{ selected.page_url }}
-          </p>
-          <p class="detail-meta" *ngIf="selected.dealership_name">
-            <span class="material-icons">store</span>
-            Sucursal: {{ selected.dealership_name }}
-          </p>
-          <p class="detail-meta" *ngIf="selected.assigned_user_name">
+        <header class="chat-header">
+          <div class="chat-header-main">
+            <div class="chat-avatar">{{ (selected.visitor_name || 'V').charAt(0) }}</div>
+            <div>
+              <h2>{{ selected.visitor_name }}</h2>
+              <p class="chat-email" *ngIf="selected.visitor_email">{{ selected.visitor_email }}</p>
+              <div class="chat-badges">
+                <span class="status-pill" [class.status-live]="selected.is_human_handoff">
+                  {{ selected.is_human_handoff ? 'Asesor en conversación' : 'Bot activo' }}
+                </span>
+                <span class="status-pill status-muted" *ngIf="selected.dealership_name">
+                  {{ selected.dealership_name }}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="chat-header-actions">
+            <button
+              type="button"
+              class="btn btn-takeover"
+              *ngIf="!selected.is_human_handoff"
+              [disabled]="actionLoading"
+              (click)="takeOver()"
+            >
+              <span class="material-icons">support_agent</span>
+              Tomar conversación
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline"
+              *ngIf="selected.is_human_handoff"
+              [disabled]="actionLoading"
+              (click)="releaseToBot()"
+            >
+              Devolver al bot
+            </button>
+          </div>
+        </header>
+
+        <div class="chat-info-bar">
+          <span *ngIf="selected.assigned_user_name">
             <span class="material-icons">person</span>
-            Asesor asignado: {{ selected.assigned_user_name }}
-          </p>
-          <p class="detail-meta">
-            Inicio: {{ formatDate(selected.created_at) }} · Último: {{ formatDate(selected.last_message_at) }}
-          </p>
+            {{ selected.assigned_user_name }}
+          </span>
+          <span *ngIf="selected.page_url" [title]="selected.page_url">
+            <span class="material-icons">link</span>
+            {{ shortUrl(selected.page_url) }}
+          </span>
+          <span>
+            <span class="material-icons">schedule</span>
+            {{ formatDate(selected.last_message_at) }}
+          </span>
         </div>
 
-        <div class="thread">
+        <div class="thread-scroll">
           <div
             *ngFor="let msg of selected.messages"
             class="thread-msg"
-            [class.thread-msg-user]="msg.role === 'user'"
-            [class.thread-msg-assistant]="msg.role === 'assistant'"
+            [ngClass]="messageCssClass(msg)"
           >
-            <div class="thread-role">{{ msg.role === 'user' ? 'Cliente' : 'Asistente' }}</div>
+            <div class="thread-role">{{ messageRoleLabel(msg) }}</div>
             <div class="thread-bubble">{{ msg.content }}</div>
             <div class="thread-time">{{ formatDate(msg.created_at) }}</div>
           </div>
         </div>
+
+        <footer class="chat-composer" *ngIf="selected.is_human_handoff">
+          <textarea
+            class="composer-input"
+            rows="2"
+            placeholder="Escribe tu respuesta al cliente…"
+            [(ngModel)]="agentReply"
+            (keyup.enter)="$event.preventDefault(); sendAgentReply()"
+            [disabled]="actionLoading"
+          ></textarea>
+          <button
+            type="button"
+            class="btn btn-primary btn-send"
+            [disabled]="actionLoading || !agentReply.trim()"
+            (click)="sendAgentReply()"
+          >
+            <span class="material-icons">send</span>
+          </button>
+        </footer>
+
+        <div class="chat-composer-hint" *ngIf="!selected.is_human_handoff">
+          <span class="material-icons">info</span>
+          Pulsa <strong>Tomar conversación</strong> para responder como asesor; el bot dejará de contestar automáticamente.
+        </div>
       </ng-container>
-    </div>
+    </section>
   </div>
 </div>

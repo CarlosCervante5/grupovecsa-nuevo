@@ -32,4 +32,18 @@ class AssistantController extends Controller
             ], 422);
         }
     }
+
+    public function messages(Request $request)
+    {
+        try {
+            $payload = $this->chatService->pollMessages($request);
+
+            return response()->json($payload);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'message' => 'Validación',
+                'errors' => $e->errors(),
+            ], 422);
+        }
+    }
 }

@@ -798,10 +798,14 @@ Route::prefix('benchmark')->middleware(['bandwidth_usage', 'auth:sanctum', 'perm
 Route::prefix('assistant')->middleware('bandwidth_usage')->group(function () {
     Route::get('/dealerships', [AssistantController::class, 'dealerships']);
     Route::post('/chat', [AssistantController::class, 'chat']);
+    Route::post('/messages', [AssistantController::class, 'messages']);
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/admin/conversations/search', [AssistantChatAdminController::class, 'search']);
         Route::post('/admin/conversations/detail', [AssistantChatAdminController::class, 'detail']);
+        Route::post('/admin/conversations/take-over', [AssistantChatAdminController::class, 'takeOver']);
+        Route::post('/admin/conversations/reply', [AssistantChatAdminController::class, 'reply']);
+        Route::post('/admin/conversations/release', [AssistantChatAdminController::class, 'release']);
     });
 });
 
