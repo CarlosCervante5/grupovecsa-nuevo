@@ -44,6 +44,9 @@ class ApiResponseHelper
 
         $genericMessage = 'Hubo un problema con su solicitud: ' . $userMessage;
         $data = is_array($error) ? $error : null;
+        if ($data === null && is_string($error) && trim($error) !== '') {
+            $data = ['detail' => $error];
+        }
 
         return response()->json(['status' => $status, 'message' => $genericMessage, 'data' => $data], $status);
     }
