@@ -12,7 +12,6 @@ import {
   vehicleDealershipNameForUserEmail,
   VehicleDealershipFormMode,
   vehicleLocationFallbackForDealershipName,
-  VEHICLE_MAIN_DEALERSHIP_NAMES,
 } from './vehicle-dealership-by-user.helper';
 
 export interface VehicleDealershipFormApplyOptions {
@@ -199,8 +198,8 @@ export class VehicleDealershipFormController {
     fallbackNames: readonly string[],
   ): Dealership[] {
     if (assignedIds.length > 0) {
-      const idSet = new Set(assignedIds);
-      const byId = all.filter((d) => d.id != null && idSet.has(d.id));
+      const idSet = new Set(assignedIds.map((id) => Number(id)));
+      const byId = all.filter((d) => d.id != null && idSet.has(Number(d.id)));
       if (byId.length > 0) {
         return this.sortDealershipsByName(byId);
       }
@@ -214,15 +213,16 @@ export class VehicleDealershipFormController {
       }
     }
 
-    const fallbackSet = new Set<string>(fallbackNames);
-    const fromFallback = all.filter((d) => fallbackSet.has(d.name));
-    if (fromFallback.length > 0) {
-      return this.sortDealershipsByName(fromFallback);
+    const hasAssignmentFromApi = assignedIds.length > 0 || assignedNames.length > 0;
+    if (!hasAssignmentFromApi && fallbackNames.length > 0) {
+      const fallbackSet = new Set<string>(fallbackNames);
+      const fromFallback = all.filter((d) => fallbackSet.has(d.name));
+      if (fromFallback.length > 0) {
+        return this.sortDealershipsByName(fromFallback);
+      }
     }
 
-    return this.sortDealershipsByName(
-      all.filter((d) => VEHICLE_MAIN_DEALERSHIP_NAMES.includes(d.name)),
-    );
+    return [];
   }
 
   private sortDealershipsByName(dealerships: Dealership[]): Dealership[] {

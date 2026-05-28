@@ -25,7 +25,6 @@ export const VEHICLE_DEALERSHIP_SELECTABLE_NAMES_BY_EMAIL: Readonly<
     VEHICLE_DEALERSHIP_VECSA_ANGELOPOLIS,
   ],
   'admin@vecsa.com': VEHICLE_MAIN_DEALERSHIP_NAMES,
-  'manager@vecsa.com': VEHICLE_MAIN_DEALERSHIP_NAMES,
 };
 
 /** Email (minúsculas) → sucursal fija (campos en solo lectura). */
@@ -59,9 +58,14 @@ export function vehicleSelectableDealershipNamesForEmail(
   email: string | null | undefined,
 ): readonly string[] {
   const key = (email ?? '').trim().toLowerCase();
-  return (
-    VEHICLE_DEALERSHIP_SELECTABLE_NAMES_BY_EMAIL[key] ?? VEHICLE_MAIN_DEALERSHIP_NAMES
-  );
+  if (VEHICLE_DEALERSHIP_SELECTABLE_NAMES_BY_EMAIL[key]) {
+    return VEHICLE_DEALERSHIP_SELECTABLE_NAMES_BY_EMAIL[key];
+  }
+  /** Sin lista fija por email: solo sucursales asignadas en admin (API). */
+  if (VEHICLE_DEALERSHIP_SELECT_USER_EMAILS.includes(key)) {
+    return [];
+  }
+  return VEHICLE_MAIN_DEALERSHIP_NAMES;
 }
 
 /** Fallback de sucursal única (hub / angelopolis) si el detalle de usuario no trae asignaciones. */
