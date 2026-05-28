@@ -4,6 +4,7 @@ namespace App\Services\Boutique;
 
 use App\Models\Boutique\BoutiqueProduct;
 use App\Models\Boutique\BoutiqueProductVariant;
+use App\Services\Boutique\BoutiqueProductPublicationService;
 use Exception;
 use Illuminate\Support\Collection;
 
@@ -43,6 +44,10 @@ class BoutiqueCheckoutLineService
             $product = $products[$item['product_uuid']] ?? null;
             if (! $product) {
                 throw new Exception('PRODUCT_NOT_FOUND:' . $item['product_uuid']);
+            }
+
+            if (! BoutiqueProductPublicationService::isPublished($product)) {
+                throw new Exception('PRODUCT_NOT_PUBLISHED:' . $item['product_uuid']);
             }
 
             $variant = null;

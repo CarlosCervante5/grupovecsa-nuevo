@@ -12,6 +12,7 @@ use App\Models\Boutique\BoutiqueProductAttribute;
 use App\Models\Boutique\BoutiqueProductAttributeValue;
 use App\Models\Boutique\BoutiqueProductVariant;
 use App\Models\Boutique\BoutiqueVariantAttributeValue;
+use App\Services\Boutique\BoutiqueProductPublicationService;
 use App\Services\DealershipAccessService;
 use App\Support\BoutiqueDealershipPresenter;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -107,6 +108,16 @@ class BoutiqueProductController extends Controller
 
             $dealershipId = $this->dealershipAccess->resolveDealershipIdForNewBoutiqueProduct($request);
 
+            $requestedActive = (bool) ($data['active'] ?? false);
+            if ($requestedActive) {
+                return ApiResponseHelper::apiError(
+                    'El producto no puede publicarse sin imagen',
+                    'Sube al menos una imagen antes de activar el producto.',
+                    400,
+                    'PRODUCT_PUBLISH_REQUIRES_IMAGE'
+                );
+            }
+
             $product = BoutiqueProduct::create([
                 'name' => $data['name'],
                 'description' => $data['description'] ?? null,
@@ -115,7 +126,7 @@ class BoutiqueProductController extends Controller
                 'category_id' => $category->id,
                 'dealership_id' => $dealershipId,
                 'stock' => $data['stock'] ?? 0,
-                'active' => $data['active'] ?? true,
+                'active' => false,
             ]);
 
             // Sync attributes if provided
@@ -166,6 +177,15 @@ class BoutiqueProductController extends Controller
                 $dealershipId = $data['dealership_id'] ?? null;
             }
 
+            $requestedActive = array_key_exists('active', $data)
+                ? (bool) $data['active']
+                : (bool) $product->active;
+
+            $publishError = BoutiqueProductPublicationService::validateActivation($product, $requestedActive);
+            if ($publishError !== null) {
+                return ApiResponseHelper::apiError('No se puede publicar el producto', $publishError, 400, 'PRODUCT_PUBLISH_REQUIRES_IMAGE');
+            }
+
             $product->update([
                 'name' => $data['name'],
                 'description' => $data['description'] ?? null,
@@ -174,7 +194,7 @@ class BoutiqueProductController extends Controller
                 'category_id' => $category->id,
                 'dealership_id' => $dealershipId,
                 'stock' => $data['stock'] ?? $product->stock,
-                'active' => $data['active'] ?? $product->active,
+                'active' => $requestedActive,
             ]);
 
             // Sync attributes if provided

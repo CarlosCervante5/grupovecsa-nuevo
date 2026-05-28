@@ -14,7 +14,7 @@ class BoutiqueCatalogController extends Controller
     public function search(Request $request)
     {
         try {
-            $query = BoutiqueProduct::where('active', true)
+            $query = BoutiqueProduct::published()
                 ->with([
                     'category',
                     'dealership',
@@ -72,8 +72,8 @@ class BoutiqueCatalogController extends Controller
         try {
             $uuid = $request->input('uuid');
 
-            $product = BoutiqueProduct::where('uuid', $uuid)
-                ->where('active', true)
+            $product = BoutiqueProduct::published()
+                ->where('uuid', $uuid)
                 ->with([
                     'category',
                     'dealership',
@@ -118,7 +118,7 @@ class BoutiqueCatalogController extends Controller
             }
 
             // Related products: same category, exclude current, limit 4
-            $relatedProducts = BoutiqueProduct::where('active', true)
+            $relatedProducts = BoutiqueProduct::published()
                 ->where('category_id', $product->category_id)
                 ->where('id', '!=', $product->id)
                 ->with(['images' => function ($q) {
@@ -140,7 +140,7 @@ class BoutiqueCatalogController extends Controller
     {
         try {
             $productCategoryIds = BoutiqueProduct::query()
-                ->where('active', true)
+                ->published()
                 ->whereNotNull('category_id')
                 ->distinct()
                 ->pluck('category_id')

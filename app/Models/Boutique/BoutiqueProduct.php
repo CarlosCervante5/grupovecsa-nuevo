@@ -5,6 +5,8 @@ namespace App\Models\Boutique;
 use App\Helpers\RichTextHelper;
 use App\Models\Dealership;
 use Carbon\Carbon;
+use App\Services\Boutique\BoutiqueProductPublicationService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -98,6 +100,12 @@ class BoutiqueProduct extends Model
     public function images()
     {
         return $this->hasMany(BoutiqueProductImage::class, 'product_id');
+    }
+
+    /** Productos visibles en catálogo público (activos con imagen subida). */
+    public function scopePublished(Builder $query): Builder
+    {
+        return BoutiqueProductPublicationService::applyPublishedScope($query);
     }
 
     public function variants()
