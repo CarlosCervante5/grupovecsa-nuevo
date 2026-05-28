@@ -418,14 +418,19 @@ class ExperienceController extends Controller
             $keywords = ['evento'];
         }
 
+        $postTypes = [
+            ['value' => 'story', 'label' => 'Historia o noticia'],
+            ['value' => 'event', 'label' => 'Evento (calendario público)'],
+        ];
+        if (ExperiencePostGalleryService::tableReady()) {
+            $postTypes[] = ['value' => 'gallery', 'label' => 'Galería de evento'];
+        }
+
         return ApiResponseHelper::apiSuccess(200, 'Meta de historias Experience', [
             'wp_category_options' => $options,
             'event_agenda_keywords' => array_values($keywords),
-            'post_types' => [
-                ['value' => 'story', 'label' => 'Historia o noticia'],
-                ['value' => 'event', 'label' => 'Evento (calendario público)'],
-                ['value' => 'gallery', 'label' => 'Galería de evento'],
-            ],
+            'post_types' => $postTypes,
+            'gallery_ready' => ExperiencePostGalleryService::tableReady(),
         ]);
     }
 
@@ -485,24 +490,31 @@ class ExperienceController extends Controller
                 $wpCategoryLabel = $this->defaultExperienceEventCategoryLabel();
             }
 
-            $post = MarketingPost::create([
-                'title' => $title,
-                'url_name' => $slug,
-                'excerpt' => $data['excerpt'] ?? null,
-                'body_html' => $postType === 'gallery' ? ($data['body_html'] ?? null) : ($data['body_html'] ?? null),
-                'status' => $status,
-                'category' => 'experience',
-                'image_path' => $data['image_url'] ?? null,
-                'event_begin_date' => $eventBegin,
-                'event_end_date' => $data['event_end_date'] ?? null,
-                'wp_category_label' => $wpCategoryLabel,
-                'experience_post_type' => ExperiencePostGalleryService::tableReady() ? $postType : 'story',
-            ]);
+            if ($postType === 'gallery' && ! ExperiencePostGalleryService::tableReady()) {
+                return ApiResponseHelper::apiError(
+                    'Galería no disponible en este servidor',
+                    'Ejecuta las migraciones del backend (experience_post_type y marketing_post_gallery_images).',
+                    503,
+                    'EXPERIENCE_GALLERY_SCHEMA_MISSING'
+                );
+            }
+
+            $post = MarketingPost::create($this->buildExperiencePostAttributes(
+                $title,
+                $slug,
+                $data,
+                $status,
+                $eventBegin,
+                $wpCategoryLabel,
+                $postType
+            ));
 
             $this->syncFeaturedImageFromRequest($request, $post);
-            $this->galleryService()->syncGalleryImagesFromRequest($request, $post->fresh());
+            if (ExperiencePostGalleryService::tableReady()) {
+                $this->galleryService()->syncGalleryImagesFromRequest($request, $post->fresh());
+            }
 
-            if ($postType === 'gallery' && $status === 'published') {
+            if ($postType === 'gallery' && $status === 'published' && ExperiencePostGalleryService::tableReady()) {
                 $this->galleryService()->assertGalleryReadyForPublish($post->fresh());
             }
 
@@ -609,25 +621,40 @@ class ExperienceController extends Controller
 
             $effectiveType = $updates['experience_post_type'] ?? $post->experience_post_type ?? 'story';
             $effectiveStatus = $updates['status'] ?? $post->status;
-            $this->validateExperiencePostTypeRules(
-                $effectiveType,
-                $effectiveBegin?->format('Y-m-d') ?? (is_string($effectiveBegin) ? $effectiveBegin : null),
-                $effectiveStatus
-            );
+            try {
+                $this->validateExperiencePostTypeRules(
+                    $effectiveType,
+                    $effectiveBegin?->format('Y-m-d') ?? (is_string($effectiveBegin) ? $effectiveBegin : null),
+                    $effectiveStatus
+                );
+            } catch (\InvalidArgumentException $e) {
+                return ApiResponseHelper::apiError($e->getMessage(), null, 422, 'EXPERIENCE_POST_VALIDATION');
+            }
+
+            if ($effectiveType === 'gallery' && ! ExperiencePostGalleryService::tableReady()) {
+                return ApiResponseHelper::apiError(
+                    'Galería no disponible en este servidor',
+                    'Ejecuta las migraciones del backend (experience_post_type y marketing_post_gallery_images).',
+                    503,
+                    'EXPERIENCE_GALLERY_SCHEMA_MISSING'
+                );
+            }
 
             if ($updates !== []) {
                 $post->update($updates);
             }
 
-            if ($request->filled('gallery_delete_uuids')) {
-                $this->galleryService()->deleteGalleryImagesByUuid($post, $request->input('gallery_delete_uuids', []));
+            if (ExperiencePostGalleryService::tableReady()) {
+                if ($request->filled('gallery_delete_uuids')) {
+                    $this->galleryService()->deleteGalleryImagesByUuid($post, $request->input('gallery_delete_uuids', []));
+                }
+                $this->galleryService()->syncGalleryImagesFromRequest($request, $post->fresh());
             }
 
             $this->syncFeaturedImageFromRequest($request, $post);
-            $this->galleryService()->syncGalleryImagesFromRequest($request, $post->fresh());
 
             $post = $post->fresh();
-            if ($post->isExperienceGallery() && $post->status === 'published') {
+            if ($post->isExperienceGallery() && $post->status === 'published' && ExperiencePostGalleryService::tableReady()) {
                 $this->galleryService()->assertGalleryReadyForPublish($post);
             }
 
@@ -716,13 +743,66 @@ class ExperienceController extends Controller
             return "La tabla `{$table}` no existe. En el servidor sandbox ejecuta `php artisan migrate` (o despliega las migraciones que crean marketing_posts).";
         }
 
-        foreach (['title', 'url_name', 'status', 'category'] as $col) {
+        foreach (
+            [
+                'title',
+                'url_name',
+                'status',
+                'category',
+                'excerpt',
+                'body_html',
+                'image_path',
+                'event_begin_date',
+                'event_end_date',
+                'wp_category_label',
+            ] as $col
+        ) {
             if (! Schema::hasColumn($table, $col)) {
                 return "La tabla `{$table}` no tiene la columna `{$col}`. Ejecuta las migraciones pendientes del backend.";
             }
         }
 
+        if (! Schema::hasColumn($table, 'experience_post_type')) {
+            return 'Falta la columna `experience_post_type`. Ejecuta la migración `2026_05_28_120000_add_experience_gallery_post_type` (php artisan migrate en el servidor).';
+        }
+
         return null;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    private function buildExperiencePostAttributes(
+        string $title,
+        string $slug,
+        array $data,
+        string $status,
+        ?string $eventBegin,
+        ?string $wpCategoryLabel,
+        string $postType
+    ): array {
+        $attrs = [
+            'title' => $title,
+            'url_name' => $slug,
+            'excerpt' => $data['excerpt'] ?? null,
+            'body_html' => $data['body_html'] ?? null,
+            'status' => $status,
+            'category' => 'experience',
+            'image_path' => $data['image_url'] ?? null,
+            'event_begin_date' => $eventBegin,
+            'event_end_date' => $data['event_end_date'] ?? null,
+            'wp_category_label' => $wpCategoryLabel,
+        ];
+
+        $table = (new MarketingPost)->getTable();
+        if (Schema::hasColumn($table, 'experience_post_type')) {
+            $attrs['experience_post_type'] = ExperiencePostGalleryService::tableReady()
+                ? $postType
+                : 'story';
+        }
+
+        return $attrs;
     }
 
     /**

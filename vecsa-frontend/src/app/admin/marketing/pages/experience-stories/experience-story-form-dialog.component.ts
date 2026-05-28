@@ -88,6 +88,9 @@ export class ExperienceStoryFormDialogComponent implements OnInit, OnDestroy {
           ? [...d.event_agenda_keywords]
           : ['evento'];
         this.postTypeOptions = d?.post_types?.length ? [...d.post_types] : [...DEFAULT_POST_TYPES];
+        if (d?.gallery_ready === false && this.postType === 'gallery') {
+          this.postType = 'story';
+        }
         this.metaLoaded = true;
         this.hydrateForm();
       },
@@ -300,6 +303,25 @@ export class ExperienceStoryFormDialogComponent implements OnInit, OnDestroy {
     this.ref.close();
   }
 
+  private formatSaveError(err: unknown): string {
+    const e = err as {
+      status?: number;
+      error?: { message?: string; data?: { detail?: string } };
+    };
+    const base = e?.error?.message ?? '';
+    const detail = e?.error?.data?.detail?.trim() ?? '';
+    if (detail && !base.includes(detail)) {
+      return detail;
+    }
+    if (base) {
+      return base.replace(/^Hubo un problema con su solicitud:\s*/i, '');
+    }
+    if (e?.status === 404) {
+      return 'Historia no encontrada en el servidor. Recarga la página.';
+    }
+    return '';
+  }
+
   save(): void {
     if (!this.metaLoaded) {
       return;
@@ -355,7 +377,15 @@ export class ExperienceStoryFormDialogComponent implements OnInit, OnDestroy {
 
     let req;
     if (this.editing) {
-      const withUuid = { ...payload, uuid: this.editing.uuid };
+      const uuid = this.editing.uuid?.trim();
+      if (!uuid) {
+        this.saving = false;
+        this.snack.open('No se pudo identificar la historia (falta uuid). Recarga la lista e intenta de nuevo.', 'OK', {
+          duration: 6000,
+        });
+        return;
+      }
+      const withUuid = { ...payload, uuid };
       req = this.api.updateWithMedia(withUuid, featured, galleryFiles, this.galleryDeleteUuids);
     } else if (featured || galleryFiles.length) {
       req = this.api.storeWithImage(payload, featured, galleryFiles);
@@ -396,6 +426,10 @@ export class ExperienceStoryFormDialogComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.saving = false;
+        const msg = this.formatSaveError(err);
+        if (msg) {
+          this.snack.open(msg, 'OK', { duration: 8000 });
+        }
         reload(err, this.router);
       },
     });
