@@ -68,6 +68,7 @@ export interface ExperienceStoriesMetaResponse {
     wp_category_options: string[];
     event_agenda_keywords: string[];
     post_types: ExperienceStoryPostTypeOption[];
+    gallery_ready?: boolean;
   };
 }
 

@@ -12,15 +12,23 @@ export function reload(error: unknown, router: Router): void {
         void Swal.fire('Su sesión a expirado, para continuar inicie sesión.');
         return;
     }
-    const errObj = error as { error?: { message?: string }; message?: string };
+    const errObj = error as {
+        error?: { message?: string; data?: { detail?: string } };
+        message?: string;
+    };
+    const apiDetail = errObj?.error?.data?.detail?.trim() ?? '';
     const detail =
         errObj?.error?.message ??
         (typeof errObj?.message === 'string' ? errObj.message : '') ??
         '';
+    const text =
+        apiDetail && apiDetail !== detail
+            ? `${detail} (${apiDetail})`
+            : detail || apiDetail;
     void Swal.fire({
         icon: 'error',
         title: 'Oupps..',
-        text: 'Al parecer ocurrio un error' + (detail ? ': ' + detail : '.'),
+        text: 'Al parecer ocurrio un error' + (text ? ': ' + text : '.'),
         showConfirmButton: true,
         confirmButtonColor: '#EEB838',
         timer: 3500,
