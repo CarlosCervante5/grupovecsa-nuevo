@@ -783,7 +783,7 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     this.selectedProduct = { images: [], variants: [] };
     this.productMode = 'create';
     this.productEditing = true;
-    this.productEditData = { name: '', description: '', sku: '', price: 0, stock: 0, active: true, category_uuid: '' };
+    this.productEditData = { name: '', description: '', sku: '', price: 0, stock: 0, active: false, category_uuid: '' };
     this.editVariants = [];
     this.hasVariants = false;
     this.selectedProductAttributes = [];

@@ -10,6 +10,7 @@ use App\Http\Requests\Boutique\UpdateCartItemRequest;
 use App\Models\Boutique\BoutiqueCart;
 use App\Models\Boutique\BoutiqueCartItem;
 use App\Models\Boutique\BoutiqueProduct;
+use App\Services\Boutique\BoutiqueProductPublicationService;
 use App\Support\BoutiqueDealershipPresenter;
 use Illuminate\Http\Request;
 
@@ -77,6 +78,15 @@ class BoutiqueCartController extends Controller
             $product = BoutiqueProduct::findByUuid($data['product_uuid']);
             if (!$product) {
                 return ApiResponseHelper::apiError('El producto no existe', null, 404, 'PRODUCT_NOT_FOUND');
+            }
+
+            if (! BoutiqueProductPublicationService::isPublished($product)) {
+                return ApiResponseHelper::apiError(
+                    'Producto no disponible',
+                    'Este producto no está publicado en la boutique.',
+                    400,
+                    'PRODUCT_NOT_PUBLISHED'
+                );
             }
 
             // Find or create cart

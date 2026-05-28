@@ -3,6 +3,7 @@
 namespace App\Services\Incadea;
 
 use App\Models\Boutique\BoutiqueProduct;
+use App\Services\Boutique\BoutiqueProductPublicationService;
 use App\Models\Boutique\IncadeaSyncLog;
 use App\Models\SystemSetting;
 use Illuminate\Support\Facades\Http;
@@ -210,16 +211,24 @@ class IncadeaSyncService
             return 'skipped';
         }
 
+        $hasStock = ((int) ($part['exists_parts'] ?? 0)) > 0;
+
+        $existing = BoutiqueProduct::where('sku', $part['no_part'])->first();
+
+        $canPublish = $hasStock && (
+            $existing
+                ? BoutiqueProductPublicationService::hasPublishableImage($existing)
+                : false
+        );
+
         $productData = [
             'category_id' => $categoryId,
             'name'        => $part['description'] ?? '',
             'description' => "Marca: {$part['brand']} | Ubicación: {$part['location_code']} | Caja: {$part['box_code']}",
             'price'       => $part['unit_price'] ?? 0,
             'stock'       => (int) ($part['exists_parts'] ?? 0),
-            'active'      => ((int) ($part['exists_parts'] ?? 0)) > 0,
+            'active'      => $canPublish,
         ];
-
-        $existing = BoutiqueProduct::where('sku', $part['no_part'])->first();
 
         if (!$existing) {
             $product = new BoutiqueProduct(array_merge($productData, ['sku' => $part['no_part']]));

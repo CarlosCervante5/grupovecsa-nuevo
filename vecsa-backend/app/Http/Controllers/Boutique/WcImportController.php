@@ -6,6 +6,7 @@ use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Boutique\BoutiqueCategory;
 use App\Models\Boutique\BoutiqueProduct;
+use App\Services\Boutique\BoutiqueProductPublicationService;
 use App\Models\Boutique\BoutiqueProductImage;
 use App\Models\Boutique\BoutiqueProductVariant;
 use App\Services\Boutique\BoutiqueVariantAttributeCatalogSync;
@@ -254,12 +255,18 @@ class WcImportController extends Controller
             'price' => $this->parsePrice($row['Precio rebajado'] ?: $row['Precio normal']),
             'sku' => $sku,
             'stock' => (int)($row['Inventario'] ?? 0),
-            'active' => ($row['Publicado'] ?? '0') == '1',
+            'active' => false,
         ]);
         $product->uuid = (string) Uuid::uuid4();
         $product->save();
 
         $this->createImages($product, $row['Imágenes'] ?? '', $stats);
+        $product->update([
+            'active' => BoutiqueProductPublicationService::resolveActiveFromImportFlag(
+                $product,
+                ($row['Publicado'] ?? '0') == '1'
+            ),
+        ]);
         $stats['products']++;
     }
 
@@ -277,7 +284,7 @@ class WcImportController extends Controller
             'price' => $price ?: 0,
             'sku' => $sku,
             'stock' => 0,
-            'active' => ($row['Publicado'] ?? '0') == '1',
+            'active' => false,
         ]);
         $product->uuid = (string) Uuid::uuid4();
         $product->save();
@@ -285,6 +292,12 @@ class WcImportController extends Controller
         $this->parentSkuToId[$sku] = $product->id;
         $this->syncAttributeParentIds[(int) $product->id] = true;
         $this->createImages($product, $row['Imágenes'] ?? '', $stats);
+        $product->update([
+            'active' => BoutiqueProductPublicationService::resolveActiveFromImportFlag(
+                $product,
+                ($row['Publicado'] ?? '0') == '1'
+            ),
+        ]);
         $stats['products']++;
     }
 
@@ -369,7 +382,7 @@ class WcImportController extends Controller
                     $hasStock = $variantStock > 0;
                 }
 
-                $hasImages = $product->images()->count() > 0;
+                $hasImages = BoutiqueProductPublicationService::hasPublishableImage($product);
 
                 if (!$hasStock && !$hasImages) {
                     $product->update(['active' => false]);

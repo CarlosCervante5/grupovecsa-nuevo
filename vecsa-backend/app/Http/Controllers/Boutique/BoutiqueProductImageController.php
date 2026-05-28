@@ -10,6 +10,7 @@ use App\Http\Requests\Boutique\StoreBoutiqueProductImageRequest;
 use App\Jobs\UploadBoutiqueProductImage;
 use App\Models\Boutique\BoutiqueProduct;
 use App\Models\Boutique\BoutiqueProductImage;
+use App\Services\Boutique\BoutiqueProductPublicationService;
 use App\Services\DealershipAccessService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
@@ -91,7 +92,12 @@ class BoutiqueProductImageController extends Controller
                 $this->dealershipAccess->assertProductDealershipAccessible($request->user(), $image->product->dealership_id);
             }
 
+            $product = $image->product;
             $image->delete();
+
+            if ($product) {
+                BoutiqueProductPublicationService::syncActiveAfterImageChange($product);
+            }
 
             return ApiResponseHelper::apiSuccess(200, 'Imagen eliminada exitosamente');
         } catch (AuthorizationException $e) {

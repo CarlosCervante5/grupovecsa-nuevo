@@ -173,7 +173,7 @@ class AssistantBoutiqueSearchService
                 'dealership',
                 'images' => fn ($q) => $q->where('status', 'uploaded')->orderBy('sort_id'),
             ])
-            ->where('active', true);
+            ->published();
 
         if ($dealershipId !== null) {
             $query->where(function (Builder $q) use ($dealershipId) {
