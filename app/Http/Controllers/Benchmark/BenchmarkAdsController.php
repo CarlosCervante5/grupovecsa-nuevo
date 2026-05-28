@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Benchmark;
 
 use App\Http\Controllers\Controller;
+use App\Services\Benchmark\BenchmarkAdsPdfReportService;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -177,6 +179,12 @@ class BenchmarkAdsController extends Controller
 
             $htmlFile = $this->generateHTMLReport($results, $timestamp);
             $csvFile = $this->generateCSVReport($results, $timestamp);
+            $pdfFile = $this->generatePdfReport($results, $timestamp);
+
+            $files = ['data' => $dataFile, 'html' => $htmlFile, 'csv' => $csvFile];
+            if ($pdfFile !== null) {
+                $files['pdf'] = $pdfFile;
+            }
 
             return response()->json([
                 'success' => true,
@@ -188,7 +196,7 @@ class BenchmarkAdsController extends Controller
                         'error' => $r['error'] ?? null,
                     ];
                 }),
-                'files' => ['data' => $dataFile, 'html' => $htmlFile, 'csv' => $csvFile],
+                'files' => $files,
             ]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -249,12 +257,76 @@ class BenchmarkAdsController extends Controller
         }
 
         $files = collect(Storage::files($this->reportsDir))
-            ->map(fn($f) => basename($f))
-            ->filter(fn($f) => str_ends_with($f, '.html') || str_ends_with($f, '.csv'))
+            ->map(fn ($f) => basename($f))
+            ->filter(fn ($f) => str_ends_with($f, '.html') || str_ends_with($f, '.csv') || str_ends_with($f, '.pdf'))
             ->sortDesc()
             ->values();
 
         return response()->json($files);
+    }
+
+    /**
+     * Descarga un reporte generado (PDF horizontal, HTML o CSV).
+     */
+    public function downloadReport(string $file): StreamedResponse|\Illuminate\Http\JsonResponse
+    {
+        if (! preg_match('/^reporte-\d{4}-\d{2}-\d{2}T[\d\-]+\.(pdf|html|csv)$/', $file)) {
+            return ApiResponseHelper::apiError('Nombre de archivo no válido', null, 404, 'INVALID_REPORT_FILE');
+        }
+
+        $path = $this->reportsDir.'/'.$file;
+        if (! Storage::exists($path)) {
+            return ApiResponseHelper::apiError('Reporte no encontrado', null, 404, 'REPORT_NOT_FOUND');
+        }
+
+        $mime = match (true) {
+            str_ends_with($file, '.pdf') => 'application/pdf',
+            str_ends_with($file, '.csv') => 'text/csv; charset=UTF-8',
+            default => 'text/html; charset=UTF-8',
+        };
+
+        return Storage::download($path, $file, ['Content-Type' => $mime]);
+    }
+
+    /**
+     * Genera PDF horizontal desde un escaneo guardado (historial).
+     */
+    public function exportPdfFromScan(Request $request)
+    {
+        $data = $request->validate([
+            'scan_file' => 'required|string|max:255',
+        ]);
+
+        $basename = basename($data['scan_file']);
+        if (! preg_match('/^scan-\d{4}-\d{2}-\d{2}T[\d\-]+\.json$/', $basename)) {
+            return ApiResponseHelper::apiError('Archivo de escaneo no válido', null, 422, 'INVALID_SCAN_FILE');
+        }
+
+        $path = $this->dataDir.'/'.$basename;
+        if (! Storage::exists($path)) {
+            return ApiResponseHelper::apiError('Escaneo no encontrado', null, 404, 'SCAN_NOT_FOUND');
+        }
+
+        $results = json_decode(Storage::get($path), true);
+        if (! is_array($results)) {
+            return ApiResponseHelper::apiError('Datos de escaneo corruptos', null, 500, 'SCAN_DATA_INVALID');
+        }
+
+        $timestamp = now()->format('Y-m-d\TH-i-s');
+        $pdfFile = $this->generatePdfReport($results, $timestamp);
+        if ($pdfFile === null) {
+            return ApiResponseHelper::apiError(
+                'No se pudo generar el PDF',
+                'Revise los logs del servidor (dompdf / imágenes).',
+                500,
+                'BENCHMARK_PDF_FAILED'
+            );
+        }
+
+        return ApiResponseHelper::apiSuccess(200, 'PDF generado', [
+            'pdf' => basename($pdfFile),
+            'download' => 'benchmark/reports/'.basename($pdfFile),
+        ]);
     }
 
     // ─── Private helpers ───
@@ -542,6 +614,27 @@ class BenchmarkAdsController extends Controller
             ->sortDesc()
             ->values()
             ->toArray();
+    }
+
+    /**
+     * @param  array<int, mixed>  $results
+     */
+    private function generatePdfReport(array $results, string $timestamp): ?string
+    {
+        try {
+            return app(BenchmarkAdsPdfReportService::class)->generateAndStore(
+                $results,
+                $this->reportsDir,
+                $timestamp
+            );
+        } catch (\Throwable $e) {
+            Log::error('BENCHMARK_PDF_REPORT_ERROR', [
+                'message' => $e->getMessage(),
+                'exception' => $e::class,
+            ]);
+
+            return null;
+        }
     }
 
     private function generateHTMLReport(array $results, string $timestamp): string
