@@ -7,7 +7,7 @@ use App\Models\Boutique\BoutiqueProductImage;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * Regla de negocio: un producto boutique solo se publica (catálogo / active) con imagen subida.
+ * Regla de negocio: inventario público boutique = activo + imagen subida + stock disponible.
  */
 class BoutiqueProductPublicationService
 {
@@ -26,13 +26,27 @@ class BoutiqueProductPublicationService
             ->exists();
     }
 
+    public static function hasAvailableStock(BoutiqueProduct $product): bool
+    {
+        if ((int) $product->stock > 0) {
+            return true;
+        }
+
+        return $product->allVariants()
+            ->where('active', true)
+            ->where('stock', '>', 0)
+            ->exists();
+    }
+
     public static function isPublished(BoutiqueProduct $product): bool
     {
-        return (bool) $product->active && self::hasPublishableImage($product);
+        return (bool) $product->active
+            && self::hasPublishableImage($product)
+            && self::hasAvailableStock($product);
     }
 
     /**
-     * Catálogo público y asistente: activo + al menos una imagen uploaded.
+     * Catálogo público y asistente: activo + imagen uploaded + stock (producto o variante activa).
      */
     public static function applyPublishedScope(Builder $query): Builder
     {
@@ -40,6 +54,12 @@ class BoutiqueProductPublicationService
             ->whereHas('images', function (Builder $q) {
                 $q->where('status', 'uploaded')
                     ->where('image_path', '!=', '');
+            })
+            ->where(function (Builder $q) {
+                $q->where('stock', '>', 0)
+                    ->orWhereHas('allVariants', function (Builder $v) {
+                        $v->where('active', true)->where('stock', '>', 0);
+                    });
             });
     }
 
