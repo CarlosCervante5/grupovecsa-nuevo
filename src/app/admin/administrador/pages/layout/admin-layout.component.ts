@@ -7,6 +7,7 @@ import {
   adminDashboardUrl,
   adminVehicleInventoryUrl,
 } from 'src/app/admin/utils/admin-route.util';
+import { AssistantChatNotificationsService } from '@services/assistant-chat-notifications.service';
 
 @Component({
   selector: 'app-admin-layout',
@@ -35,23 +36,31 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
       label: 'Chats asistente',
       icon: 'forum',
       route: '/admin/administrator/assistant-chats',
+      notifyKey: 'assistant' as const,
     },
   ];
 
   dynamicItems: { label: string; icon: string; route: string }[] = [];
   panelItems: { label: string; icon: string; route: string }[] = [];
+  assistantUnread = 0;
 
   private permSub?: Subscription;
+  private unreadSub?: Subscription;
 
   constructor(
     private router: Router,
     private auth: AuthService,
+    private assistantNotifications: AssistantChatNotificationsService,
   ) {
     this.loadSession();
     this.rebuildNavLists();
   }
 
   ngOnInit(): void {
+    this.assistantNotifications.start();
+    this.unreadSub = this.assistantNotifications.unreadTotal$.subscribe((n) => {
+      this.assistantUnread = n;
+    });
     this.permSub = this.auth.permissionsRevision$.subscribe(() => {
       try {
         this.permissions = JSON.parse(localStorage.getItem('permissions') || '[]');
@@ -64,6 +73,16 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.permSub?.unsubscribe();
+    this.unreadSub?.unsubscribe();
+    this.assistantNotifications.stop();
+  }
+
+  navBadgeCount(item: { notifyKey?: string }): number {
+    return item.notifyKey === 'assistant' ? this.assistantUnread : 0;
+  }
+
+  formatBadgeCount(count: number): string {
+    return count > 99 ? '99+' : String(count);
   }
 
   private loadSession(): void {

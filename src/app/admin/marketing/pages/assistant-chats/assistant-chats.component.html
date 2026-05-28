@@ -43,6 +43,9 @@
         >
           <div class="conv-item-top">
             <strong class="conv-name">{{ row.visitor_name }}</strong>
+            <span class="conv-unread-badge" *ngIf="row.unread_count && row.unread_count > 0">
+              {{ formatUnreadBadge(row.unread_count) }}
+            </span>
             <span class="conv-time">{{ formatDate(row.last_message_at) }}</span>
           </div>
           <p class="conv-preview">{{ row.preview || 'Sin mensajes' }}</p>

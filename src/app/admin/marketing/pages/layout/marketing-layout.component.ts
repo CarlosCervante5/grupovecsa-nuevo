@@ -7,6 +7,7 @@ import {
   adminDashboardUrl,
   adminVehicleInventoryUrl,
 } from 'src/app/admin/utils/admin-route.util';
+import { AssistantChatNotificationsService } from '@services/assistant-chat-notifications.service';
 
 @Component({
   selector: 'app-marketing-layout',
@@ -26,22 +27,34 @@ export class MarketingLayoutComponent implements OnInit, OnDestroy {
     { label: 'Testimonios', icon: 'format_quote', route: '/admin/marketing/home-testimonials' },
     { label: 'Banners Boutique', icon: 'view_carousel', route: '/admin/marketing/boutique-banners' },
     { label: 'Experience — Historias', icon: 'auto_stories', route: '/admin/marketing/experience-stories' },
-    { label: 'Chats asistente', icon: 'forum', route: '/admin/marketing/assistant-chats' },
+    {
+      label: 'Chats asistente',
+      icon: 'forum',
+      route: '/admin/marketing/assistant-chats',
+      notifyKey: 'assistant' as const,
+    },
   ];
 
   dynamicItems: { label: string; icon: string; route: string }[] = [];
+  assistantUnread = 0;
 
   private permSub?: Subscription;
+  private unreadSub?: Subscription;
 
   constructor(
     private router: Router,
     private auth: AuthService,
+    private assistantNotifications: AssistantChatNotificationsService,
   ) {
     this.loadSession();
     this.rebuildDynamicItems();
   }
 
   ngOnInit(): void {
+    this.assistantNotifications.start();
+    this.unreadSub = this.assistantNotifications.unreadTotal$.subscribe((n) => {
+      this.assistantUnread = n;
+    });
     this.permSub = this.auth.permissionsRevision$.subscribe(() => {
       try {
         this.permissions = JSON.parse(localStorage.getItem('permissions') || '[]');
@@ -54,6 +67,16 @@ export class MarketingLayoutComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.permSub?.unsubscribe();
+    this.unreadSub?.unsubscribe();
+    this.assistantNotifications.stop();
+  }
+
+  navBadgeCount(item: { notifyKey?: string }): number {
+    return item.notifyKey === 'assistant' ? this.assistantUnread : 0;
+  }
+
+  formatBadgeCount(count: number): string {
+    return count > 99 ? '99+' : String(count);
   }
 
   private loadSession(): void {

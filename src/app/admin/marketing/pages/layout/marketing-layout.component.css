@@ -10,7 +10,41 @@
 .panel-user-role { font-size: 0.7rem; color: #64748b; }
 .panel-nav { flex: 1; overflow-y: auto; }
 .panel-nav-label { font-size: 0.65rem; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.08em; margin: 16px 0 6px 8px; }
-.panel-nav-item { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; color: #94a3b8; font-size: 0.8rem; border-radius: 8px; cursor: pointer; text-decoration: none; transition: all 0.15s; margin-bottom: 1px; }
+.panel-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 12px;
+  color: #94a3b8;
+  font-size: 0.8rem;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s;
+  margin-bottom: 1px;
+}
+.panel-nav-item-label {
+  flex: 1;
+  min-width: 0;
+}
+.panel-nav-badge {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.panel-nav-item.active .panel-nav-badge {
+  background: #fff;
+  color: #1c69d4;
+}
 .panel-nav-item .material-icons {
   font-size: 18px;
   width: 24px;

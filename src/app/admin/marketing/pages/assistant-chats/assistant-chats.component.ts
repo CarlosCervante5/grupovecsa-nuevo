@@ -8,6 +8,8 @@ import {
   AssistantChatMessage,
   AssistantChatsAdminService,
 } from '@services/assistant-chats-admin.service';
+import { AssistantChatNotificationsService } from '@services/assistant-chat-notifications.service';
+import { ChatNotificationSoundService } from '@services/chat-notification-sound.service';
 
 @Component({
   selector: 'app-assistant-chats',
@@ -32,8 +34,11 @@ export class AssistantChatsComponent implements OnDestroy {
 
   constructor(
     private api: AssistantChatsAdminService,
-    private router: Router
+    private router: Router,
+    private assistantNotifications: AssistantChatNotificationsService,
+    private sound: ChatNotificationSoundService,
   ) {
+    this.sound.unlock();
     this.loadList();
   }
 
@@ -88,6 +93,7 @@ export class AssistantChatsComponent implements OnDestroy {
       next: (res) => {
         this.selected = res?.data?.conversation ?? null;
         this.detailLoading = false;
+        this.assistantNotifications.refresh();
         this.scheduleAutoRefresh();
         setTimeout(() => this.scrollThread(), 50);
       },
@@ -233,12 +239,17 @@ export class AssistantChatsComponent implements OnDestroy {
         if (!next || next.uuid !== this.selected?.uuid) {
           return;
         }
-        const prevCount = this.selected.messages?.length ?? 0;
-        this.selected = next;
-        this.syncRowFromSelected();
-        if ((next.messages?.length ?? 0) > prevCount) {
-          setTimeout(() => this.scrollThread(), 50);
-        }
+          const prevCount = this.selected.messages?.length ?? 0;
+          const newMessages = next.messages ?? [];
+          this.selected = next;
+          this.syncRowFromSelected();
+          if (newMessages.length > prevCount) {
+            const incoming = newMessages.slice(prevCount);
+            if (incoming.some((m) => m.role === 'user')) {
+              this.sound.playNewMessage();
+            }
+            setTimeout(() => this.scrollThread(), 50);
+          }
       },
     });
   }
@@ -256,8 +267,17 @@ export class AssistantChatsComponent implements OnDestroy {
         messages_count: this.selected.messages_count,
         last_message_at: this.selected.last_message_at,
         is_human_handoff: this.selected.is_human_handoff,
+        unread_count: 0,
       };
     }
+  }
+
+  formatUnreadBadge(count: number | undefined): string {
+    const n = Number(count ?? 0);
+    if (n <= 0) {
+      return '';
+    }
+    return n > 99 ? '99+' : String(n);
   }
 
   private scrollThread(): void {

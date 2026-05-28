@@ -19,6 +19,7 @@ export interface AssistantChatListRow {
   is_registered: boolean;
   is_human_handoff?: boolean;
   human_handoff_at?: string | null;
+  unread_count?: number;
 }
 
 export interface AssistantChatMessage {
@@ -90,6 +91,14 @@ export class AssistantChatsAdminService {
     return this.http.post(
       `${this.baseUrl}/api/assistant/admin/conversations/release`,
       { uuid },
+      { headers: this.headers() }
+    );
+  }
+
+  unreadSummary(): Observable<any> {
+    return this.http.post(
+      `${this.baseUrl}/api/assistant/admin/unread-summary`,
+      {},
       { headers: this.headers() }
     );
   }
