@@ -368,10 +368,10 @@ class BenchmarkAdsController extends Controller
             ], 502);
         }
 
-        $results = $body['results'] ?? null;
+        $results = $this->resolveReportAdsScanResults($base, is_array($body) ? $body : []);
         if (! is_array($results)) {
             return response()->json([
-                'error' => 'El servicio reportADS no devolvió el cuerpo de resultados. Actualice reportADS (POST /api/scan con includeResults: true) o use Meta API.',
+                'error' => 'El servicio reportADS no devolvió resultados. Redespliega el proyecto reportADS del monorepo (debe responder con `results` en POST /api/scan) o usa Meta API con token.',
                 'code' => 'SCRAPER_LEGACY',
             ], 502);
         }
@@ -382,6 +382,59 @@ class BenchmarkAdsController extends Controller
         }
 
         return $enriched;
+    }
+
+    /**
+     * Resultados del scan en reportADS: cuerpo directo o fallback vía GET /api/history/:file.
+     *
+     * @param  array<string, mixed>  $body
+     * @return array<int, mixed>|null
+     */
+    private function resolveReportAdsScanResults(string $base, array $body): ?array
+    {
+        $results = $body['results'] ?? null;
+        if (is_array($results)) {
+            return $results;
+        }
+
+        return $this->fetchReportAdsResultsFromHistoryFile($base, $body['files'] ?? null);
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $files
+     * @return array<int, mixed>|null
+     */
+    private function fetchReportAdsResultsFromHistoryFile(string $base, mixed $files): ?array
+    {
+        if (! is_array($files) || empty($files['data'])) {
+            return null;
+        }
+
+        $basename = basename((string) $files['data']);
+        if ($basename === '' || $basename === '.' || $basename === '..') {
+            return null;
+        }
+
+        try {
+            $history = Http::timeout(120)
+                ->connectTimeout(30)
+                ->get($base.'/api/history/'.rawurlencode($basename));
+
+            if ($history->failed()) {
+                return null;
+            }
+
+            $data = $history->json();
+
+            return is_array($data) ? $data : null;
+        } catch (\Throwable $e) {
+            Log::warning('BENCHMARK_REPORT_ADS_HISTORY_FALLBACK', [
+                'file' => $basename,
+                'message' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
     }
 
     private function searchMetaAds(string $searchTerm, string $token): array
