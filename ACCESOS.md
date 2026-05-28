@@ -12,7 +12,7 @@ Atajo para publicar ambos subtrees a sandbox:
 ./tools/push-sandbox-subtrees.sh
 ```
 
-En Railway, el backend sandbox ejecuta `deploy.sh` en cada release (`migrate` + seeders idempotentes con usuarios de prueba). Si el login falla con 401, revisa que el release terminó bien y usa las credenciales de la tabla siguiente.
+En Railway, el backend sandbox ejecuta `deploy.sh` en cada deploy como **pre-deploy** (`migrate` + seeders idempotentes con usuarios de prueba). Si el login falla con 401, revisa en el deploy que el paso pre-deploy terminó bien y usa las credenciales de la tabla siguiente.
 
 Login único en la app: `/auth/iniciar-sesion` (la ruta `/auth/login` abre la misma pantalla).
 

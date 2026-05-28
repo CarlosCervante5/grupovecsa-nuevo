@@ -1,5 +1,8 @@
-# Railway: migraciones en cada deploy (release) antes de levantar el nuevo servicio.
-# Documentación: https://docs.railway.com/guides/config-as-code
+# Railway: migraciones en cada deploy (fase pre-deploy, tras el build de la imagen).
+# https://docs.railway.com/deployments/pre-deploy-command
+#
+# preDeployCommand corre en un contenedor aparte con red privada y variables de entorno
+# (incl. DATABASE_URL). Si falla, el deploy no continúa.
 #
 # Si en el dashboard ya tienes un Start Command distinto (Apache, Octane, etc.),
 # sustituye solo `startCommand` o bórralo para seguir usando el de la UI.
@@ -9,5 +12,5 @@ builder = "nixpacks"
 
 [deploy]
 # migrate + seeders idempotentes (usuarios de prueba ACCESOS.md, roles, datos demo)
-releaseCommand = "bash deploy.sh"
+preDeployCommand = "bash deploy.sh"
 startCommand = "bash railway-start.sh"
