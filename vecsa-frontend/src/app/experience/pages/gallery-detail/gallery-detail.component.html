@@ -1,0 +1,38 @@
+<div class="gallery-page">
+  <a routerLink="/experience" class="back-link">
+    <span class="back-icon">←</span> Volver a Experience
+  </a>
+
+  <div class="loading" *ngIf="loading">Cargando…</div>
+  <div class="error" *ngIf="!loading && error">{{ error }}</div>
+
+  <article class="gallery-article" *ngIf="!loading && post">
+    <header class="gallery-header">
+      <p class="gallery-meta">{{ formatDate(post.event_begin_date || post.created_at) }}</p>
+      <h1>{{ post.title }}</h1>
+      <p class="gallery-excerpt" *ngIf="post.excerpt">{{ post.excerpt }}</p>
+    </header>
+
+    <figure class="gallery-cover" *ngIf="post.image_path">
+      <img [src]="post.image_path" [alt]="post.title" />
+    </figure>
+
+    <div class="gallery-grid" *ngIf="photos.length">
+      <button
+        type="button"
+        class="gallery-grid-item"
+        *ngFor="let photo of photos"
+        (click)="openLightbox(photo.image_path)"
+      >
+        <img [src]="photo.image_path" [alt]="photo.image_name || post.title" loading="lazy" />
+      </button>
+    </div>
+
+    <p class="gallery-empty" *ngIf="!photos.length">Esta galería aún no tiene fotos adicionales.</p>
+  </article>
+
+  <div class="lightbox" *ngIf="lightboxSrc" (click)="closeLightbox()" role="dialog">
+    <button type="button" class="lightbox-close" (click)="closeLightbox(); $event.stopPropagation()">×</button>
+    <img [src]="lightboxSrc" alt="" (click)="$event.stopPropagation()" />
+  </div>
+</div>

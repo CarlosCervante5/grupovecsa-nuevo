@@ -1,0 +1,105 @@
+.gallery-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #1c69d4;
+  text-decoration: none;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.gallery-header h1 {
+  margin: 0 0 8px;
+  font-size: 1.75rem;
+}
+
+.gallery-meta {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin: 0 0 4px;
+}
+
+.gallery-excerpt {
+  color: #475569;
+  margin: 0 0 20px;
+}
+
+.gallery-cover {
+  margin: 0 0 24px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.gallery-cover img {
+  width: 100%;
+  max-height: 420px;
+  object-fit: cover;
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.gallery-grid-item {
+  padding: 0;
+  border: none;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  background: #f1f5f9;
+}
+
+.gallery-grid-item img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.2s;
+}
+
+.gallery-grid-item:hover img {
+  transform: scale(1.03);
+}
+
+.gallery-empty,
+.loading,
+.error {
+  color: #64748b;
+  padding: 24px 0;
+}
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.lightbox img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-size: 2rem;
+  cursor: pointer;
+}

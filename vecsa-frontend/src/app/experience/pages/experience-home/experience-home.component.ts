@@ -217,6 +217,20 @@ export class ExperienceHomeComponent implements OnInit, OnDestroy {
     return `${this.formatShortDate(ev.begin_date)} – ${this.formatShortDate(ev.end_date)}`;
   }
 
+  galleryRoute(ev: ExperienceEvent): string | null {
+    if (ev.source === 'gallery_post' && ev.story_slug?.trim()) {
+      return `/experience/galeria/${ev.story_slug.trim()}`;
+    }
+    return null;
+  }
+
+  openGalleryItem(ev: ExperienceEvent): void {
+    const route = this.galleryRoute(ev);
+    if (route) {
+      void this.router.navigateByUrl(route);
+    }
+  }
+
   reservar(ev: ExperienceEvent): void {
     const slug = ev.story_slug?.trim();
     if (slug) {

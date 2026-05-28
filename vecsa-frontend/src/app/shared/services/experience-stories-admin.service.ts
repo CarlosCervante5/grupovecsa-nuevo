@@ -3,6 +3,13 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { environment } from '@environments/environment';
 import { Observable } from 'rxjs';
 
+export interface ExperienceGalleryImageRow {
+  uuid: string;
+  sort_id: number;
+  image_path: string;
+  image_name?: string | null;
+}
+
 export interface ExperienceStoryRow {
   uuid: string;
   title: string;
@@ -17,6 +24,9 @@ export interface ExperienceStoryRow {
   wp_tags?: string[] | null;
   event_begin_date?: string | null;
   event_end_date?: string | null;
+  experience_post_type?: 'story' | 'event' | 'gallery' | string | null;
+  gallery_images?: ExperienceGalleryImageRow[];
+  gallery_images_count?: number;
   created_at: string;
 }
 
@@ -99,9 +109,16 @@ export class ExperienceStoriesAdminService {
   /**
    * Crear historia con imagen destacada (multipart). No fijar Content-Type (boundary).
    */
-  storeWithImage(body: Record<string, unknown>, imageFile: File): Observable<ExperienceStoryMutationResponse> {
-    const fd = this.storyFormData(body, { includeImageUrl: !imageFile });
-    fd.append('image', imageFile, imageFile.name);
+  storeWithImage(
+    body: Record<string, unknown>,
+    imageFile: File | null,
+    galleryFiles: File[] = []
+  ): Observable<ExperienceStoryMutationResponse> {
+    const fd = this.storyFormData(body);
+    if (imageFile) {
+      fd.append('image', imageFile, imageFile.name);
+    }
+    galleryFiles.forEach((f) => fd.append('gallery_images[]', f, f.name));
     return this.http.post<ExperienceStoryMutationResponse>(
       `${this.baseUrl}/api/experience/admin/stories/store`,
       fd,
@@ -120,12 +137,22 @@ export class ExperienceStoriesAdminService {
   /**
    * Actualizar historia; si se envía imageFile, reemplaza la imagen en el servidor.
    */
-  updateWithOptionalImage(body: Record<string, unknown>, imageFile: File | null): Observable<ExperienceStoryMutationResponse> {
-    if (!imageFile) {
+  updateWithMedia(
+    body: Record<string, unknown>,
+    imageFile: File | null,
+    galleryFiles: File[] = [],
+    galleryDeleteUuids: string[] = []
+  ): Observable<ExperienceStoryMutationResponse> {
+    const needsMultipart = !!imageFile || galleryFiles.length > 0 || galleryDeleteUuids.length > 0;
+    if (!needsMultipart) {
       return this.update(body);
     }
-    const fd = this.storyFormData(body, { includeImageUrl: false });
-    fd.append('image', imageFile, imageFile.name);
+    const fd = this.storyFormData(body);
+    if (imageFile) {
+      fd.append('image', imageFile, imageFile.name);
+    }
+    galleryFiles.forEach((f) => fd.append('gallery_images[]', f, f.name));
+    galleryDeleteUuids.forEach((u) => fd.append('gallery_delete_uuids[]', u));
     return this.http.post<ExperienceStoryMutationResponse>(
       `${this.baseUrl}/api/experience/admin/stories/update`,
       fd,
@@ -138,10 +165,7 @@ export class ExperienceStoriesAdminService {
     return new HttpHeaders().set('Authorization', `Bearer ${token ?? ''}`);
   }
 
-  private storyFormData(
-    body: Record<string, unknown>,
-    opts: { includeImageUrl: boolean }
-  ): FormData {
+  private storyFormData(body: Record<string, unknown>): FormData {
     const fd = new FormData();
     const appendIf = (key: string, v: unknown) => {
       if (v === undefined || v === null) return;
@@ -158,10 +182,7 @@ export class ExperienceStoriesAdminService {
     appendIf('event_begin_date', body['event_begin_date']);
     appendIf('event_end_date', body['event_end_date']);
     appendIf('wp_category_label', body['wp_category_label']);
-
-    if (opts.includeImageUrl) {
-      appendIf('image_url', body['image_url']);
-    }
+    appendIf('experience_post_type', body['experience_post_type']);
 
     const uuid = body['uuid'];
     if (uuid != null && String(uuid).trim() !== '') {

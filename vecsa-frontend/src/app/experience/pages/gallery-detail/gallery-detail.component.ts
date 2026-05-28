@@ -1,25 +1,28 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { ExperienceService, ExperiencePostDetail } from '@services/experience.service';
+import {
+  ExperienceGalleryImage,
+  ExperiencePostDetail,
+  ExperienceService,
+} from '@services/experience.service';
 
 @Component({
-  selector: 'app-story-detail',
-  templateUrl: './story-detail.component.html',
-  styleUrls: ['./story-detail.component.css'],
+  selector: 'app-gallery-detail',
+  templateUrl: './gallery-detail.component.html',
+  styleUrls: ['./gallery-detail.component.css'],
   standalone: false,
 })
-export class StoryDetailComponent implements OnInit {
+export class GalleryDetailComponent implements OnInit {
   post: ExperiencePostDetail | null = null;
-  safeBody: SafeHtml | null = null;
+  photos: ExperienceGalleryImage[] = [];
   loading = true;
   error: string | null = null;
+  lightboxSrc: string | null = null;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private experience: ExperienceService,
-    private sanitizer: DomSanitizer
+    private experience: ExperienceService
   ) {}
 
   ngOnInit(): void {
@@ -31,29 +34,31 @@ export class StoryDetailComponent implements OnInit {
     this.experience.getPostDetail({ slug }).subscribe({
       next: (res) => {
         const p = res.data?.post;
-        if (!p) {
-          this.error = 'Historia no encontrada';
+        if (!p || p.experience_post_type !== 'gallery') {
+          this.error = 'Galería no encontrada';
           this.loading = false;
           return;
         }
-        if (p.experience_post_type === 'gallery' && p.url_name) {
-          void this.router.navigate(['/experience', 'galeria', p.url_name], { replaceUrl: true });
-          return;
-        }
         this.post = p;
-        this.safeBody = p.body_html
-          ? this.sanitizer.bypassSecurityTrustHtml(p.body_html)
-          : null;
+        this.photos = p.gallery_images ?? [];
         this.loading = false;
       },
       error: () => {
-        this.error = 'No se pudo cargar la historia';
+        this.error = 'No se pudo cargar la galería';
         this.loading = false;
       },
     });
   }
 
-  formatDate(dateStr: string): string {
+  openLightbox(src: string): void {
+    this.lightboxSrc = src;
+  }
+
+  closeLightbox(): void {
+    this.lightboxSrc = null;
+  }
+
+  formatDate(dateStr: string | null | undefined): string {
     if (!dateStr) return '';
     const d = new Date(dateStr.replace(' ', 'T') + 'Z');
     return d.toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
