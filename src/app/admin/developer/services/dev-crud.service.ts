@@ -89,4 +89,30 @@ export class DevCrudService {
   deleteById(resource: string, id: number | string): Observable<any> {
     return this.http.delete(`${this.baseUrl}/api/${resource}/${id}`, { headers: this.headers });
   }
+
+  /** Descarga un reporte benchmark (PDF, HTML o CSV) con autenticación. */
+  downloadBenchmarkReport(filename: string) {
+    return this.http.get(`${this.baseUrl}/api/benchmark/reports/${encodeURIComponent(filename)}`, {
+      headers: this.headersOnlyAuth(),
+      responseType: 'blob',
+    });
+  }
+
+  /** Genera PDF horizontal desde un JSON de escaneo en historial. */
+  exportBenchmarkPdfFromScan(scanFile: string): Observable<{ data?: { pdf?: string } }> {
+    return this.http.post<{ data?: { pdf?: string } }>(
+      `${this.baseUrl}/api/benchmark/reports/export-pdf`,
+      { scan_file: scanFile },
+      { headers: this.headers().set('Content-Type', 'application/json') }
+    );
+  }
+
+  triggerFileDownload(blob: Blob, filename: string): void {
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
 }

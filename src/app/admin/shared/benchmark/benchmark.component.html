@@ -164,6 +164,20 @@
         </div>
       </div>
 
+      @if (lastPdfReport) {
+        <div class="bench-pdf-actions">
+          <button
+            type="button"
+            class="bench-btn-primary"
+            (click)="downloadPdfReport(lastPdfReport!)"
+            [disabled]="pdfDownloading"
+          >
+            <span class="material-icons">picture_as_pdf</span>
+            {{ pdfDownloading ? 'Preparando PDF…' : 'Descargar reporte PDF (horizontal)' }}
+          </button>
+        </div>
+      }
+
       <div class="bench-table-wrap">
         <table class="bench-table">
           <thead>
@@ -230,11 +244,22 @@
     @if (!loading && history.length > 0) {
       <div class="bench-list">
         @for (h of history; track h.file) {
-          <div class="bench-list-item" (click)="viewHistoryDetail(h.file)">
-            <span class="material-icons">schedule</span>
-            <span class="bench-list-date">{{ h.date }}</span>
-            <span class="bench-list-file">{{ h.file }}</span>
-            <span class="material-icons bench-list-arrow">chevron_right</span>
+          <div class="bench-list-item bench-list-item--history">
+            <button type="button" class="bench-list-main" (click)="viewHistoryDetail(h.file)">
+              <span class="material-icons">schedule</span>
+              <span class="bench-list-date">{{ h.date }}</span>
+              <span class="bench-list-file">{{ h.file }}</span>
+              <span class="material-icons bench-list-arrow">chevron_right</span>
+            </button>
+            <button
+              type="button"
+              class="bench-btn-secondary bench-pdf-mini"
+              title="Exportar PDF horizontal"
+              (click)="exportPdfFromHistoryScan(h.file, $event)"
+              [disabled]="pdfDownloading"
+            >
+              <span class="material-icons">picture_as_pdf</span>
+            </button>
           </div>
         }
       </div>
@@ -250,11 +275,11 @@
     @if (!loading && reports.length > 0) {
       <div class="bench-list">
         @for (r of reports; track r) {
-          <a class="bench-list-item bench-list-link" [href]="'http://localhost:3000/reports/' + r" target="_blank">
-            <span class="material-icons">{{ r.endsWith('.html') ? 'article' : 'table_chart' }}</span>
+          <button type="button" class="bench-list-item bench-list-link" (click)="openReport(r)">
+            <span class="material-icons">{{ reportIcon(r) }}</span>
             <span>{{ r }}</span>
-            <span class="material-icons bench-list-arrow">open_in_new</span>
-          </a>
+            <span class="material-icons bench-list-arrow">download</span>
+          </button>
         }
       </div>
     }
