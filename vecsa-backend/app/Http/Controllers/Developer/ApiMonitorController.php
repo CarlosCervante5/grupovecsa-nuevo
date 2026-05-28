@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Developer;
 
 use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
+use App\Services\Incadea\IncadeaSyncService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -127,7 +128,7 @@ class ApiMonitorController extends Controller
             // Incadea API
             try {
                 $start = microtime(true);
-                $resp = Http::timeout(10)->get(config('services.incadea.api_url', 'http://52.21.121.207/api/incadea/get_spare_parts'));
+                $resp = Http::timeout(10)->get(IncadeaSyncService::resolveIncadeaApiUrl());
                 $ms = round((microtime(true) - $start) * 1000);
                 $services[] = [
                     'name' => 'Incadea API',

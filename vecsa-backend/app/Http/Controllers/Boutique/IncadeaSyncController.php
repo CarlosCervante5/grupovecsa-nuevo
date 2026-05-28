@@ -100,7 +100,10 @@ class IncadeaSyncController extends Controller
 
             $config = IncadeaSyncService::getSyncConfig();
 
-            return ApiResponseHelper::apiSuccess(200, 'Configuración obtenida exitosamente', ['config' => $config]);
+            return ApiResponseHelper::apiSuccess(200, 'Configuración obtenida exitosamente', [
+                'config' => $config,
+                'api_probe' => IncadeaSyncService::probeApi(),
+            ]);
         } catch (\Throwable $e) {
             Log::error('INCADEA_GET_CONFIG_ERROR', ['message' => $e->getMessage(), 'exception' => $e::class]);
 

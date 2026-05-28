@@ -1914,6 +1914,7 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   incadeaConfigError = '';
   incadeaNewBrand = '';
   incadeaNewCategory = '';
+  incadeaApiProbe: { endpoint?: string; http_status?: number | null; ok?: boolean; hint?: string; error?: string } | null = null;
 
   loadIncadea(): void {
     this.loadIncadeaLogs();
@@ -1961,6 +1962,7 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
           excluded_brands: cfg.excluded_brands || [],
           excluded_categories: cfg.excluded_categories || [],
         };
+        this.incadeaApiProbe = res.data?.api_probe ?? null;
         this.incadeaConfigLoading = false;
       },
       error: () => { this.incadeaConfigLoading = false; },

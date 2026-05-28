@@ -21,6 +21,26 @@
     <h1 class="dev-title">Sincronización Incadea → Boutique</h1>
     <p class="dev-subtitle">Sincroniza refacciones desde Incadea al catálogo de la Boutique</p>
 
+    <div *ngIf="apiProbe" class="dev-card" style="margin-bottom: 16px;">
+      <h3 class="dev-card-title">
+        <span class="material-icons">link</span>
+        Conectividad Incadea (desde el servidor)
+      </h3>
+      <p *ngIf="apiProbe.ok" class="alert" style="background: #ecfdf5; color: #065f46;">
+        <span class="material-icons">check_circle</span>
+        OK — {{ apiProbe.endpoint }} (HTTP {{ apiProbe.http_status }})
+      </p>
+      <div *ngIf="!apiProbe.ok" class="alert alert-error">
+        <span class="material-icons">error</span>
+        <span>
+          {{ apiProbe.endpoint || 'Incadea' }}
+          <ng-container *ngIf="apiProbe.http_status != null"> — HTTP {{ apiProbe.http_status }}</ng-container>
+          <ng-container *ngIf="apiProbe.error"> — {{ apiProbe.error }}</ng-container>
+        </span>
+        <p *ngIf="apiProbe.hint" style="margin: 8px 0 0; font-size: 0.9rem;">{{ apiProbe.hint }}</p>
+      </div>
+    </div>
+
     <!-- Sync Action -->
     <div class="dev-card">
       <h3 class="dev-card-title">

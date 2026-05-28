@@ -1552,6 +1552,21 @@
       <h1 class="store-title">Sincronización Incadea → Boutique</h1>
       <p class="store-subtitle">Sincroniza refacciones desde Incadea al catálogo de productos</p>
 
+      @if (incadeaApiProbe) {
+        <div class="store-card" style="margin-bottom: 16px;">
+          @if (incadeaApiProbe.ok) {
+            <div class="alert-success"><span class="material-icons">check_circle</span> Incadea alcanzable desde el servidor — {{ incadeaApiProbe.endpoint }} (HTTP {{ incadeaApiProbe.http_status }})</div>
+          } @else {
+            <div class="alert-error">
+              <span class="material-icons">error</span>
+              Incadea no disponible: {{ incadeaApiProbe.endpoint }}
+              @if (incadeaApiProbe.http_status != null) { (HTTP {{ incadeaApiProbe.http_status }}) }
+              @if (incadeaApiProbe.hint) { <p style="margin:8px 0 0;font-size:0.9rem;">{{ incadeaApiProbe.hint }}</p> }
+            </div>
+          }
+        </div>
+      }
+
       <!-- Sync Button -->
       <div class="store-card" style="margin-bottom: 18px;">
         <h3 class="card-title"><span class="material-icons" style="color:#1c69d4;font-size:20px;">sync</span> Ejecutar Sincronización</h3>
