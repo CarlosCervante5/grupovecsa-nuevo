@@ -15,13 +15,16 @@ class AssistantChatService
 {
     private const SYSTEM_PROMPT = 'Eres el asistente virtual de Grupo VECSA, concesionario autorizado de BMW, MINI y BMW Motorrad en México. '
         .'Ayudas a los clientes con información sobre vehículos, servicios, citas, boutique, rewards y sucursales. '
-        .'Responde de forma amable, concisa y profesional. Si no sabes algo, sugiere contactar al equipo de la sucursal. '
+        .'Responde de forma amable, concisa y profesional. '
+        .'Cuando recibas datos de inventario en el contexto, preséntalos con esos datos exactos; no inventes unidades ni precios. '
         .'Si el cliente pide más información, ofrece detalles útiles y concretos. '
         .'Responde siempre en español.';
 
     public function __construct(
         private readonly AssistantDealershipAssigner $dealershipAssigner,
-        private readonly AssistantLlmService $llm
+        private readonly AssistantLlmService $llm,
+        private readonly AssistantInventorySearchService $inventory,
+        private readonly AssistantBoutiqueSearchService $boutique
     ) {}
 
     /**
@@ -91,14 +94,47 @@ class AssistantChatService
 
         $conversation = $this->resolveConversation($data, $request, $user);
         $conversation->refresh();
+        $this->syncPageUrl($conversation, $data);
 
         $userText = trim($data['message']);
+        $pageUrl = $this->resolvePageUrl($data, $conversation);
 
         if ($conversation->isHumanHandoff()) {
             $reply = 'Tu mensaje fue enviado al asesor. Te responderá en breve.';
             $this->persistMessages($conversation, $userText, $reply, $data, $user);
 
             return $this->chatPayload($conversation, $reply, true);
+        }
+
+        if ($this->boutique->isBoutiqueSection($pageUrl)
+            && $this->boutique->userAcceptsBoutiqueAdvisor($conversation, $userText)) {
+            $reply = $this->activateSalesHandoff($conversation, 'boutique');
+            $this->persistMessages($conversation, $userText, $reply, $data, $user);
+
+            return $this->chatPayload($conversation, $reply, true);
+        }
+
+        if ($this->inventory->userAcceptsSalesAdvisor($conversation, $userText)) {
+            $reply = $this->activateSalesHandoff($conversation, 'ventas');
+            $this->persistMessages($conversation, $userText, $reply, $data, $user);
+
+            return $this->chatPayload($conversation, $reply, true);
+        }
+
+        $boutiqueReply = $this->boutique->tryBuildReply($conversation, $userText, $pageUrl);
+        if ($boutiqueReply !== null) {
+            $this->persistMessages($conversation, $userText, $boutiqueReply, $data, $user);
+
+            return $this->chatPayload($conversation, $boutiqueReply, false);
+        }
+
+        if (! $this->boutique->isBoutiqueSection($pageUrl)) {
+            $inventoryReply = $this->inventory->tryBuildReply($conversation, $userText);
+            if ($inventoryReply !== null) {
+                $this->persistMessages($conversation, $userText, $inventoryReply, $data, $user);
+
+                return $this->chatPayload($conversation, $inventoryReply, false);
+            }
         }
 
         $reply = $this->generateReply($userText, $conversation);
@@ -259,6 +295,62 @@ class AssistantChatService
         ];
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private function syncPageUrl(AssistantConversation $conversation, array $data): void
+    {
+        if (empty($data['page_url'])) {
+            return;
+        }
+
+        $url = Str::limit(trim((string) $data['page_url']), 500, '');
+        if ($conversation->page_url !== $url) {
+            $conversation->update(['page_url' => $url]);
+            $conversation->refresh();
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private function resolvePageUrl(array $data, AssistantConversation $conversation): ?string
+    {
+        if (! empty($data['page_url'])) {
+            return Str::limit(trim((string) $data['page_url']), 500, '');
+        }
+
+        return $conversation->page_url;
+    }
+
+    private function activateSalesHandoff(AssistantConversation $conversation, string $context = 'ventas'): string
+    {
+        $conversation->loadMissing('dealership');
+        $dealershipName = $conversation->dealership?->name ?? 'Grupo VECSA';
+
+        if (! $conversation->isHumanHandoff()) {
+            $dealershipId = (int) ($conversation->dealership_id ?? 0);
+            $assignedUserId = $conversation->assigned_user_id;
+            if (! $assignedUserId && $dealershipId > 0) {
+                $assignedUserId = $this->dealershipAssigner->assignSalesUserIdForDealership($dealershipId);
+            }
+
+            $conversation->update([
+                'human_handoff_at' => now(),
+                'assigned_user_id' => $assignedUserId,
+            ]);
+            $conversation->refresh();
+        }
+
+        if ($context === 'boutique') {
+            return 'Perfecto. Un asesor de la boutique de '.$dealershipName
+                .' te atenderá por este chat en breve. Si lo deseas, indica producto, marca y talla o modelo.';
+        }
+
+        return 'Perfecto. Un asesor de ventas de '.$dealershipName
+            .' atenderá tu solicitud por este chat en breve. Si lo deseas, indica modelo, presupuesto y horario preferido de contacto.';
+    }
+
     private function generateReply(string $userText, AssistantConversation $conversation): string
     {
         $system = self::SYSTEM_PROMPT;
@@ -268,6 +360,19 @@ class AssistantChatService
                 .$conversation->dealership->name
                 .($conversation->dealership->location ? ' ('.$conversation->dealership->location.')' : '')
                 .'.';
+        }
+
+        $pageUrl = $conversation->page_url;
+        if ($this->boutique->isBoutiqueSection($pageUrl)) {
+            $system .= ' El cliente navega la sección Boutique (accesorios y productos). '
+                .'Prioriza preguntar producto y marca si aún no los ha indicado.';
+        }
+
+        if (! $this->boutique->isBoutiqueSection($pageUrl) && $this->inventory->isInventoryQuery($userText)) {
+            $inventoryContext = $this->inventory->tryBuildReply($conversation, $userText);
+            if ($inventoryContext !== null) {
+                $system .= "\n\nDatos de inventario verificados:\n".$inventoryContext;
+            }
         }
 
         $recent = $conversation->messages
