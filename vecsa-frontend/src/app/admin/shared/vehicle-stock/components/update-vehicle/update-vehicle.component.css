@@ -5,7 +5,7 @@
 }
 
 .update-vehicle-sheet {
-  max-width: 960px;
+  max-width: min(980px, 100%);
   margin: 0 auto;
 }
 
@@ -35,8 +35,8 @@
 
 .upload-fields-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px 16px;
 }
 
 .field-group {
@@ -344,7 +344,12 @@ select.field-input {
   font-size: 0.8rem;
 }
 
+/* Bottom sheet ~980px: no usar 992px o el formulario queda siempre en 2 columnas */
 @media (max-width: 640px) {
+  .upload-fields-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
   .photo-row {
     grid-template-columns: 1fr 1fr;
   }
@@ -359,7 +364,7 @@ select.field-input {
   }
 }
 
-@media (max-width: 576px) {
+@media (max-width: 480px) {
   :host {
     padding: 12px 12px 20px;
   }
