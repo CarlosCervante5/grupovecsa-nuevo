@@ -80,7 +80,7 @@
         <div class="spinner"></div>
       </div>
 
-      <ng-container *ngIf="selected && !detailLoading">
+      <div class="chat-panel" *ngIf="selected && !detailLoading">
         <header class="chat-header">
           <div class="chat-header-main">
             <div class="chat-avatar">{{ (selected.visitor_name || 'V').charAt(0) }}</div>
@@ -170,7 +170,7 @@
           <span class="material-icons">info</span>
           Pulsa <strong>Tomar conversación</strong> para responder como asesor; el bot dejará de contestar automáticamente.
         </div>
-      </ng-container>
+      </div>
     </section>
   </div>
 </div>
