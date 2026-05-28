@@ -155,6 +155,9 @@ export class BenchmarkComponent implements OnInit {
         if (err?.name === 'TimeoutError') {
           this.error =
             'Tiempo de espera agotado (10 minutos). Si escanea muchos competidores, puede agotarse el límite del navegador o del servidor; pruebe con menos filas o revise BENCHMARK_META_REQUEST_DELAY_US en el backend.';
+        } else if (err?.status === 404) {
+          this.error =
+            'El servidor respondió 404. Si usa Web Scraper, revise BENCHMARK_REPORT_ADS_URL (debe ser la URL de reportADS, no la del backend). Si usa Meta API, confirme token y permiso «access benchmark».';
         } else {
           const e = err?.error;
           this.error =
@@ -162,7 +165,7 @@ export class BenchmarkComponent implements OnInit {
             e?.error ||
             e?.message ||
             (Array.isArray(e?.errors) ? e.errors.join(' ') : '') ||
-            'Error al escanear';
+            (err?.status ? `Error al escanear (HTTP ${err.status})` : 'Error al escanear');
         }
         this.scanning = false;
       },
