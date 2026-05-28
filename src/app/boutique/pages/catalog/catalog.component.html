@@ -71,14 +71,14 @@
               } @else {
                 <div class="cc-img-placeholder"><mat-icon>image_not_supported</mat-icon></div>
               }
-              @if (product.stock === 0) {
+              @if (isProductOutOfStock(product)) {
                 <span class="cc-badge-out">Agotado</span>
               }
             </div>
             <div class="cc-body">
               <span class="cc-category">{{ product.category?.name }}</span>
               <p class="cc-name">{{ product.name }}</p>
-              <p class="cc-price">{{ product.price | currency:'MXN':'symbol-narrow':'1.2-2' }}</p>
+              <p class="cc-price">{{ catalogDisplayPrice(product) | currency:'MXN':'symbol-narrow':'1.2-2' }}</p>
             </div>
           </a>
         }

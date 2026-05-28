@@ -28,7 +28,21 @@ export class ProductCardComponent {
     return 'assets/images/placeholder-product.svg';
   }
 
+  get displayPrice(): number {
+    const catalog = this.product.catalog_price;
+    if (catalog != null && catalog > 0) {
+      return catalog;
+    }
+    return this.product.price;
+  }
+
   get isOutOfStock(): boolean {
-    return this.product.stock === 0;
+    if (typeof this.product.in_stock === 'boolean') {
+      return !this.product.in_stock;
+    }
+    if (this.product.catalog_stock != null) {
+      return this.product.catalog_stock <= 0;
+    }
+    return this.product.stock <= 0;
   }
 }

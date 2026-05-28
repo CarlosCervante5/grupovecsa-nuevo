@@ -299,4 +299,22 @@ export class CatalogComponent implements OnInit, OnDestroy {
       'Productos'
     );
   }
+
+  isProductOutOfStock(product: BoutiqueProduct): boolean {
+    if (typeof product.in_stock === 'boolean') {
+      return !product.in_stock;
+    }
+    if (product.catalog_stock != null) {
+      return product.catalog_stock <= 0;
+    }
+    return product.stock <= 0;
+  }
+
+  catalogDisplayPrice(product: BoutiqueProduct): number {
+    const catalog = product.catalog_price;
+    if (catalog != null && catalog > 0) {
+      return catalog;
+    }
+    return product.price;
+  }
 }

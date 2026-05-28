@@ -87,8 +87,13 @@ export interface BoutiqueProduct {
   name: string;
   description: string | null;
   price: number;
+  /** Precio efectivo en listados (variantes con precio propio). */
+  catalog_price?: number;
   sku: string;
   stock: number;
+  /** Stock vendible en listados (suma variantes activas o stock del producto). */
+  catalog_stock?: number;
+  in_stock?: boolean;
   active: boolean;
   images: BoutiqueProductImage[];
   variants?: BoutiqueProductVariant[];
