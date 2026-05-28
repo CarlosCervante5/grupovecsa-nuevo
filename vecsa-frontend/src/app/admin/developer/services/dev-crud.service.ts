@@ -49,6 +49,15 @@ export class DevCrudService {
     });
   }
 
+  /** Sin Content-Type (p. ej. descarga blob PDF). */
+  private get headersOnlyAuth(): HttpHeaders {
+    const token = localStorage.getItem('user_token') || '';
+    return new HttpHeaders({
+      'X-Requested-With': 'XMLHttpRequest',
+      Authorization: `Bearer ${token}`,
+    });
+  }
+
   fetch(endpoint: string, method: 'GET' | 'POST', body: any = {}): Observable<any> {
     const url = `${this.baseUrl}/api/${endpoint}`;
     if (method === 'GET') {
@@ -93,7 +102,7 @@ export class DevCrudService {
   /** Descarga un reporte benchmark (PDF, HTML o CSV) con autenticación. */
   downloadBenchmarkReport(filename: string) {
     return this.http.get(`${this.baseUrl}/api/benchmark/reports/${encodeURIComponent(filename)}`, {
-      headers: this.headersOnlyAuth(),
+      headers: this.headersOnlyAuth,
       responseType: 'blob',
     });
   }
@@ -103,7 +112,7 @@ export class DevCrudService {
     return this.http.post<{ data?: { pdf?: string } }>(
       `${this.baseUrl}/api/benchmark/reports/export-pdf`,
       { scan_file: scanFile },
-      { headers: this.headers().set('Content-Type', 'application/json') }
+      { headers: this.headers }
     );
   }
 
