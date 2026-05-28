@@ -26,6 +26,7 @@ php artisan db:seed --class=BoutiqueProductsSeeder --force 2>/dev/null || echo "
 echo "⚡ Limpiando caché de config y cacheando rutas..."
 php artisan permission:cache-reset 2>/dev/null || echo "⚠️ Permission cache reset skipped"
 php artisan config:clear 2>/dev/null || true
+php artisan route:clear 2>/dev/null || true
 php artisan route:cache 2>/dev/null || true
 
 echo "✅ Deploy complete!"

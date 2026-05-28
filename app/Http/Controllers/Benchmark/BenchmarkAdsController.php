@@ -341,11 +341,25 @@ class BenchmarkAdsController extends Controller
 
         $body = $response->json();
         if ($response->failed()) {
+            $upstreamStatus = (int) $response->status();
             $msg = is_array($body) ? ($body['error'] ?? json_encode($body)) : $response->body();
+            if (! is_string($msg) || $msg === '') {
+                $msg = 'Error al contactar el servicio de scraper.';
+            }
 
+            if ($upstreamStatus === 404) {
+                return response()->json([
+                    'error' => 'No se encontró POST '.$base.'/api/scan. BENCHMARK_REPORT_ADS_URL debe apuntar al servicio Node reportADS desplegado (no al backend Laravel). Alternativa: use el método Meta API con token.',
+                    'code' => 'SCRAPER_ENDPOINT_NOT_FOUND',
+                ], 502);
+            }
+
+            // No reenviar 404/4xx del upstream como status HTTP del API Laravel (confunde con “ruta no existe”).
             return response()->json([
-                'error' => is_string($msg) ? $msg : 'Error al contactar el servicio de scraper.',
-            ], min($response->status() ?: 502, 599));
+                'error' => $msg,
+                'code' => 'SCRAPER_UPSTREAM_ERROR',
+                'upstreamStatus' => $upstreamStatus > 0 ? $upstreamStatus : null,
+            ], 502);
         }
 
         if (! ($body['success'] ?? false)) {
