@@ -403,7 +403,10 @@ export class CompraTuAutoComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  titleCase(str: string) {
+  titleCase(str: string | null | undefined): string {
+    if (str == null || str === '') {
+      return '';
+    }
     return str.toLowerCase().split(' ').map(function(word) {
       return (word.charAt(0).toUpperCase() + word.slice(1));
     }).join(' ');
@@ -841,7 +844,7 @@ export class CompraTuAutoComponent implements OnInit, AfterViewInit, OnDestroy {
         
         this.spinner = false;
 
-        response.data.categories.map( category => {
+        (response.data.categories ?? []).filter(Boolean).map( category => {
           if (!this.existsInArray( this.categories, this.titleCase(category))) {
             this.allCategories.push(category == 'new' ? 'nuevo' : category == 'pre_owned' ? 'seminuevo' : category);
           }
@@ -849,7 +852,7 @@ export class CompraTuAutoComponent implements OnInit, AfterViewInit, OnDestroy {
             map((category: string | null) => category ? this._filterCategories(category) : this.allCategories.slice()));
         });
 
-        response.data.brands.map( brand => { 
+        (response.data.brands ?? []).filter(Boolean).map( brand => { 
           if( !this.existsInArray( this.brands, this.titleCase(brand)) ){
             this.allBrands.push( brand );
           }
@@ -857,7 +860,7 @@ export class CompraTuAutoComponent implements OnInit, AfterViewInit, OnDestroy {
             map((brand: string | null) => brand ? this._filterBrands(brand) : this.allBrands.slice()));
         });   
 
-        response.data.lines.map( line => {
+        (response.data.lines ?? []).filter(Boolean).map( line => {
           if (!this.existsInArray( this.lines, this.titleCase(line))) {
             this.allLines.push( line );
           }
@@ -865,7 +868,7 @@ export class CompraTuAutoComponent implements OnInit, AfterViewInit, OnDestroy {
             map((line: string | null) => line ? this._filterLines(line) : this.allLines.slice()));
         });
 
-        response.data.versions.map( version => {
+        (response.data.versions ?? []).filter(Boolean).map( version => {
           if (!this.existsInArray( this.versions, this.titleCase(version))) {
             this.allVersions.push( version );
           }
@@ -873,7 +876,7 @@ export class CompraTuAutoComponent implements OnInit, AfterViewInit, OnDestroy {
             map((version: string | null) => version ? this._filterVersions(version) : this.allVersions.slice()));
         });
 
-        response.data.bodies.map( body => {
+        (response.data.bodies ?? []).filter(Boolean).map( body => {
           if (!this.existsInArray( this.bodies, this.titleCase(body))) {
             this.allBodies.push( body );
           }
@@ -881,7 +884,7 @@ export class CompraTuAutoComponent implements OnInit, AfterViewInit, OnDestroy {
             map((body: string | null) => body ? this._filterBodies(body) : this.allBodies.slice()));
         });
 
-        response.data.models.map( model => {
+        (response.data.models ?? []).filter(Boolean).map( model => {
           if( !this.existsInArray( this.models, this.titleCase(model)) ){
             this.allModels.push( model );
           }
@@ -889,7 +892,7 @@ export class CompraTuAutoComponent implements OnInit, AfterViewInit, OnDestroy {
             map((model: string | null) => model ? this._filterModels(model) : this.allModels.slice()));
         });
 
-        response.data.years.map( year => {
+        (response.data.years ?? []).filter((y): y is number => y != null).map( year => {
           if( !this.existsInArray( this.years, `${year}`) ){
             this.allYears.push(`${year}`);
           }
@@ -897,7 +900,7 @@ export class CompraTuAutoComponent implements OnInit, AfterViewInit, OnDestroy {
             map((year: string | null) => year ? this._filterYears(year) : this.allYears.slice()));
         });
 
-        response.data.transmissions.map( transmission => {
+        (response.data.transmissions ?? []).filter(Boolean).map( transmission => {
           if( !this.existsInArray( this.transmissions, this.titleCase(transmission)) ){
             this.allTransmissions.push(transmission);
           }
@@ -905,7 +908,7 @@ export class CompraTuAutoComponent implements OnInit, AfterViewInit, OnDestroy {
             map((transmission: string | null) => transmission ? this._filterTransmissions(transmission) : this.allTransmissions.slice()));
         });
 
-        response.data.exterior_colors.map( color => {          
+        (response.data.exterior_colors ?? []).filter(Boolean).map( color => {          
           if( !this.existsInArray( this.extColors, this.titleCase(color)) ){
             this.allExtColors.push(color);            
           }
@@ -913,7 +916,7 @@ export class CompraTuAutoComponent implements OnInit, AfterViewInit, OnDestroy {
             map((extColor: string | null) => extColor ? this._filterExtColors(extColor) : this.allExtColors.slice()));
         });
 
-        response.data.interior_colors.map( color => {          
+        (response.data.interior_colors ?? []).filter(Boolean).map( color => {          
           if( !this.existsInArray( this.intColors, this.titleCase(color)) ){
             this.allIntColors.push(color);            
           }
@@ -921,7 +924,7 @@ export class CompraTuAutoComponent implements OnInit, AfterViewInit, OnDestroy {
             map((intColor: string | null) => intColor ? this._filterIntColors(intColor) : this.allIntColors.slice()));
         });
 
-        response.data.locations.map( location => {          
+        (response.data.locations ?? []).filter(Boolean).map( location => {          
           if( !this.existsInArray( this.states, this.titleCase(location)) ){
             this.allStates.push(location);            
           }

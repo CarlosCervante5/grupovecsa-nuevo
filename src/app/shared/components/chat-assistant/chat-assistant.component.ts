@@ -163,7 +163,9 @@ export class ChatAssistantComponent {
     this.dealershipPickerHint =
       'Selecciona la sucursal con la que deseas contactar.';
     if (res.dealerships?.length) {
-      this.dealerships = res.dealerships;
+      this.dealerships = res.dealerships.filter(
+        (d): d is ChatDealership => !!d?.id && !!d?.name
+      );
     } else {
       this.ensureDealershipsLoaded();
     }
@@ -184,7 +186,9 @@ export class ChatAssistantComponent {
       )
       .subscribe({
         next: (res) => {
-          this.dealerships = res.dealerships ?? [];
+          this.dealerships = (res.dealerships ?? []).filter(
+            (d): d is ChatDealership => !!d?.id && !!d?.name
+          );
           this.loadingDealerships = false;
         },
         error: () => {
