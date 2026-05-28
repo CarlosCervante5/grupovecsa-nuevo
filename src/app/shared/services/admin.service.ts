@@ -2,6 +2,9 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { environment } from '@environments/environment';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { AuthMeResponse } from '@interfaces/auth.interface';
+import { extractUserDealershipAssignment } from 'src/app/admin/shared/vehicle-stock/helpers/vehicle-dealership-by-user.helper';
 import { FormGroup } from '@angular/forms';
 
 //interfaces
@@ -542,6 +545,31 @@ export class AdminService {
         let user_token = localStorage.getItem('user_token');
         let headers = new HttpHeaders().set('Authorization', `Bearer ${user_token}`);
         return this._http.post<DetailResponsive>(`${this.baseUrl}/api/users/detail`,body , { headers });
+    }
+
+    /**
+     * Sucursales del usuario en sesión.
+     * Admin/developer: POST /api/users/detail. Resto (manager, marketing, etc.): GET /api/auth/me.
+     */
+    public fetchSessionUserDealershipAssignment(userUuid: string | null): Observable<{
+        ids: number[];
+        names: string[];
+    }> {
+        const role = (localStorage.getItem('role') ?? '').trim().toLowerCase();
+        const user_token = localStorage.getItem('user_token');
+        const headers = new HttpHeaders()
+            .set('Content-Type', 'application/json')
+            .set('Authorization', `Bearer ${user_token}`);
+
+        if ((role === 'administrator' || role === 'developer') && userUuid) {
+            return this.detailUser(userUuid).pipe(
+                map((detail) => extractUserDealershipAssignment(detail.data)),
+            );
+        }
+
+        return this._http
+            .get<AuthMeResponse>(`${this.baseUrl}/api/auth/me`, { headers })
+            .pipe(map((res) => extractUserDealershipAssignment(res.data)));
     }
 
     public updateUser(user_uuid:string,name: string,last_name: string,phone_1: string,phone_2: string,gender: string,email: string,location: string,role_name: string,picture: File[],password: string, dealershipIds: number[] = []){

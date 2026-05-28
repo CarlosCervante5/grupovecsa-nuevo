@@ -4,7 +4,6 @@ import { Dealership, DealerShipResponse } from '@interfaces/admin.interfaces';
 import { AdminService } from '@services/admin.service';
 import { reload } from '@helpers/session.helper';
 import {
-  extractUserDealershipAssignment,
   readSignedInUserEmail,
   readSignedInUserUuid,
   resolveAssignedDealerships,
@@ -97,9 +96,8 @@ export class VehicleDealershipFormController {
     }
 
     this.dealershipsLoading = true;
-    this.adminService.detailUser(userUuid).subscribe({
-      next: (detail) => {
-        const { ids, names } = extractUserDealershipAssignment(detail.data);
+    this.adminService.fetchSessionUserDealershipAssignment(userUuid).subscribe({
+      next: ({ ids, names }) => {
         this.loadDealershipCatalog(
           (catalog) => finish(catalog, ids, names),
           () => finish([], ids, names),
