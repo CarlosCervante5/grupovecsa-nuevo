@@ -38,6 +38,24 @@
 }
 .chat-name { display: block; font-size: 14px; font-weight: 600; }
 .chat-status { display: block; font-size: 11px; opacity: 0.8; }
+.chat-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.chat-change-branch {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #fff;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.chat-change-branch:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
 .chat-close { background: none; border: none; color: #fff; cursor: pointer; opacity: 0.7; transition: opacity 0.2s; }
 .chat-close:hover { opacity: 1; }
 
@@ -50,6 +68,8 @@
 .chat-dealership-step {
   padding: 8px 4px 12px;
   text-align: center;
+  margin-top: 12px;
+  border-top: 1px solid #e2e8f0;
 }
 .chat-dealership-title {
   font-size: 14px;
@@ -123,6 +143,7 @@
 }
 .chat-msg.assistant .chat-bubble {
   background: #fff; color: #1e293b; border: 1px solid #e2e8f0; border-bottom-left-radius: 4px;
+  white-space: pre-line;
 }
 
 /* Typing indicator */

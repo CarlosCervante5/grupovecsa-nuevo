@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { environment } from '@environments/environment';
 
 const SESSION_KEY = 'vecsa_assistant_session';
@@ -13,6 +13,13 @@ interface ChatDealership {
   state?: string | null;
 }
 
+interface AssistantChatResponse {
+  reply?: string;
+  conversation_uuid?: string;
+  needs_dealership?: boolean;
+  dealerships?: ChatDealership[];
+}
+
 @Component({
   selector: 'app-chat-assistant',
   templateUrl: './chat-assistant.component.html',
@@ -24,9 +31,13 @@ export class ChatAssistantComponent {
   message = '';
   sending = false;
   loadingDealerships = false;
-  phase: 'dealership' | 'chat' = 'dealership';
+  /** Muestra botones de sucursal (inicio o cuando el API lo pide). */
+  showDealershipPicker = true;
+  dealershipPickerHint =
+    'Te enlazaremos con el equipo de la sucursal que elijas.';
   dealerships: ChatDealership[] = [];
   selectedDealershipId: number | null = null;
+  selectedDealershipName: string | null = null;
   messages: { role: 'user' | 'assistant'; text: string }[] = [];
 
   private url = environment.baseUrl;
@@ -37,29 +48,40 @@ export class ChatAssistantComponent {
     const stored = this.loadDealershipId();
     if (stored) {
       this.selectedDealershipId = stored;
-      this.phase = 'chat';
+      this.showDealershipPicker = false;
     }
   }
 
   toggle(): void {
     this.open = !this.open;
-    if (this.open && this.dealerships.length === 0) {
-      this.loadDealerships();
+    if (this.open) {
+      this.ensureDealershipsLoaded();
     }
   }
 
   selectDealership(d: ChatDealership): void {
     this.selectedDealershipId = d.id;
+    this.selectedDealershipName = d.name;
     if (typeof localStorage !== 'undefined') {
       localStorage.setItem(DEALERSHIP_KEY, String(d.id));
     }
-    this.phase = 'chat';
-    this.messages = [
-      {
-        role: 'assistant',
-        text: `Has elegido ${d.name}. ¿En qué puedo ayudarte hoy?`,
-      },
-    ];
+    this.showDealershipPicker = false;
+    if (this.messages.length === 0) {
+      this.messages = [
+        {
+          role: 'assistant',
+          text: `Has elegido ${d.name}. ¿En qué puedo ayudarte hoy?`,
+        },
+      ];
+    }
+    setTimeout(() => this.scrollToBottom(), 50);
+  }
+
+  changeDealership(): void {
+    this.showDealershipPicker = true;
+    this.dealershipPickerHint =
+      'Elige otra sucursal para continuar la conversación.';
+    this.ensureDealershipsLoaded(true);
     setTimeout(() => this.scrollToBottom(), 50);
   }
 
@@ -68,8 +90,12 @@ export class ChatAssistantComponent {
     if (!text || this.sending) {
       return;
     }
+
     if (!this.selectedDealershipId) {
-      this.phase = 'dealership';
+      this.showDealershipPicker = true;
+      this.dealershipPickerHint =
+        'Selecciona una sucursal para que podamos atenderte.';
+      this.ensureDealershipsLoaded();
       return;
     }
 
@@ -89,48 +115,73 @@ export class ChatAssistantComponent {
     }
 
     this.http
-      .post<{
-        reply: string;
-        conversation_uuid?: string;
-        needs_dealership?: boolean;
-        dealerships?: ChatDealership[];
-      }>(`${this.url}/api/assistant/chat`, body, { headers })
+      .post<AssistantChatResponse>(`${this.url}/api/assistant/chat`, body, {
+        headers,
+      })
       .subscribe({
-        next: (res) => {
-          if (res.needs_dealership) {
-            this.phase = 'dealership';
-            if (res.dealerships?.length) {
-              this.dealerships = res.dealerships;
-            }
-            this.messages.push({
-              role: 'assistant',
-              text: res.reply || 'Elige la sucursal con la que deseas contactar:',
-            });
-            this.sending = false;
-            return;
-          }
-          if (res.conversation_uuid) {
-            this.conversationUuid = res.conversation_uuid;
-            this.saveConversationUuid(res.conversation_uuid);
-          }
-          this.messages.push({ role: 'assistant', text: res.reply });
-          this.sending = false;
-          setTimeout(() => this.scrollToBottom(), 50);
-        },
-        error: () => {
-          this.messages.push({
-            role: 'assistant',
-            text: 'Lo siento, hubo un error. Intenta de nuevo.',
-          });
-          this.sending = false;
-        },
+        next: (res) => this.handleChatResponse(res),
+        error: (err) => this.handleChatError(err),
       });
   }
 
-  private loadDealerships(): void {
+  private handleChatResponse(res: AssistantChatResponse): void {
+    if (res.needs_dealership) {
+      this.applyNeedsDealership(res);
+      this.sending = false;
+      return;
+    }
+
+    if (res.conversation_uuid) {
+      this.conversationUuid = res.conversation_uuid;
+      this.saveConversationUuid(res.conversation_uuid);
+    }
+    if (res.reply) {
+      this.messages.push({ role: 'assistant', text: res.reply });
+    }
+    this.sending = false;
+    setTimeout(() => this.scrollToBottom(), 50);
+  }
+
+  private handleChatError(err: HttpErrorResponse): void {
+    const body = err.error as AssistantChatResponse | undefined;
+    if (err.status === 422 && body?.needs_dealership) {
+      this.applyNeedsDealership(body);
+      this.sending = false;
+      return;
+    }
+
+    this.messages.push({
+      role: 'assistant',
+      text: 'Lo siento, hubo un error. Intenta de nuevo.',
+    });
+    this.sending = false;
+  }
+
+  private applyNeedsDealership(res: AssistantChatResponse): void {
+    this.clearStoredDealership();
+    this.showDealershipPicker = true;
+    this.dealershipPickerHint =
+      'Selecciona la sucursal con la que deseas contactar.';
+    if (res.dealerships?.length) {
+      this.dealerships = res.dealerships;
+    } else {
+      this.ensureDealershipsLoaded();
+    }
+    if (res.reply) {
+      this.messages.push({ role: 'assistant', text: res.reply });
+    }
+    setTimeout(() => this.scrollToBottom(), 50);
+  }
+
+  private ensureDealershipsLoaded(force = false): void {
+    if (this.loadingDealerships || (!force && this.dealerships.length > 0)) {
+      return;
+    }
     this.loadingDealerships = true;
     this.http
-      .get<{ dealerships: ChatDealership[] }>(`${this.url}/api/assistant/dealerships`)
+      .get<{ dealerships: ChatDealership[] }>(
+        `${this.url}/api/assistant/dealerships`
+      )
       .subscribe({
         next: (res) => {
           this.dealerships = res.dealerships ?? [];
@@ -140,6 +191,14 @@ export class ChatAssistantComponent {
           this.loadingDealerships = false;
         },
       });
+  }
+
+  private clearStoredDealership(): void {
+    this.selectedDealershipId = null;
+    this.selectedDealershipName = null;
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem(DEALERSHIP_KEY);
+    }
   }
 
   private buildHeaders(): HttpHeaders {
