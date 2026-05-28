@@ -7,7 +7,7 @@ use App\Models\Boutique\BoutiqueProductImage;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * Regla de negocio: inventario público boutique = activo + imagen subida + stock disponible.
+ * Regla de negocio: inventario público boutique = activo + imagen + stock vendible + precio > 0.
  */
 class BoutiqueProductPublicationService
 {
@@ -26,15 +26,37 @@ class BoutiqueProductPublicationService
             ->exists();
     }
 
+    /**
+     * Stock mostrable en listados: suma variantes activas o stock del producto simple.
+     */
+    public static function catalogDisplayStock(BoutiqueProduct $product): int
+    {
+        $variantStock = (int) $product->allVariants()
+            ->where('active', true)
+            ->sum('stock');
+
+        if ($variantStock > 0) {
+            return $variantStock;
+        }
+
+        return max(0, (int) $product->stock);
+    }
+
     public static function hasAvailableStock(BoutiqueProduct $product): bool
     {
-        if ((int) $product->stock > 0) {
+        return self::catalogDisplayStock($product) > 0;
+    }
+
+    public static function hasValidPrice(BoutiqueProduct $product): bool
+    {
+        if ((float) $product->price > 0) {
             return true;
         }
 
         return $product->allVariants()
             ->where('active', true)
             ->where('stock', '>', 0)
+            ->where('price', '>', 0)
             ->exists();
     }
 
@@ -42,11 +64,12 @@ class BoutiqueProductPublicationService
     {
         return (bool) $product->active
             && self::hasPublishableImage($product)
-            && self::hasAvailableStock($product);
+            && self::hasAvailableStock($product)
+            && self::hasValidPrice($product);
     }
 
     /**
-     * Catálogo público y asistente: activo + imagen uploaded + stock (producto o variante activa).
+     * Catálogo público y asistente: activo + imagen + stock vendible + precio válido.
      */
     public static function applyPublishedScope(Builder $query): Builder
     {
@@ -56,11 +79,47 @@ class BoutiqueProductPublicationService
                     ->where('image_path', '!=', '');
             })
             ->where(function (Builder $q) {
-                $q->where('stock', '>', 0)
-                    ->orWhereHas('allVariants', function (Builder $v) {
-                        $v->where('active', true)->where('stock', '>', 0);
-                    });
+                $q->where(function (Builder $stock) {
+                    $stock->where('stock', '>', 0)
+                        ->orWhereHas('allVariants', function (Builder $v) {
+                            $v->where('active', true)->where('stock', '>', 0);
+                        });
+                })->where(function (Builder $price) {
+                    $price->where('price', '>', 0)
+                        ->orWhereHas('allVariants', function (Builder $v) {
+                            $v->where('active', true)
+                                ->where('stock', '>', 0)
+                                ->where('price', '>', 0);
+                        });
+                });
             });
+    }
+
+    /**
+     * Metadatos para tarjetas del catálogo (stock/precio efectivos).
+     *
+     * @return array{catalog_stock: int, in_stock: bool, catalog_price: float}
+     */
+    public static function catalogPresentation(BoutiqueProduct $product): array
+    {
+        $catalogStock = self::catalogDisplayStock($product);
+        $catalogPrice = (float) $product->price;
+
+        if ($catalogPrice <= 0) {
+            $variantPrice = $product->allVariants()
+                ->where('active', true)
+                ->where('stock', '>', 0)
+                ->where('price', '>', 0)
+                ->min('price');
+
+            $catalogPrice = $variantPrice !== null ? (float) $variantPrice : 0.0;
+        }
+
+        return [
+            'catalog_stock' => $catalogStock,
+            'in_stock' => $catalogStock > 0,
+            'catalog_price' => $catalogPrice,
+        ];
     }
 
     /**
@@ -89,6 +148,9 @@ class BoutiqueProductPublicationService
      */
     public static function resolveActiveFromImportFlag(BoutiqueProduct $product, bool $wantsPublished): bool
     {
-        return $wantsPublished && self::hasPublishableImage($product);
+        return $wantsPublished
+            && self::hasPublishableImage($product)
+            && self::hasAvailableStock($product)
+            && self::hasValidPrice($product);
     }
 }
