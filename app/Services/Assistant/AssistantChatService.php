@@ -26,11 +26,12 @@ class AssistantChatService
         private readonly AssistantLlmService $llm,
         private readonly AssistantInventorySearchService $inventory,
         private readonly AssistantBoutiqueSearchService $boutique,
-        private readonly AssistantMessageCatalogCodec $catalogCodec
+        private readonly AssistantMessageCatalogCodec $catalogCodec,
+        private readonly AssistantContactCallbackService $contactCallback
     ) {}
 
     /**
-     * @return list<array{id: int, name: string, location: string|null, state: string|null, advisors_available: bool}>
+     * @return list<array{id: int, name: string, location: string|null, state: string|null}>
      */
     public function listDealershipsForChat(): array
     {
@@ -44,6 +45,13 @@ class AssistantChatService
                 'state' => $d->state,
                 'advisors_available' => $this->advisorAvailability->hasAvailableAdvisor((int) $d->id),
             ])
+            ->filter(fn (array $row) => $row['advisors_available'])
+            ->map(fn (array $row) => [
+                'id' => $row['id'],
+                'name' => $row['name'],
+                'location' => $row['location'],
+                'state' => $row['state'],
+            ])
             ->values()
             ->all();
     }
@@ -54,7 +62,8 @@ class AssistantChatService
     public function formatDealershipPickerReply(array $dealerships): string
     {
         if ($dealerships === []) {
-            return 'Por favor elige la sucursal con la que deseas contactar. En este momento no hay sucursales disponibles en el sistema; intenta más tarde.';
+            return 'Por favor elige la sucursal con la que deseas contactar. '
+                .'En este momento ninguna sucursal tiene asesores en línea; intenta de nuevo en unos minutos.';
         }
 
         $lines = ['Por favor elige la sucursal con la que deseas contactar:'];
@@ -111,6 +120,13 @@ class AssistantChatService
             $this->persistUserMessageOnly($conversation, $userText, $data, $user);
 
             return $this->chatPayload($conversation, '', true);
+        }
+
+        $callbackReply = $this->contactCallback->tryHandleMessage($conversation, $userText);
+        if ($callbackReply !== null) {
+            $this->persistMessages($conversation, $userText, $callbackReply['text'], $data, $user);
+
+            return $this->chatPayload($conversation, $callbackReply['text'], false);
         }
 
         if ($this->isBoutiqueChat($pageUrl)) {
@@ -440,7 +456,7 @@ class AssistantChatService
         $dealershipId = (int) ($conversation->dealership_id ?? 0);
 
         if ($dealershipId > 0 && ! $this->advisorAvailability->hasAvailableAdvisor($dealershipId)) {
-            return $this->advisorAvailability->unavailableHandoffMessage($dealershipName);
+            return $this->contactCallback->beginCallbackRequest($conversation, $dealershipName);
         }
 
         if (! $conversation->isHumanHandoff()) {
@@ -450,7 +466,7 @@ class AssistantChatService
             }
 
             if (! $assignedUserId) {
-                return $this->advisorAvailability->unavailableHandoffMessage($dealershipName);
+                return $this->contactCallback->beginCallbackRequest($conversation, $dealershipName);
             }
 
             $conversation->update([

@@ -40,6 +40,8 @@ class AssistantConversation extends Model
         'visitor_last_read_message_id',
         'visitor_name',
         'visitor_email',
+        'visitor_phone',
+        'contact_callback_requested_at',
         'page_url',
         'ip_address',
         'preview',
@@ -51,6 +53,7 @@ class AssistantConversation extends Model
         'messages_count' => 'integer',
         'last_message_at' => 'datetime',
         'human_handoff_at' => 'datetime',
+        'contact_callback_requested_at' => 'datetime',
         'staff_last_read_message_id' => 'integer',
         'visitor_last_read_message_id' => 'integer',
     ];
