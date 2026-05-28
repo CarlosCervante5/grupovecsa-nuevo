@@ -9,17 +9,21 @@ export const VEHICLE_MAIN_DEALERSHIP_NAMES: readonly string[] = [
   VEHICLE_DEALERSHIP_VECSA_ANGELOPOLIS,
 ];
 
-/** Usuario con acceso a varias sucursales: elige en select. */
-export const VEHICLE_DEALERSHIP_SELECT_USER_EMAIL = 'ana.gonzalez@bmwvecsa.com';
+/** Usuarios con varias sucursales: select + ubicación automática (asignación en admin). */
+export const VEHICLE_DEALERSHIP_SELECT_USER_EMAILS: readonly string[] = [
+  'ana.gonzalez@bmwvecsa.com',
+  'admin@vecsa.com',
+];
 
 /** Fallback por email si la API de usuario no devuelve asignaciones. */
 export const VEHICLE_DEALERSHIP_SELECTABLE_NAMES_BY_EMAIL: Readonly<
   Record<string, readonly string[]>
 > = {
-  [VEHICLE_DEALERSHIP_SELECT_USER_EMAIL]: [
+  'ana.gonzalez@bmwvecsa.com': [
     VEHICLE_DEALERSHIP_BMW_HUB_SERDAN,
     VEHICLE_DEALERSHIP_VECSA_ANGELOPOLIS,
   ],
+  'admin@vecsa.com': VEHICLE_MAIN_DEALERSHIP_NAMES,
 };
 
 /** Email (minúsculas) → sucursal fija (campos en solo lectura). */
@@ -37,7 +41,7 @@ export function vehicleDealershipFormModeForEmail(
   if (VEHICLE_DEALERSHIP_NAME_BY_EMAIL[key]) {
     return 'locked';
   }
-  if (key === VEHICLE_DEALERSHIP_SELECT_USER_EMAIL) {
+  if (VEHICLE_DEALERSHIP_SELECT_USER_EMAILS.includes(key)) {
     return 'select';
   }
   return 'manual';

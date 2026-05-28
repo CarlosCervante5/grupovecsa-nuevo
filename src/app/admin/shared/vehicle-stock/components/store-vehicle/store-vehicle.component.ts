@@ -121,7 +121,7 @@ export class StoreVehicleComponent  implements OnInit{
   }
 
   /**
-   * Hub, Angelopolis y Ana: sucursales desde asignación en admin (`dealership_ids`).
+   * Hub, Angelopolis, Ana y admin: sucursales desde asignación en admin (`dealership_ids`).
    * Una sucursal → campos bloqueados; varias → select.
    */
   private loadAssignedDealershipsForUser(
