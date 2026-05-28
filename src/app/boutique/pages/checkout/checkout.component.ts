@@ -262,12 +262,15 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     return !this.openPayAvailable;
   }
 
-  /** Datos de envío/cliente listos para armar el mensaje a ventas. */
-  get canContactSalesWhatsApp(): boolean {
+  /** Formulario de checkout completo (sin exigir método de pago en línea). */
+  get checkoutFormComplete(): boolean {
     if (!this.cart?.items?.length) {
       return false;
     }
     if (!this.guestConfirmed) {
+      return false;
+    }
+    if (!this.isLoggedIn && this.guestForm.invalid) {
       return false;
     }
     if (this.deliveryMethod === 'envio_domicilio') {
@@ -284,6 +287,35 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       return false;
     }
     return true;
+  }
+
+  /** Datos listos para abrir WhatsApp de ventas. */
+  get canContactSalesWhatsApp(): boolean {
+    return this.checkoutFormComplete;
+  }
+
+  /** Texto bajo el botón cuando aún faltan datos. */
+  get salesWhatsAppDisabledHint(): string {
+    if (!this.guestConfirmed) {
+      return 'Confirma tu identidad (invitado) o inicia sesión para continuar.';
+    }
+    if (!this.isLoggedIn && this.guestForm.invalid) {
+      return 'Indica tu nombre y correo electrónico.';
+    }
+    if (this.deliveryMethod === 'envio_domicilio') {
+      if (this.shippingForm.invalid) {
+        return 'Completa todos los campos de envío a domicilio (incluido teléfono de 10 dígitos).';
+      }
+      if (!this.selectedQuote) {
+        return 'Espera la cotización de envío o completa dirección, ciudad, estado y código postal válidos.';
+      }
+    } else if (!this.selectedDealership) {
+      return 'Selecciona la sucursal donde recogerás tu pedido.';
+    }
+    if (!this.acceptCheckoutTerms) {
+      return 'Debes leer y aceptar los términos y avisos legales.';
+    }
+    return '';
   }
 
   ngOnDestroy(): void {
@@ -438,12 +470,8 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
   openSalesWhatsApp(): void {
     if (!this.canContactSalesWhatsApp) {
-      const msg =
-        !this.cart?.items?.length || !this.guestConfirmed
-          ? 'Completa tus datos y la entrega antes de contactar a ventas.'
-          : !this.acceptCheckoutTerms
-            ? 'Para continuar debes leer y aceptar los términos y avisos legales.'
-            : 'Completa tus datos y la entrega antes de contactar a ventas.';
+      this.markCheckoutFieldsForWhatsApp();
+      const msg = this.salesWhatsAppDisabledHint || 'Completa todos los datos antes de contactar a ventas.';
       this.snackBar.open(msg, 'Cerrar', { duration: 5000 });
       return;
     }
@@ -454,6 +482,16 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     });
     const url = boutiqueSalesWhatsAppUrl(this.buildSalesWhatsAppMessage(), phone);
     window.open(url, '_blank', 'noopener,noreferrer');
+  }
+
+  /** Marca campos tocados para mostrar errores si el usuario pulsa WhatsApp incompleto. */
+  private markCheckoutFieldsForWhatsApp(): void {
+    if (!this.isLoggedIn) {
+      this.guestForm.markAllAsTouched();
+    }
+    if (this.deliveryMethod === 'envio_domicilio') {
+      this.shippingForm.markAllAsTouched();
+    }
   }
 
   private buildSalesWhatsAppMessage(): string {

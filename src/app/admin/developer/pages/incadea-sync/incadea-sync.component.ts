@@ -29,6 +29,7 @@ export class IncadeaSyncComponent implements OnInit {
   syncError = '';
   configSuccess = '';
   configError = '';
+  apiProbe: { endpoint?: string; http_status?: number | null; ok?: boolean; hint?: string; error?: string } | null = null;
 
   constructor(
     private syncService: IncadeaSyncService,
@@ -90,6 +91,7 @@ export class IncadeaSyncComponent implements OnInit {
           excluded_brands: cfg.excluded_brands || [],
           excluded_categories: cfg.excluded_categories || [],
         };
+        this.apiProbe = res.data?.api_probe ?? null;
         this.configLoading = false;
       },
       error: () => { this.configLoading = false; },

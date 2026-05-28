@@ -434,6 +434,10 @@
   line-height: 1.4;
 }
 
+.sales-whatsapp-hint--warn {
+  color: #b45309;
+}
+
 /* Order Summary */
 .order-summary {
   background: #fff;

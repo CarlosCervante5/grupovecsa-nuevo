@@ -311,18 +311,8 @@
               <div class="sales-whatsapp-cta__body">
                 <p class="sales-whatsapp-cta__title">¿Requieres hacer una compra?</p>
                 <p class="sales-whatsapp-cta__text">
-                  El pago con tarjeta en línea no está disponible. Contacta a ventas por WhatsApp con el resumen de tu pedido (se usa el WhatsApp de la sucursal del producto o de recolección).
+                  El pago con tarjeta en línea no está disponible. Completa tus datos de entrega, acepta los términos y usa el botón del resumen del pedido para contactar a ventas por WhatsApp.
                 </p>
-                <button
-                  type="button"
-                  mat-flat-button
-                  class="sales-whatsapp-btn"
-                  [disabled]="!canContactSalesWhatsApp"
-                  (click)="openSalesWhatsApp()"
-                >
-                  <mat-icon>chat</mat-icon>
-                  Contactar ventas por WhatsApp
-                </button>
               </div>
             </div>
           }
@@ -439,7 +429,11 @@
             <mat-icon>chat</mat-icon>
             Contactar ventas por WhatsApp
           </button>
-          <p class="sales-whatsapp-hint">Se abrirá WhatsApp con el detalle de tu pedido para coordinar la compra.</p>
+          @if (!canContactSalesWhatsApp) {
+            <p class="sales-whatsapp-hint sales-whatsapp-hint--warn">{{ salesWhatsAppDisabledHint }}</p>
+          } @else {
+            <p class="sales-whatsapp-hint">Se abrirá WhatsApp con el detalle de tu pedido para coordinar la compra.</p>
+          }
         } @else {
           <button
             type="button"
