@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Jobs\UploadMarketingPostImage;
 use App\Models\MarketingEvent;
 use App\Models\MarketingPost;
+use App\Services\Experience\ExperiencePostGalleryService;
 use App\Services\WordPressExperienceImportService;
 use App\Support\UploadableImage;
 use Carbon\Carbon;
@@ -113,15 +114,55 @@ class ExperienceController extends Controller
     public function pastEvents(Request $request)
     {
         try {
-            $perPage = $request->input('per_page', 8);
+            $perPage = max(1, min((int) $request->input('per_page', 8), 50));
+            $page = max(1, (int) $request->input('page', 1));
 
-            $events = MarketingEvent::where('type', 'experience')
+            $eventCards = MarketingEvent::where('type', 'experience')
                 ->where('begin_date', '<', Carbon::today()->toDateString())
-                ->with('multimedia')
                 ->orderBy('begin_date', 'desc')
-                ->paginate($perPage);
+                ->get()
+                ->map(fn (MarketingEvent $e) => [
+                    'uuid' => $e->uuid,
+                    'name' => $e->name,
+                    'begin_date' => $e->begin_date,
+                    'image_path' => $e->image_path,
+                    'type' => 'experience',
+                    'source' => 'event',
+                    'story_slug' => null,
+                ]);
 
-            return ApiResponseHelper::apiSuccess(200, 'Galería obtenida exitosamente', ['gallery' => $events]);
+            $galleryCards = collect();
+            if (ExperiencePostGalleryService::tableReady()) {
+                $galleryCards = MarketingPost::query()
+                    ->where('category', 'experience')
+                    ->where('status', 'published')
+                    ->where('experience_post_type', 'gallery')
+                    ->where(function ($q) {
+                        $q->whereDate('event_begin_date', '<', Carbon::today())
+                            ->orWhereNull('event_begin_date');
+                    })
+                    ->orderByDesc('event_begin_date')
+                    ->orderByDesc('id')
+                    ->get()
+                    ->map(fn (MarketingPost $p) => ExperiencePostGalleryService::galleryCardFromPost($p));
+            }
+
+            $merged = $eventCards->concat($galleryCards)
+                ->sortByDesc('begin_date')
+                ->values();
+
+            $total = $merged->count();
+            $items = $merged->slice(($page - 1) * $perPage, $perPage)->values();
+
+            $paginator = new LengthAwarePaginator(
+                $items,
+                $total,
+                $perPage,
+                $page,
+                ['path' => $request->url(), 'query' => $request->query()]
+            );
+
+            return ApiResponseHelper::apiSuccess(200, 'Galería obtenida exitosamente', ['gallery' => $paginator]);
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al obtener galería', $e->getMessage(), 500, 'GET_EXPERIENCE_GALLERY_ERROR');
         }
@@ -190,9 +231,18 @@ class ExperienceController extends Controller
 
             $orderColumn = Schema::hasColumn($table, 'created_at') ? 'created_at' : 'id';
 
-            $posts = MarketingPost::query()
+            $postsQuery = MarketingPost::query()
                 ->where('category', 'experience')
-                ->where('status', 'published')
+                ->where('status', 'published');
+
+            if (Schema::hasColumn($table, 'experience_post_type')) {
+                $postsQuery->where(function ($q) {
+                    $q->whereNull('experience_post_type')
+                        ->orWhereIn('experience_post_type', ['story', 'event']);
+                });
+            }
+
+            $posts = $postsQuery
                 ->select($columns)
                 ->orderBy($orderColumn, 'desc')
                 ->paginate($perPage);
@@ -287,6 +337,10 @@ class ExperienceController extends Controller
                 return ApiResponseHelper::apiError('Historia no encontrada', null, 404, 'EXPERIENCE_POST_NOT_FOUND');
             }
 
+            if ($post->isExperienceGallery() && ExperiencePostGalleryService::tableReady()) {
+                $post->load('galleryImages');
+            }
+
             return ApiResponseHelper::apiSuccess(200, 'Historia obtenida exitosamente', ['post' => $post]);
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al obtener la historia', $e->getMessage(), 500, 'GET_EXPERIENCE_POST_DETAIL_ERROR');
@@ -324,10 +378,15 @@ class ExperienceController extends Controller
 
             $orderCol = Schema::hasColumn($table, 'created_at') ? 'created_at' : 'id';
 
-            $posts = MarketingPost::query()
+            $postsQuery = MarketingPost::query()
                 ->where('category', 'experience')
-                ->orderBy($orderCol, 'desc')
-                ->paginate($perPage, ['*'], 'page', $page);
+                ->orderBy($orderCol, 'desc');
+
+            if (ExperiencePostGalleryService::tableReady()) {
+                $postsQuery->withCount('galleryImages');
+            }
+
+            $posts = $postsQuery->paginate($perPage, ['*'], 'page', $page);
 
             return ApiResponseHelper::apiSuccess(200, 'Historias obtenidas exitosamente', ['posts' => $posts]);
         } catch (\Throwable $e) {
@@ -365,6 +424,7 @@ class ExperienceController extends Controller
             'post_types' => [
                 ['value' => 'story', 'label' => 'Historia o noticia'],
                 ['value' => 'event', 'label' => 'Evento (calendario público)'],
+                ['value' => 'gallery', 'label' => 'Galería de evento'],
             ],
         ]);
     }
@@ -380,7 +440,10 @@ class ExperienceController extends Controller
             'excerpt' => 'nullable|string|max:2000',
             'body_html' => 'nullable|string',
             'image_url' => 'nullable|string|max:2000',
-            'image' => 'nullable|image|max:8192',
+            'image' => ['nullable', 'file', 'uploadable_image', 'max:8192'],
+            'experience_post_type' => 'nullable|string|in:story,event,gallery',
+            'gallery_images' => 'nullable|array',
+            'gallery_images.*' => ['file', 'uploadable_image', 'max:8192'],
             'status' => 'nullable|string|in:published,draft,unpublished',
             'event_begin_date' => 'nullable|date',
             'event_end_date' => 'nullable|date',
@@ -404,7 +467,15 @@ class ExperienceController extends Controller
                 $slug = 'experience-' . bin2hex(random_bytes(4));
             }
 
+            $postType = $this->normalizeExperiencePostType($data['experience_post_type'] ?? 'story');
             $eventBegin = $data['event_begin_date'] ?? null;
+            $status = $data['status'] ?? 'published';
+            try {
+                $this->validateExperiencePostTypeRules($postType, $eventBegin, $status);
+            } catch (\InvalidArgumentException $e) {
+                return ApiResponseHelper::apiError($e->getMessage(), null, 422, 'EXPERIENCE_POST_VALIDATION');
+            }
+
             $explicitLabel = array_key_exists('wp_category_label', $data)
                 ? trim((string) ($data['wp_category_label'] ?? ''))
                 : '';
@@ -418,18 +489,26 @@ class ExperienceController extends Controller
                 'title' => $title,
                 'url_name' => $slug,
                 'excerpt' => $data['excerpt'] ?? null,
-                'body_html' => $data['body_html'] ?? null,
-                'status' => $data['status'] ?? 'published',
+                'body_html' => $postType === 'gallery' ? ($data['body_html'] ?? null) : ($data['body_html'] ?? null),
+                'status' => $status,
                 'category' => 'experience',
                 'image_path' => $data['image_url'] ?? null,
                 'event_begin_date' => $eventBegin,
                 'event_end_date' => $data['event_end_date'] ?? null,
                 'wp_category_label' => $wpCategoryLabel,
+                'experience_post_type' => ExperiencePostGalleryService::tableReady() ? $postType : 'story',
             ]);
 
             $this->syncFeaturedImageFromRequest($request, $post);
+            $this->galleryService()->syncGalleryImagesFromRequest($request, $post->fresh());
 
-            return ApiResponseHelper::apiSuccess(201, 'Historia creada exitosamente', ['post' => $post->fresh()]);
+            if ($postType === 'gallery' && $status === 'published') {
+                $this->galleryService()->assertGalleryReadyForPublish($post->fresh());
+            }
+
+            return ApiResponseHelper::apiSuccess(201, 'Historia creada exitosamente', [
+                'post' => $this->formatAdminExperiencePost($post->fresh()),
+            ]);
         } catch (\Throwable $e) {
             Log::error('CREATE_EXPERIENCE_STORY_ERROR', [
                 'message' => $e->getMessage(),
@@ -455,6 +534,11 @@ class ExperienceController extends Controller
             'body_html' => 'nullable|string',
             'image_url' => 'nullable|string|max:2000',
             'image' => ['nullable', 'file', 'uploadable_image', 'max:8192'],
+            'experience_post_type' => 'nullable|string|in:story,event,gallery',
+            'gallery_images' => 'nullable|array',
+            'gallery_images.*' => ['file', 'uploadable_image', 'max:8192'],
+            'gallery_delete_uuids' => 'nullable|array',
+            'gallery_delete_uuids.*' => 'string',
             'status' => 'nullable|string|in:published,draft,unpublished',
             'event_begin_date' => 'nullable|date',
             'event_end_date' => 'nullable|date',
@@ -508,6 +592,9 @@ class ExperienceController extends Controller
                 $raw = trim((string) ($data['wp_category_label'] ?? ''));
                 $updates['wp_category_label'] = $raw !== '' ? $raw : null;
             }
+            if (array_key_exists('experience_post_type', $data) && ExperiencePostGalleryService::tableReady()) {
+                $updates['experience_post_type'] = $this->normalizeExperiencePostType($data['experience_post_type']);
+            }
 
             $effectiveBegin = array_key_exists('event_begin_date', $updates)
                 ? $updates['event_begin_date']
@@ -520,13 +607,33 @@ class ExperienceController extends Controller
                 $updates['wp_category_label'] = $this->defaultExperienceEventCategoryLabel();
             }
 
+            $effectiveType = $updates['experience_post_type'] ?? $post->experience_post_type ?? 'story';
+            $effectiveStatus = $updates['status'] ?? $post->status;
+            $this->validateExperiencePostTypeRules(
+                $effectiveType,
+                $effectiveBegin?->format('Y-m-d') ?? (is_string($effectiveBegin) ? $effectiveBegin : null),
+                $effectiveStatus
+            );
+
             if ($updates !== []) {
                 $post->update($updates);
             }
 
-            $this->syncFeaturedImageFromRequest($request, $post);
+            if ($request->filled('gallery_delete_uuids')) {
+                $this->galleryService()->deleteGalleryImagesByUuid($post, $request->input('gallery_delete_uuids', []));
+            }
 
-            return ApiResponseHelper::apiSuccess(200, 'Historia actualizada exitosamente', ['post' => $post->fresh()]);
+            $this->syncFeaturedImageFromRequest($request, $post);
+            $this->galleryService()->syncGalleryImagesFromRequest($request, $post->fresh());
+
+            $post = $post->fresh();
+            if ($post->isExperienceGallery() && $post->status === 'published') {
+                $this->galleryService()->assertGalleryReadyForPublish($post);
+            }
+
+            return ApiResponseHelper::apiSuccess(200, 'Historia actualizada exitosamente', [
+                'post' => $this->formatAdminExperiencePost($post),
+            ]);
         } catch (\Throwable $e) {
             Log::error('UPDATE_EXPERIENCE_STORY_ERROR', [
                 'message' => $e->getMessage(),
@@ -649,5 +756,54 @@ class ExperienceController extends Controller
                 'La imagen no se guardó en el servidor. Revise Cloudinary/S3 o el formato del archivo.'
             );
         }
+    }
+
+    private function galleryService(): ExperiencePostGalleryService
+    {
+        return app(ExperiencePostGalleryService::class);
+    }
+
+    private function normalizeExperiencePostType(?string $type): string
+    {
+        $type = strtolower(trim((string) $type));
+
+        return in_array($type, ['story', 'event', 'gallery'], true) ? $type : 'story';
+    }
+
+    private function validateExperiencePostTypeRules(string $postType, ?string $eventBegin, string $status): void
+    {
+        if ($status !== 'published') {
+            return;
+        }
+
+        if ($postType === 'event' && ! $eventBegin) {
+            throw new \InvalidArgumentException('Para publicar un evento indica la fecha de inicio.');
+        }
+
+        if ($postType === 'gallery' && ! $eventBegin) {
+            throw new \InvalidArgumentException('Para publicar una galería indica la fecha del evento.');
+        }
+    }
+
+    private function formatAdminExperiencePost(MarketingPost $post): MarketingPost
+    {
+        if ($post->isExperienceGallery() && ExperiencePostGalleryService::tableReady()) {
+            $post->load('galleryImages');
+        }
+
+        return $post;
+    }
+
+    private function formatDateForValidation(mixed $value): ?string
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        if ($value instanceof \Carbon\CarbonInterface) {
+            return $value->format('Y-m-d');
+        }
+
+        return substr((string) $value, 0, 10) ?: null;
     }
 }

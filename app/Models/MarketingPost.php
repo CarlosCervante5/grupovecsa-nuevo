@@ -50,6 +50,7 @@ class MarketingPost extends Model
         'wp_featured_source_url',
         'event_begin_date',
         'event_end_date',
+        'experience_post_type',
     ];
 
     /**
@@ -114,6 +115,16 @@ class MarketingPost extends Model
     public function contents()
     {
         return $this->hasMany(PostContent::class, 'post_id')->orderBy('sort_id');
+    }
+
+    public function galleryImages()
+    {
+        return $this->hasMany(MarketingPostGalleryImage::class, 'post_id')->orderBy('sort_id');
+    }
+
+    public function isExperienceGallery(): bool
+    {
+        return ($this->experience_post_type ?? 'story') === 'gallery';
     }
 
     public static function findByUuid($uuid, $relationships = [])
