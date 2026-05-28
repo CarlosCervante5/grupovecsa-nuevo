@@ -102,7 +102,7 @@ class BoutiqueProduct extends Model
         return $this->hasMany(BoutiqueProductImage::class, 'product_id');
     }
 
-    /** Productos visibles en catálogo público (activos con imagen subida). */
+    /** Productos visibles en inventario público (activos, con imagen y stock). */
     public function scopePublished(Builder $query): Builder
     {
         return BoutiqueProductPublicationService::applyPublishedScope($query);

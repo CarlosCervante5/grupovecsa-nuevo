@@ -81,9 +81,13 @@ class BoutiqueCartController extends Controller
             }
 
             if (! BoutiqueProductPublicationService::isPublished($product)) {
+                $detail = ! BoutiqueProductPublicationService::hasAvailableStock($product)
+                    ? 'Este producto no tiene stock disponible.'
+                    : 'Este producto no está publicado en la boutique.';
+
                 return ApiResponseHelper::apiError(
                     'Producto no disponible',
-                    'Este producto no está publicado en la boutique.',
+                    $detail,
                     400,
                     'PRODUCT_NOT_PUBLISHED'
                 );
