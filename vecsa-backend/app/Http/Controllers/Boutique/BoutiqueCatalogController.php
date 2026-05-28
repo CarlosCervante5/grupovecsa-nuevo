@@ -6,6 +6,7 @@ use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Boutique\BoutiqueCategory;
 use App\Models\Boutique\BoutiqueProduct;
+use App\Services\Boutique\BoutiqueProductPublicationService;
 use App\Support\BoutiqueDealershipPresenter;
 use Illuminate\Http\Request;
 
@@ -54,6 +55,7 @@ class BoutiqueCatalogController extends Controller
             $paginator->getCollection()->transform(function (BoutiqueProduct $product) {
                 $arr = $product->toArray();
                 $arr['dealership'] = BoutiqueDealershipPresenter::catalogSummary($product->dealership);
+                $arr = array_merge($arr, BoutiqueProductPublicationService::catalogPresentation($product));
 
                 return $arr;
             });
