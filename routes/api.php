@@ -863,6 +863,8 @@ Route::prefix('settings')->middleware(['bandwidth_usage', 'auth:sanctum'])->grou
     Route::post('/openpay/update', [SettingsController::class, 'updateOpenpay'])->middleware('role:developer|administrator');
     Route::post('/gemini_image_ai', [SettingsController::class, 'geminiImageAi'])->middleware('role:developer|administrator');
     Route::post('/gemini_image_ai/update', [SettingsController::class, 'updateGeminiImageAi'])->middleware('role:developer|administrator');
+    Route::post('/assistant_chat', [SettingsController::class, 'assistantChat'])->middleware('role:developer|administrator');
+    Route::post('/assistant_chat/update', [SettingsController::class, 'updateAssistantChat'])->middleware('role:developer|administrator');
 });
 
 // Fin Settings

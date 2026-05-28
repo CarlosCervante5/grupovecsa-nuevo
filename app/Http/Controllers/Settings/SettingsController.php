@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Settings;
 use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Models\SystemSetting;
+use App\Services\Assistant\AssistantLlmService;
 use App\Services\Media\ImageAiProcessingService;
 use App\Support\BoutiqueCheckoutLegalPages;
 use App\Support\BoutiqueCheckoutPaymentMethods;
@@ -527,6 +528,100 @@ class SettingsController extends Controller
             throw $e;
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al actualizar Gemini', $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Chat público del asistente (bot flotante) — Gemini y/o OpenAI.
+     */
+    public function assistantChat(Request $request)
+    {
+        try {
+            $geminiKey = trim((string) SystemSetting::getEncrypted('assistant_gemini_api_key', ''));
+            if ($geminiKey === '') {
+                $geminiKey = trim((string) SystemSetting::getEncrypted('gemini_api_key', ''));
+            }
+            $openaiKey = trim((string) SystemSetting::getEncrypted('openai_api_key', ''));
+            if ($openaiKey === '') {
+                $openaiKey = trim((string) config('openai.api_key', env('OPENAI_API_KEY', '')));
+            }
+
+            return ApiResponseHelper::apiSuccess(200, 'Configuración chat asistente', [
+                'assistant_chat_enabled' => filter_var(SystemSetting::get('assistant_chat_enabled', '1'), FILTER_VALIDATE_BOOLEAN),
+                'assistant_chat_provider' => SystemSetting::get('assistant_chat_provider', 'gemini'),
+                'assistant_chat_gemini_model' => SystemSetting::get('assistant_chat_gemini_model', ''),
+                'assistant_chat_openai_model' => SystemSetting::get('assistant_chat_openai_model', ''),
+                'gemini_api_key' => $geminiKey !== '' ? $this->mask($geminiKey) : '',
+                'assistant_gemini_api_key' => trim((string) SystemSetting::getEncrypted('assistant_gemini_api_key', '')) !== ''
+                    ? $this->mask((string) SystemSetting::getEncrypted('assistant_gemini_api_key', ''))
+                    : '',
+                'openai_api_key' => $openaiKey !== '' && ! str_contains($openaiKey, 'your-api-key')
+                    ? $this->mask($openaiKey)
+                    : '',
+                'default_gemini_model_hint' => AssistantLlmService::DEFAULT_GEMINI_MODEL,
+                'default_openai_model_hint' => AssistantLlmService::DEFAULT_OPENAI_MODEL,
+                'gemini_configured' => $geminiKey !== '',
+                'openai_configured' => $openaiKey !== '' && ! str_contains($openaiKey, 'your-api-key'),
+            ]);
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al obtener configuración del chat', $e->getMessage(), 500);
+        }
+    }
+
+    public function updateAssistantChat(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'assistant_chat_enabled' => 'sometimes|boolean',
+                'assistant_chat_provider' => 'nullable|string|in:gemini,openai,auto',
+                'assistant_chat_gemini_model' => 'nullable|string|max:120',
+                'assistant_chat_openai_model' => 'nullable|string|max:120',
+                'assistant_gemini_api_key' => 'nullable|string|max:512',
+                'openai_api_key' => 'nullable|string|max:512',
+            ]);
+
+            if (array_key_exists('assistant_chat_enabled', $validated)) {
+                SystemSetting::set('assistant_chat_enabled', ! empty($validated['assistant_chat_enabled']) ? '1' : '0');
+            }
+
+            if (array_key_exists('assistant_chat_provider', $validated)) {
+                SystemSetting::set('assistant_chat_provider', $validated['assistant_chat_provider'] ?? 'gemini');
+            }
+
+            foreach (['assistant_chat_gemini_model', 'assistant_chat_openai_model'] as $modelKey) {
+                if (! array_key_exists($modelKey, $validated)) {
+                    continue;
+                }
+                $model = trim((string) $validated[$modelKey]);
+                if ($model !== '' && ! preg_match('/^[a-zA-Z0-9._\-]+$/', $model)) {
+                    return response()->json([
+                        'status' => 422,
+                        'message' => 'Error de validación',
+                        'errors' => [$modelKey => ['El nombre del modelo tiene caracteres no permitidos']],
+                    ], 422);
+                }
+                SystemSetting::set($modelKey, $model);
+            }
+
+            foreach (['assistant_gemini_api_key' => 'assistant_gemini_api_key', 'openai_api_key' => 'openai_api_key'] as $input => $storageKey) {
+                $key = $request->input($input);
+                if ($key !== null && $key !== '' && ! str_starts_with((string) $key, '•••')) {
+                    if (strlen((string) $key) < 20) {
+                        return response()->json([
+                            'status' => 422,
+                            'message' => 'Error de validación',
+                            'errors' => [$input => ['La llave API parece inválida (demasiado corta)']],
+                        ], 422);
+                    }
+                    SystemSetting::setEncrypted($storageKey, trim((string) $key));
+                }
+            }
+
+            return ApiResponseHelper::apiSuccess(200, 'Configuración del chat asistente actualizada');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al actualizar chat asistente', $e->getMessage(), 500);
         }
     }
 

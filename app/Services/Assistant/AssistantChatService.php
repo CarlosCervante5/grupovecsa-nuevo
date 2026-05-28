@@ -11,17 +11,17 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\PersonalAccessToken;
-use OpenAI\Laravel\Facades\OpenAI;
-
 class AssistantChatService
 {
     private const SYSTEM_PROMPT = 'Eres el asistente virtual de Grupo VECSA, concesionario autorizado de BMW, MINI y BMW Motorrad en México. '
         .'Ayudas a los clientes con información sobre vehículos, servicios, citas, boutique, rewards y sucursales. '
         .'Responde de forma amable, concisa y profesional. Si no sabes algo, sugiere contactar al equipo de la sucursal. '
+        .'Si el cliente pide más información, ofrece detalles útiles y concretos. '
         .'Responde siempre en español.';
 
     public function __construct(
-        private readonly AssistantDealershipAssigner $dealershipAssigner
+        private readonly AssistantDealershipAssigner $dealershipAssigner,
+        private readonly AssistantLlmService $llm
     ) {}
 
     /**
@@ -262,7 +262,7 @@ class AssistantChatService
     private function generateReply(string $userText, AssistantConversation $conversation): string
     {
         $system = self::SYSTEM_PROMPT;
-        $conversation->loadMissing('dealership');
+        $conversation->loadMissing(['dealership', 'messages']);
         if ($conversation->dealership) {
             $system .= ' El cliente está en contacto con la sucursal '
                 .$conversation->dealership->name
@@ -270,22 +270,21 @@ class AssistantChatService
                 .'.';
         }
 
-        try {
-            $result = OpenAI::chat()->create([
-                'model' => 'gpt-4o-mini',
-                'messages' => [
-                    ['role' => 'system', 'content' => $system],
-                    ['role' => 'user', 'content' => $userText],
-                ],
-                'max_tokens' => 300,
-                'temperature' => 0.7,
-            ]);
+        $recent = $conversation->messages
+            ->sortByDesc('id')
+            ->take(12)
+            ->sortBy('id')
+            ->values();
+        $history = AssistantLlmService::historyFromMessages($recent);
 
-            return trim((string) ($result->choices[0]->message->content ?? ''))
-                ?: 'Lo siento, no pude generar una respuesta. Intenta de nuevo.';
-        } catch (\Throwable) {
-            return 'Lo siento, no pude procesar tu mensaje en este momento. Intenta de nuevo más tarde.';
+        $reply = $this->llm->generate($system, $userText, $history);
+
+        if ($reply !== null && $reply !== '') {
+            return $reply;
         }
+
+        return 'No pude procesar tu mensaje: falta configurar la IA del chat en Panel desarrollo '
+            .'(Gemini u OpenAI). Si el problema continúa, usa el botón para elegir sucursal y hablar con un asesor.';
     }
 
     /**
