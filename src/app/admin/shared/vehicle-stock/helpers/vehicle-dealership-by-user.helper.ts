@@ -34,14 +34,27 @@ export const VEHICLE_DEALERSHIP_NAME_BY_EMAIL: Readonly<Record<string, string>> 
 
 export type VehicleDealershipFormMode = 'manual' | 'locked' | 'select';
 
+/** Roles con varias sucursales: select + ubicación automática. */
+export const VEHICLE_DEALERSHIP_SELECT_ROLES: readonly string[] = ['manager'];
+
+export function readSignedInUserRole(): string | null {
+  const role = localStorage.getItem('role')?.trim().toLowerCase();
+  return role || null;
+}
+
 export function vehicleDealershipFormModeForEmail(
   email: string | null | undefined,
+  role?: string | null,
 ): VehicleDealershipFormMode {
   const key = (email ?? '').trim().toLowerCase();
   if (VEHICLE_DEALERSHIP_NAME_BY_EMAIL[key]) {
     return 'locked';
   }
   if (VEHICLE_DEALERSHIP_SELECT_USER_EMAILS.includes(key)) {
+    return 'select';
+  }
+  const r = (role ?? readSignedInUserRole() ?? '').trim().toLowerCase();
+  if (VEHICLE_DEALERSHIP_SELECT_ROLES.includes(r)) {
     return 'select';
   }
   return 'manual';
@@ -55,11 +68,17 @@ export function vehicleDealershipNameForUserEmail(email: string | null | undefin
 /** Nombres permitidos en select cuando no hay `dealership_ids` en el detalle del usuario. */
 export function vehicleSelectableDealershipNamesForEmail(
   email: string | null | undefined,
+  role?: string | null,
 ): readonly string[] {
   const key = (email ?? '').trim().toLowerCase();
-  return (
-    VEHICLE_DEALERSHIP_SELECTABLE_NAMES_BY_EMAIL[key] ?? VEHICLE_MAIN_DEALERSHIP_NAMES
-  );
+  if (VEHICLE_DEALERSHIP_SELECTABLE_NAMES_BY_EMAIL[key]) {
+    return VEHICLE_DEALERSHIP_SELECTABLE_NAMES_BY_EMAIL[key];
+  }
+  const r = (role ?? readSignedInUserRole() ?? '').trim().toLowerCase();
+  if (VEHICLE_DEALERSHIP_SELECT_ROLES.includes(r)) {
+    return VEHICLE_MAIN_DEALERSHIP_NAMES;
+  }
+  return VEHICLE_MAIN_DEALERSHIP_NAMES;
 }
 
 /** Fallback de sucursal única (hub / angelopolis) si el detalle de usuario no trae asignaciones. */
@@ -74,9 +93,10 @@ export function vehicleLockedDealershipFallbackNamesForEmail(
 export function vehicleDealershipFallbackNamesForEmail(
   email: string | null | undefined,
   mode: VehicleDealershipFormMode,
+  role?: string | null,
 ): readonly string[] {
   if (mode === 'select') {
-    return vehicleSelectableDealershipNamesForEmail(email);
+    return vehicleSelectableDealershipNamesForEmail(email, role);
   }
   if (mode === 'locked') {
     return vehicleLockedDealershipFallbackNamesForEmail(email);

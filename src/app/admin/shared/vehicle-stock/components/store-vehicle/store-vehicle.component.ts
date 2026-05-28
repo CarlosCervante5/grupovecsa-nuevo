@@ -15,17 +15,9 @@ import { ImageAiDialogComponent } from 'src/app/shared/components/image-ai-dialo
 import { ImageOrder } from 'src/app/dashboard/pages/comprar-autos/interfaces/detail/vehicle_data.interface';
 
 import { BrandsResponse, Brand, Line, LinesResponse, Model, Body, ModelsResponse, VersionsResponse, Version, BodiesResponse, VehicleStoreResponse, FullDetailResponse } from '@interfaces/vehicle_data.interface';
-import { Dealership, DealerShipResponse, GetcampaingResponse } from '@interfaces/admin.interfaces';
-import {
-  parseDealershipNamesFromDetail,
-  readSignedInUserEmail,
-  readSignedInUserUuid,
-  vehicleDealershipFallbackNamesForEmail,
-  vehicleDealershipFormModeForEmail,
-  vehicleDealershipNameForUserEmail,
-  VehicleDealershipFormMode,
-  vehicleLocationFallbackForDealershipName,
-} from '../../helpers/vehicle-dealership-by-user.helper';
+import { Dealership, GetcampaingResponse } from '@interfaces/admin.interfaces';
+import { VehicleDealershipFormMode } from '../../helpers/vehicle-dealership-by-user.helper';
+import { VehicleDealershipFormController } from '../../helpers/vehicle-dealership-form.controller';
 //import { CampaingService } from 'src/app/admin/gestor/services/campaing.service';
 import { AdminService } from '@services/admin.service';
 
@@ -48,9 +40,24 @@ export class StoreVehicleComponent  implements OnInit{
   public button: boolean = false;
   public vehicleSaved = false;
   public listNeedsReload = false;
-  public dealershipMode: VehicleDealershipFormMode = 'manual';
-  public selectableDealerships: Dealership[] = [];
-  public dealershipsLoading = false;
+
+  readonly dealershipUi: VehicleDealershipFormController;
+
+  get dealershipMode(): VehicleDealershipFormMode {
+    return this.dealershipUi.dealershipMode;
+  }
+
+  get selectableDealerships(): Dealership[] {
+    return this.dealershipUi.selectableDealerships;
+  }
+
+  get dealershipsLoading(): boolean {
+    return this.dealershipUi.dealershipsLoading;
+  }
+
+  get locationFieldReadonly(): boolean {
+    return this.dealershipUi.locationFieldReadonly;
+  }
 
   vehicleImages: ImageOrder[] = [];
   photoFiles: File[] = [];
@@ -95,218 +102,21 @@ export class StoreVehicleComponent  implements OnInit{
     private _imagesService: ImagesService,
     private _dialog: MatDialog,
   ) {
+      this.dealershipUi = new VehicleDealershipFormController(
+        () => this.form,
+        this._campaignService,
+        this._router,
+      );
       this.formInit();
   }
 
   ngOnInit(): void {
     this.InitForm();
-    this.applyDealershipForSignedInUser();
-  }
-
-  get locationFieldReadonly(): boolean {
-    return this.dealershipMode === 'locked' || this.dealershipMode === 'select';
-  }
-
-  private applyDealershipForSignedInUser(): void {
-    const email = readSignedInUserEmail();
-    const preferredMode = vehicleDealershipFormModeForEmail(email);
-
-    if (preferredMode === 'manual') {
-      this.dealershipMode = 'manual';
-      return;
-    }
-
-    const fallbackNames = vehicleDealershipFallbackNamesForEmail(email, preferredMode);
-    this.loadAssignedDealershipsForUser(email, preferredMode, fallbackNames);
-  }
-
-  /**
-   * Hub, Angelopolis, Ana y admin: sucursales desde asignación en admin (`dealership_ids`).
-   * Una sucursal → campos bloqueados; varias → select.
-   */
-  private loadAssignedDealershipsForUser(
-    email: string | null,
-    preferredMode: VehicleDealershipFormMode,
-    fallbackNames: readonly string[],
-  ): void {
-    const userUuid = readSignedInUserUuid();
-
-    const resolveFromCatalog = (
-      all: Dealership[],
-      assignedIds: number[],
-      assignedNames: string[],
-    ): void => {
-      const assigned = this.filterUserAssignedDealerships(
-        all,
-        assignedIds,
-        assignedNames,
-        fallbackNames,
-      );
-      this.applyDealershipUiFromAssignments(email, preferredMode, assigned, fallbackNames);
-    };
-
-    if (!userUuid) {
-      this.loadDealershipsAndApply(
-        (data) => resolveFromCatalog(data, [], []),
-        () => this.applyDealershipUiFromAssignments(email, preferredMode, [], fallbackNames),
-      );
-      return;
-    }
-
-    this.dealershipsLoading = true;
-    this._campaignService.detailUser(userUuid).subscribe({
-      next: (detail) => {
-        const assignedIds = detail.data?.dealership_ids ?? [];
-        const assignedNames = parseDealershipNamesFromDetail(
-          detail.data?.dealership_names ?? null,
-        );
-
-        this.loadDealershipsAndApply(
-          (data) => resolveFromCatalog(data, assignedIds, assignedNames),
-          () => this.applyDealershipUiFromAssignments(email, preferredMode, [], fallbackNames),
-        );
-      },
-      error: () => {
-        this.dealershipsLoading = false;
-        this.loadDealershipsAndApply(
-          (data) => resolveFromCatalog(data, [], []),
-          () => this.applyDealershipUiFromAssignments(email, preferredMode, [], fallbackNames),
-        );
-      },
-    });
-  }
-
-  private applyDealershipUiFromAssignments(
-    email: string | null,
-    preferredMode: VehicleDealershipFormMode,
-    assigned: Dealership[],
-    fallbackNames: readonly string[],
-  ): void {
-    if (preferredMode === 'select' || assigned.length > 1) {
-      this.dealershipMode = 'select';
-      this.selectableDealerships =
-        assigned.length > 0
-          ? assigned
-          : this.buildDealershipStubs(fallbackNames);
-      return;
-    }
-
-    if (assigned.length === 1) {
-      this.dealershipMode = 'locked';
-      this.lockDealershipFromRecord(assigned[0]);
-      return;
-    }
-
-    if (preferredMode === 'locked') {
-      const fallbackName = vehicleDealershipNameForUserEmail(email);
-      if (fallbackName) {
-        this.dealershipMode = 'locked';
-        this.lockDealershipFields(
-          fallbackName,
-          vehicleLocationFallbackForDealershipName(fallbackName),
-        );
-      }
-      return;
-    }
-
-    this.dealershipMode = 'select';
-    this.selectableDealerships = this.buildDealershipStubs(fallbackNames);
-  }
-
-  private lockDealershipFromRecord(dealership: Dealership): void {
-    const location =
-      dealership.location?.trim() ||
-      vehicleLocationFallbackForDealershipName(dealership.name);
-    this.lockDealershipFields(dealership.name, location);
-  }
-
-  private buildDealershipStubs(names: readonly string[]): Dealership[] {
-    return names.map((name) => ({
-      name,
-      location: vehicleLocationFallbackForDealershipName(name),
-      description: null,
-      created_at: new Date(),
-    }));
-  }
-
-  private filterUserAssignedDealerships(
-    all: Dealership[],
-    assignedIds: number[],
-    assignedNames: string[],
-    fallbackNames: readonly string[],
-  ): Dealership[] {
-    if (assignedIds.length > 0) {
-      const idSet = new Set(assignedIds);
-      const byId = all.filter((d) => d.id != null && idSet.has(d.id));
-      if (byId.length > 0) {
-        return this.sortDealershipsByName(byId);
-      }
-    }
-
-    if (assignedNames.length > 0) {
-      const nameSet = new Set(assignedNames);
-      const byName = all.filter((d) => nameSet.has(d.name));
-      if (byName.length > 0) {
-        return this.sortDealershipsByName(byName);
-      }
-    }
-
-    const fallbackSet = new Set<string>(fallbackNames);
-    return this.sortDealershipsByName(all.filter((d) => fallbackSet.has(d.name)));
-  }
-
-  private sortDealershipsByName(dealerships: Dealership[]): Dealership[] {
-    return [...dealerships].sort((a, b) => a.name.localeCompare(b.name, 'es'));
+    this.dealershipUi.applyForSignedInUser();
   }
 
   onDealershipSelected(event: Event): void {
-    const selectedName = (event.target as HTMLSelectElement).value;
-    const match = this.selectableDealerships.find((d) => d.name === selectedName);
-    if (!match) {
-      return;
-    }
-    const location =
-      match.location?.trim() ||
-      vehicleLocationFallbackForDealershipName(match.name);
-    this.form.patchValue({
-      dealership_name: match.name,
-      location,
-    });
-    this.form.get('location')?.markAsDirty();
-    this.form.get('location')?.updateValueAndValidity();
-  }
-
-  private loadDealershipsAndApply(
-    onSuccess: (dealerships: Dealership[]) => void,
-    onErrorFallback?: () => void,
-  ): void {
-    this.dealershipsLoading = true;
-    this._campaignService.getDealerships().subscribe({
-      next: (response: DealerShipResponse) => {
-        this.dealershipsLoading = false;
-        onSuccess(response.data ?? []);
-      },
-      error: (error) => {
-        this.dealershipsLoading = false;
-        onErrorFallback?.();
-        const status =
-          error && typeof error === 'object' && 'status' in error
-            ? Number((error as { status: number }).status)
-            : 0;
-        if (status === 401) {
-          reload(error, this._router);
-        }
-      },
-    });
-  }
-
-  private lockDealershipFields(dealershipName: string, location: string): void {
-    this.form.patchValue({
-      dealership_name: dealershipName,
-      location,
-    });
-    this.form.get('dealership_name')?.markAsDirty();
-    this.form.get('location')?.markAsDirty();
+    this.dealershipUi.onDealershipSelected(event);
   }
 
   private filters(): void {

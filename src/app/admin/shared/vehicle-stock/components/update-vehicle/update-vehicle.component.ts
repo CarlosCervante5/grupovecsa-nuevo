@@ -15,7 +15,9 @@ import { ImageAiDialogComponent } from 'src/app/shared/components/image-ai-dialo
 import { ImageOrder } from 'src/app/dashboard/pages/comprar-autos/interfaces/detail/vehicle_data.interface';
 
 import {UpdateVehicle,  FullDetailResponse, BrandsResponse, Brand, Line, LinesResponse, Model, Body, ModelsResponse, VersionsResponse, Version, BodiesResponse, VehicleUpdateResponse, GralResponse} from '@interfaces/vehicle_data.interface';
-import { GetcampaingResponse } from '@interfaces/admin.interfaces';
+import { Dealership, GetcampaingResponse } from '@interfaces/admin.interfaces';
+import { VehicleDealershipFormMode } from '../../helpers/vehicle-dealership-by-user.helper';
+import { VehicleDealershipFormController } from '../../helpers/vehicle-dealership-form.controller';
 // import { CampaingService } from 'src/app/admin/gestor/services/campaing.service';
 import { AdminService } from '@services/admin.service';
 
@@ -37,6 +39,24 @@ export class UpdateVehicleComponent implements OnInit {
   public form!: FormGroup;
 
   public button: boolean = false;
+
+  readonly dealershipUi: VehicleDealershipFormController;
+
+  get dealershipMode(): VehicleDealershipFormMode {
+    return this.dealershipUi.dealershipMode;
+  }
+
+  get selectableDealerships(): Dealership[] {
+    return this.dealershipUi.selectableDealerships;
+  }
+
+  get dealershipsLoading(): boolean {
+    return this.dealershipUi.dealershipsLoading;
+  }
+
+  get locationFieldReadonly(): boolean {
+    return this.dealershipUi.locationFieldReadonly;
+  }
 
   public camps: string[] = [];
   public id_camp: string[] = [];
@@ -82,13 +102,21 @@ export class UpdateVehicleComponent implements OnInit {
     private _imagesService: ImagesService,
     private _dialog: MatDialog,
   ) {
-      this.vehicle_uuid =  data.uuid;    
+      this.vehicle_uuid =  data.uuid;
+      this.dealershipUi = new VehicleDealershipFormController(
+        () => this.form,
+        this._campaignService,
+        this._router,
+      );
       this.formInit();
   }
 
   ngOnInit(): void {
-
       this.getVehicle();
+  }
+
+  onDealershipSelected(event: Event): void {
+    this.dealershipUi.onDealershipSelected(event);
   }
 
   private filters(): void {
@@ -264,6 +292,7 @@ export class UpdateVehicleComponent implements OnInit {
 
             this.filters();
             this.syncImagesFromVehicle();
+            this.dealershipUi.applyForSignedInUser({ preserveFormValues: true });
           }, 500);
         }
       });
