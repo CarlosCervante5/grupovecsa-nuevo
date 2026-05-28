@@ -51,6 +51,10 @@
       <span class="material-icons">auto_fix_high</span>
       Gemini (edición de fotos)
     </button>
+    <button class="dev-nav-item" [class.active]="activeSection === 'assistant_chat_config'" (click)="selectSection('assistant_chat_config')">
+      <span class="material-icons">smart_toy</span>
+      Chat asistente (IA)
+    </button>
     <button class="dev-nav-item" (click)="navigate('/admin/developer/incadea-sync')">
       <span class="material-icons">sync</span>
       Sync Incadea
@@ -570,6 +574,93 @@
           <button class="crud-create-btn" (click)="saveGeminiAiConfig()" [disabled]="geminiAiSaving">
             @if (geminiAiSaving) { <div class="spinner-sm"></div> } @else { <span class="material-icons">save</span> }
             Guardar Gemini
+          </button>
+        </div>
+      }
+    }
+
+    <!-- CHAT ASISTENTE — GEMINI / OPENAI -->
+    @if (activeSection === 'assistant_chat_config') {
+      <h1 class="dev-title">Chat asistente — IA</h1>
+      <p class="dev-subtitle">
+        Configura el bot del chat público (widget flotante). Por defecto usa <strong>Gemini</strong>; puedes usar OpenAI o modo automático (Gemini y, si falla, OpenAI).
+        <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">Llave Gemini en Google AI Studio</a>.
+      </p>
+
+      @if (assistantChatLoading) {
+        <div class="crud-loading"><div class="spinner"></div><span>Cargando...</span></div>
+      }
+
+      @if (assistantChatError) {
+        <div class="stripe-alert stripe-alert-error"><span class="material-icons">error</span> {{ assistantChatError }}</div>
+      }
+      @if (assistantChatSuccess) {
+        <div class="stripe-alert stripe-alert-success"><span class="material-icons">check_circle</span> {{ assistantChatSuccess }}</div>
+      }
+
+      @if (!assistantChatLoading) {
+        <div class="dev-card" style="margin-bottom:16px;">
+          <h3 class="dev-card-title"><span class="material-icons">power_settings_new</span> Estado</h3>
+          <label class="dev-toggle-row">
+            <input type="checkbox" [checked]="assistantChatEnabled" (change)="toggleAssistantChatEnabled()" />
+            <span class="dev-toggle-label-text">Asistente virtual activo en el sitio</span>
+          </label>
+          <p style="font-size:0.82rem;color:#64748b;margin:10px 0 0;">
+            Gemini configurado: {{ assistantChatGeminiOk ? 'sí' : 'no' }} · OpenAI configurado: {{ assistantChatOpenAiOk ? 'sí' : 'no' }}
+          </p>
+        </div>
+
+        <div class="dev-card" style="margin-bottom:16px;">
+          <h3 class="dev-card-title"><span class="material-icons">tune</span> Proveedor</h3>
+          <label class="modal-label">Motor de respuestas</label>
+          <select class="modal-input" [value]="assistantChatProvider" (change)="onAssistantChatProviderChange($event)">
+            <option value="gemini">Solo Gemini (recomendado)</option>
+            <option value="openai">Solo OpenAI</option>
+            <option value="auto">Automático (Gemini → OpenAI si falla)</option>
+          </select>
+        </div>
+
+        <div class="dev-card" style="margin-bottom:16px;">
+          <h3 class="dev-card-title"><span class="material-icons">key</span> Llaves API</h3>
+          <label class="modal-label">GEMINI_API_KEY (chat; opcional si ya usas la de «edición de fotos»)</label>
+          <input class="modal-input" type="password" autocomplete="off"
+            placeholder="AIza... (vacío = reutilizar llave Gemini de fotos)"
+            [value]="$any(assistantChatConfig)['assistant_gemini_api_key'] ?? $any(assistantChatConfig)['gemini_api_key'] ?? ''"
+            (input)="assistantChatConfig['assistant_gemini_api_key'] = $any($event.target).value" />
+          <p style="font-size:0.82rem;color:#64748b;margin:8px 0 0;">
+            Deja los puntos (••••) si no quieres cambiar la llave. Si no defines una llave solo para chat, se usa la de «Gemini (edición de fotos)».
+          </p>
+
+          <label class="modal-label" style="margin-top:16px;">OPENAI_API_KEY (opcional, para proveedor OpenAI o modo auto)</label>
+          <input class="modal-input" type="password" autocomplete="off"
+            placeholder="sk-..."
+            [value]="$any(assistantChatConfig)['openai_api_key'] ?? ''"
+            (input)="assistantChatConfig['openai_api_key'] = $any($event.target).value" />
+        </div>
+
+        <div class="dev-card" style="margin-bottom:16px;">
+          <h3 class="dev-card-title"><span class="material-icons">model_training</span> Modelos</h3>
+          <label class="modal-label">
+            Modelo Gemini (vacío = <code>{{ assistantChatGeminiModelHint }}</code>)
+          </label>
+          <input class="modal-input" type="text" autocomplete="off"
+            placeholder="ej. gemini-2.0-flash"
+            [value]="$any(assistantChatConfig)['assistant_chat_gemini_model'] ?? ''"
+            (input)="assistantChatConfig['assistant_chat_gemini_model'] = $any($event.target).value" />
+
+          <label class="modal-label" style="margin-top:16px;">
+            Modelo OpenAI (vacío = <code>{{ assistantChatOpenAiModelHint }}</code>)
+          </label>
+          <input class="modal-input" type="text" autocomplete="off"
+            placeholder="ej. gpt-4o-mini"
+            [value]="$any(assistantChatConfig)['assistant_chat_openai_model'] ?? ''"
+            (input)="assistantChatConfig['assistant_chat_openai_model'] = $any($event.target).value" />
+        </div>
+
+        <div class="stripe-actions">
+          <button class="crud-create-btn" (click)="saveAssistantChatConfig()" [disabled]="assistantChatSaving">
+            @if (assistantChatSaving) { <div class="spinner-sm"></div> } @else { <span class="material-icons">save</span> }
+            Guardar chat asistente
           </button>
         </div>
       }
