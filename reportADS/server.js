@@ -42,8 +42,11 @@ app.post('/api/scan', async (req, res) => {
     const htmlFile = reportGen.generateHTML(results, method === 'scraper' ? 'scraper' : 'api');
     const csvFile = reportGen.generateCSV(results, method === 'scraper' ? 'scraper' : 'api');
 
+    // Siempre incluir `results` (Laravel benchmark y clientes legacy dependen de ello).
+    // `includeResults: false` solo omite el cuerpo si se pide explícitamente (ahorro de ancho de banda).
     const payload = {
       success: true,
+      results,
       summary: results.map(r => ({
         competitor: r.competitor,
         adsCount: method === 'scraper' ? (r.adsFound || 0) : (r.data?.length || 0),
@@ -51,8 +54,8 @@ app.post('/api/scan', async (req, res) => {
       })),
       files: { data: dataFile, html: htmlFile, csv: csvFile }
     };
-    if (includeResults) {
-      payload.results = results;
+    if (includeResults === false) {
+      delete payload.results;
     }
     res.json(payload);
   } catch (error) {

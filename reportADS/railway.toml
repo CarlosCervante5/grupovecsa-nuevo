@@ -1,0 +1,9 @@
+# Servicio Node reportADS (Puppeteer) para Benchmark Web Scraper.
+# Despliega este directorio como proyecto aparte en Railway y apunta
+# BENCHMARK_REPORT_ADS_URL en el backend Laravel a su URL pública.
+
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "npm start"
