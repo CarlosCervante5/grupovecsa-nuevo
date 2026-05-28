@@ -233,10 +233,84 @@
       </div>
     </div>
 
+    <section class="photos-section" [class.photos-section--locked]="!canManagePhotos">
+      <h3 class="photos-section__title">Fotos del vehículo</h3>
+      <p class="field-hint" *ngIf="!canManagePhotos">
+        Pulsa «Crear» para guardar el vehículo; después podrás subir fotos aquí.
+      </p>
+      <p class="field-hint" *ngIf="canManagePhotos">
+        Sube imágenes, arrastra para cambiar el orden, edita con IA o elimina fotos.
+      </p>
+
+      <div class="photos-toolbar">
+        <label class="action-btn photos-upload-btn">
+          <span class="material-icons icon-18">add_photo_alternate</span>
+          Elegir archivos
+          <input
+            type="file"
+            accept=".png,.jpg,.jpeg,.webp,.heic,.heif"
+            multiple
+            hidden
+            [disabled]="!canManagePhotos"
+            (change)="onPhotoFiles($event)"
+          />
+        </label>
+        <button
+          type="button"
+          class="action-btn primary-btn"
+          (click)="uploadPhotos()"
+          [disabled]="!canManagePhotos || photoUploadDisabled || photoUploading"
+        >
+          {{ photoUploading ? 'Subiendo…' : 'Subir fotos' }}
+        </button>
+        <button
+          type="button"
+          class="action-btn"
+          *ngIf="vehicleImages.length"
+          (click)="savePhotoOrder()"
+        >
+          Guardar orden
+        </button>
+      </div>
+
+      <p class="photos-empty" *ngIf="canManagePhotos && !vehicleImages.length">Este vehículo aún no tiene fotos.</p>
+
+      <div
+        cdkDropList
+        class="photos-list"
+        *ngIf="vehicleImages.length"
+        (cdkDropListDropped)="dropPhoto($event)"
+      >
+        <div class="photo-row" *ngFor="let image of vehicleImages; let i = index" cdkDrag>
+          <label class="photo-check">
+            <input type="checkbox" [(ngModel)]="image.selected" [ngModelOptions]="{ standalone: true }" />
+            <span>Seleccionar</span>
+          </label>
+          <span class="photo-pos">Posición {{ i + 1 }}</span>
+          <div class="photo-thumb-wrap">
+            <img class="photo-thumb" [src]="image.path" [alt]="'Foto ' + (i + 1)" />
+          </div>
+          <div class="photo-actions">
+            <button type="button" class="action-btn action-btn--compact" (click)="openPhotoAi(image, i)" title="Editar con IA">
+              <span class="material-icons icon-18">auto_fix_high</span>
+              IA
+            </button>
+            <button type="button" class="action-btn action-btn--compact action-btn--danger" (click)="deletePhoto(image.id, i)" title="Eliminar">
+              <span class="material-icons icon-18">delete</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <div class="vehicle-form__actions">
       <button type="button" class="action-btn" (click)="close()">Cancelar</button>
-      <button type="submit" class="action-btn primary-btn" [disabled]="form.invalid || button">
-        {{ button ? 'Guardando…' : 'Crear' }}
+      <button
+        type="submit"
+        class="action-btn primary-btn"
+        [disabled]="((!vehicleSaved && form.invalid) || button)"
+      >
+        {{ vehicleSaved ? 'Finalizar' : (button ? 'Guardando…' : 'Crear') }}
       </button>
     </div>
   </form>

@@ -1,15 +1,20 @@
 import { Campaign } from '@interfaces/admin.interfaces';
 import { Component, OnInit } from '@angular/core';
 import { MatBottomSheetRef } from '@angular/material/bottom-sheet';
+import { MatDialog } from '@angular/material/dialog';
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { AbstractControl, FormControl, FormGroup, UntypedFormBuilder, ValidatorFn, Validators } from '@angular/forms';
 import { VehicleService } from '@services/vehicle.service';
+import { ImagesService } from '@services/images.service';
 import Swal from "sweetalert2";
 import { MatChipInputEvent } from '@angular/material/chips';
 import { Observable, of } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
+import { ImageAiDialogComponent } from 'src/app/shared/components/image-ai-dialog/image-ai-dialog.component';
+import { ImageOrder } from 'src/app/dashboard/pages/comprar-autos/interfaces/detail/vehicle_data.interface';
 
-import {UpdateVehicle,  FullDetailResponse, BrandsResponse, Brand, Line, LinesResponse, Model, Body, ModelsResponse, VersionsResponse, Version, BodiesResponse, VehicleUpdateResponse, GralResponse, VehicleStoreResponse} from '@interfaces/vehicle_data.interface';
+import { BrandsResponse, Brand, Line, LinesResponse, Model, Body, ModelsResponse, VersionsResponse, Version, BodiesResponse, VehicleStoreResponse, FullDetailResponse } from '@interfaces/vehicle_data.interface';
 import { GetcampaingResponse } from '@interfaces/admin.interfaces';
 //import { CampaingService } from 'src/app/admin/gestor/services/campaing.service';
 import { AdminService } from '@services/admin.service';
@@ -28,10 +33,17 @@ export class StoreVehicleComponent  implements OnInit{
   
   
   public vehicle_uuid: string = '';
-  public vehicle!: UpdateVehicle;
   public form!: FormGroup;
 
   public button: boolean = false;
+  public vehicleSaved = false;
+  public listNeedsReload = false;
+
+  vehicleImages: ImageOrder[] = [];
+  photoFiles: File[] = [];
+  photoUploadDisabled = true;
+  photoUploading = false;
+  imagesChanged = false;
 
   public camps: string[] = [];
   public id_camp: string[] = [];
@@ -66,7 +78,9 @@ export class StoreVehicleComponent  implements OnInit{
     private _vehicleService:VehicleService,
     private _campaignService:AdminService,
     private _bottomSheetRef: MatBottomSheetRef<any>,
-    private _router: Router
+    private _router: Router,
+    private _imagesService: ImagesService,
+    private _dialog: MatDialog,
   ) {
       this.formInit();
   }
@@ -154,9 +168,10 @@ export class StoreVehicleComponent  implements OnInit{
     });
   }
 
-  onCampaignSelected(event: MatAutocompleteSelectedEvent): void{
-    this.camps.push(event.option.value);
+  onCampaignSelected(event: MatAutocompleteSelectedEvent): void {
+    this.pushCampaign(event.option.value);
     this.id_camp.push(event.option.id);
+    this.form.patchValue({ campaign_2: '' });
   }
 
   onLineSelected(event: MatAutocompleteSelectedEvent): void {
@@ -266,6 +281,161 @@ export class StoreVehicleComponent  implements OnInit{
     });
   }
 
+  get canManagePhotos(): boolean {
+    return !!this.vehicle_uuid;
+  }
+
+  private refreshVehicleImages(): void {
+    if (!this.vehicle_uuid) {
+      return;
+    }
+    this._vehicleService.getVehicle(this.vehicle_uuid).subscribe({
+      next: (detailResponse: FullDetailResponse) => {
+        const imgs = detailResponse.data?.images ?? [];
+        this.vehicleImages = imgs.map((img) => ({
+          id: img.uuid ?? '',
+          sort_id: String(img.sort_id ?? ''),
+          path: img.service_image_url,
+          path_public: img.service_public_id ?? '',
+          external_website: 'no',
+          selected: false,
+        }));
+        this.imagesChanged = true;
+      },
+      error: (err) => reload(err, this._router),
+    });
+  }
+
+  dropPhoto(event: CdkDragDrop<ImageOrder[]>): void {
+    const selected = this.vehicleImages.filter((image) => image.selected);
+    if (selected.length > 0) {
+      const remaining = this.vehicleImages.filter((image) => !image.selected);
+      const insertIndex = event.currentIndex;
+      this.vehicleImages = [
+        ...remaining.slice(0, insertIndex),
+        ...selected,
+        ...remaining.slice(insertIndex),
+      ];
+    } else {
+      moveItemInArray(this.vehicleImages, event.previousIndex, event.currentIndex);
+    }
+  }
+
+  savePhotoOrder(): void {
+    this._imagesService.changeOrder(this.vehicleImages).subscribe({
+      next: (resp) => {
+        Swal.fire({
+          icon: 'success',
+          title: resp.message,
+          showConfirmButton: false,
+          timer: 2000,
+        });
+        this.imagesChanged = true;
+        this.listNeedsReload = true;
+      },
+      error: (err) => reload(err, this._router),
+    });
+  }
+
+  openPhotoAi(image: ImageOrder, index: number): void {
+    const ref = this._dialog.open(ImageAiDialogComponent, {
+      width: '640px',
+      maxWidth: '95vw',
+      data: {
+        sourceUrl: image.path,
+        targetType: 'vehicle_image',
+        targetUuid: image.id,
+        title: 'Mejorar foto del vehículo',
+      },
+    });
+    ref.afterClosed().subscribe((result) => {
+      if (result?.saved && result.imageUrl) {
+        this.vehicleImages[index].path = result.imageUrl;
+        this.imagesChanged = true;
+        this.listNeedsReload = true;
+        Swal.fire({
+          icon: 'success',
+          title: 'Imagen actualizada con IA',
+          showConfirmButton: false,
+          timer: 2200,
+        });
+      }
+    });
+  }
+
+  deletePhoto(vehicleImageUuid: string, index: number): void {
+    Swal.fire({
+      title: '¿Eliminar esta imagen?',
+      showCancelButton: true,
+      confirmButtonText: 'Eliminar',
+      confirmButtonColor: '#1c69d4',
+    }).then((result) => {
+      if (!result.isConfirmed) {
+        return;
+      }
+      this._imagesService.deleteImage(vehicleImageUuid).subscribe({
+        next: (resp) => {
+          this.vehicleImages.splice(index, 1);
+          this.imagesChanged = true;
+          this.listNeedsReload = true;
+          Swal.fire(resp.message, '', 'success');
+        },
+        error: (err) => reload(err, this._router),
+      });
+    });
+  }
+
+  onPhotoFiles(event: Event): void {
+    const element = event.currentTarget as HTMLInputElement;
+    const fileList = element.files;
+    if (fileList?.length) {
+      this.photoFiles = Array.from(fileList);
+      this.photoUploadDisabled = false;
+    } else {
+      this.photoFiles = [];
+      this.photoUploadDisabled = true;
+    }
+  }
+
+  uploadPhotos(): void {
+    if (!this.vehicle_uuid || !this.photoFiles.length || this.photoUploading) {
+      return;
+    }
+    this.photoUploading = true;
+    this.photoUploadDisabled = true;
+    this._imagesService.setImage(this.vehicle_uuid, this.photoFiles).subscribe({
+      next: () => {
+        this.photoUploading = false;
+        this.photoFiles = [];
+        Swal.fire({
+          icon: 'success',
+          title: 'Imágenes cargadas',
+          showConfirmButton: false,
+          timer: 2200,
+        });
+        this.listNeedsReload = true;
+        this.refreshVehicleImages();
+      },
+      error: (err) => {
+        this.photoUploading = false;
+        this.photoUploadDisabled = false;
+        reload(err, this._router);
+      },
+    });
+  }
+
+  private attachCampaigns(): void {
+    if (!this.id_camp.length || !this.vehicle_uuid) {
+      return;
+    }
+    this._vehicleService.attachVehicle(this.id_camp, this.vehicle_uuid).subscribe({
+      next: () => {
+        this.listNeedsReload = true;
+      },
+      error: (error) => reload(error, this._router),
+    });
+  }
+
   private formInit() {
       this.form = this._formBuilder.group({
           name:           ['', [Validators.required]],
@@ -308,49 +478,43 @@ export class StoreVehicleComponent  implements OnInit{
   }
 
   onSubmit() {
-    this._vehicleService.storeVehicle( this.form.value)
-    .subscribe({
-      next: ( storeVehicleResponse :VehicleStoreResponse) => {
-        this.vehicle_uuid = storeVehicleResponse.data.uuid;
-        if(this.id_camp.length > 0){
-          this._vehicleService.attachVehicle(this.id_camp, this.vehicle_uuid)
-          .subscribe({
-            next: ( relationVehicleResponse :GralResponse) => {
-                Swal.fire({                    
-                  icon: 'success',
-                  title: 'Vehículo relacionado con campañacon exitosamente',
-                  text: '',
-                  showConfirmButton: false,
-                  timer: 2000
-                });
-    
-                this._bottomSheetRef.dismiss(
-                  {reload: true}
-                );
-            },
-            error: (error) => {
-              reload(error, this._router);
-            }
-          });
-        }
-          Swal.fire({                    
-            icon: 'success',
-            title: 'Vehículo actualizado con exito',
-            text: storeVehicleResponse.data.name,
-            showConfirmButton: false,
-            timer: 2000
-          });
+    if (this.button) {
+      return;
+    }
 
-          this._bottomSheetRef.dismiss(
-            {reload: true}
-          );
+    if (this.vehicleSaved) {
+      this.finishAndClose();
+      return;
+    }
+
+    this.button = true;
+    this._vehicleService.storeVehicle(this.form.value).subscribe({
+      next: (storeVehicleResponse: VehicleStoreResponse) => {
+        this.button = false;
+        this.vehicle_uuid = storeVehicleResponse.data.uuid;
+        this.vehicleSaved = true;
+        this.listNeedsReload = true;
+        this.attachCampaigns();
+        this.form.disable();
+        Swal.fire({
+          icon: 'success',
+          title: 'Vehículo creado',
+          text: `${storeVehicleResponse.data.name}. Ya puedes subir fotos.`,
+          showConfirmButton: false,
+          timer: 2500,
+        });
       },
       error: (error) => {
+        this.button = false;
         reload(error, this._router);
-      }
+      },
     });
+  }
 
-    this.button = false;
+  private finishAndClose(): void {
+    this._bottomSheetRef.dismiss(
+      this.listNeedsReload || this.imagesChanged ? { reload: true } : undefined,
+    );
   }
 
   private offerPriceValidator(salePriceControlName: string): ValidatorFn {
@@ -458,7 +622,11 @@ export class StoreVehicleComponent  implements OnInit{
     return this.form.get('dealership_name')!.invalid && (this.form.get('dealership_name')!.dirty);
   }
 
-  public close():void {
+  public close(): void {
+    if (this.listNeedsReload || this.imagesChanged || this.vehicleSaved) {
+      this._bottomSheetRef.dismiss({ reload: true });
+      return;
+    }
     this._bottomSheetRef.dismiss();
   }
 
