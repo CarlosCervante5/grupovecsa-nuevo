@@ -7,8 +7,17 @@
       <input type="text" class="field-input" [(ngModel)]="title" />
     </div>
 
+    <div class="field-group">
+      <label class="field-label">Tipo de publicación</label>
+      <select class="field-input" [(ngModel)]="postType" (ngModelChange)="onPostTypeChange()">
+        <option *ngFor="let pt of postTypeOptions" [value]="pt.value">{{ pt.label }}</option>
+      </select>
+      <p class="field-hint" *ngIf="postType === 'event'">Requiere fecha de evento. La categoría debe coincidir con las palabras de agenda si quieres el calendario.</p>
+      <p class="field-hint" *ngIf="postType === 'gallery'">Aparece en «Galería de eventos» del sitio público. Portada + varias fotos del evento.</p>
+    </div>
+
     <div class="field-group full featured-image-block">
-      <label class="field-label">Imagen destacada</label>
+      <label class="field-label">{{ isGallery ? 'Imagen de portada' : 'Imagen destacada' }}</label>
       <input
         #featuredFileEl
         type="file"
@@ -32,7 +41,7 @@
         </button>
       </div>
       <p class="field-hint">
-        Sube un archivo de imagen (máx. 8 MB). Para <strong>publicar</strong> hace falta imagen: archivo o URL de imagen abajo.
+        Sube un archivo de imagen (máx. 8 MB, JPG, PNG, WebP, GIF o HEIC). Para <strong>publicar</strong> hace falta imagen destacada.
       </p>
       <div class="admin-media-specs admin-media-specs--dialog" role="note">
         <strong>Medidas recomendadas — imagen destacada (Experience)</strong>
@@ -40,23 +49,64 @@
           <li><strong>Listados y tarjetas:</strong> 1200 × 630 px (proporción ~1,91:1, útil también para vista previa en redes).</li>
           <li><strong>Alternativa 16:9:</strong> 1600 × 900 px o 1920 × 1080 px si priorizas pantallas grandes.</li>
         </ul>
-        <span class="admin-media-specs__note">JPG o WebP; si subes URL externa, usa la misma proporción para evitar recortes raros.</span>
+        <span class="admin-media-specs__note">JPG o WebP recomendados; HEIC de iPhone también se acepta.</span>
       </div>
       <div class="featured-preview" *ngIf="featuredPreviewSrc as src">
         <img [src]="src" alt="Vista previa imagen destacada" />
       </div>
     </div>
 
+    <div class="field-group full gallery-upload-block" *ngIf="isGallery">
+      <label class="field-label">Fotos de la galería</label>
+      <input
+        #galleryFilesEl
+        type="file"
+        class="file-input-hidden"
+        [attr.accept]="featuredImageAccept"
+        multiple
+        (change)="onGalleryFilesChange($event)"
+      />
+      <div class="featured-upload-row">
+        <button type="button" class="action-btn primary-btn" (click)="galleryFilesEl.click()">
+          <span class="material-icons icon-18">collections</span>
+          Añadir fotos
+        </button>
+        <span class="featured-file-name">{{ galleryPhotosCount }} foto(s) en total</span>
+      </div>
+      <p class="field-hint">Selecciona una o varias imágenes (máx. 8 MB c/u). Mínimo 1 foto además de la portada para publicar.</p>
+
+      <div class="gallery-admin-grid" *ngIf="visibleExistingGallery.length">
+        <div class="gallery-admin-item" *ngFor="let img of visibleExistingGallery">
+          <img [src]="img.image_path" [alt]="img.image_name || ''" />
+          <button type="button" class="gallery-admin-remove" (click)="markGalleryImageDeleted(img.uuid)" title="Quitar">
+            <span class="material-icons">close</span>
+          </button>
+        </div>
+      </div>
+
+      <ul class="gallery-pending-list" *ngIf="galleryPendingFiles.length">
+        <li *ngFor="let f of galleryPendingFiles; let i = index">
+          <span>{{ f.name }} (nueva)</span>
+          <button type="button" class="action-btn action-btn--compact" (click)="removePendingGalleryFile(i)">Quitar</button>
+        </li>
+      </ul>
+
+      <div class="gallery-deleted-hint" *ngIf="galleryDeleteUuids.length">
+        <span>{{ galleryDeleteUuids.length }} foto(s) marcada(s) para eliminar al guardar.</span>
+        <button
+          type="button"
+          class="action-btn action-btn--compact"
+          *ngFor="let uuid of galleryDeleteUuids"
+          (click)="undoGalleryImageDelete(uuid)"
+        >
+          Deshacer
+        </button>
+      </div>
+    </div>
+
     <div class="field-group">
       <label class="field-label">Slug (URL)</label>
       <input type="text" class="field-input" [(ngModel)]="urlName" placeholder="auto desde título si vacío" />
-    </div>
-    <div class="field-group">
-      <label class="field-label">Tipo de publicación</label>
-      <select class="field-input" [(ngModel)]="postType" (ngModelChange)="onPostTypeChange()">
-        <option *ngFor="let pt of postTypeOptions" [value]="pt.value">{{ pt.label }}</option>
-      </select>
-      <p class="field-hint" *ngIf="postType === 'event'">Requiere fecha de evento. La categoría debe coincidir con las palabras de agenda si quieres el calendario.</p>
     </div>
     <div class="field-group">
       <label class="field-label">Estado</label>
@@ -80,7 +130,7 @@
       <input type="text" class="field-input" [(ngModel)]="wpCategoryOther" placeholder="Ej. Rodada BMW" />
     </div>
     <div class="field-group">
-      <label class="field-label">Fecha evento (agenda)</label>
+      <label class="field-label">{{ isGallery ? 'Fecha del evento *' : 'Fecha evento (agenda)' }}</label>
       <input type="date" class="field-input" [(ngModel)]="eventBeginDate" />
     </div>
     <div class="field-group">
@@ -88,21 +138,10 @@
       <input type="date" class="field-input" [(ngModel)]="eventEndDate" />
     </div>
     <div class="field-group full">
-      <label class="field-label">Imagen destacada — URL alternativa</label>
-      <input
-        type="text"
-        class="field-input"
-        [(ngModel)]="imageUrl"
-        placeholder="https://…/foto.jpg o /storage/…/foto.png"
-        autocomplete="off"
-      />
-      <p class="field-hint">Solo si no subes archivo: enlace directo a .jpg, .png, .webp, .gif o .svg.</p>
-    </div>
-    <div class="field-group full">
       <label class="field-label">Resumen</label>
       <textarea class="field-input field-textarea" rows="3" [(ngModel)]="excerpt"></textarea>
     </div>
-    <div class="field-group full">
+    <div class="field-group full" *ngIf="!isGallery">
       <label class="field-label">Contenido (HTML)</label>
       <textarea class="field-input field-textarea field-textarea--body" rows="12" [(ngModel)]="bodyHtml"></textarea>
     </div>

@@ -62,6 +62,21 @@ export class ExperienceStoriesComponent {
     this.load();
   }
 
+  postTypeLabel(row: ExperienceStoryRow): string {
+    const t = row.experience_post_type;
+    if (t === 'gallery') {
+      const n = row.gallery_images_count ?? row.gallery_images?.length ?? 0;
+      return `Galería (${n} fotos)`;
+    }
+    if (t === 'event') {
+      return 'Evento';
+    }
+    if (t === 'story') {
+      return 'Historia';
+    }
+    return row.event_begin_date ? 'Evento' : 'Historia';
+  }
+
   tagsLine(row: ExperienceStoryRow): string {
     const t = row.wp_tags;
     if (!t?.length) {

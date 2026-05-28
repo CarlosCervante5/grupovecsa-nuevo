@@ -12,9 +12,9 @@ export interface ExperienceEvent {
   location: string | null;
   image_path: string | null;
   type: string;
-  /** 'event' = marketing_events; 'post' = marketing_posts (historia / WP evento) */
-  source?: 'event' | 'post';
-  /** Slug para /experience/historia/:slug cuando source === 'post' */
+  /** 'event' | 'post' | 'gallery_post' */
+  source?: 'event' | 'post' | 'gallery_post';
+  /** Slug para /experience/historia/:slug o /experience/galeria/:slug */
   story_slug?: string | null;
   created_at?: string;
   multimedia?: ExperienceMultimedia[];
@@ -28,6 +28,13 @@ export interface ExperienceMultimedia {
   multimedia_path: string;
 }
 
+export interface ExperienceGalleryImage {
+  uuid: string;
+  sort_id: number;
+  image_path: string;
+  image_name?: string | null;
+}
+
 export interface ExperiencePost {
   uuid: string;
   title: string;
@@ -36,6 +43,8 @@ export interface ExperiencePost {
   url_name: string;
   status: string;
   category: string;
+  experience_post_type?: string | null;
+  event_begin_date?: string | null;
   created_at: string;
 }
 
@@ -43,6 +52,7 @@ export interface ExperiencePost {
 export interface ExperiencePostDetail extends ExperiencePost {
   excerpt: string | null;
   body_html: string | null;
+  gallery_images?: ExperienceGalleryImage[];
 }
 
 export interface ExperiencePostDetailResponse {

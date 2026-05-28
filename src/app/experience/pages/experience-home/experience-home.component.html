@@ -125,7 +125,12 @@
     </div>
 
     <div *ngIf="!loadingGallery && pastEvents.length > 0" class="gallery-grid">
-      <div class="gallery-card" *ngFor="let event of pastEvents">
+      <div
+        class="gallery-card"
+        *ngFor="let event of pastEvents"
+        [class.gallery-card--clickable]="!!galleryRoute(event)"
+        (click)="openGalleryItem(event)"
+      >
         <div class="gallery-card-img">
           <img *ngIf="event.image_path" [src]="event.image_path" [alt]="event.name">
           <div *ngIf="!event.image_path" class="gallery-placeholder"><span>📸</span></div>

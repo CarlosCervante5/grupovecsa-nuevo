@@ -29,6 +29,7 @@
         <tr>
           <th class="col-thumb"></th>
           <th>Título</th>
+          <th>Tipo</th>
           <th>Slug</th>
           <th>Categoría (WP)</th>
           <th>Etiquetas</th>
@@ -51,6 +52,7 @@
             <span *ngIf="!s.image_path" class="row-thumb row-thumb--empty">—</span>
           </td>
           <td>{{ s.title }}</td>
+          <td>{{ postTypeLabel(s) }}</td>
           <td><code>{{ s.url_name }}</code></td>
           <td>{{ s.wp_category_label || '—' }}</td>
           <td class="cell-tags">{{ tagsLine(s) }}</td>
