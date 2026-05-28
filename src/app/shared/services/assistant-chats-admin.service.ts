@@ -17,11 +17,13 @@ export interface AssistantChatListRow {
   last_message_at: string | null;
   created_at: string;
   is_registered: boolean;
+  is_human_handoff?: boolean;
+  human_handoff_at?: string | null;
 }
 
 export interface AssistantChatMessage {
   id: number;
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'agent';
   content: string;
   created_at: string;
 }
@@ -63,6 +65,30 @@ export class AssistantChatsAdminService {
   detail(uuid: string): Observable<any> {
     return this.http.post(
       `${this.baseUrl}/api/assistant/admin/conversations/detail`,
+      { uuid },
+      { headers: this.headers() }
+    );
+  }
+
+  takeOver(uuid: string): Observable<any> {
+    return this.http.post(
+      `${this.baseUrl}/api/assistant/admin/conversations/take-over`,
+      { uuid },
+      { headers: this.headers() }
+    );
+  }
+
+  reply(uuid: string, message: string): Observable<any> {
+    return this.http.post(
+      `${this.baseUrl}/api/assistant/admin/conversations/reply`,
+      { uuid, message },
+      { headers: this.headers() }
+    );
+  }
+
+  release(uuid: string): Observable<any> {
+    return this.http.post(
+      `${this.baseUrl}/api/assistant/admin/conversations/release`,
       { uuid },
       { headers: this.headers() }
     );

@@ -46,9 +46,19 @@
       <p>¡Hola! Soy el asistente virtual de Grupo VECSA. ¿En qué puedo ayudarte?</p>
     </div>
 
-    <div *ngFor="let msg of messages" class="chat-msg" [class.user]="msg.role === 'user'" [class.assistant]="msg.role === 'assistant'">
+    <div
+      *ngFor="let msg of messages"
+      class="chat-msg"
+      [class.user]="msg.role === 'user'"
+      [class.assistant]="msg.role === 'assistant'"
+      [class.agent]="msg.role === 'agent'"
+    >
+      <span class="chat-msg-label" *ngIf="messageLabel(msg.role)">{{ messageLabel(msg.role) }}</span>
       <div class="chat-bubble">{{ msg.text }}</div>
     </div>
+    <p class="chat-handoff-note" *ngIf="humanHandoff">
+      Un asesor está atendiendo tu conversación.
+    </p>
 
     <div class="chat-msg assistant" *ngIf="sending">
       <div class="chat-bubble chat-typing">
