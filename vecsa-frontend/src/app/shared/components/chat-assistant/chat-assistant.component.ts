@@ -388,8 +388,7 @@ export class ChatAssistantComponent implements OnInit, OnDestroy {
     list: ChatDealership[] | undefined
   ): ChatDealership[] {
     return (list ?? []).filter(
-      (d): d is ChatDealership =>
-        !!d?.id && !!d?.name && d.advisors_available !== false
+      (d): d is ChatDealership => !!d?.id && !!d?.name
     );
   }
 
