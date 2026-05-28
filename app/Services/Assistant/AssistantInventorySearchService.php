@@ -9,6 +9,11 @@ use Illuminate\Support\Collection;
 
 class AssistantInventorySearchService
 {
+    public function __construct(
+        private readonly AssistantAdvisorAvailabilityService $advisorAvailability,
+        private readonly AssistantCatalogPresenter $catalogPresenter
+    ) {}
+
     public const SALES_ADVISOR_OFFER_MARKER = '¿Te gustaría que un asesor de ventas';
 
     private const MAX_RESULTS = 5;
@@ -52,11 +57,16 @@ class AssistantInventorySearchService
     }
 
     /**
-     * Respuesta con inventario o invitación a asesor; null si no aplica búsqueda.
+     * @return array{text: string, catalog_cards: list<array<string, mixed>>}|null
      */
-    public function tryBuildReply(AssistantConversation $conversation, string $userText): ?string
-    {
-        if (! $this->isInventoryQuery($userText)) {
+    public function tryBuildReply(
+        AssistantConversation $conversation,
+        string $userText,
+        ?string $pageUrl = null
+    ): ?array {
+        $pageUrl = $pageUrl ?? $conversation->page_url;
+
+        if (! $this->shouldAttemptVehicleSearch($userText, $pageUrl)) {
             return null;
         }
 
@@ -69,20 +79,23 @@ class AssistantInventorySearchService
         $dealershipName = $conversation->dealership?->name ?? 'tu sucursal';
         $dealershipId = $conversation->dealership_id ? (int) $conversation->dealership_id : null;
 
-        $local = $this->search($keyword, $dealershipId);
+        $local = $this->search($keyword, $dealershipId, $pageUrl);
         if ($local->isNotEmpty()) {
             return $this->formatFoundReply($local, $dealershipName, true);
         }
 
         $network = $dealershipId !== null
-            ? $this->search($keyword, null)
+            ? $this->search($keyword, null, $pageUrl)
             : collect();
 
         if ($network->isNotEmpty()) {
             return $this->formatFoundReply($network, $dealershipName, false);
         }
 
-        return $this->formatNoResultsReply($dealershipName, $keyword);
+        return [
+            'text' => $this->formatNoResultsReply($dealershipName, $keyword, $dealershipId),
+            'catalog_cards' => [],
+        ];
     }
 
     public function userAcceptsSalesAdvisor(AssistantConversation $conversation, string $userText): bool
@@ -131,32 +144,69 @@ class AssistantInventorySearchService
     /**
      * @return Collection<int, Vehicle>
      */
-    private function search(string $keyword, ?int $dealershipId): Collection
+    public function shouldAttemptVehicleSearch(string $userText, ?string $pageUrl): bool
     {
-        $like = '%'.$keyword.'%';
+        if ($this->isInventoryQuery($userText)) {
+            return true;
+        }
+
+        if ($this->isAutosTopic($pageUrl) || $this->isMotosTopic($pageUrl)) {
+            return $this->extractKeyword($userText) !== ''
+                || (bool) preg_match('/\bx\s*\d{1,2}\b/ui', mb_strtolower($userText))
+                || (bool) preg_match('/\b\d\s*serie\b/ui', mb_strtolower($userText));
+        }
+
+        return false;
+    }
+
+    private function search(string $keyword, ?int $dealershipId, ?string $pageUrl = null): Collection
+    {
+        $parts = preg_split('/\s+/u', trim($keyword)) ?: [];
+        $parts = array_values(array_filter($parts, fn (string $p) => strlen($p) >= 2));
+        if ($parts === []) {
+            $parts = [trim($keyword)];
+        }
 
         $query = Vehicle::query()
-            ->with(['brand', 'line', 'model', 'version', 'dealership'])
-            ->where('page_status', 'active')
-            ->whereHas('images')
-            ->where(function (Builder $q) use ($like) {
-                $q->where('name', 'LIKE', $like)
-                    ->orWhere('uuid', 'LIKE', $like)
-                    ->orWhereHas('model', fn (Builder $m) => $m->where('name', 'LIKE', $like))
-                    ->orWhereHas('line', fn (Builder $l) => $l->where('name', 'LIKE', $like))
-                    ->orWhereHas('brand', fn (Builder $b) => $b->where('name', 'LIKE', $like))
-                    ->orWhereHas('version', fn (Builder $v) => $v->where('name', 'LIKE', $like))
-                    ->orWhereHas('body', fn (Builder $b) => $b->where('name', 'LIKE', $like));
+            ->with(['brand', 'line', 'model', 'version', 'dealership', 'firstImage', 'images'])
+            ->whereIn('page_status', ['active', 'inactive'])
+            ->where(function (Builder $outer) use ($parts, $keyword) {
+                $likeFull = '%'.$keyword.'%';
+                $outer->where(function (Builder $q) use ($likeFull) {
+                    $this->applyVehicleKeywordClause($q, $likeFull);
+                });
+                foreach ($parts as $part) {
+                    $outer->orWhere(function (Builder $q) use ($part) {
+                        $this->applyVehicleKeywordClause($q, '%'.$part.'%');
+                    });
+                }
             });
 
         if ($dealershipId !== null) {
             $query->where('dealership_id', $dealershipId);
         }
 
+        if ($this->isMotosTopic($pageUrl)) {
+            $query->whereHas('brand', fn (Builder $b) => $b->where('name', 'LIKE', '%Motorrad%'));
+        } elseif ($this->isAutosTopic($pageUrl)) {
+            $query->whereHas('brand', fn (Builder $b) => $b->where('name', 'NOT LIKE', '%Motorrad%'));
+        }
+
         return $query
             ->orderByDesc('updated_at')
             ->limit(self::MAX_RESULTS)
             ->get();
+    }
+
+    private function applyVehicleKeywordClause(Builder $query, string $like): void
+    {
+        $query->where('name', 'LIKE', $like)
+            ->orWhere('uuid', 'LIKE', $like)
+            ->orWhereHas('model', fn (Builder $m) => $m->where('name', 'LIKE', $like))
+            ->orWhereHas('line', fn (Builder $l) => $l->where('name', 'LIKE', $like))
+            ->orWhereHas('brand', fn (Builder $b) => $b->where('name', 'LIKE', $like))
+            ->orWhereHas('version', fn (Builder $v) => $v->where('name', 'LIKE', $like))
+            ->orWhereHas('body', fn (Builder $b) => $b->where('name', 'LIKE', $like));
     }
 
     private function extractKeyword(string $text): string
@@ -167,7 +217,10 @@ class AssistantInventorySearchService
 
         foreach ($tokens as $token) {
             $token = trim($token);
-            if ($token === '' || strlen($token) < 2) {
+            if ($token === '') {
+                continue;
+            }
+            if (strlen($token) < 2 && ! preg_match('/^\d$/u', $token)) {
                 continue;
             }
             if (in_array($token, self::STOPWORDS, true)) {
@@ -185,33 +238,33 @@ class AssistantInventorySearchService
 
     /**
      * @param  Collection<int, Vehicle>  $vehicles
+     * @return array{text: string, catalog_cards: list<array<string, mixed>>}
      */
-    private function formatFoundReply(Collection $vehicles, string $dealershipName, bool $atSelectedDealership): string
+    private function formatFoundReply(Collection $vehicles, string $dealershipName, bool $atSelectedDealership): array
     {
         $count = $vehicles->count();
         $intro = $atSelectedDealership
-            ? "Encontré {$count} ".($count === 1 ? 'opción' : 'opciones')." en inventario en {$dealershipName}:"
+            ? "Encontré {$count} ".($count === 1 ? 'opción' : 'opciones')." en inventario en {$dealershipName}. Desliza para ver:"
             : "No hay coincidencias en {$dealershipName}, pero encontré {$count} "
-                .($count === 1 ? 'opción' : 'opciones').' en otras sucursales de Grupo VECSA:';
+                .($count === 1 ? 'opción' : 'opciones').' en otras sucursales. Desliza para ver:';
 
-        $lines = [$intro, ''];
-
-        foreach ($vehicles as $index => $vehicle) {
-            $lines[] = ($index + 1).'. '.$this->vehicleLabel($vehicle);
-            $lines[] = '   '.$this->vehicleDetails($vehicle);
-            $lines[] = '   Ver detalle: /compra-tu-auto/detail/'.$vehicle->uuid;
-            $lines[] = '';
-        }
-
-        $lines[] = '¿Te gustaría más información de alguna unidad o comparar opciones?';
-
-        return trim(implode("\n", $lines));
+        return [
+            'text' => $intro."\n\n¿Te gustaría más información de alguna unidad o comparar opciones?",
+            'catalog_cards' => $this->catalogPresenter->vehicleCards($vehicles),
+        ];
     }
 
-    private function formatNoResultsReply(string $dealershipName, string $keyword): string
+    private function formatNoResultsReply(string $dealershipName, string $keyword, ?int $dealershipId): string
     {
-        return 'No encontré vehículos con «'.$keyword.'» disponibles en el inventario publicado '
-            ."de {$dealershipName} en este momento.\n\n"
+        $base = 'No encontré vehículos con «'.$keyword.'» disponibles en el inventario publicado '
+            ."de {$dealershipName} en este momento.";
+
+        if ($dealershipId === null || ! $this->advisorAvailability->hasAvailableAdvisor($dealershipId)) {
+            return $base."\n\n"
+                .'Puedes seguir consultando con el asistente: indica marca, año o presupuesto y revisamos otras opciones.';
+        }
+
+        return $base."\n\n"
             .self::SALES_ADVISOR_OFFER_MARKER.' te ayude a revisar llegadas, reservas u opciones en otras sucursales? '
             .'Responde sí o cuéntame marca, año y presupuesto aproximado.';
     }
@@ -266,6 +319,16 @@ class AssistantInventorySearchService
         }
 
         return $bits !== [] ? implode(' · ', $bits) : 'Consulta disponibilidad con un asesor';
+    }
+
+    public function isMotosTopic(?string $pageUrl): bool
+    {
+        return $pageUrl !== null && (bool) preg_match('#/motorrad(?:/|$)#i', $pageUrl);
+    }
+
+    public function isAutosTopic(?string $pageUrl): bool
+    {
+        return $pageUrl !== null && (bool) preg_match('#/compra-tu-auto(?:/|$)#i', $pageUrl);
     }
 
     private function isAffirmative(string $text): bool

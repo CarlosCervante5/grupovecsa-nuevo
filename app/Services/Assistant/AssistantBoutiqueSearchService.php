@@ -9,6 +9,11 @@ use Illuminate\Support\Collection;
 
 class AssistantBoutiqueSearchService
 {
+    public function __construct(
+        private readonly AssistantAdvisorAvailabilityService $advisorAvailability,
+        private readonly AssistantCatalogPresenter $catalogPresenter
+    ) {}
+
     public const PRODUCT_BRAND_PROMPT_MARKER = '¿Qué producto y marca estás buscando';
 
     public const BOUTIQUE_ADVISOR_OFFER_MARKER = '¿Te gustaría que un asesor de la boutique';
@@ -39,28 +44,33 @@ class AssistantBoutiqueSearchService
     }
 
     /**
-     * Respuesta boutique (pregunta producto/marca, catálogo o sin resultados); null si no aplica.
+     * @return array{text: string, catalog_cards: list<array<string, mixed>>}|null
      */
     public function tryBuildReply(
         AssistantConversation $conversation,
         string $userText,
         ?string $pageUrl
-    ): ?string {
+    ): ?array {
         if (! $this->isBoutiqueSection($pageUrl)) {
             return null;
         }
 
-        if ($this->shouldAskProductAndBrand($conversation, $userText)) {
-            return $this->productBrandPrompt();
+        $terms = $this->extractSearchTerms($userText);
+
+        if ($this->shouldAskProductAndBrand($conversation, $userText, $terms)) {
+            return ['text' => $this->productBrandPrompt(), 'catalog_cards' => []];
         }
 
-        $terms = $this->extractSearchTerms($userText);
         if ($terms === '') {
-            return $this->productBrandPrompt();
+            return ['text' => $this->productBrandPrompt(), 'catalog_cards' => []];
         }
 
         $dealershipId = $conversation->dealership_id ? (int) $conversation->dealership_id : null;
         $products = $this->search($terms, $dealershipId);
+
+        if ($products->isEmpty() && $dealershipId !== null) {
+            $products = $this->search($terms, null);
+        }
 
         if ($products->isNotEmpty()) {
             $conversation->loadMissing('dealership');
@@ -69,7 +79,10 @@ class AssistantBoutiqueSearchService
             return $this->formatFoundReply($products, $dealershipName);
         }
 
-        return $this->formatNoResultsReply($terms);
+        return [
+            'text' => $this->formatNoResultsReply($terms, $dealershipId),
+            'catalog_cards' => [],
+        ];
     }
 
     public function userAcceptsBoutiqueAdvisor(AssistantConversation $conversation, string $userText): bool
@@ -95,8 +108,15 @@ class AssistantBoutiqueSearchService
     {
         $lower = mb_strtolower(trim($userText));
         $signals = [
-            'asesor', 'hablar con alguien', 'persona real', 'ayuda humana', 'vendedor',
-            'atención personal', 'atencion personal',
+            'asesor de boutique',
+            'asesor boutique',
+            'hablar con alguien',
+            'persona real',
+            'ayuda humana',
+            'atención personal',
+            'atencion personal',
+            'hablar con un asesor',
+            'hablar con asesor',
         ];
 
         foreach ($signals as $signal) {
@@ -105,17 +125,20 @@ class AssistantBoutiqueSearchService
             }
         }
 
-        return false;
+        return (bool) preg_match('/\basesor\b/u', $lower)
+            && ! str_contains($lower, 'asesoramiento');
     }
 
-    private function shouldAskProductAndBrand(AssistantConversation $conversation, string $userText): bool
-    {
+    private function shouldAskProductAndBrand(
+        AssistantConversation $conversation,
+        string $userText,
+        string $terms = ''
+    ): bool {
         $trimmed = trim($userText);
         if ($trimmed === '' || $this->isGreeting($trimmed)) {
             return true;
         }
 
-        $terms = $this->extractSearchTerms($userText);
         if ($terms !== '') {
             return false;
         }
@@ -145,12 +168,18 @@ class AssistantBoutiqueSearchService
         $parts = array_values(array_filter($parts, fn (string $p) => strlen($p) >= 2));
 
         $query = BoutiqueProduct::query()
-            ->with(['category', 'dealership'])
-            ->where('active', true)
-            ->whereHas('images', fn (Builder $q) => $q->where('status', 'uploaded'));
+            ->with([
+                'category',
+                'dealership',
+                'images' => fn ($q) => $q->where('status', 'uploaded')->orderBy('sort_id'),
+            ])
+            ->where('active', true);
 
         if ($dealershipId !== null) {
-            $query->where('dealership_id', $dealershipId);
+            $query->where(function (Builder $q) use ($dealershipId) {
+                $q->where('dealership_id', $dealershipId)
+                    ->orWhereNull('dealership_id');
+            });
         }
 
         $query->where(function (Builder $outer) use ($parts, $terms) {
@@ -209,42 +238,30 @@ class AssistantBoutiqueSearchService
 
     /**
      * @param  Collection<int, BoutiqueProduct>  $products
+     * @return array{text: string, catalog_cards: list<array<string, mixed>>}
      */
-    private function formatFoundReply(Collection $products, string $dealershipName): string
+    private function formatFoundReply(Collection $products, string $dealershipName): array
     {
         $count = $products->count();
-        $lines = [
-            "Encontré {$count} ".($count === 1 ? 'producto' : 'productos')." en la Boutique ({$dealershipName}):",
-            '',
+
+        return [
+            'text' => "Encontré {$count} ".($count === 1 ? 'producto' : 'productos')
+                ." en la Boutique ({$dealershipName}). Desliza para ver:\n\n"
+                .'¿Quieres detalles de alguno o buscar otra marca o producto?',
+            'catalog_cards' => $this->catalogPresenter->boutiqueProductCards($products),
         ];
-
-        foreach ($products as $index => $product) {
-            $lines[] = ($index + 1).'. '.$product->name;
-            $details = [];
-            if ($product->category?->name) {
-                $details[] = 'Categoría/marca: '.$product->category->name;
-            }
-            if ($product->price) {
-                $details[] = 'Precio $'.number_format((float) $product->price, 0, '.', ',');
-            }
-            if ((int) $product->stock > 0) {
-                $details[] = 'Stock: '.$product->stock;
-            }
-            if ($details !== []) {
-                $lines[] = '   '.implode(' · ', $details);
-            }
-            $lines[] = '   Ver: /boutique/product/'.$product->uuid;
-            $lines[] = '';
-        }
-
-        $lines[] = '¿Quieres detalles de alguno o buscar otra marca o producto?';
-
-        return trim(implode("\n", $lines));
     }
 
-    private function formatNoResultsReply(string $terms): string
+    private function formatNoResultsReply(string $terms, ?int $dealershipId): string
     {
-        return 'No encontré productos con «'.$terms.'» en la Boutique en este momento.'."\n\n"
+        $base = 'No encontré productos con «'.$terms.'» en la Boutique en este momento.';
+
+        if ($dealershipId === null || ! $this->advisorAvailability->hasAvailableAdvisor($dealershipId)) {
+            return $base."\n\n"
+                .'Puedes indicar otra marca o producto y seguimos buscando en el catálogo.';
+        }
+
+        return $base."\n\n"
             .self::BOUTIQUE_ADVISOR_OFFER_MARKER.' te ayude a ubicarlo o avisarte cuando haya existencia? '
             .'Responde sí o indica otra marca o producto.';
     }
