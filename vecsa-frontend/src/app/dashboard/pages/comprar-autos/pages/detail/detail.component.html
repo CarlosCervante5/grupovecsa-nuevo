@@ -331,7 +331,7 @@
                                                                         alt="Icon Location Vehicle" />
                                                                     <span class="detail-text">Ubicación</span>
                                                                     <span
-                                                                        class="detail-content fw-bold">{{ (vehicle.dealership.location | titlecase) }}</span>
+                                                                        class="detail-content fw-bold">{{ vehicle.dealership?.location ? (vehicle.dealership.location | titlecase) : '—' }}</span>
                                                                 </div>
                                                             </div>
                                                 
