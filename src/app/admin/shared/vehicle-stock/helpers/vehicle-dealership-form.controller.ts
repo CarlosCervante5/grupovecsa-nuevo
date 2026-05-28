@@ -4,9 +4,10 @@ import { Dealership, DealerShipResponse } from '@interfaces/admin.interfaces';
 import { AdminService } from '@services/admin.service';
 import { reload } from '@helpers/session.helper';
 import {
-  parseDealershipNamesFromDetail,
+  extractUserDealershipAssignment,
   readSignedInUserEmail,
   readSignedInUserUuid,
+  resolveAssignedDealerships,
   vehicleDealershipFallbackNamesForEmail,
   vehicleDealershipFormModeForEmail,
   vehicleDealershipNameForUserEmail,
@@ -70,13 +71,13 @@ export class VehicleDealershipFormController {
   ): void {
     const userUuid = readSignedInUserUuid();
 
-    const resolveFromCatalog = (
-      all: Dealership[],
+    const finish = (
+      catalog: Dealership[],
       assignedIds: number[],
       assignedNames: string[],
     ): void => {
-      const assigned = this.filterUserAssignedDealerships(
-        all,
+      const assigned = resolveAssignedDealerships(
+        catalog,
         assignedIds,
         assignedNames,
         fallbackNames,
@@ -91,32 +92,22 @@ export class VehicleDealershipFormController {
     };
 
     if (!userUuid) {
-      this.loadDealershipsAndApply(
-        (data) => resolveFromCatalog(data, [], []),
-        () => this.applyDealershipUiFromAssignments(email, preferredMode, [], fallbackNames, options),
-      );
+      this.loadDealershipCatalog((catalog) => finish(catalog, [], []));
       return;
     }
 
     this.dealershipsLoading = true;
     this.adminService.detailUser(userUuid).subscribe({
       next: (detail) => {
-        const assignedIds = detail.data?.dealership_ids ?? [];
-        const assignedNames = parseDealershipNamesFromDetail(
-          detail.data?.dealership_names ?? null,
-        );
-
-        this.loadDealershipsAndApply(
-          (data) => resolveFromCatalog(data, assignedIds, assignedNames),
-          () => this.applyDealershipUiFromAssignments(email, preferredMode, [], fallbackNames, options),
+        const { ids, names } = extractUserDealershipAssignment(detail.data);
+        this.loadDealershipCatalog(
+          (catalog) => finish(catalog, ids, names),
+          () => finish([], ids, names),
         );
       },
       error: () => {
         this.dealershipsLoading = false;
-        this.loadDealershipsAndApply(
-          (data) => resolveFromCatalog(data, [], []),
-          () => this.applyDealershipUiFromAssignments(email, preferredMode, [], fallbackNames, options),
-        );
+        this.loadDealershipCatalog((catalog) => finish(catalog, [], []));
       },
     });
   }
@@ -191,45 +182,7 @@ export class VehicleDealershipFormController {
     }));
   }
 
-  private filterUserAssignedDealerships(
-    all: Dealership[],
-    assignedIds: number[],
-    assignedNames: string[],
-    fallbackNames: readonly string[],
-  ): Dealership[] {
-    if (assignedIds.length > 0) {
-      const idSet = new Set(assignedIds.map((id) => Number(id)));
-      const byId = all.filter((d) => d.id != null && idSet.has(Number(d.id)));
-      if (byId.length > 0) {
-        return this.sortDealershipsByName(byId);
-      }
-    }
-
-    if (assignedNames.length > 0) {
-      const nameSet = new Set(assignedNames);
-      const byName = all.filter((d) => nameSet.has(d.name));
-      if (byName.length > 0) {
-        return this.sortDealershipsByName(byName);
-      }
-    }
-
-    const hasAssignmentFromApi = assignedIds.length > 0 || assignedNames.length > 0;
-    if (!hasAssignmentFromApi && fallbackNames.length > 0) {
-      const fallbackSet = new Set<string>(fallbackNames);
-      const fromFallback = all.filter((d) => fallbackSet.has(d.name));
-      if (fromFallback.length > 0) {
-        return this.sortDealershipsByName(fromFallback);
-      }
-    }
-
-    return [];
-  }
-
-  private sortDealershipsByName(dealerships: Dealership[]): Dealership[] {
-    return [...dealerships].sort((a, b) => a.name.localeCompare(b.name, 'es'));
-  }
-
-  private loadDealershipsAndApply(
+  private loadDealershipCatalog(
     onSuccess: (dealerships: Dealership[]) => void,
     onErrorFallback?: () => void,
   ): void {
@@ -237,7 +190,8 @@ export class VehicleDealershipFormController {
     this.adminService.getDealerships().subscribe({
       next: (response: DealerShipResponse) => {
         this.dealershipsLoading = false;
-        onSuccess(response.data ?? []);
+        const catalog = Array.isArray(response.data) ? response.data : [];
+        onSuccess(catalog);
       },
       error: (error) => {
         this.dealershipsLoading = false;

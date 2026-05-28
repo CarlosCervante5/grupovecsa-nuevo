@@ -1,3 +1,5 @@
+import { Dealership } from '@interfaces/admin.interfaces';
+
 /** Nombres de sucursal en BD (literales). */
 export const VEHICLE_DEALERSHIP_VECSA_HIDALGO = 'Vecsa Hidalgo';
 export const VEHICLE_DEALERSHIP_BMW_HUB_SERDAN = 'Bmw Hub Serdán';
@@ -97,19 +99,135 @@ export function parseDealershipNamesFromDetail(
     return [];
   }
   return dealershipNames
-    .split(',')
+    .split(/[,;]/)
     .map((part) => part.trim())
     .filter(Boolean);
 }
 
+export function normalizeDealershipKey(name: string): string {
+  return name
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
+
+/** Nombre literal de BD si coincide; si no, el de la API. */
+export function canonicalDealershipName(name: string): string {
+  const key = normalizeDealershipKey(name);
+  for (const canonical of VEHICLE_MAIN_DEALERSHIP_NAMES) {
+    if (normalizeDealershipKey(canonical) === key) {
+      return canonical;
+    }
+  }
+  return name.trim();
+}
+
+export function extractUserDealershipAssignment(detail: unknown): {
+  ids: number[];
+  names: string[];
+} {
+  if (!detail || typeof detail !== 'object') {
+    return { ids: [], names: [] };
+  }
+  const row = detail as Record<string, unknown>;
+  const rawIds = row['dealership_ids'];
+  const rawNames = row['dealership_names'];
+
+  const ids = Array.isArray(rawIds)
+    ? rawIds
+        .map((id) => Number(id))
+        .filter((id) => !Number.isNaN(id) && id > 0)
+    : [];
+
+  let names: string[] = [];
+  if (typeof rawNames === 'string') {
+    names = parseDealershipNamesFromDetail(rawNames);
+  } else if (Array.isArray(rawNames)) {
+    names = rawNames.map((n) => String(n).trim()).filter(Boolean);
+  }
+
+  return {
+    ids,
+    names: names.map(canonicalDealershipName),
+  };
+}
+
+function sortDealershipsByName(dealerships: Dealership[]): Dealership[] {
+  return [...dealerships].sort((a, b) => a.name.localeCompare(b.name, 'es'));
+}
+
+/**
+ * Cruza catálogo de sucursales con asignación del usuario (admin).
+ * Si hay asignación en API pero no hay match en catálogo, usa los nombres de la API.
+ */
+export function resolveAssignedDealerships(
+  catalog: Dealership[],
+  assignedIds: number[],
+  assignedNames: string[],
+  fallbackNames: readonly string[],
+): Dealership[] {
+  if (assignedIds.length > 0 && catalog.length > 0) {
+    const idSet = new Set(assignedIds.map((id) => Number(id)));
+    const byId = catalog.filter((d) => d.id != null && idSet.has(Number(d.id)));
+    if (byId.length > 0) {
+      return sortDealershipsByName(byId);
+    }
+  }
+
+  const apiNames = assignedNames.map(canonicalDealershipName);
+  if (apiNames.length > 0 && catalog.length > 0) {
+    const exact = catalog.filter((d) => apiNames.includes(d.name));
+    if (exact.length > 0) {
+      return sortDealershipsByName(exact);
+    }
+
+    const keySet = new Set(apiNames.map(normalizeDealershipKey));
+    const byNormalized = catalog.filter((d) => keySet.has(normalizeDealershipKey(d.name)));
+    if (byNormalized.length > 0) {
+      return sortDealershipsByName(byNormalized);
+    }
+  }
+
+  const hasApiAssignment = assignedIds.length > 0 || apiNames.length > 0;
+  if (hasApiAssignment && apiNames.length > 0) {
+    const resolved = apiNames.map((name) => {
+      const fromCatalog =
+        catalog.find((d) => normalizeDealershipKey(d.name) === normalizeDealershipKey(name)) ??
+        catalog.find((d) => d.name === name);
+      if (fromCatalog) {
+        return fromCatalog;
+      }
+      return {
+        name,
+        location: vehicleLocationFallbackForDealershipName(name),
+        description: null,
+        created_at: new Date(),
+      };
+    });
+    return sortDealershipsByName(resolved);
+  }
+
+  if (!hasApiAssignment && fallbackNames.length > 0 && catalog.length > 0) {
+    const fallbackSet = new Set<string>(fallbackNames);
+    const fromFallback = catalog.filter((d) => fallbackSet.has(d.name));
+    if (fromFallback.length > 0) {
+      return sortDealershipsByName(fromFallback);
+    }
+  }
+
+  return [];
+}
+
 /** Ubicación por defecto si la API no devuelve `location`. */
 export function vehicleLocationFallbackForDealershipName(dealershipName: string): string {
-  if (dealershipName === VEHICLE_DEALERSHIP_VECSA_HIDALGO) {
+  const canonical = canonicalDealershipName(dealershipName);
+  if (canonical === VEHICLE_DEALERSHIP_VECSA_HIDALGO) {
     return 'Hidalgo';
   }
   if (
-    dealershipName === VEHICLE_DEALERSHIP_BMW_HUB_SERDAN ||
-    dealershipName === VEHICLE_DEALERSHIP_VECSA_ANGELOPOLIS
+    canonical === VEHICLE_DEALERSHIP_BMW_HUB_SERDAN ||
+    canonical === VEHICLE_DEALERSHIP_VECSA_ANGELOPOLIS
   ) {
     return 'Puebla';
   }
