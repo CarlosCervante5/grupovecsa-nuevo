@@ -24,7 +24,6 @@ interface ChatDealership {
   name: string;
   location?: string | null;
   state?: string | null;
-  advisors_available?: boolean;
 }
 
 type ChatMessageRole = 'user' | 'assistant' | 'agent';
@@ -118,7 +117,7 @@ export class ChatAssistantComponent implements OnInit, OnDestroy {
   showIntentPicker = true;
   showDealershipPicker = false;
   dealershipPickerHint =
-    'Elige la sucursal con la que quieres continuar.';
+    'Elige la sucursal con asesores en línea para tu consulta.';
 
   selectedIntent: ChatIntent | null = null;
   dealerships: ChatDealership[] = [];
@@ -202,13 +201,6 @@ export class ChatAssistantComponent implements OnInit, OnDestroy {
     }
   }
 
-  dealershipAdvisorHint(d: ChatDealership): string | null {
-    if (d.advisors_available === false) {
-      return 'Sin asesor en línea (solo asistente virtual)';
-    }
-    return null;
-  }
-
   selectIntent(intent: ChatIntent): void {
     if (this.selectedIntent !== intent) {
       this.resetConversationSession();
@@ -218,7 +210,7 @@ export class ChatAssistantComponent implements OnInit, OnDestroy {
     this.showIntentPicker = false;
     this.showDealershipPicker = true;
     this.dealershipPickerHint =
-      'Elige la sucursal disponible para tu consulta.';
+      'Solo se muestran sucursales con asesores en línea.';
     this.ensureDealershipsLoaded(true);
     setTimeout(() => this.scrollToBottom(), 50);
   }
@@ -360,9 +352,7 @@ export class ChatAssistantComponent implements OnInit, OnDestroy {
     this.dealershipPickerHint =
       'Selecciona la sucursal con la que deseas contactar.';
     if (res.dealerships?.length) {
-      this.dealerships = res.dealerships.filter(
-        (d): d is ChatDealership => !!d?.id && !!d?.name
-      );
+      this.dealerships = this.filterDealershipsWithAdvisors(res.dealerships);
     } else {
       this.ensureDealershipsLoaded();
     }
@@ -383,8 +373,8 @@ export class ChatAssistantComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: (res) => {
-          this.dealerships = (res.dealerships ?? []).filter(
-            (d): d is ChatDealership => !!d?.id && !!d?.name
+          this.dealerships = this.filterDealershipsWithAdvisors(
+            res.dealerships ?? []
           );
           this.loadingDealerships = false;
         },
@@ -392,6 +382,15 @@ export class ChatAssistantComponent implements OnInit, OnDestroy {
           this.loadingDealerships = false;
         },
       });
+  }
+
+  private filterDealershipsWithAdvisors(
+    list: ChatDealership[] | undefined
+  ): ChatDealership[] {
+    return (list ?? []).filter(
+      (d): d is ChatDealership =>
+        !!d?.id && !!d?.name && d.advisors_available !== false
+    );
   }
 
   private applyOnboardingStep(): void {

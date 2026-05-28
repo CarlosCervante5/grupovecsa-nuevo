@@ -59,7 +59,7 @@
     <div class="chat-intent-step" *ngIf="showIntentPicker">
       <div class="chat-welcome-icon">👋</div>
       <p class="chat-intent-title">¿Qué te gustaría consultar?</p>
-      <p class="chat-intent-hint">Primero elige el tipo de ayuda; después verás las sucursales disponibles.</p>
+      <p class="chat-intent-hint">Primero elige el tipo de ayuda; después verás las sucursales con asesores en línea.</p>
       <div class="chat-intent-list">
         <button
           type="button"
@@ -85,19 +85,15 @@
         <button
           type="button"
           class="chat-dealership-btn"
-          [class.no-advisors]="d.advisors_available === false"
           *ngFor="let d of dealerships"
           (click)="selectDealership(d)"
         >
           <span class="chat-dealership-name">{{ d.name }}</span>
           <span class="chat-dealership-loc" *ngIf="d.location">{{ d.location }}</span>
           <span class="chat-dealership-loc" *ngIf="!d.location && d.state">{{ d.state }}</span>
-          <span class="chat-dealership-advisor-hint" *ngIf="dealershipAdvisorHint(d)">
-            {{ dealershipAdvisorHint(d) }}
-          </span>
         </button>
         <p class="chat-dealership-empty" *ngIf="dealerships.length === 0">
-          No hay sucursales disponibles. Intenta de nuevo en unos minutos.
+          En este momento ninguna sucursal tiene asesores en línea. Intenta de nuevo en unos minutos.
         </p>
       </div>
     </div>
