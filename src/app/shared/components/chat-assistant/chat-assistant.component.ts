@@ -13,11 +13,33 @@ interface ChatDealership {
   state?: string | null;
 }
 
+type ChatMessageRole = 'user' | 'assistant' | 'agent';
+
+interface ChatMessage {
+  id?: number;
+  role: ChatMessageRole;
+  text: string;
+}
+
+interface PollMessageRow {
+  id: number;
+  role: string;
+  content: string;
+  created_at?: string;
+}
+
+interface PollMessagesResponse {
+  messages?: PollMessageRow[];
+  human_handoff?: boolean;
+  conversation_uuid?: string;
+}
+
 interface AssistantChatResponse {
   reply?: string;
   conversation_uuid?: string;
   needs_dealership?: boolean;
   dealerships?: ChatDealership[];
+  human_handoff?: boolean;
 }
 
 @Component({
