@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { DevCrudService } from '../../developer/services/dev-crud.service';
 import { adminRouteSegmentForRole } from 'src/app/admin/utils/admin-route.util';
 
@@ -32,12 +33,20 @@ export class BenchmarkComponent implements OnInit {
   /** true si en el backend existe BENCHMARK_REPORT_ADS_URL (proxy al Node reportADS). */
   scraperProxyConfigured = false;
 
+  /** Nombre del último PDF generado (p. ej. reporte-2026-05-28T12-00-00.pdf). */
+  lastPdfReport: string | null = null;
+  pdfDownloading = false;
+
   get totalAds(): number {
     if (!this.scanResults?.summary) return 0;
     return this.scanResults.summary.reduce((s: number, r: any) => s + (r.adsCount || 0), 0);
   }
 
-  constructor(private router: Router, private crud: DevCrudService) {}
+  constructor(
+    private router: Router,
+    private crud: DevCrudService,
+    private snack: MatSnackBar
+  ) {}
 
   ngOnInit(): void {
     this.loadBenchmarkOptions();
@@ -140,6 +149,18 @@ export class BenchmarkComponent implements OnInit {
       next: (res: any) => {
         this.scanResults = res;
         this.scanning = false;
+        const pdfPath = res?.files?.pdf;
+        this.lastPdfReport =
+          typeof pdfPath === 'string' && pdfPath.length > 0
+            ? pdfPath.split('/').pop() ?? null
+            : null;
+        if (!this.lastPdfReport) {
+          this.snack.open(
+            'Escaneo listo, pero no se generó el PDF. Revise los logs del backend o vuelva a intentar.',
+            'OK',
+            { duration: 5000 }
+          );
+        }
         this.crud.fetch('benchmark/history', 'GET', {}).subscribe({
           next: (hist: any) => {
             const list = Array.isArray(hist) ? hist : [];
@@ -219,6 +240,62 @@ export class BenchmarkComponent implements OnInit {
       },
       error: () => { this.loading = false; },
     });
+  }
+
+  downloadPdfReport(filename: string): void {
+    if (!filename || this.pdfDownloading) {
+      return;
+    }
+    this.pdfDownloading = true;
+    this.crud.downloadBenchmarkReport(filename).subscribe({
+      next: (blob) => {
+        this.crud.triggerFileDownload(blob, filename);
+        this.pdfDownloading = false;
+      },
+      error: () => {
+        this.pdfDownloading = false;
+        this.snack.open('No se pudo descargar el reporte PDF.', 'OK', { duration: 4000 });
+      },
+    });
+  }
+
+  exportPdfFromHistoryScan(scanFile: string, event?: Event): void {
+    event?.stopPropagation();
+    if (this.pdfDownloading) {
+      return;
+    }
+    this.pdfDownloading = true;
+    this.crud.exportBenchmarkPdfFromScan(scanFile).subscribe({
+      next: (res) => {
+        const pdf = res?.data?.pdf;
+        this.pdfDownloading = false;
+        if (pdf) {
+          this.lastPdfReport = pdf;
+          this.downloadPdfReport(pdf);
+          this.snack.open('PDF generado en formato horizontal.', 'OK', { duration: 3000 });
+        } else {
+          this.snack.open('No se recibió el nombre del PDF.', 'OK', { duration: 4000 });
+        }
+      },
+      error: () => {
+        this.pdfDownloading = false;
+        this.snack.open('Error al generar el PDF desde el historial.', 'OK', { duration: 4000 });
+      },
+    });
+  }
+
+  reportIcon(filename: string): string {
+    if (filename.endsWith('.pdf')) {
+      return 'picture_as_pdf';
+    }
+    if (filename.endsWith('.csv')) {
+      return 'table_chart';
+    }
+    return 'article';
+  }
+
+  openReport(filename: string): void {
+    this.downloadPdfReport(filename);
   }
 
   /** Anuncios para tarjetas: soporta JSON guardado solo con `data` (Meta API) o con `ads` (scraper). */

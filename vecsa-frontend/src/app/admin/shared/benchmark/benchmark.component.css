@@ -165,8 +165,32 @@
 .bench-list-date { font-weight: 500; color: #1e293b; font-size: 13px; }
 .bench-list-file { color: #94a3b8; font-size: 12px; flex: 1; }
 .bench-list-arrow { color: #cbd5e1; margin-left: auto; }
-.bench-list-link { text-decoration: none; color: #1e293b; font-size: 13px; }
+.bench-list-link { text-decoration: none; color: #1e293b; font-size: 13px; border: none; width: 100%; text-align: left; font-family: inherit; }
 .bench-list-link .bench-list-arrow { color: #1c69d4; }
+
+.bench-pdf-actions { margin-bottom: 16px; }
+.bench-list-item--history { padding: 8px 8px 8px 12px; gap: 8px; cursor: default; }
+.bench-list-item--history:hover { border-color: #e2e8f0; background: #fff; }
+.bench-list-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  padding: 4px 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+}
+.bench-list-main:hover .bench-list-arrow { color: #1c69d4; }
+.bench-pdf-mini {
+  flex-shrink: 0;
+  padding: 8px 10px !important;
+  min-width: auto;
+}
+.bench-pdf-mini .material-icons { font-size: 20px; }
 
 /* Token Meta */
 .bench-meta-panel {

@@ -788,6 +788,8 @@ Route::prefix('benchmark')->middleware(['bandwidth_usage', 'auth:sanctum', 'perm
     Route::post('/competitors', [BenchmarkAdsController::class, 'addCompetitor']);
     Route::delete('/competitors/{name}', [BenchmarkAdsController::class, 'removeCompetitor']);
     Route::get('/reports', [BenchmarkAdsController::class, 'reports']);
+    Route::get('/reports/{file}', [BenchmarkAdsController::class, 'downloadReport']);
+    Route::post('/reports/export-pdf', [BenchmarkAdsController::class, 'exportPdfFromScan']);
 });
 
 // Fin Benchmark ADS
