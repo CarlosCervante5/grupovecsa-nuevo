@@ -34,8 +34,6 @@ export class AdminLegalEditComponent implements OnInit, OnDestroy {
     license_key: 'gpl',
   };
 
-  readonly tinymceScriptSrc = '/tinymce/tinymce.min.js';
-
   form = this.fb.group({
     title: ['', [Validators.required, Validators.maxLength(255)]],
     meta_description: ['', [Validators.maxLength(500)]],
