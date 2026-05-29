@@ -50,16 +50,19 @@ export class AppComponent implements OnDestroy {
                 const url = navEnd.urlAfterRedirects || navEnd.url;
                 this.isHomeRoute = url === '/' || navEnd.url === '/';
                 this.hideChrome = url.startsWith('/admin/');
-                if (url.startsWith('/auth/iniciar-sesion') || url.startsWith('/auth/login')) {
-                    clearPostLoginLoading();
-                    removePostLoginOverlayElement();
-                    this.postLoginLoading = false;
-                } else if (this.postLoginLoading && this.isPostLoginDestination(url)) {
+                if (this.postLoginLoading && this.isPostLoginDestination(url)) {
                     clearPostLoginLoading();
                     removePostLoginOverlayElement();
                     setTimeout(() => {
                         this.postLoginLoading = false;
-                    }, 120);
+                    }, 200);
+                } else if (
+                    (url.startsWith('/auth/iniciar-sesion') || url.startsWith('/auth/login'))
+                    && !localStorage.getItem('user_token')
+                ) {
+                    clearPostLoginLoading();
+                    removePostLoginOverlayElement();
+                    this.postLoginLoading = false;
                 }
                 if (localStorage.getItem('user_token') && url.startsWith('/admin/')) {
                     this._authService.refreshPermissionsInStorage().subscribe({ error: () => {} });

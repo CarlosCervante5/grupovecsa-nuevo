@@ -4,7 +4,7 @@
   </div>
 </ng-container>
 
-<mat-sidenav-container fullscreen >
+<mat-sidenav-container fullscreen [class.app-shell--post-login]="postLoginLoading">
     <span id="moveTop"></span>
     <div class="content" style="min-height: 85%;">
         <app-new-nav *ngIf="!hideChrome"></app-new-nav>

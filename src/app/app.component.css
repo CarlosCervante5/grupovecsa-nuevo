@@ -11,6 +11,11 @@
   background: #fff;
 }
 
+.app-shell--post-login {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .promocion{
     color: #008bcc !important;
 }

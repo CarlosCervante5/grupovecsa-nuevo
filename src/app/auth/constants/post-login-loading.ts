@@ -24,6 +24,19 @@ export function isPostLoginLoading(): boolean {
   }
 }
 
+export function showPostLoginOverlayElement(): void {
+  const el = document.getElementById('vecsa-post-login-overlay');
+  if (el) {
+    el.hidden = false;
+  }
+}
+
 export function removePostLoginOverlayElement(): void {
   document.getElementById('vecsa-post-login-overlay')?.remove();
+}
+
+/** Marca sesión en tránsito y muestra cubo hasta recarga/navegación al panel. */
+export function beginPostLoginTransition(): void {
+  markPostLoginLoading();
+  showPostLoginOverlayElement();
 }
