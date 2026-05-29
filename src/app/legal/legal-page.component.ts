@@ -5,6 +5,16 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Meta, Title } from '@angular/platform-browser';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { LegalAdminService } from '@services/legal-admin.service';
+
+/** Archivo en assets/legal/ si la API no está disponible. */
+const LEGAL_ASSET_BY_SLUG: Record<string, string> = {
+  privacidad: 'aviso-privacidad',
+  condiciones: 'condiciones-uso',
+  devoluciones: 'politicas-devolucion',
+  lealtad: 'lealtad',
+  cookies: 'uso-cookies',
+};
 
 @Component({
   selector: 'app-legal-page',
@@ -15,6 +25,7 @@ import { Subscription } from 'rxjs';
 })
 export class LegalPageComponent implements OnInit, OnDestroy {
   private readonly http = inject(HttpClient);
+  private readonly legalAdmin = inject(LegalAdminService);
   private readonly sanitizer = inject(DomSanitizer);
   private readonly route = inject(ActivatedRoute);
   private readonly title = inject(Title);
@@ -28,34 +39,47 @@ export class LegalPageComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const data = this.route.snapshot.data as {
-      legalAsset?: string;
+      legalSlug?: string;
       pageTitle?: string;
       metaDescription?: string;
     };
-    const asset = data.legalAsset ?? 'aviso-privacidad';
-    const pageTitle = data.pageTitle ?? 'Grupo VECSA';
-    const metaDescription = data.metaDescription ?? '';
+    const legalSlug = data.legalSlug ?? 'privacidad';
+    const fallbackTitle = data.pageTitle ?? 'Grupo VECSA';
+    const fallbackMeta = data.metaDescription ?? '';
+    const asset = LEGAL_ASSET_BY_SLUG[legalSlug] ?? legalSlug;
 
-    this.title.setTitle(pageTitle);
-    if (metaDescription) {
-      this.meta.updateTag({ name: 'description', content: metaDescription });
-    }
-
-    const url = `assets/legal/${asset}.html`;
-    this.sub = this.http.get(url, { responseType: 'text' }).subscribe({
-      next: (html) => {
-        this.safeBody = this.sanitizer.bypassSecurityTrustHtml(html);
+    this.sub = this.legalAdmin.getPublic(legalSlug).subscribe({
+      next: (doc) => {
+        this.applyMeta(doc.title || fallbackTitle, doc.meta_description || fallbackMeta);
+        this.safeBody = this.sanitizer.bypassSecurityTrustHtml(doc.body_html ?? '');
         this.loading.set(false);
         this.loadError.set(false);
       },
       error: () => {
-        this.loading.set(false);
-        this.loadError.set(true);
+        this.http.get(`assets/legal/${asset}.html`, { responseType: 'text' }).subscribe({
+          next: (html) => {
+            this.applyMeta(fallbackTitle, fallbackMeta);
+            this.safeBody = this.sanitizer.bypassSecurityTrustHtml(html);
+            this.loading.set(false);
+            this.loadError.set(false);
+          },
+          error: () => {
+            this.loading.set(false);
+            this.loadError.set(true);
+          },
+        });
       },
     });
   }
 
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
+  }
+
+  private applyMeta(pageTitle: string, metaDescription: string): void {
+    this.title.setTitle(pageTitle);
+    if (metaDescription) {
+      this.meta.updateTag({ name: 'description', content: metaDescription });
+    }
   }
 }

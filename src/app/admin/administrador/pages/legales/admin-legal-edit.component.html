@@ -1,0 +1,43 @@
+<div class="legal-edit-page">
+  <div class="page-head">
+    <a mat-button [routerLink]="['/admin/administrator/legales']">
+      <span class="material-icons">arrow_back</span> Legales
+    </a>
+    <h1 class="title">{{ pageLabel }}</h1>
+    <p class="subtitle">URL pública: <a [href]="publicPath" target="_blank" rel="noopener">{{ publicPath }}</a></p>
+  </div>
+
+  @if (loading) {
+    <app-sk-cube></app-sk-cube>
+  } @else if (error) {
+    <p class="error-msg">No se pudo cargar el documento.</p>
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="save()" class="legal-form">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Título</mat-label>
+        <input matInput formControlName="title" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Meta descripción (SEO)</mat-label>
+        <textarea matInput rows="2" formControlName="meta_description"></textarea>
+      </mat-form-field>
+
+      <label class="editor-label">Contenido</label>
+      <editor
+        formControlName="body_html"
+        [init]="editorInit"
+        [scriptSrc]="tinymceScriptSrc"
+      ></editor>
+
+      <mat-checkbox formControlName="is_published" color="primary">Publicado en el sitio</mat-checkbox>
+
+      <div class="actions">
+        <button mat-flat-button color="primary" type="submit" [disabled]="saving || form.invalid">
+          @if (saving) { Guardando… } @else { Guardar }
+        </button>
+        <a mat-stroked-button [href]="publicPath" target="_blank" rel="noopener">Vista previa</a>
+      </div>
+    </form>
+  }
+</div>
