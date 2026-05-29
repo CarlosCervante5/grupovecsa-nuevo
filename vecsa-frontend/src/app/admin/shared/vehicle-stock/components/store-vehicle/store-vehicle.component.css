@@ -81,6 +81,16 @@ select.field-input {
   cursor: pointer;
 }
 
+.field-input--readonly {
+  background: #f1f5f9;
+  color: #475569;
+  cursor: default;
+}
+
+.field-hint--inline {
+  margin: 2px 0 0;
+}
+
 .field-error {
   font-size: 0.75rem;
   color: #dc2626;

@@ -15,7 +15,9 @@ import { ImageAiDialogComponent } from 'src/app/shared/components/image-ai-dialo
 import { ImageOrder } from 'src/app/dashboard/pages/comprar-autos/interfaces/detail/vehicle_data.interface';
 
 import { BrandsResponse, Brand, Line, LinesResponse, Model, Body, ModelsResponse, VersionsResponse, Version, BodiesResponse, VehicleStoreResponse, FullDetailResponse } from '@interfaces/vehicle_data.interface';
-import { GetcampaingResponse } from '@interfaces/admin.interfaces';
+import { Dealership, GetcampaingResponse } from '@interfaces/admin.interfaces';
+import { VehicleDealershipFormMode } from '../../helpers/vehicle-dealership-by-user.helper';
+import { VehicleDealershipFormController } from '../../helpers/vehicle-dealership-form.controller';
 //import { CampaingService } from 'src/app/admin/gestor/services/campaing.service';
 import { AdminService } from '@services/admin.service';
 
@@ -38,6 +40,24 @@ export class StoreVehicleComponent  implements OnInit{
   public button: boolean = false;
   public vehicleSaved = false;
   public listNeedsReload = false;
+
+  readonly dealershipUi: VehicleDealershipFormController;
+
+  get dealershipMode(): VehicleDealershipFormMode {
+    return this.dealershipUi.dealershipMode;
+  }
+
+  get selectableDealerships(): Dealership[] {
+    return this.dealershipUi.selectableDealerships;
+  }
+
+  get dealershipsLoading(): boolean {
+    return this.dealershipUi.dealershipsLoading;
+  }
+
+  get locationFieldReadonly(): boolean {
+    return this.dealershipUi.locationFieldReadonly;
+  }
 
   vehicleImages: ImageOrder[] = [];
   photoFiles: File[] = [];
@@ -82,11 +102,21 @@ export class StoreVehicleComponent  implements OnInit{
     private _imagesService: ImagesService,
     private _dialog: MatDialog,
   ) {
+      this.dealershipUi = new VehicleDealershipFormController(
+        () => this.form,
+        this._campaignService,
+        this._router,
+      );
       this.formInit();
   }
 
   ngOnInit(): void {
     this.InitForm();
+    this.dealershipUi.applyForSignedInUser();
+  }
+
+  onDealershipSelected(event: Event): void {
+    this.dealershipUi.onDealershipSelected(event);
   }
 
   private filters(): void {

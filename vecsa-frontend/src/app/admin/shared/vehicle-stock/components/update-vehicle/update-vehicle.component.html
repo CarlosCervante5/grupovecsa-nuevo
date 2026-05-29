@@ -47,14 +47,74 @@
 
         <div class="field-group">
           <label class="field-label" for="uv-dealership">Sucursal del vehículo *</label>
-          <input id="uv-dealership" type="text" class="field-input" formControlName="dealership_name" placeholder="Sucursal" required />
-          <span class="field-error" *ngIf="dealershipInvalid">Escribe la nueva sucursal del vehículo.</span>
+
+          <input
+            *ngIf="dealershipMode === 'locked'"
+            id="uv-dealership"
+            type="text"
+            class="field-input field-input--readonly"
+            formControlName="dealership_name"
+            readonly
+            required
+          />
+
+          <select
+            *ngIf="dealershipMode === 'select'"
+            id="uv-dealership"
+            class="field-input"
+            formControlName="dealership_name"
+            (change)="onDealershipSelected($event)"
+            [disabled]="dealershipsLoading"
+            required
+          >
+            <option value="" disabled>{{ dealershipsLoading ? 'Cargando sucursales…' : 'Selecciona sucursal' }}</option>
+            <option *ngFor="let dealership of selectableDealerships" [value]="dealership.name">
+              {{ dealership.name }}
+            </option>
+          </select>
+
+          <input
+            *ngIf="dealershipMode === 'manual'"
+            id="uv-dealership"
+            type="text"
+            class="field-input"
+            formControlName="dealership_name"
+            placeholder="Sucursal"
+            required
+          />
+
+          <span class="field-hint field-hint--inline" *ngIf="dealershipMode === 'locked'">
+            Sucursal del vehículo (no editable para tu usuario).
+          </span>
+          <span class="field-error" *ngIf="dealershipInvalid && dealershipMode === 'manual'">
+            Escribe la nueva sucursal del vehículo.
+          </span>
+          <span class="field-error" *ngIf="dealershipInvalid && dealershipMode === 'select'">
+            Selecciona la sucursal del vehículo.
+          </span>
         </div>
 
         <div class="field-group">
           <label class="field-label" for="uv-location">Ubicación del vehículo *</label>
-          <input id="uv-location" type="text" class="field-input" formControlName="location" placeholder="Ubicación" required />
-          <span class="field-error" *ngIf="locationInvalid">Escribe la nueva ubicación del vehículo.</span>
+          <input
+            id="uv-location"
+            type="text"
+            class="field-input"
+            [class.field-input--readonly]="locationFieldReadonly"
+            formControlName="location"
+            [placeholder]="locationFieldReadonly ? 'Se asigna al elegir sucursal' : 'Ubicación'"
+            [readonly]="locationFieldReadonly"
+            required
+          />
+          <span class="field-hint field-hint--inline" *ngIf="dealershipMode === 'select'">
+            Hidalgo o Puebla según la sucursal seleccionada.
+          </span>
+          <span class="field-error" *ngIf="locationInvalid && dealershipMode === 'manual'">
+            Escribe la nueva ubicación del vehículo.
+          </span>
+          <span class="field-error" *ngIf="locationInvalid && locationFieldReadonly">
+            La ubicación se asigna al elegir sucursal.
+          </span>
         </div>
 
         <div class="field-group">
