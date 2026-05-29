@@ -12,6 +12,7 @@ import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { BodyworkPaintFormComponent } from './components/bodywork-paint-form/bodywork-paint-form.component';
 import { NewNavComponent } from 'src/app/shared/versiones-nav/new-nav/new-nav.component';
 import { BenchmarkModule } from '../shared/benchmark/benchmark.module';
+import { SkCubeComponent } from '@components/sk-cube/sk-cube.component';
 
 
 @NgModule({
@@ -28,7 +29,8 @@ import { BenchmarkModule } from '../shared/benchmark/benchmark.module';
     CommonModule,
     FormsModule,
     NewNavComponent,
-    BenchmarkModule
+    BenchmarkModule,
+    SkCubeComponent,
   ]
 })
 export class BodyworkPaintTechnicianModule { }

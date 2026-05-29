@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, ElementRef, ViewChild, OnDestroy } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AdminDashboardService } from '../../../shared/services/admin-dashboard.service';
 import * as echarts from 'echarts';
@@ -11,7 +11,7 @@ import { expandLegacyGestorPermissions, GESTOR_FEATURE_PERMISSIONS } from 'src/a
   styleUrls: ['./dashboard.component.css'],
   standalone: false,
 })
-export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
+export class DashboardComponent implements OnInit, OnDestroy {
   loading = true;
   error = false;
 
@@ -107,10 +107,6 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     return effective.includes(perm);
   }
 
-  ngAfterViewInit(): void {
-    setTimeout(() => this.initCharts(), 400);
-  }
-
   ngOnDestroy(): void {
     window.removeEventListener('resize', this.onResize);
     this.chartInstances.forEach(c => c.dispose());
@@ -129,11 +125,11 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
         } else {
           this.stats.forEach((s) => { s.value = 0; s.loading = false; });
         }
+        this.loading = false;
         if (data?.charts && this.showEventsChart) {
           this.chartsData = data.charts;
           setTimeout(() => this.initCharts(), 100);
         }
-        this.loading = false;
       },
       error: () => {
         this.error = true;

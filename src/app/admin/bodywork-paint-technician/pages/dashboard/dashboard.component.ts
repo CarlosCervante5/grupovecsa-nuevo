@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, ElementRef, ViewChild, OnDestroy } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AdminDashboardService } from '../../../shared/services/admin-dashboard.service';
 import { adminBodyworkPanelBaseFromRouterUrl } from 'src/app/admin/utils/admin-route.util';
@@ -10,7 +10,7 @@ import * as echarts from 'echarts';
   styleUrls: ['./dashboard.component.css'],
   standalone: false,
 })
-export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
+export class DashboardComponent implements OnInit, OnDestroy {
   loading = true;
   error = false;
 
@@ -33,8 +33,6 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit(): void { this.loadMetrics(); }
 
-  ngAfterViewInit(): void { setTimeout(() => this.initCharts(), 300); }
-
   ngOnDestroy(): void {
     this.chartInstances.forEach(c => c.dispose());
     window.removeEventListener('resize', this.onResize);
@@ -52,8 +50,11 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
             this.stats[i].loading = false;
           });
         }
-        if (data?.charts) { this.chartsData = data.charts; this.initCharts(); }
         this.loading = false;
+        if (data?.charts) {
+          this.chartsData = data.charts;
+          setTimeout(() => this.initCharts(), 100);
+        }
       },
       error: () => {
         this.error = true; this.loading = false;

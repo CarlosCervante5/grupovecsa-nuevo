@@ -10,6 +10,7 @@ import { AngularMaterialModule } from 'src/app/angular-material/angular-material
 import { FormsModule } from '@angular/forms';
 import { NewNavComponent } from 'src/app/shared/versiones-nav/new-nav/new-nav.component';
 import { BenchmarkModule } from '../shared/benchmark/benchmark.module';
+import { SkCubeComponent } from '@components/sk-cube/sk-cube.component';
 
 
 @NgModule({
@@ -25,7 +26,8 @@ import { BenchmarkModule } from '../shared/benchmark/benchmark.module';
     AppointmentManagerRoutingModule,
     FormsModule,
     NewNavComponent,
-    BenchmarkModule
+    BenchmarkModule,
+    SkCubeComponent,
   ]
 })
 export class AppointmentManagerModule { }
