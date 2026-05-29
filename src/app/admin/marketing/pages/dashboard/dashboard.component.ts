@@ -12,6 +12,7 @@ import * as echarts from 'echarts';
 export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   loading = true;
   error = false;
+  subtitle = 'Panel de Marketing — Resumen general del sistema';
 
   @ViewChild('vehiclesBrandChart') vehiclesBrandChartEl!: ElementRef;
   private chartInstances: echarts.ECharts[] = [];
@@ -60,6 +61,9 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
         if (data?.charts) {
           this.chartsData = data.charts;
           this.initCharts();
+        }
+        if (data?.scope?.filtered && data.scope.dealership_names?.length) {
+          this.subtitle = `Panel de Marketing — ${data.scope.dealership_names.join(', ')}`;
         }
         this.loading = false;
       },

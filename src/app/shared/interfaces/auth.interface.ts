@@ -22,6 +22,9 @@
             profile?: { name?: string | null; last_name?: string | null } | null;
             /** Rol principal (misma lógica que login); el cliente puede sincronizar `localStorage.role`. */
             role?: string | null;
+            /** Sucursales asignadas al usuario (pivote dealership_user). */
+            dealership_ids?: number[];
+            dealership_names?: string | null;
         };
     }
     
