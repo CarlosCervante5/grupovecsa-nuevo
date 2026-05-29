@@ -19,12 +19,15 @@ use App\Models\User;
 use App\Models\Valuations\VehicleValuation;
 use App\Models\Vehicle;
 use App\Models\VehicleBrand;
+use App\Services\DealershipAccessService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class AdminDashboardController extends Controller
 {
+    public function __construct(protected DealershipAccessService $dealershipAccess) {}
+
     public function metrics(Request $request)
     {
         try {
@@ -32,7 +35,7 @@ class AdminDashboardController extends Controller
 
             $data = match ($role) {
                 'administrator' => $this->administratorMetrics(),
-                'marketing'     => $this->marketingMetrics(),
+                'marketing'     => $this->marketingMetrics($request->user()),
                 'staff'         => $this->staffMetrics(),
                 'gestor'        => $this->gestorMetrics(),
                 'receptionist'  => $this->receptionistMetrics(),
@@ -79,21 +82,64 @@ class AdminDashboardController extends Controller
         return ['stats' => $stats, 'charts' => ['orders_by_month' => $ordersByMonth, 'orders_by_status' => $ordersByStatus]];
     }
 
-    private function marketingMetrics(): array
+    private function marketingMetrics(User $user): array
     {
-        // marketing_campaigns usa page_status (enum), no existe columna status.
-        // vehicles usa page_status (active|inactive|sale|valuing), no status/available.
+        $scopeIds = $this->dealershipAccess->inventoryDealershipIds($user);
+
+        $campaignQuery = MarketingCampaign::query()->active();
+        $this->dealershipAccess->scopeCampaignsForInventoryUser($campaignQuery, $user);
+
+        $promotionQuery = MarketingPromotion::query();
+        $this->dealershipAccess->scopePromotionsForInventoryUser($promotionQuery, $user);
+
+        $eventQuery = MarketingEvent::query();
+        $this->dealershipAccess->scopeEventsForInventoryUser($eventQuery, $user);
+
+        $vehicleQuery = Vehicle::query()->where('page_status', 'active');
+        $this->dealershipAccess->scopeVehiclesForInventoryUser($vehicleQuery, $user);
+
         $stats = [
-            'campaigns'  => MarketingCampaign::count(),
-            'promotions' => MarketingPromotion::count(),
-            'events'     => MarketingEvent::count(),
-            'vehicles'   => Vehicle::where('page_status', 'active')->count(),
+            'campaigns'  => $campaignQuery->count(),
+            'promotions' => $promotionQuery->count(),
+            'events'     => $eventQuery->count(),
+            'vehicles'   => $vehicleQuery->count(),
         ];
 
-        $vehiclesByBrand = VehicleBrand::withCount('vehicles')->get()
-            ->map(fn($b) => ['name' => $b->name, 'count' => $b->vehicles_count])->values()->toArray();
+        $vehiclesByBrand = VehicleBrand::query()
+            ->withCount(['vehicles as vehicles_count' => function ($query) use ($scopeIds) {
+                $query->where('page_status', 'active');
+                if ($scopeIds !== null) {
+                    $query->whereIn('dealership_id', $scopeIds);
+                }
+            }])
+            ->get()
+            ->filter(fn ($brand) => $brand->vehicles_count > 0)
+            ->map(fn ($brand) => ['name' => $brand->name, 'count' => $brand->vehicles_count])
+            ->values()
+            ->toArray();
 
-        return ['stats' => $stats, 'charts' => ['vehicles_by_brand' => $vehiclesByBrand]];
+        return [
+            'stats'  => $stats,
+            'charts' => ['vehicles_by_brand' => $vehiclesByBrand],
+            'scope'  => $this->marketingScopeMeta($user, $scopeIds),
+        ];
+    }
+
+    /**
+     * @param  list<int>|null  $scopeIds
+     */
+    private function marketingScopeMeta(User $user, ?array $scopeIds): array
+    {
+        if ($scopeIds === null) {
+            return ['filtered' => false, 'dealership_names' => []];
+        }
+
+        $dealershipTable = $user->dealerships()->getRelated()->getTable();
+
+        return [
+            'filtered'          => true,
+            'dealership_names'  => $user->dealerships()->pluck($dealershipTable.'.name')->filter()->values()->all(),
+        ];
     }
 
     private function staffMetrics(): array
