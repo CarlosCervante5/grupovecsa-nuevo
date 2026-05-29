@@ -15,6 +15,9 @@
     "prod": "ng build --configuration=production"
   },
   "private": true,
+  "engines": {
+    "node": ">=18.19.1"
+  },
   "dependencies": {
     "@angular-devkit/build-angular": "^19.1.6",
     "@angular/animations": "^19.1.4",
