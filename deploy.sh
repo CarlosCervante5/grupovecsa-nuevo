@@ -20,6 +20,7 @@ php artisan db:seed --class=BoutiqueCategoriesSeeder --force 2>/dev/null || echo
 php artisan db:seed --class=VehicleDataSeeder --force 2>/dev/null || echo "⚠️ VehicleDataSeeder skipped"
 php artisan db:seed --class=VehicleInventorySeeder --force 2>/dev/null || echo "⚠️ VehicleInventorySeeder skipped"
 php artisan db:seed --class=BoutiqueProductsSeeder --force 2>/dev/null || echo "⚠️ BoutiqueProductsSeeder skipped"
+php artisan db:seed --class=LegalesSeeder --force 2>/dev/null || echo "⚠️ LegalesSeeder skipped"
 
 # En Railway las variables (AWS_*, etc.) se inyectan en runtime; config:cache las
 # congela en el release y deja bucket/credenciales vacíos si se añadieron después.

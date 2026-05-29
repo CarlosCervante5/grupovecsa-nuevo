@@ -58,6 +58,8 @@ use App\Http\Controllers\StoreManagement\StorePointsController;
 use App\Http\Controllers\StoreManagement\StoreCouponController;
 use App\Http\Controllers\AdminDashboard\AdminDashboardController;
 use App\Http\Controllers\Settings\SettingsController;
+use App\Http\Controllers\Legal\LegalPublicController;
+use App\Http\Controllers\Legal\LegalAdminController;
 use App\Http\Controllers\Boutique\IncadeaSyncController;
 use App\Http\Controllers\Developer\ApiMonitorController;
 use App\Http\Controllers\Boutique\WcImportController;
@@ -874,6 +876,19 @@ Route::prefix('settings')->middleware(['bandwidth_usage', 'auth:sanctum'])->grou
 });
 
 // Fin Settings
+
+
+// Segmento Legales (contenido editable)
+
+Route::get('/legal/{slug}', [LegalPublicController::class, 'show']);
+
+Route::prefix('admin/legal')->middleware(['bandwidth_usage', 'auth:sanctum', 'role:administrator|developer|admin'])->group(function () {
+    Route::get('/', [LegalAdminController::class, 'index']);
+    Route::get('/{slug}', [LegalAdminController::class, 'show']);
+    Route::put('/{slug}', [LegalAdminController::class, 'update']);
+});
+
+// Fin Legales
 
 
 // Segmento Incadea Sync
