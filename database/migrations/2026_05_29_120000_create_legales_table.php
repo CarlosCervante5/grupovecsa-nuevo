@@ -8,7 +8,8 @@ return new class extends Migration
 {
     public function up(): void
     {
-        $tableName = env('DB_TABLE_PREFIX', '').'legales';
+        $prefix = (string) config('vecsa.db_table_prefix', env('DB_TABLE_PREFIX', ''));
+        $tableName = $prefix.'legales';
 
         if (Schema::hasTable($tableName)) {
             return;
@@ -22,7 +23,8 @@ return new class extends Migration
             $table->longText('body_html');
             $table->string('meta_description', 500)->nullable();
             $table->boolean('is_published')->default(true);
-            $table->foreignId('updated_by')->nullable()->constrained(env('DB_TABLE_PREFIX', '').'users')->nullOnDelete();
+            // Tabla users sin prefijo (convención del proyecto).
+            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
         });
 
@@ -31,6 +33,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists(env('DB_TABLE_PREFIX', '').'legales');
+        $prefix = (string) config('vecsa.db_table_prefix', env('DB_TABLE_PREFIX', ''));
+        Schema::dropIfExists($prefix.'legales');
     }
 };
