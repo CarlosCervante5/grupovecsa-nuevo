@@ -12,7 +12,6 @@ import { AngularMaterialModule } from 'src/app/angular-material/angular-material
 import { SparePartsViewComponent } from './pages/spare-parts-view/spare-parts-view.component';
 import { SparePartsEditComponent } from './components/spare-parts-edit/spare-parts-edit.component';
 import { BenchmarkModule } from '../shared/benchmark/benchmark.module';
-import { SkCubeComponent } from '@components/sk-cube/sk-cube.component';
 
 
 @NgModule({
@@ -31,8 +30,7 @@ import { SkCubeComponent } from '@components/sk-cube/sk-cube.component';
     NewNavComponent,
     ReactiveFormsModule,
     SparePartsRoutingModule,
-    BenchmarkModule,
-    SkCubeComponent,
+    BenchmarkModule
   ]
 })
 export class SparePartsModule { }

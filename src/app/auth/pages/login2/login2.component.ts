@@ -8,6 +8,7 @@ import { AuthService } from '../../services/auth.service';
 import { LoginResponse } from '@interfaces/auth.interface';
 import { BoutiqueCartService } from 'src/app/boutique/services/boutique-cart.service';
 import { adminRouteSegmentForRole } from 'src/app/admin/utils/admin-route.util';
+import { markPostLoginLoading } from '../../constants/post-login-loading';
 
 @Component({
     selector: 'app-login2',
@@ -118,6 +119,7 @@ export class Login2Component implements OnInit {
                 afterCartSync$.pipe(
                     finalize(() => {
                         sessionStorage.removeItem('vecsa_chunk_reload');
+                        markPostLoginLoading();
                         if (safeReturnUrl) {
                             window.location.assign(safeReturnUrl);
                         } else if (loginResponse.data.role === 'client') {

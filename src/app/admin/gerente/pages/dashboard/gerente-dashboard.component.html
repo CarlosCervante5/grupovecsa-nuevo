@@ -1,119 +1,131 @@
-<ng-container *ngIf="loading">
-  <app-sk-cube></app-sk-cube>
-</ng-container>
+<div class="dashboard-container">
+  <h1 class="dashboard-title">Dashboard</h1>
+  <p class="dashboard-subtitle">Panel de operaciones — Gerente</p>
 
-<ng-container *ngIf="!loading">
-  <div class="dashboard-container">
-    <h1 class="dashboard-title">Dashboard</h1>
-    <p class="dashboard-subtitle">Panel de operaciones — Gerente</p>
+  <!-- Loading Spinner -->
+  <div class="loading-overlay" *ngIf="loading">
+    <div class="spinner"></div>
+    <p class="loading-text">Cargando métricas...</p>
+  </div>
 
-    <div class="error-banner" *ngIf="error">
-      <span class="material-icons">error_outline</span>
-      <span>Error al cargar las métricas.</span>
-      <button class="retry-btn" (click)="retryLoad()">Reintentar</button>
-    </div>
+  <!-- Error Message -->
+  <div class="error-banner" *ngIf="error">
+    <span class="material-icons">error_outline</span>
+    <span>Error al cargar las métricas.</span>
+    <button class="retry-btn" (click)="retryLoad()">Reintentar</button>
+  </div>
 
-    <p class="section-label">General</p>
-    <div class="stats-grid">
-      <div class="stat-card" *ngFor="let stat of generalStats">
-        <div class="stat-icon" [style.background]="stat.color + '18'" [style.color]="stat.color">
-          <span class="material-icons">{{ stat.icon }}</span>
-        </div>
-        <div class="stat-info">
-          <div class="stat-value">{{ stat.value }}</div>
-          <div class="stat-label">{{ stat.label }}</div>
-        </div>
+  <!-- Row 1 - General -->
+  <p class="section-label">General</p>
+  <div class="stats-grid">
+    <div class="stat-card" *ngFor="let stat of generalStats">
+      <div class="stat-icon" [style.background]="stat.color + '18'" [style.color]="stat.color">
+        <span class="material-icons">{{ stat.icon }}</span>
       </div>
-    </div>
-
-    <div class="stats-grid">
-      <div class="stat-card" *ngFor="let stat of generalStats2">
-        <div class="stat-icon" [style.background]="stat.color + '18'" [style.color]="stat.color">
-          <span class="material-icons">{{ stat.icon }}</span>
-        </div>
-        <div class="stat-info">
-          <div class="stat-value">{{ stat.value }}</div>
-          <div class="stat-label">{{ stat.label }}</div>
-        </div>
-      </div>
-    </div>
-
-    <p class="section-label">Boutique</p>
-    <div class="stats-grid">
-      <div class="stat-card" *ngFor="let stat of boutiqueStats">
-        <div class="stat-icon" [style.background]="stat.color + '18'" [style.color]="stat.color">
-          <span class="material-icons">{{ stat.icon }}</span>
-        </div>
-        <div class="stat-info">
-          <div class="stat-value">{{ stat.value }}</div>
-          <div class="stat-label">{{ stat.label }}</div>
-        </div>
-      </div>
-    </div>
-
-    <p class="section-label">Actividad</p>
-    <div class="stats-grid">
-      <div class="stat-card" *ngFor="let stat of activityStats">
-        <div class="stat-icon" [style.background]="stat.color + '18'" [style.color]="stat.color">
-          <span class="material-icons">{{ stat.icon }}</span>
-        </div>
-        <div class="stat-info">
-          <div class="stat-value">{{ stat.value }}</div>
-          <div class="stat-label">{{ stat.label }}</div>
-        </div>
-      </div>
-    </div>
-
-    <p class="section-label">Benchmark</p>
-    <div class="stats-grid">
-      <div class="stat-card" *ngFor="let stat of benchmarkStats">
-        <div class="stat-icon" [style.background]="stat.color + '18'" [style.color]="stat.color">
-          <span class="material-icons">{{ stat.icon }}</span>
-        </div>
-        <div class="stat-info">
-          <div class="stat-value">{{ stat.value }}</div>
-          <div class="stat-label">{{ stat.label }}</div>
-        </div>
-      </div>
-    </div>
-
-    <p class="section-label">Gráficas</p>
-    <div class="charts-grid">
-      <div class="chart-card">
-        <h3 class="chart-title"><span class="material-icons">bar_chart</span> Pedidos por mes</h3>
-        <div class="chart-container" #ordersBarChart></div>
-      </div>
-      <div class="chart-card">
-        <h3 class="chart-title"><span class="material-icons">donut_large</span> Pedidos por estatus</h3>
-        <div class="chart-container" #ordersDoughnutChart></div>
-      </div>
-      <div class="chart-card">
-        <h3 class="chart-title"><span class="material-icons">leaderboard</span> Top 5 productos</h3>
-        <div class="chart-container" #topProductsChart></div>
-      </div>
-      <div class="chart-card">
-        <h3 class="chart-title"><span class="material-icons">price_check</span> Valuaciones por sucursal</h3>
-        <div class="chart-container" #valuationsDealershipChart></div>
-      </div>
-      <div class="chart-card">
-        <h3 class="chart-title"><span class="material-icons">event</span> Citas por sucursal</h3>
-        <div class="chart-container" #appointmentsDealershipChart></div>
-      </div>
-      <div class="chart-card">
-        <h3 class="chart-title"><span class="material-icons">show_chart</span> Citas por mes</h3>
-        <div class="chart-container" #appointmentsLineChart></div>
-      </div>
-    </div>
-
-    <div class="quick-nav-section">
-      <h3 class="section-title"><span class="material-icons">apps</span> Acceso rápido</h3>
-      <div class="quick-nav-grid">
-        <div class="quick-nav-card" *ngFor="let link of quickLinks" (click)="navigateTo(link.route)">
-          <span class="material-icons quick-nav-icon">{{ link.icon }}</span>
-          <span class="quick-nav-label">{{ link.label }}</span>
-          <span class="material-icons quick-nav-arrow">chevron_right</span>
-        </div>
+      <div class="stat-info">
+        <div class="stat-value" *ngIf="!stat.loading">{{ stat.value }}</div>
+        <div class="stat-value-loading" *ngIf="stat.loading"><span class="spinner-sm"></span></div>
+        <div class="stat-label">{{ stat.label }}</div>
       </div>
     </div>
   </div>
-</ng-container>
+
+  <div class="stats-grid">
+    <div class="stat-card" *ngFor="let stat of generalStats2">
+      <div class="stat-icon" [style.background]="stat.color + '18'" [style.color]="stat.color">
+        <span class="material-icons">{{ stat.icon }}</span>
+      </div>
+      <div class="stat-info">
+        <div class="stat-value" *ngIf="!stat.loading">{{ stat.value }}</div>
+        <div class="stat-value-loading" *ngIf="stat.loading"><span class="spinner-sm"></span></div>
+        <div class="stat-label">{{ stat.label }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 3 - Boutique -->
+  <p class="section-label">Boutique</p>
+  <div class="stats-grid">
+    <div class="stat-card" *ngFor="let stat of boutiqueStats">
+      <div class="stat-icon" [style.background]="stat.color + '18'" [style.color]="stat.color">
+        <span class="material-icons">{{ stat.icon }}</span>
+      </div>
+      <div class="stat-info">
+        <div class="stat-value" *ngIf="!stat.loading">{{ stat.value }}</div>
+        <div class="stat-value-loading" *ngIf="stat.loading"><span class="spinner-sm"></span></div>
+        <div class="stat-label">{{ stat.label }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 4 - Activity -->
+  <p class="section-label">Actividad</p>
+  <div class="stats-grid">
+    <div class="stat-card" *ngFor="let stat of activityStats">
+      <div class="stat-icon" [style.background]="stat.color + '18'" [style.color]="stat.color">
+        <span class="material-icons">{{ stat.icon }}</span>
+      </div>
+      <div class="stat-info">
+        <div class="stat-value" *ngIf="!stat.loading">{{ stat.value }}</div>
+        <div class="stat-value-loading" *ngIf="stat.loading"><span class="spinner-sm"></span></div>
+        <div class="stat-label">{{ stat.label }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 5 - Benchmark -->
+  <p class="section-label">Benchmark</p>
+  <div class="stats-grid">
+    <div class="stat-card" *ngFor="let stat of benchmarkStats">
+      <div class="stat-icon" [style.background]="stat.color + '18'" [style.color]="stat.color">
+        <span class="material-icons">{{ stat.icon }}</span>
+      </div>
+      <div class="stat-info">
+        <div class="stat-value" *ngIf="!stat.loading">{{ stat.value }}</div>
+        <div class="stat-value-loading" *ngIf="stat.loading"><span class="spinner-sm"></span></div>
+        <div class="stat-label">{{ stat.label }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <p class="section-label">Gráficas</p>
+  <div class="charts-grid">
+    <div class="chart-card">
+      <h3 class="chart-title"><span class="material-icons">bar_chart</span> Pedidos por mes</h3>
+      <div class="chart-container" #ordersBarChart></div>
+    </div>
+    <div class="chart-card">
+      <h3 class="chart-title"><span class="material-icons">donut_large</span> Pedidos por estatus</h3>
+      <div class="chart-container" #ordersDoughnutChart></div>
+    </div>
+    <div class="chart-card">
+      <h3 class="chart-title"><span class="material-icons">leaderboard</span> Top 5 productos</h3>
+      <div class="chart-container" #topProductsChart></div>
+    </div>
+    <div class="chart-card">
+      <h3 class="chart-title"><span class="material-icons">price_check</span> Valuaciones por sucursal</h3>
+      <div class="chart-container" #valuationsDealershipChart></div>
+    </div>
+    <div class="chart-card">
+      <h3 class="chart-title"><span class="material-icons">event</span> Citas por sucursal</h3>
+      <div class="chart-container" #appointmentsDealershipChart></div>
+    </div>
+    <div class="chart-card">
+      <h3 class="chart-title"><span class="material-icons">show_chart</span> Citas por mes</h3>
+      <div class="chart-container" #appointmentsLineChart></div>
+    </div>
+  </div>
+
+  <!-- Quick Links -->
+  <div class="quick-nav-section">
+    <h3 class="section-title"><span class="material-icons">apps</span> Acceso rápido</h3>
+    <div class="quick-nav-grid">
+      <div class="quick-nav-card" *ngFor="let link of quickLinks" (click)="navigateTo(link.route)">
+        <span class="material-icons quick-nav-icon">{{ link.icon }}</span>
+        <span class="quick-nav-label">{{ link.label }}</span>
+        <span class="material-icons quick-nav-arrow">chevron_right</span>
+      </div>
+    </div>
+  </div>
+</div>

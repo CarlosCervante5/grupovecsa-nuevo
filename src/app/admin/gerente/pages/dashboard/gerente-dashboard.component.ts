@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef, ViewChild, OnDestroy } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ElementRef, ViewChild, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { GerenteDashboardService } from '../../services/gerente-dashboard.service';
 import { adminBenchmarkUrl } from 'src/app/admin/utils/admin-route.util';
@@ -10,7 +10,7 @@ import * as echarts from 'echarts';
   styleUrls: ['./gerente-dashboard.component.css'],
   standalone: false,
 })
-export class GerenteDashboardComponent implements OnInit, OnDestroy {
+export class GerenteDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   loading = true;
   error = false;
 
@@ -81,6 +81,10 @@ export class GerenteDashboardComponent implements OnInit, OnDestroy {
     this.loadMetrics();
   }
 
+  ngAfterViewInit(): void {
+    setTimeout(() => this.initCharts(), 400);
+  }
+
   ngOnDestroy(): void {
     window.removeEventListener('resize', this.onResize);
     this.chartInstances.forEach(c => c.dispose());
@@ -138,11 +142,11 @@ export class GerenteDashboardComponent implements OnInit, OnDestroy {
         } else {
           this.setAllLoading(false);
         }
-        this.loading = false;
         if (data?.charts) {
           this.chartsData = data.charts;
           setTimeout(() => this.initCharts(), 100);
         }
+        this.loading = false;
       },
       error: () => {
         this.error = true;

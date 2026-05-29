@@ -7,6 +7,7 @@ import { AuthService } from '../../services/auth.service';
 import { LoginResponse } from '@interfaces/auth.interface';
 import { BoutiqueCartService } from 'src/app/boutique/services/boutique-cart.service';
 import { adminRouteSegmentForRole } from 'src/app/admin/utils/admin-route.util';
+import { markPostLoginLoading } from '../../constants/post-login-loading';
 
 @Component({
     selector: 'app-login',
@@ -93,6 +94,7 @@ export class LoginComponent {
                 const dest = loginResponse.data.role === 'client'
                     ? ['/auth/mi-cuenta']
                     : ['/admin', adminRouteSegmentForRole(loginResponse.data.role)];
+                markPostLoginLoading();
                 this._router.navigate(dest).finally(() => { this.spinner = false; });
 
                 // Carrito en segundo plano: no retrasa la navegación percibida tras login

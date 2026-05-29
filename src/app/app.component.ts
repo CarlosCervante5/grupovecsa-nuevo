@@ -3,6 +3,11 @@ import { Router, NavigationEnd } from '@angular/router';
 import { Subscription, fromEvent, merge } from 'rxjs';
 import { debounceTime, filter } from 'rxjs/operators';
 import { AuthService } from './auth/services/auth.service';
+import {
+  clearPostLoginLoading,
+  isPostLoginLoading,
+  removePostLoginOverlayElement,
+} from './auth/constants/post-login-loading';
 
 
 @Component({
@@ -18,6 +23,8 @@ export class AppComponent implements OnDestroy {
     public spinner: boolean = false;
     public isHomeRoute: boolean = false;
     public hideChrome: boolean = false;
+    /** Cubo de carga tras login (pantalla en blanco al cargar admin / mi-cuenta). */
+    public postLoginLoading = isPostLoginLoading();
 
     private routerSub: Subscription;
     private sessionRefreshSub?: Subscription;
@@ -43,6 +50,17 @@ export class AppComponent implements OnDestroy {
                 const url = navEnd.urlAfterRedirects || navEnd.url;
                 this.isHomeRoute = url === '/' || navEnd.url === '/';
                 this.hideChrome = url.startsWith('/admin/');
+                if (url.startsWith('/auth/iniciar-sesion') || url.startsWith('/auth/login')) {
+                    clearPostLoginLoading();
+                    removePostLoginOverlayElement();
+                    this.postLoginLoading = false;
+                } else if (this.postLoginLoading && this.isPostLoginDestination(url)) {
+                    clearPostLoginLoading();
+                    removePostLoginOverlayElement();
+                    setTimeout(() => {
+                        this.postLoginLoading = false;
+                    }, 120);
+                }
                 if (localStorage.getItem('user_token') && url.startsWith('/admin/')) {
                     this._authService.refreshPermissionsInStorage().subscribe({ error: () => {} });
                 }
@@ -66,5 +84,9 @@ export class AppComponent implements OnDestroy {
     ngOnDestroy(): void {
         this.routerSub.unsubscribe();
         this.sessionRefreshSub?.unsubscribe();
+    }
+
+    private isPostLoginDestination(url: string): boolean {
+        return url.startsWith('/admin/') || url.startsWith('/auth/mi-cuenta');
     }
 }
