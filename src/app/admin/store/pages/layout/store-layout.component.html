@@ -1872,99 +1872,208 @@
     @if (activeSection === 'google_sheet') {
       <h1 class="store-title">Inventario desde Google Sheets</h1>
       <p class="store-subtitle">
-        Sincroniza stock, precios y productos desde una hoja publicada. La primera fila debe ser encabezados; el SKU es obligatorio.
+        Conecta tu hoja, mapea cada columna al catálogo y sincroniza stock, precios o productos completos.
       </p>
 
-      <div class="store-card" style="margin-bottom: 18px;">
+      <div class="gs-steps">
+        <span class="gs-step" [class.gs-step-done]="gsSheetUrl.includes('docs.google.com')">
+          <span class="gs-step-num">1</span> Hoja
+        </span>
+        <span class="material-icons gs-step-arrow">chevron_right</span>
+        <span class="gs-step" [class.gs-step-done]="gsHeadersLoaded">
+          <span class="gs-step-num">2</span> Mapeo
+        </span>
+        <span class="material-icons gs-step-arrow">chevron_right</span>
+        <span class="gs-step" [class.gs-step-done]="gsMappingReady">
+          <span class="gs-step-num">3</span> Importar
+        </span>
+      </div>
+
+      <!-- Paso 1: conexión -->
+      <div class="store-card gs-card">
         <h3 class="card-title">
-          <span class="material-icons" style="color:#16a34a;font-size:20px;">table_chart</span>
-          Conexión a la hoja
+          <span class="material-icons gs-icon-green">link</span>
+          Paso 1 — Conectar hoja
         </h3>
-        <p style="font-size:0.82rem;color:#64748b;margin:0 0 12px;">
-          Pega la URL de edición o compartida de Google Sheets. La hoja debe estar publicada en la web o visible con enlace.
+        <p class="gs-hint">
+          Publica la hoja en la web (Archivo → Compartir → Publicar en la web) o compártela con enlace de lectura.
         </p>
-        <div class="form-grid" style="display:grid;gap:10px;margin-bottom:12px;">
-          <label>
-            <span style="font-size:0.75rem;color:#64748b;">URL de la hoja</span>
+        <div class="gs-form-grid">
+          <label class="gs-field gs-field-wide">
+            <span class="gs-label">URL de Google Sheets</span>
             <input
               class="store-input"
               type="url"
               [(ngModel)]="gsSheetUrl"
-              placeholder="https://docs.google.com/spreadsheets/d/..."
+              placeholder="https://docs.google.com/spreadsheets/d/ID/edit#gid=0"
             />
           </label>
-          <label>
-            <span style="font-size:0.75rem;color:#64748b;">GID (pestaña, opcional)</span>
+          <label class="gs-field">
+            <span class="gs-label">GID (pestaña)</span>
             <input class="store-input" type="text" [(ngModel)]="gsGid" placeholder="0" />
           </label>
-          <label>
-            <span style="font-size:0.75rem;color:#64748b;">Modo</span>
+          <label class="gs-field">
+            <span class="gs-label">Modo de sincronización</span>
             <select class="store-input" [(ngModel)]="gsMode">
-              <option value="inventory">Inventario (solo actualizar existentes por SKU)</option>
-              <option value="full">Completo (crear y actualizar productos/variantes)</option>
+              <option value="inventory">Inventario — actualizar por SKU</option>
+              <option value="full">Completo — crear y actualizar</option>
             </select>
           </label>
-          <label style="display:flex;align-items:center;gap:8px;font-size:0.82rem;color:#475569;">
-            <input type="checkbox" [(ngModel)]="gsDryRun" />
-            Simular sin guardar en base de datos
-          </label>
         </div>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;">
-          <button type="button" class="store-action-btn" (click)="runGoogleSheetPreview()" [disabled]="gsPreviewing || gsSyncing">
-            @if (gsPreviewing) {
-              <div class="spinner-sm"></div> Vista previa...
-            } @else {
-              <span class="material-icons">preview</span> Vista previa
-            }
-          </button>
-          <button
-            type="button"
-            class="store-action-btn"
-            (click)="runGoogleSheetSync()"
-            [disabled]="gsSyncing || gsPreviewing"
-            style="background:#16a34a;"
-          >
-            @if (gsSyncing) {
-              <div class="spinner-sm"></div> Sincronizando...
-            } @else {
-              <span class="material-icons">sync</span>
-              {{ gsDryRun ? 'Simular sincronización' : 'Sincronizar ahora' }}
-            }
-          </button>
-        </div>
-        @if (gsError) {
-          <div class="alert-error" style="margin-top:12px;"><span class="material-icons">error</span> {{ gsError }}</div>
-        }
+        <button
+          type="button"
+          class="store-action-btn"
+          (click)="loadGoogleSheetHeaders()"
+          [disabled]="gsLoadingHeaders"
+        >
+          @if (gsLoadingHeaders) {
+            <div class="spinner-sm"></div> Leyendo hoja...
+          } @else {
+            <span class="material-icons">cloud_download</span> Cargar columnas de la hoja
+          }
+        </button>
       </div>
 
-      @if (gsLoadingTemplate) {
-        <p style="font-size:0.85rem;color:#64748b;">Cargando plantilla de columnas…</p>
-      }
+      <!-- Paso 2: mapeo -->
+      @if (gsHeadersLoaded) {
+        <div class="store-card gs-card">
+          <div class="gs-card-head">
+            <h3 class="card-title">
+              <span class="material-icons gs-icon-blue">swap_horiz</span>
+              Paso 2 — Mapear columnas
+            </h3>
+            <span class="gs-badge">{{ gsTotalRows }} filas · {{ gsSheetHeaders.length }} columnas detectadas</span>
+          </div>
+          <p class="gs-hint">
+            Elige qué columna de tu hoja corresponde a cada campo del sistema. El SKU es obligatorio.
+            Campos sin asignar se ignoran en la importación.
+          </p>
+          <div class="gs-mapping-actions">
+            <button type="button" class="gs-link-btn" (click)="resetGoogleSheetMappingAuto()">
+              <span class="material-icons">auto_fix_high</span> Detectar automático
+            </button>
+            <button type="button" class="gs-link-btn" (click)="clearGoogleSheetMapping()">
+              <span class="material-icons">clear_all</span> Limpiar mapeo
+            </button>
+            <span class="gs-mapping-count">{{ gsMappedFieldsCount }} campos asignados</span>
+          </div>
 
-      @if (gsTemplate?.template?.columns) {
-        <div class="store-card" style="margin-bottom: 18px;">
-          <h3 class="card-title"><span class="material-icons" style="color:#1c69d4;font-size:20px;">view_column</span> Columnas de la hoja</h3>
-          <div style="overflow-x:auto;">
-            <table class="store-table" style="font-size:0.8rem;">
+          <div class="gs-mapping-table-wrap">
+            <table class="store-table gs-mapping-table">
               <thead>
                 <tr>
-                  <th>Columna</th>
-                  <th>Obligatoria</th>
+                  <th>Campo en VECSA</th>
+                  <th>Columna en tu hoja</th>
                   <th>Ejemplo</th>
                 </tr>
               </thead>
               <tbody>
-                @for (col of gsTemplate.template.columns; track col.key) {
-                  <tr>
-                    <td><code>{{ col.key }}</code></td>
-                    <td>{{ col.required ? 'Sí' : 'No' }}</td>
-                    <td>{{ col.example }}</td>
+                @for (field of gsFieldColumns; track field.key) {
+                  <tr [class.gs-row-required]="field.required">
+                    <td>
+                      <span class="gs-field-name">{{ field.label }}</span>
+                      <code class="gs-field-key">{{ field.key }}</code>
+                      @if (field.required) {
+                        <span class="gs-required-tag">Obligatorio</span>
+                      }
+                    </td>
+                    <td>
+                      <select
+                        class="store-input gs-mapping-select"
+                        [ngModel]="gsColumnMapping[field.key] || ''"
+                        (ngModelChange)="onGoogleSheetMappingChange(field.key, $event)"
+                      >
+                        <option value="">— No importar —</option>
+                        @for (header of gsSheetHeaders; track header) {
+                          <option [value]="header">{{ header }}</option>
+                        }
+                      </select>
+                    </td>
+                    <td class="gs-example-cell">{{ field.example }}</td>
                   </tr>
                 }
               </tbody>
             </table>
           </div>
+
+          @if (gsSampleRawRows.length) {
+            <details class="gs-sample-details">
+              <summary>Vista de las primeras filas de tu hoja</summary>
+              <div class="gs-sample-scroll">
+                <table class="store-table gs-sample-table">
+                  <thead>
+                    <tr>
+                      @for (header of gsSheetHeaders; track header) {
+                        <th>{{ header }}</th>
+                      }
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (row of gsSampleRawRows; track $index) {
+                      <tr>
+                        @for (header of gsSheetHeaders; track header) {
+                          <td>{{ row[header] || '—' }}</td>
+                        }
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </details>
+          }
         </div>
+      }
+
+      <!-- Paso 3: importar -->
+      @if (gsHeadersLoaded) {
+        <div class="store-card gs-card">
+          <h3 class="card-title">
+            <span class="material-icons gs-icon-green">upload</span>
+            Paso 3 — Vista previa e importación
+          </h3>
+          <label class="gs-dry-run">
+            <input type="checkbox" [(ngModel)]="gsDryRun" />
+            Simular sin guardar en base de datos
+          </label>
+          <div class="gs-import-actions">
+            <button
+              type="button"
+              class="store-action-btn"
+              (click)="runGoogleSheetPreview()"
+              [disabled]="!gsMappingReady || gsPreviewing || gsSyncing"
+            >
+              @if (gsPreviewing) {
+                <div class="spinner-sm"></div> Analizando...
+              } @else {
+                <span class="material-icons">preview</span> Vista previa
+              }
+            </button>
+            <button
+              type="button"
+              class="store-action-btn gs-btn-primary"
+              (click)="runGoogleSheetSync()"
+              [disabled]="!gsMappingReady || gsSyncing || gsPreviewing"
+            >
+              @if (gsSyncing) {
+                <div class="spinner-sm"></div> Procesando...
+              } @else {
+                <span class="material-icons">sync</span>
+                {{ gsDryRun ? 'Simular importación' : 'Importar ahora' }}
+              }
+            </button>
+          </div>
+          @if (!gsMappingReady) {
+            <p class="gs-warn"><span class="material-icons">info</span> Asigna la columna SKU para habilitar la importación.</p>
+          }
+        </div>
+      }
+
+      @if (gsError) {
+        <div class="alert-error gs-alert"><span class="material-icons">error</span> {{ gsError }}</div>
+      }
+
+      @if (gsLoadingTemplate) {
+        <p class="gs-hint">Cargando definición de campos…</p>
       }
 
       @if (gsPreview?.stats) {
