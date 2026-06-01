@@ -902,6 +902,7 @@ Route::prefix('boutique/admin/wc-import')->middleware(['auth:sanctum'])->group(f
 
 Route::prefix('boutique/admin/google-sheet')->middleware(['auth:sanctum'])->group(function () {
     Route::get('/template', [BoutiqueGoogleSheetController::class, 'template']);
+    Route::post('/headers', [BoutiqueGoogleSheetController::class, 'headers']);
     Route::post('/preview', [BoutiqueGoogleSheetController::class, 'preview']);
     Route::post('/sync', [BoutiqueGoogleSheetController::class, 'sync']);
 });

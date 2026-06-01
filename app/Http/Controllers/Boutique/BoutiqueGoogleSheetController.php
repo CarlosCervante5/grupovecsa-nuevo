@@ -31,6 +31,31 @@ class BoutiqueGoogleSheetController extends Controller
     }
 
     /**
+     * POST /api/boutique/admin/google-sheet/headers
+     */
+    public function headers(Request $request)
+    {
+        if (! $this->canManage($request)) {
+            return ApiResponseHelper::apiError('No autorizado', null, 403, 'UNAUTHORIZED');
+        }
+
+        $data = $this->validatedConnectionRequest($request);
+
+        try {
+            $result = $this->syncService->loadHeaders(
+                $data['sheet_url'] ?? null,
+                $data['gid'] ?? null
+            );
+
+            return ApiResponseHelper::apiSuccess(200, 'Columnas de la hoja cargadas', $result);
+        } catch (\InvalidArgumentException $e) {
+            return ApiResponseHelper::apiError($e->getMessage(), null, 422, 'INVALID_SHEET_URL');
+        } catch (\Throwable $e) {
+            return ApiResponseHelper::apiError('Error al leer la hoja', $e->getMessage(), 500, 'SHEET_HEADERS_ERROR');
+        }
+    }
+
+    /**
      * POST /api/boutique/admin/google-sheet/preview
      */
     public function preview(Request $request)
@@ -45,12 +70,13 @@ class BoutiqueGoogleSheetController extends Controller
             $result = $this->syncService->preview(
                 $data['sheet_url'] ?? null,
                 $data['gid'] ?? null,
-                $data['mode']
+                $data['mode'],
+                $data['column_mapping'] ?? []
             );
 
             return ApiResponseHelper::apiSuccess(200, 'Vista previa generada', $result);
         } catch (\InvalidArgumentException $e) {
-            return ApiResponseHelper::apiError($e->getMessage(), null, 422, 'INVALID_SHEET_URL');
+            return ApiResponseHelper::apiError($e->getMessage(), null, 422, 'INVALID_MAPPING');
         } catch (\Throwable $e) {
             return ApiResponseHelper::apiError('Error al leer la hoja', $e->getMessage(), 500, 'SHEET_PREVIEW_ERROR');
         }
@@ -72,7 +98,8 @@ class BoutiqueGoogleSheetController extends Controller
                 $data['sheet_url'] ?? null,
                 $data['gid'] ?? null,
                 $data['mode'],
-                (bool) ($data['dry_run'] ?? false)
+                (bool) ($data['dry_run'] ?? false),
+                $data['column_mapping'] ?? []
             );
 
             $message = ($data['dry_run'] ?? false)
@@ -81,7 +108,7 @@ class BoutiqueGoogleSheetController extends Controller
 
             return ApiResponseHelper::apiSuccess(200, $message, $result);
         } catch (\InvalidArgumentException $e) {
-            return ApiResponseHelper::apiError($e->getMessage(), null, 422, 'INVALID_SHEET_URL');
+            return ApiResponseHelper::apiError($e->getMessage(), null, 422, 'INVALID_MAPPING');
         } catch (\Throwable $e) {
             return ApiResponseHelper::apiError('Error al sincronizar', $e->getMessage(), 500, 'SHEET_SYNC_ERROR');
         }
@@ -95,7 +122,18 @@ class BoutiqueGoogleSheetController extends Controller
     }
 
     /**
-     * @return array{sheet_url?: string|null, gid?: string|null, mode: string, dry_run?: bool}
+     * @return array{sheet_url?: string|null, gid?: string|null}
+     */
+    private function validatedConnectionRequest(Request $request): array
+    {
+        return $request->validate([
+            'sheet_url' => 'nullable|string|max:500',
+            'gid' => 'nullable|string|max:20',
+        ]);
+    }
+
+    /**
+     * @return array<string, mixed>
      */
     private function validatedSheetRequest(Request $request): array
     {
@@ -104,6 +142,8 @@ class BoutiqueGoogleSheetController extends Controller
             'gid' => 'nullable|string|max:20',
             'mode' => ['required', 'string', Rule::in(['inventory', 'full'])],
             'dry_run' => 'sometimes|boolean',
+            'column_mapping' => 'sometimes|array',
+            'column_mapping.*' => 'nullable|string|max:200',
         ]);
     }
 }

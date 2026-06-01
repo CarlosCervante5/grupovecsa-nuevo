@@ -23,7 +23,50 @@ class BoutiqueGoogleSheetSyncService
 
     public function __construct(
         private readonly BoutiqueGoogleSheetUrlResolver $urlResolver,
+        private readonly BoutiqueGoogleSheetColumnMapper $columnMapper,
     ) {}
+
+    /**
+     * @return list<array{key: string, label: string, required: bool, example: string}>
+     */
+    public static function columnCatalog(): array
+    {
+        return [
+            ['key' => 'sku', 'label' => 'SKU', 'required' => true, 'example' => 'BMW-MALETA-001'],
+            ['key' => 'tipo', 'label' => 'Tipo de fila', 'required' => false, 'example' => 'producto | variable | variante'],
+            ['key' => 'sku_padre', 'label' => 'SKU padre', 'required' => false, 'example' => 'BMW-MALETA-001'],
+            ['key' => 'nombre', 'label' => 'Nombre', 'required' => false, 'example' => 'Maleta BMW'],
+            ['key' => 'descripcion', 'label' => 'Descripción', 'required' => false, 'example' => 'Descripción corta'],
+            ['key' => 'categorias', 'label' => 'Categorías', 'required' => false, 'example' => 'Accesorios > BMW'],
+            ['key' => 'precio', 'label' => 'Precio', 'required' => false, 'example' => '1299.00'],
+            ['key' => 'stock', 'label' => 'Stock / inventario', 'required' => false, 'example' => '5'],
+            ['key' => 'publicado', 'label' => 'Publicado / activo', 'required' => false, 'example' => 'si | no | 1 | 0'],
+            ['key' => 'imagenes', 'label' => 'Imágenes (URLs)', 'required' => false, 'example' => 'https://.../foto1.jpg'],
+            ['key' => 'talla', 'label' => 'Talla', 'required' => false, 'example' => 'L'],
+            ['key' => 'color', 'label' => 'Color', 'required' => false, 'example' => 'Negro'],
+        ];
+    }
+
+    /**
+     * @return array<string, list<string>>
+     */
+    public static function columnAliases(): array
+    {
+        return [
+            'sku' => ['sku', 'código', 'codigo', 'code', 'referencia', 'ref'],
+            'tipo' => ['tipo', 'type', 'tipo de producto'],
+            'sku_padre' => ['sku_padre', 'sku padre', 'parent_sku', 'superior', 'sku parent'],
+            'nombre' => ['nombre', 'name', 'producto', 'titulo', 'título'],
+            'descripcion' => ['descripcion', 'descripción', 'description', 'descripcion corta'],
+            'categorias' => ['categorias', 'categorías', 'categories', 'categoria', 'categoría'],
+            'precio' => ['precio', 'price', 'precio normal', 'precio venta', 'sale price'],
+            'stock' => ['stock', 'inventario', 'cantidad', 'qty', 'existencia'],
+            'publicado' => ['publicado', 'published', 'active', 'activo', 'visible', 'estado'],
+            'imagenes' => ['imagenes', 'imágenes', 'images', 'imagen_url', 'imagen', 'url imagen', 'fotos'],
+            'talla' => ['talla', 'size', 'tamano', 'tamaño'],
+            'color' => ['color', 'colour'],
+        ];
+    }
 
     /**
      * @return array<string, mixed>
@@ -33,39 +76,48 @@ class BoutiqueGoogleSheetSyncService
         return [
             'title' => 'Inventario Boutique — Google Sheets',
             'instructions' => [
-                'Publica la hoja en la web o compártela con enlace (cualquiera con el enlace puede ver).',
-                'La primera fila debe ser encabezados. El SKU es obligatorio en cada fila con datos.',
-                'Modo inventario: actualiza stock, precio y publicado de productos/variantes existentes.',
-                'Modo completo: crea o actualiza productos, variantes, categorías e imágenes por URL.',
+                'Publica la hoja en la web o compártela con enlace.',
+                'Carga la hoja, asigna cada columna de tu Sheet al campo del sistema y luego sincroniza.',
+                'El campo SKU es obligatorio para importar.',
             ],
-            'columns' => [
-                ['key' => 'sku', 'required' => true, 'example' => 'BMW-MALETA-001'],
-                ['key' => 'tipo', 'required' => false, 'example' => 'producto | variable | variante'],
-                ['key' => 'sku_padre', 'required' => false, 'example' => 'BMW-MALETA-001 (solo variante)'],
-                ['key' => 'nombre', 'required' => false, 'example' => 'Maleta BMW'],
-                ['key' => 'descripcion', 'required' => false, 'example' => 'Descripción corta'],
-                ['key' => 'categorias', 'required' => false, 'example' => 'Accesorios > BMW'],
-                ['key' => 'precio', 'required' => false, 'example' => '1299.00'],
-                ['key' => 'stock', 'required' => false, 'example' => '5'],
-                ['key' => 'publicado', 'required' => false, 'example' => 'si | no | 1 | 0'],
-                ['key' => 'imagenes', 'required' => false, 'example' => 'https://.../foto1.jpg, https://.../foto2.jpg'],
-                ['key' => 'talla', 'required' => false, 'example' => 'L'],
-                ['key' => 'color', 'required' => false, 'example' => 'Negro'],
-            ],
-            'aliases' => [
-                'sku' => ['sku', 'código', 'codigo'],
-                'tipo' => ['tipo', 'type'],
-                'sku_padre' => ['sku_padre', 'sku padre', 'parent_sku', 'superior'],
-                'nombre' => ['nombre', 'name'],
-                'descripcion' => ['descripcion', 'descripción', 'description'],
-                'categorias' => ['categorias', 'categorías', 'categories', 'categoria'],
-                'precio' => ['precio', 'price', 'precio normal'],
-                'stock' => ['stock', 'inventario'],
-                'publicado' => ['publicado', 'published', 'active', 'activo'],
-                'imagenes' => ['imagenes', 'imágenes', 'images', 'imagen_url'],
-                'talla' => ['talla', 'size'],
-                'color' => ['color'],
-            ],
+            'columns' => self::columnCatalog(),
+            'fields' => $this->columnMapper->fieldDefinitions(),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function loadHeaders(?string $sheetUrl, ?string $gid): array
+    {
+        $sheet = $this->fetchSheet($sheetUrl, $gid);
+        $suggested = $this->columnMapper->suggestMapping($sheet['headers']);
+
+        return [
+            'export_url' => $sheet['export_url'],
+            'sheet_headers' => $sheet['headers'],
+            'total_rows' => count($sheet['rows']),
+            'suggested_mapping' => $suggested,
+            'sample_raw_rows' => $this->columnMapper->sampleRawRows($sheet['headers'], $sheet['rows'], 4),
+        ];
+    }
+
+    /**
+     * @param  array<string, string|null>  $columnMapping
+     * @return array{mapping: array<string, string>, rows: list<array<string, string>>}
+     */
+    private function prepareRows(array $sheetRows, array $sheetHeaders, array $columnMapping): array
+    {
+        $resolved = $this->columnMapper->resolveMapping($columnMapping, $sheetHeaders);
+        if ($resolved['missing_required'] !== []) {
+            throw new \InvalidArgumentException(
+                'Falta mapear columnas obligatorias: '.implode(', ', $resolved['missing_required'])
+            );
+        }
+
+        return [
+            'mapping' => $resolved['mapping'],
+            'rows' => $this->columnMapper->mapRows($sheetRows, $resolved['mapping']),
         ];
     }
 
@@ -102,10 +154,17 @@ class BoutiqueGoogleSheetSyncService
     /**
      * @return array<string, mixed>
      */
-    public function preview(?string $sheetUrl, ?string $gid, string $mode = 'inventory'): array
+    /**
+     * @param  array<string, string|null>  $columnMapping
+     */
+    public function preview(?string $sheetUrl, ?string $gid, string $mode = 'inventory', array $columnMapping = []): array
     {
         $sheet = $this->fetchSheet($sheetUrl, $gid);
-        $normalized = array_map(fn (array $row) => $this->normalizeRow($row), $sheet['rows']);
+        if ($columnMapping === []) {
+            $columnMapping = $this->columnMapper->suggestMapping($sheet['headers']);
+        }
+        $prepared = $this->prepareRows($sheet['rows'], $sheet['headers'], $columnMapping);
+        $normalized = $prepared['rows'];
 
         $stats = [
             'total_rows' => count($normalized),
@@ -127,6 +186,7 @@ class BoutiqueGoogleSheetSyncService
         return [
             'export_url' => $sheet['export_url'],
             'headers_detected' => $sheet['headers'],
+            'column_mapping' => $prepared['mapping'],
             'mode' => $mode,
             'stats' => $stats,
             'sample' => $samples,
@@ -134,12 +194,22 @@ class BoutiqueGoogleSheetSyncService
     }
 
     /**
+     * @param  array<string, string|null>  $columnMapping
      * @return array<string, mixed>
      */
-    public function sync(?string $sheetUrl, ?string $gid, string $mode = 'inventory', bool $dryRun = false): array
-    {
+    public function sync(
+        ?string $sheetUrl,
+        ?string $gid,
+        string $mode = 'inventory',
+        bool $dryRun = false,
+        array $columnMapping = []
+    ): array {
         $sheet = $this->fetchSheet($sheetUrl, $gid);
-        $rows = array_map(fn (array $row) => $this->normalizeRow($row), $sheet['rows']);
+        if ($columnMapping === []) {
+            $columnMapping = $this->columnMapper->suggestMapping($sheet['headers']);
+        }
+        $prepared = $this->prepareRows($sheet['rows'], $sheet['headers'], $columnMapping);
+        $rows = $prepared['rows'];
 
         $stats = [
             'total_rows' => count($rows),
@@ -182,6 +252,7 @@ class BoutiqueGoogleSheetSyncService
             return [
                 'dry_run' => true,
                 'export_url' => $sheet['export_url'],
+                'column_mapping' => $prepared['mapping'],
                 'mode' => $mode,
                 'stats' => $stats,
             ];
@@ -223,6 +294,7 @@ class BoutiqueGoogleSheetSyncService
         return [
             'dry_run' => false,
             'export_url' => $sheet['export_url'],
+            'column_mapping' => $prepared['mapping'],
             'mode' => $mode,
             'stats' => $stats,
             'error_details' => array_slice($errors, 0, 30),
@@ -598,35 +670,6 @@ class BoutiqueGoogleSheetSyncService
         }
 
         return null;
-    }
-
-    /**
-     * @param  array<string, string>  $raw
-     * @return array<string, string>
-     */
-    private function normalizeRow(array $raw): array
-    {
-        $aliases = $this->templateDefinition()['aliases'];
-        $out = [];
-
-        foreach ($raw as $header => $value) {
-            $normalizedHeader = mb_strtolower(trim($header));
-            foreach ($aliases as $canonical => $list) {
-                foreach ($list as $alias) {
-                    if ($normalizedHeader === mb_strtolower($alias)) {
-                        $out[$canonical] = trim((string) $value);
-
-                        continue 2;
-                    }
-                }
-            }
-        }
-
-        if (isset($out['sku'])) {
-            $out['sku'] = trim($out['sku']);
-        }
-
-        return $out;
     }
 
     /**
