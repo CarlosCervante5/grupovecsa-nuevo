@@ -211,6 +211,7 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     { key: 'openpay', label: 'Pagos OpenPay', icon: 'account_balance' },
     { key: 'incadea', label: 'Sync Incadea', icon: 'sync' },
     { key: 'wc_import', label: 'WC Import', icon: 'upload_file' },
+    { key: 'google_sheet', label: 'Google Sheet', icon: 'table_chart' },
   ];
 
   readonly orderStatuses = ['pendiente', 'pagado', 'en_preparacion', 'enviado', 'entregado', 'cancelado'];
@@ -292,6 +293,8 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
       this.loadOpenpayConfig();
     } else if (key === 'incadea') {
       this.loadIncadea();
+    } else if (key === 'google_sheet') {
+      this.loadGoogleSheetTemplate();
     }
   }
 
@@ -2110,5 +2113,98 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
       next: (res: any) => { this.wcCleanResult = res.data; this.wcCleaning = false; },
       error: (err: any) => { this.wcCleanError = err?.error?.message || 'Error en limpieza'; this.wcCleaning = false; },
     });
+  }
+
+  // ── Google Sheet inventario ──
+  gsSheetUrl = '';
+  gsGid = '0';
+  gsMode: 'inventory' | 'full' = 'inventory';
+  gsDryRun = false;
+  gsLoadingTemplate = false;
+  gsPreviewing = false;
+  gsSyncing = false;
+  gsTemplate: any = null;
+  gsPreview: any = null;
+  gsResult: any = null;
+  gsError = '';
+
+  loadGoogleSheetTemplate(): void {
+    if (this.gsTemplate) {
+      return;
+    }
+    this.gsLoadingTemplate = true;
+    this.http
+      .get(`${environment.baseUrl}/api/boutique/admin/google-sheet/template`, {
+        headers: this.getHeaders(),
+      })
+      .subscribe({
+        next: (res: any) => {
+          this.gsTemplate = res.data;
+          if (!this.gsSheetUrl && res.data?.default_sheet_url) {
+            this.gsSheetUrl = res.data.default_sheet_url;
+          }
+          if (res.data?.default_gid) {
+            this.gsGid = String(res.data.default_gid);
+          }
+          this.gsLoadingTemplate = false;
+        },
+        error: () => {
+          this.gsLoadingTemplate = false;
+        },
+      });
+  }
+
+  runGoogleSheetPreview(): void {
+    this.gsPreviewing = true;
+    this.gsError = '';
+    this.gsPreview = null;
+    const body = {
+      sheet_url: this.gsSheetUrl.trim() || null,
+      gid: this.gsGid.trim() || null,
+      mode: this.gsMode,
+    };
+    this.http
+      .post(`${environment.baseUrl}/api/boutique/admin/google-sheet/preview`, body, {
+        headers: this.getHeaders(),
+      })
+      .subscribe({
+        next: (res: any) => {
+          this.gsPreview = res.data;
+          this.gsPreviewing = false;
+        },
+        error: (err: any) => {
+          this.gsError = err?.error?.message || 'Error en vista previa';
+          this.gsPreviewing = false;
+        },
+      });
+  }
+
+  runGoogleSheetSync(): void {
+    this.gsSyncing = true;
+    this.gsError = '';
+    this.gsResult = null;
+    const body = {
+      sheet_url: this.gsSheetUrl.trim() || null,
+      gid: this.gsGid.trim() || null,
+      mode: this.gsMode,
+      dry_run: this.gsDryRun,
+    };
+    this.http
+      .post(`${environment.baseUrl}/api/boutique/admin/google-sheet/sync`, body, {
+        headers: this.getHeaders(),
+      })
+      .subscribe({
+        next: (res: any) => {
+          this.gsResult = res.data;
+          this.gsSyncing = false;
+          if (!this.gsDryRun && this.activeSection === 'products') {
+            this.loadProducts();
+          }
+        },
+        error: (err: any) => {
+          this.gsError = err?.error?.message || 'Error al sincronizar';
+          this.gsSyncing = false;
+        },
+      });
   }
 }
