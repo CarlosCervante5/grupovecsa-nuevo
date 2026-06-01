@@ -2121,12 +2121,31 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   gsMode: 'inventory' | 'full' = 'inventory';
   gsDryRun = false;
   gsLoadingTemplate = false;
+  gsLoadingHeaders = false;
+  gsHeadersLoaded = false;
   gsPreviewing = false;
   gsSyncing = false;
   gsTemplate: any = null;
   gsPreview: any = null;
   gsResult: any = null;
   gsError = '';
+  gsSheetHeaders: string[] = [];
+  gsColumnMapping: Record<string, string> = {};
+  gsSampleRawRows: Record<string, string>[] = [];
+  gsTotalRows = 0;
+
+  get gsFieldColumns(): { key: string; label: string; required: boolean; example: string }[] {
+    return this.gsTemplate?.template?.columns ?? [];
+  }
+
+  get gsMappingReady(): boolean {
+    const skuHeader = (this.gsColumnMapping['sku'] ?? '').trim();
+    return skuHeader !== '' && this.gsSheetHeaders.includes(skuHeader);
+  }
+
+  get gsMappedFieldsCount(): number {
+    return Object.values(this.gsColumnMapping).filter((h) => !!h?.trim()).length;
+  }
 
   loadGoogleSheetTemplate(): void {
     if (this.gsTemplate) {
@@ -2154,17 +2173,107 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
       });
   }
 
-  runGoogleSheetPreview(): void {
-    this.gsPreviewing = true;
+  loadGoogleSheetHeaders(): void {
+    const url = this.gsSheetUrl.trim();
+    if (!url || !url.includes('docs.google.com')) {
+      this.gsError = 'Ingresa una URL válida de Google Sheets.';
+      return;
+    }
+    this.gsLoadingHeaders = true;
     this.gsError = '';
+    this.gsHeadersLoaded = false;
     this.gsPreview = null;
-    const body = {
+    this.gsResult = null;
+    this.http
+      .post(
+        `${environment.baseUrl}/api/boutique/admin/google-sheet/headers`,
+        { sheet_url: url, gid: this.gsGid.trim() || null },
+        { headers: this.getHeaders() }
+      )
+      .subscribe({
+        next: (res: any) => {
+          const data = res.data ?? {};
+          this.gsSheetHeaders = data.sheet_headers ?? [];
+          this.gsTotalRows = data.total_rows ?? 0;
+          this.gsSampleRawRows = data.sample_raw_rows ?? [];
+          this.applySuggestedGoogleSheetMapping(data.suggested_mapping ?? {});
+          this.gsHeadersLoaded = true;
+          this.gsLoadingHeaders = false;
+        },
+        error: (err: any) => {
+          this.gsError = err?.error?.message || 'No se pudo leer la hoja';
+          this.gsLoadingHeaders = false;
+        },
+      });
+  }
+
+  applySuggestedGoogleSheetMapping(suggested: Record<string, string | null>): void {
+    const mapping: Record<string, string> = {};
+    for (const field of this.gsFieldColumns) {
+      const header = suggested[field.key];
+      mapping[field.key] = header ? String(header) : '';
+    }
+    this.gsColumnMapping = mapping;
+  }
+
+  resetGoogleSheetMappingAuto(): void {
+    if (!this.gsHeadersLoaded) {
+      this.loadGoogleSheetHeaders();
+      return;
+    }
+    this.http
+      .post(
+        `${environment.baseUrl}/api/boutique/admin/google-sheet/headers`,
+        {
+          sheet_url: this.gsSheetUrl.trim() || null,
+          gid: this.gsGid.trim() || null,
+        },
+        { headers: this.getHeaders() }
+      )
+      .subscribe({
+        next: (res: any) => {
+          this.applySuggestedGoogleSheetMapping(res.data?.suggested_mapping ?? {});
+        },
+      });
+  }
+
+  clearGoogleSheetMapping(): void {
+    const cleared: Record<string, string> = {};
+    for (const field of this.gsFieldColumns) {
+      cleared[field.key] = '';
+    }
+    this.gsColumnMapping = cleared;
+  }
+
+  onGoogleSheetMappingChange(fieldKey: string, header: string): void {
+    this.gsColumnMapping = { ...this.gsColumnMapping, [fieldKey]: header };
+  }
+
+  private googleSheetRequestBody(): Record<string, unknown> {
+    const mapping: Record<string, string> = {};
+    for (const [key, header] of Object.entries(this.gsColumnMapping)) {
+      if (header?.trim()) {
+        mapping[key] = header.trim();
+      }
+    }
+    return {
       sheet_url: this.gsSheetUrl.trim() || null,
       gid: this.gsGid.trim() || null,
       mode: this.gsMode,
+      column_mapping: mapping,
     };
+  }
+
+  runGoogleSheetPreview(): void {
+    if (!this.gsMappingReady) {
+      this.gsError = 'Asigna al menos la columna SKU antes de continuar.';
+      return;
+    }
+    this.gsPreviewing = true;
+    this.gsError = '';
+    this.gsPreview = null;
     this.http
-      .post(`${environment.baseUrl}/api/boutique/admin/google-sheet/preview`, body, {
+      .post(`${environment.baseUrl}/api/boutique/admin/google-sheet/preview`, this.googleSheetRequestBody(), {
         headers: this.getHeaders(),
       })
       .subscribe({
@@ -2180,15 +2289,14 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   runGoogleSheetSync(): void {
+    if (!this.gsMappingReady) {
+      this.gsError = 'Asigna al menos la columna SKU antes de sincronizar.';
+      return;
+    }
     this.gsSyncing = true;
     this.gsError = '';
     this.gsResult = null;
-    const body = {
-      sheet_url: this.gsSheetUrl.trim() || null,
-      gid: this.gsGid.trim() || null,
-      mode: this.gsMode,
-      dry_run: this.gsDryRun,
-    };
+    const body = { ...this.googleSheetRequestBody(), dry_run: this.gsDryRun };
     this.http
       .post(`${environment.baseUrl}/api/boutique/admin/google-sheet/sync`, body, {
         headers: this.getHeaders(),
@@ -2206,5 +2314,13 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
           this.gsSyncing = false;
         },
       });
+  }
+
+  gsPreviewMappedValue(row: Record<string, string>, fieldKey: string): string {
+    const header = this.gsColumnMapping[fieldKey];
+    if (!header) {
+      return '—';
+    }
+    return row[header]?.trim() || '—';
   }
 }
