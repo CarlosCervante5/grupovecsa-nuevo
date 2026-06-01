@@ -60,6 +60,7 @@ use App\Http\Controllers\AdminDashboard\AdminDashboardController;
 use App\Http\Controllers\Settings\SettingsController;
 use App\Http\Controllers\Boutique\IncadeaSyncController;
 use App\Http\Controllers\Developer\ApiMonitorController;
+use App\Http\Controllers\Boutique\BoutiqueGoogleSheetController;
 use App\Http\Controllers\Boutique\WcImportController;
 use Illuminate\Support\Facades\Route;
 
@@ -898,6 +899,14 @@ Route::prefix('boutique/admin/wc-import')->middleware(['auth:sanctum'])->group(f
 });
 
 // Fin WooCommerce Import
+
+Route::prefix('boutique/admin/google-sheet')->middleware(['auth:sanctum'])->group(function () {
+    Route::get('/template', [BoutiqueGoogleSheetController::class, 'template']);
+    Route::post('/preview', [BoutiqueGoogleSheetController::class, 'preview']);
+    Route::post('/sync', [BoutiqueGoogleSheetController::class, 'sync']);
+});
+
+// Fin Google Sheet Boutique
 
 
 // Segmento API Monitor

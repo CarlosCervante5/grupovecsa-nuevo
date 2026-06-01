@@ -1868,6 +1868,161 @@
       }
     }
 
+    <!-- ═══ GOOGLE SHEET INVENTARIO ═══ -->
+    @if (activeSection === 'google_sheet') {
+      <h1 class="store-title">Inventario desde Google Sheets</h1>
+      <p class="store-subtitle">
+        Sincroniza stock, precios y productos desde una hoja publicada. La primera fila debe ser encabezados; el SKU es obligatorio.
+      </p>
+
+      <div class="store-card" style="margin-bottom: 18px;">
+        <h3 class="card-title">
+          <span class="material-icons" style="color:#16a34a;font-size:20px;">table_chart</span>
+          Conexión a la hoja
+        </h3>
+        <p style="font-size:0.82rem;color:#64748b;margin:0 0 12px;">
+          Pega la URL de edición o compartida de Google Sheets. La hoja debe estar publicada en la web o visible con enlace.
+        </p>
+        <div class="form-grid" style="display:grid;gap:10px;margin-bottom:12px;">
+          <label>
+            <span style="font-size:0.75rem;color:#64748b;">URL de la hoja</span>
+            <input
+              class="store-input"
+              type="url"
+              [(ngModel)]="gsSheetUrl"
+              placeholder="https://docs.google.com/spreadsheets/d/..."
+            />
+          </label>
+          <label>
+            <span style="font-size:0.75rem;color:#64748b;">GID (pestaña, opcional)</span>
+            <input class="store-input" type="text" [(ngModel)]="gsGid" placeholder="0" />
+          </label>
+          <label>
+            <span style="font-size:0.75rem;color:#64748b;">Modo</span>
+            <select class="store-input" [(ngModel)]="gsMode">
+              <option value="inventory">Inventario (solo actualizar existentes por SKU)</option>
+              <option value="full">Completo (crear y actualizar productos/variantes)</option>
+            </select>
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:0.82rem;color:#475569;">
+            <input type="checkbox" [(ngModel)]="gsDryRun" />
+            Simular sin guardar en base de datos
+          </label>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          <button type="button" class="store-action-btn" (click)="runGoogleSheetPreview()" [disabled]="gsPreviewing || gsSyncing">
+            @if (gsPreviewing) {
+              <div class="spinner-sm"></div> Vista previa...
+            } @else {
+              <span class="material-icons">preview</span> Vista previa
+            }
+          </button>
+          <button
+            type="button"
+            class="store-action-btn"
+            (click)="runGoogleSheetSync()"
+            [disabled]="gsSyncing || gsPreviewing"
+            style="background:#16a34a;"
+          >
+            @if (gsSyncing) {
+              <div class="spinner-sm"></div> Sincronizando...
+            } @else {
+              <span class="material-icons">sync</span>
+              {{ gsDryRun ? 'Simular sincronización' : 'Sincronizar ahora' }}
+            }
+          </button>
+        </div>
+        @if (gsError) {
+          <div class="alert-error" style="margin-top:12px;"><span class="material-icons">error</span> {{ gsError }}</div>
+        }
+      </div>
+
+      @if (gsLoadingTemplate) {
+        <p style="font-size:0.85rem;color:#64748b;">Cargando plantilla de columnas…</p>
+      }
+
+      @if (gsTemplate?.template?.columns) {
+        <div class="store-card" style="margin-bottom: 18px;">
+          <h3 class="card-title"><span class="material-icons" style="color:#1c69d4;font-size:20px;">view_column</span> Columnas de la hoja</h3>
+          <div style="overflow-x:auto;">
+            <table class="store-table" style="font-size:0.8rem;">
+              <thead>
+                <tr>
+                  <th>Columna</th>
+                  <th>Obligatoria</th>
+                  <th>Ejemplo</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (col of gsTemplate.template.columns; track col.key) {
+                  <tr>
+                    <td><code>{{ col.key }}</code></td>
+                    <td>{{ col.required ? 'Sí' : 'No' }}</td>
+                    <td>{{ col.example }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+
+      @if (gsPreview?.stats) {
+        <div class="stats-grid" style="margin-bottom: 18px;">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#dbeafe;color:#1c69d4;"><span class="material-icons">table_rows</span></div>
+            <div class="stat-info"><span class="stat-value">{{ gsPreview.stats.total_rows }}</span><span class="stat-label">Filas</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#dcfce7;color:#16a34a;"><span class="material-icons">edit</span></div>
+            <div class="stat-info"><span class="stat-value">{{ gsPreview.stats.would_update }}</span><span class="stat-label">Actualizarían</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#e0e7ff;color:#4338ca;"><span class="material-icons">add_box</span></div>
+            <div class="stat-info"><span class="stat-value">{{ gsPreview.stats.would_create }}</span><span class="stat-label">Crearían</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#fef3c7;color:#d97706;"><span class="material-icons">search_off</span></div>
+            <div class="stat-info"><span class="stat-value">{{ gsPreview.stats.not_found }}</span><span class="stat-label">No encontrados</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#f1f5f9;color:#64748b;"><span class="material-icons">skip_next</span></div>
+            <div class="stat-info"><span class="stat-value">{{ gsPreview.stats.would_skip }}</span><span class="stat-label">Omitirían</span></div>
+          </div>
+        </div>
+      }
+
+      @if (gsResult?.stats) {
+        <div class="stats-grid" style="margin-bottom: 18px;">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#dbeafe;color:#1c69d4;"><span class="material-icons">inventory_2</span></div>
+            <div class="stat-info">
+              <span class="stat-value">{{ gsResult.stats.products_created + gsResult.stats.products_updated }}</span>
+              <span class="stat-label">Productos (creados/actualizados)</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#f3e8ff;color:#7c3aed;"><span class="material-icons">style</span></div>
+            <div class="stat-info">
+              <span class="stat-value">{{ gsResult.stats.variants_created + gsResult.stats.variants_updated }}</span>
+              <span class="stat-label">Variantes</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#dcfce7;color:#16a34a;"><span class="material-icons">category</span></div>
+            <div class="stat-info"><span class="stat-value">{{ gsResult.stats.categories || 0 }}</span><span class="stat-label">Categorías</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#fef2f2;color:#ef4444;"><span class="material-icons">error_outline</span></div>
+            <div class="stat-info"><span class="stat-value">{{ gsResult.stats.errors || 0 }}</span><span class="stat-label">Errores</span></div>
+          </div>
+        </div>
+        @if (gsResult.dry_run) {
+          <p style="font-size:0.82rem;color:#047857;margin:0 0 12px;">Simulación completada — no se modificó la base de datos.</p>
+        }
+      }
+    }
+
   </main>
 </div>
 
