@@ -20,7 +20,16 @@ export class FooterComponent {
   public date: number = 0;  
   public recommended_vehicles: Vehicle[] = [];
 
-  constructor(private _homeService: HomeService, private _router: Router) { 
+  /** Rutas legales del sitio (mismas que home-footer y módulo Legales). */
+  readonly legalLinks: { label: string; url: string }[] = [
+    { label: 'Aviso de Privacidad', url: '/aviso-privacidad' },
+    { label: 'Condiciones de Uso', url: '/condiciones-uso' },
+    { label: 'Políticas de Devolución', url: '/politicas-devolucion' },
+    { label: 'Programa de Lealtad', url: '/programa-lealtad' },
+    { label: 'Uso de Cookies', url: '/uso-cookies' },
+  ];
+
+  constructor(private _homeService: HomeService, private _router: Router) {
     const d = new Date();
     this.date = d.getFullYear();
   }
