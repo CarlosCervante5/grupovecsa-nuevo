@@ -171,6 +171,17 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
+  align-items: stretch;
+}
+
+.vehicles-grid > div {
+  display: flex;
+  min-height: 0;
+}
+
+.vehicles-grid c-vender-autos-vehicle {
+  display: block;
+  width: 100%;
 }
 
 /* ===== PAGINATOR ===== */

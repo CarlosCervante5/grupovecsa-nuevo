@@ -12,7 +12,7 @@
     "postbuild": "node ./src/assets/scripts/rename-build-files.js",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "prod": "ng build --configuration=production",
+    "prod": "ng build --configuration=railway-production",
     "postprod": "node ./src/assets/scripts/rename-build-files.js"
   },
   "private": true,
