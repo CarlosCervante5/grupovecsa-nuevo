@@ -267,6 +267,37 @@ c-vender-autos-vehicle {
     cursor: pointer;
 }
 
+/* Inventario (/compra-tu-auto): mismo alto de foto en todas las tarjetas (global; vence Tailwind img{height:auto}) */
+.vehicles-grid c-vender-autos-vehicle .card-element .price-container {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    padding-top: 75% !important;
+    height: 0 !important;
+    background: #f3f4f6;
+    flex-shrink: 0;
+}
+
+.vehicles-grid c-vender-autos-vehicle .card-element .price-container img {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    object-fit: cover !important;
+    object-position: center center;
+    display: block;
+}
+
+.vehicles-grid c-vender-autos-vehicle .card-element .price-align {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
 c-vender-autos-vehicle.pic img {
     height: 180px !important;
 }
