@@ -5,7 +5,7 @@
 cmds = ["npm ci --no-audit"]
 
 [phases.build]
-cmds = ["npm run build"]
+cmds = ["npm run prod"]
 
 [start]
 cmd = "npm start"
