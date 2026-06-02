@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  baseUrl: 'https://backend.grupovecsa.com'
+  baseUrl: 'https://vecsa-backend-production.up.railway.app'
 };
