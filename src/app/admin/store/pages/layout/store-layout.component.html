@@ -1868,6 +1868,281 @@
       }
     }
 
+    <!-- ═══ GOOGLE SHEET INVENTARIO ═══ -->
+    @if (activeSection === 'google_sheet') {
+      <h1 class="store-title">Inventario desde Google Sheets</h1>
+      <p class="store-subtitle">
+        Conecta tu hoja, mapea cada columna al catálogo y sincroniza stock, precios o productos completos.
+      </p>
+
+      <div class="gs-steps">
+        <span class="gs-step" [class.gs-step-done]="gsSheetUrl.includes('docs.google.com')">
+          <span class="gs-step-num">1</span> Hoja
+        </span>
+        <span class="material-icons gs-step-arrow">chevron_right</span>
+        <span class="gs-step" [class.gs-step-done]="gsHeadersLoaded">
+          <span class="gs-step-num">2</span> Mapeo
+        </span>
+        <span class="material-icons gs-step-arrow">chevron_right</span>
+        <span class="gs-step" [class.gs-step-done]="gsMappingReady">
+          <span class="gs-step-num">3</span> Importar
+        </span>
+      </div>
+
+      <!-- Paso 1: conexión -->
+      <div class="store-card gs-card">
+        <h3 class="card-title">
+          <span class="material-icons gs-icon-green">link</span>
+          Paso 1 — Conectar hoja
+        </h3>
+        <p class="gs-hint">
+          Publica la hoja en la web (Archivo → Compartir → Publicar en la web) o compártela con enlace de lectura.
+          En la columna de imágenes puedes usar enlaces de Google Drive (acceso: cualquier persona con el enlace); se suben al catálogo al importar.
+        </p>
+        <div class="gs-form-grid">
+          <label class="gs-field gs-field-wide">
+            <span class="gs-label">URL de Google Sheets</span>
+            <input
+              class="store-input"
+              type="url"
+              [(ngModel)]="gsSheetUrl"
+              placeholder="https://docs.google.com/spreadsheets/d/ID/edit#gid=0"
+            />
+          </label>
+          <label class="gs-field">
+            <span class="gs-label">GID (pestaña)</span>
+            <input class="store-input" type="text" [(ngModel)]="gsGid" placeholder="0" />
+          </label>
+          <label class="gs-field">
+            <span class="gs-label">Modo de sincronización</span>
+            <select class="store-input" [(ngModel)]="gsMode">
+              <option value="inventory">Inventario — actualizar por SKU</option>
+              <option value="full">Completo — crear y actualizar</option>
+            </select>
+          </label>
+        </div>
+        <button
+          type="button"
+          class="store-action-btn"
+          (click)="loadGoogleSheetHeaders()"
+          [disabled]="gsLoadingHeaders"
+        >
+          @if (gsLoadingHeaders) {
+            <div class="spinner-sm"></div> Leyendo hoja...
+          } @else {
+            <span class="material-icons">cloud_download</span> Cargar columnas de la hoja
+          }
+        </button>
+      </div>
+
+      <!-- Paso 2: mapeo -->
+      @if (gsHeadersLoaded) {
+        <div class="store-card gs-card">
+          <div class="gs-card-head">
+            <h3 class="card-title">
+              <span class="material-icons gs-icon-blue">swap_horiz</span>
+              Paso 2 — Mapear columnas
+            </h3>
+            <span class="gs-badge">{{ gsTotalRows }} filas · {{ gsSheetHeaders.length }} columnas detectadas</span>
+          </div>
+          <p class="gs-hint">
+            Elige qué columna de tu hoja corresponde a cada campo del sistema. El SKU es obligatorio.
+            Campos sin asignar se ignoran en la importación.
+          </p>
+          <div class="gs-mapping-actions">
+            <button type="button" class="gs-link-btn" (click)="resetGoogleSheetMappingAuto()">
+              <span class="material-icons">auto_fix_high</span> Detectar automático
+            </button>
+            <button type="button" class="gs-link-btn" (click)="clearGoogleSheetMapping()">
+              <span class="material-icons">clear_all</span> Limpiar mapeo
+            </button>
+            <span class="gs-mapping-count">{{ gsMappedFieldsCount }} campos asignados</span>
+          </div>
+
+          <div class="gs-mapping-table-wrap">
+            <table class="store-table gs-mapping-table">
+              <thead>
+                <tr>
+                  <th>Campo en VECSA</th>
+                  <th>Columna en tu hoja</th>
+                  <th>Ejemplo</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (field of gsFieldColumns; track field.key) {
+                  <tr [class.gs-row-required]="field.required">
+                    <td>
+                      <span class="gs-field-name">{{ field.label }}</span>
+                      <code class="gs-field-key">{{ field.key }}</code>
+                      @if (field.required) {
+                        <span class="gs-required-tag">Obligatorio</span>
+                      }
+                    </td>
+                    <td>
+                      <select
+                        class="store-input gs-mapping-select"
+                        [ngModel]="gsColumnMapping[field.key] || ''"
+                        (ngModelChange)="onGoogleSheetMappingChange(field.key, $event)"
+                      >
+                        <option value="">— No importar —</option>
+                        @for (header of gsSheetHeaders; track header) {
+                          <option [value]="header">{{ header }}</option>
+                        }
+                      </select>
+                    </td>
+                    <td class="gs-example-cell">{{ field.example }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          @if (gsSampleRawRows.length) {
+            <details class="gs-sample-details">
+              <summary>Vista de las primeras filas de tu hoja</summary>
+              <div class="gs-sample-scroll">
+                <table class="store-table gs-sample-table">
+                  <thead>
+                    <tr>
+                      @for (header of gsSheetHeaders; track header) {
+                        <th>{{ header }}</th>
+                      }
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (row of gsSampleRawRows; track $index) {
+                      <tr>
+                        @for (header of gsSheetHeaders; track header) {
+                          <td>{{ row[header] || '—' }}</td>
+                        }
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </details>
+          }
+        </div>
+      }
+
+      <!-- Paso 3: importar -->
+      @if (gsHeadersLoaded) {
+        <div class="store-card gs-card">
+          <h3 class="card-title">
+            <span class="material-icons gs-icon-green">upload</span>
+            Paso 3 — Vista previa e importación
+          </h3>
+          <label class="gs-dry-run">
+            <input type="checkbox" [(ngModel)]="gsDryRun" />
+            Simular sin guardar en base de datos
+          </label>
+          <div class="gs-import-actions">
+            <button
+              type="button"
+              class="store-action-btn"
+              (click)="runGoogleSheetPreview()"
+              [disabled]="!gsMappingReady || gsPreviewing || gsSyncing"
+            >
+              @if (gsPreviewing) {
+                <div class="spinner-sm"></div> Analizando...
+              } @else {
+                <span class="material-icons">preview</span> Vista previa
+              }
+            </button>
+            <button
+              type="button"
+              class="store-action-btn gs-btn-primary"
+              (click)="runGoogleSheetSync()"
+              [disabled]="!gsMappingReady || gsSyncing || gsPreviewing"
+            >
+              @if (gsSyncing) {
+                <div class="spinner-sm"></div> Procesando...
+              } @else {
+                <span class="material-icons">sync</span>
+                {{ gsDryRun ? 'Simular importación' : 'Importar ahora' }}
+              }
+            </button>
+          </div>
+          @if (!gsMappingReady) {
+            <p class="gs-warn"><span class="material-icons">info</span> Asigna la columna SKU para habilitar la importación.</p>
+          }
+        </div>
+      }
+
+      @if (gsError) {
+        <div class="alert-error gs-alert"><span class="material-icons">error</span> {{ gsError }}</div>
+      }
+
+      @if (gsLoadingTemplate) {
+        <p class="gs-hint">Cargando definición de campos…</p>
+      }
+
+      @if (gsPreview?.stats) {
+        <div class="stats-grid" style="margin-bottom: 18px;">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#dbeafe;color:#1c69d4;"><span class="material-icons">table_rows</span></div>
+            <div class="stat-info"><span class="stat-value">{{ gsPreview.stats.total_rows }}</span><span class="stat-label">Filas</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#dcfce7;color:#16a34a;"><span class="material-icons">edit</span></div>
+            <div class="stat-info"><span class="stat-value">{{ gsPreview.stats.would_update }}</span><span class="stat-label">Actualizarían</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#e0e7ff;color:#4338ca;"><span class="material-icons">add_box</span></div>
+            <div class="stat-info"><span class="stat-value">{{ gsPreview.stats.would_create }}</span><span class="stat-label">Crearían</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#fef3c7;color:#d97706;"><span class="material-icons">search_off</span></div>
+            <div class="stat-info"><span class="stat-value">{{ gsPreview.stats.not_found }}</span><span class="stat-label">No encontrados</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#f1f5f9;color:#64748b;"><span class="material-icons">skip_next</span></div>
+            <div class="stat-info"><span class="stat-value">{{ gsPreview.stats.would_skip }}</span><span class="stat-label">Omitirían</span></div>
+          </div>
+        </div>
+      }
+
+      @if (gsResult?.stats) {
+        <div class="stats-grid" style="margin-bottom: 18px;">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#dbeafe;color:#1c69d4;"><span class="material-icons">inventory_2</span></div>
+            <div class="stat-info">
+              <span class="stat-value">{{ gsResult.stats.products_created + gsResult.stats.products_updated }}</span>
+              <span class="stat-label">Productos (creados/actualizados)</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#f3e8ff;color:#7c3aed;"><span class="material-icons">style</span></div>
+            <div class="stat-info">
+              <span class="stat-value">{{ gsResult.stats.variants_created + gsResult.stats.variants_updated }}</span>
+              <span class="stat-label">Variantes</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#dcfce7;color:#16a34a;"><span class="material-icons">category</span></div>
+            <div class="stat-info"><span class="stat-value">{{ gsResult.stats.categories || 0 }}</span><span class="stat-label">Categorías</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#e0f2fe;color:#0284c7;"><span class="material-icons">image</span></div>
+            <div class="stat-info"><span class="stat-value">{{ gsResult.stats.images || 0 }}</span><span class="stat-label">Imágenes</span></div>
+          </div>
+          @if (gsResult.stats.images_failed) {
+            <div class="stat-card">
+              <div class="stat-icon" style="background:#fef3c7;color:#d97706;"><span class="material-icons">broken_image</span></div>
+              <div class="stat-info"><span class="stat-value">{{ gsResult.stats.images_failed }}</span><span class="stat-label">Imágenes Drive fallidas</span></div>
+            </div>
+          }
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#fef2f2;color:#ef4444;"><span class="material-icons">error_outline</span></div>
+            <div class="stat-info"><span class="stat-value">{{ gsResult.stats.errors || 0 }}</span><span class="stat-label">Errores</span></div>
+          </div>
+        </div>
+        @if (gsResult.dry_run) {
+          <p style="font-size:0.82rem;color:#047857;margin:0 0 12px;">Simulación completada — no se modificó la base de datos.</p>
+        }
+      }
+    }
+
   </main>
 </div>
 

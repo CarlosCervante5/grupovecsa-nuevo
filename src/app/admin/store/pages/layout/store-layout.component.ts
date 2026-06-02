@@ -211,6 +211,7 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     { key: 'openpay', label: 'Pagos OpenPay', icon: 'account_balance' },
     { key: 'incadea', label: 'Sync Incadea', icon: 'sync' },
     { key: 'wc_import', label: 'WC Import', icon: 'upload_file' },
+    { key: 'google_sheet', label: 'Google Sheet', icon: 'table_chart' },
   ];
 
   readonly orderStatuses = ['pendiente', 'pagado', 'en_preparacion', 'enviado', 'entregado', 'cancelado'];
@@ -292,6 +293,8 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
       this.loadOpenpayConfig();
     } else if (key === 'incadea') {
       this.loadIncadea();
+    } else if (key === 'google_sheet') {
+      this.loadGoogleSheetTemplate();
     }
   }
 
@@ -2110,5 +2113,214 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
       next: (res: any) => { this.wcCleanResult = res.data; this.wcCleaning = false; },
       error: (err: any) => { this.wcCleanError = err?.error?.message || 'Error en limpieza'; this.wcCleaning = false; },
     });
+  }
+
+  // ── Google Sheet inventario ──
+  gsSheetUrl = '';
+  gsGid = '0';
+  gsMode: 'inventory' | 'full' = 'inventory';
+  gsDryRun = false;
+  gsLoadingTemplate = false;
+  gsLoadingHeaders = false;
+  gsHeadersLoaded = false;
+  gsPreviewing = false;
+  gsSyncing = false;
+  gsTemplate: any = null;
+  gsPreview: any = null;
+  gsResult: any = null;
+  gsError = '';
+  gsSheetHeaders: string[] = [];
+  gsColumnMapping: Record<string, string> = {};
+  gsSampleRawRows: Record<string, string>[] = [];
+  gsTotalRows = 0;
+
+  get gsFieldColumns(): { key: string; label: string; required: boolean; example: string }[] {
+    return this.gsTemplate?.template?.columns ?? [];
+  }
+
+  get gsMappingReady(): boolean {
+    const skuHeader = (this.gsColumnMapping['sku'] ?? '').trim();
+    return skuHeader !== '' && this.gsSheetHeaders.includes(skuHeader);
+  }
+
+  get gsMappedFieldsCount(): number {
+    return Object.values(this.gsColumnMapping).filter((h) => !!h?.trim()).length;
+  }
+
+  loadGoogleSheetTemplate(): void {
+    if (this.gsTemplate) {
+      return;
+    }
+    this.gsLoadingTemplate = true;
+    this.http
+      .get(`${environment.baseUrl}/api/boutique/admin/google-sheet/template`, {
+        headers: this.getHeaders(),
+      })
+      .subscribe({
+        next: (res: any) => {
+          this.gsTemplate = res.data;
+          if (!this.gsSheetUrl && res.data?.default_sheet_url) {
+            this.gsSheetUrl = res.data.default_sheet_url;
+          }
+          if (res.data?.default_gid) {
+            this.gsGid = String(res.data.default_gid);
+          }
+          this.gsLoadingTemplate = false;
+        },
+        error: () => {
+          this.gsLoadingTemplate = false;
+        },
+      });
+  }
+
+  loadGoogleSheetHeaders(): void {
+    const url = this.gsSheetUrl.trim();
+    if (!url || !url.includes('docs.google.com')) {
+      this.gsError = 'Ingresa una URL válida de Google Sheets.';
+      return;
+    }
+    this.gsLoadingHeaders = true;
+    this.gsError = '';
+    this.gsHeadersLoaded = false;
+    this.gsPreview = null;
+    this.gsResult = null;
+    this.http
+      .post(
+        `${environment.baseUrl}/api/boutique/admin/google-sheet/headers`,
+        { sheet_url: url, gid: this.gsGid.trim() || null },
+        { headers: this.getHeaders() }
+      )
+      .subscribe({
+        next: (res: any) => {
+          const data = res.data ?? {};
+          this.gsSheetHeaders = data.sheet_headers ?? [];
+          this.gsTotalRows = data.total_rows ?? 0;
+          this.gsSampleRawRows = data.sample_raw_rows ?? [];
+          this.applySuggestedGoogleSheetMapping(data.suggested_mapping ?? {});
+          this.gsHeadersLoaded = true;
+          this.gsLoadingHeaders = false;
+        },
+        error: (err: any) => {
+          this.gsError = err?.error?.message || 'No se pudo leer la hoja';
+          this.gsLoadingHeaders = false;
+        },
+      });
+  }
+
+  applySuggestedGoogleSheetMapping(suggested: Record<string, string | null>): void {
+    const mapping: Record<string, string> = {};
+    for (const field of this.gsFieldColumns) {
+      const header = suggested[field.key];
+      mapping[field.key] = header ? String(header) : '';
+    }
+    this.gsColumnMapping = mapping;
+  }
+
+  resetGoogleSheetMappingAuto(): void {
+    if (!this.gsHeadersLoaded) {
+      this.loadGoogleSheetHeaders();
+      return;
+    }
+    this.http
+      .post(
+        `${environment.baseUrl}/api/boutique/admin/google-sheet/headers`,
+        {
+          sheet_url: this.gsSheetUrl.trim() || null,
+          gid: this.gsGid.trim() || null,
+        },
+        { headers: this.getHeaders() }
+      )
+      .subscribe({
+        next: (res: any) => {
+          this.applySuggestedGoogleSheetMapping(res.data?.suggested_mapping ?? {});
+        },
+      });
+  }
+
+  clearGoogleSheetMapping(): void {
+    const cleared: Record<string, string> = {};
+    for (const field of this.gsFieldColumns) {
+      cleared[field.key] = '';
+    }
+    this.gsColumnMapping = cleared;
+  }
+
+  onGoogleSheetMappingChange(fieldKey: string, header: string): void {
+    this.gsColumnMapping = { ...this.gsColumnMapping, [fieldKey]: header };
+  }
+
+  private googleSheetRequestBody(): Record<string, unknown> {
+    const mapping: Record<string, string> = {};
+    for (const [key, header] of Object.entries(this.gsColumnMapping)) {
+      if (header?.trim()) {
+        mapping[key] = header.trim();
+      }
+    }
+    return {
+      sheet_url: this.gsSheetUrl.trim() || null,
+      gid: this.gsGid.trim() || null,
+      mode: this.gsMode,
+      column_mapping: mapping,
+    };
+  }
+
+  runGoogleSheetPreview(): void {
+    if (!this.gsMappingReady) {
+      this.gsError = 'Asigna al menos la columna SKU antes de continuar.';
+      return;
+    }
+    this.gsPreviewing = true;
+    this.gsError = '';
+    this.gsPreview = null;
+    this.http
+      .post(`${environment.baseUrl}/api/boutique/admin/google-sheet/preview`, this.googleSheetRequestBody(), {
+        headers: this.getHeaders(),
+      })
+      .subscribe({
+        next: (res: any) => {
+          this.gsPreview = res.data;
+          this.gsPreviewing = false;
+        },
+        error: (err: any) => {
+          this.gsError = err?.error?.message || 'Error en vista previa';
+          this.gsPreviewing = false;
+        },
+      });
+  }
+
+  runGoogleSheetSync(): void {
+    if (!this.gsMappingReady) {
+      this.gsError = 'Asigna al menos la columna SKU antes de sincronizar.';
+      return;
+    }
+    this.gsSyncing = true;
+    this.gsError = '';
+    this.gsResult = null;
+    const body = { ...this.googleSheetRequestBody(), dry_run: this.gsDryRun };
+    this.http
+      .post(`${environment.baseUrl}/api/boutique/admin/google-sheet/sync`, body, {
+        headers: this.getHeaders(),
+      })
+      .subscribe({
+        next: (res: any) => {
+          this.gsResult = res.data;
+          this.gsSyncing = false;
+          if (!this.gsDryRun && this.activeSection === 'products') {
+            this.loadProducts();
+          }
+        },
+        error: (err: any) => {
+          this.gsError = err?.error?.message || 'Error al sincronizar';
+          this.gsSyncing = false;
+        },
+      });
+  }
+
+  gsPreviewMappedValue(row: Record<string, string>, fieldKey: string): string {
+    const header = this.gsColumnMapping[fieldKey];
+    if (!header) {
+      return '—';
+    }
+    return row[header]?.trim() || '—';
   }
 }
