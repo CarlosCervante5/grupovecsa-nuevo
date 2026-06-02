@@ -24,6 +24,7 @@ class BoutiqueGoogleSheetSyncService
     public function __construct(
         private readonly BoutiqueGoogleSheetUrlResolver $urlResolver,
         private readonly BoutiqueGoogleSheetColumnMapper $columnMapper,
+        private readonly BoutiqueExternalImageImporter $imageImporter,
     ) {}
 
     /**
@@ -41,7 +42,7 @@ class BoutiqueGoogleSheetSyncService
             ['key' => 'precio', 'label' => 'Precio', 'required' => false, 'example' => '1299.00'],
             ['key' => 'stock', 'label' => 'Stock / inventario', 'required' => false, 'example' => '5'],
             ['key' => 'publicado', 'label' => 'Publicado / activo', 'required' => false, 'example' => 'si | no | 1 | 0'],
-            ['key' => 'imagenes', 'label' => 'Imágenes (URLs)', 'required' => false, 'example' => 'https://.../foto1.jpg'],
+            ['key' => 'imagenes', 'label' => 'Imágenes (URLs)', 'required' => false, 'example' => 'https://drive.google.com/... o https://.../foto.jpg'],
             ['key' => 'talla', 'label' => 'Talla', 'required' => false, 'example' => 'L'],
             ['key' => 'color', 'label' => 'Color', 'required' => false, 'example' => 'Negro'],
         ];
@@ -79,6 +80,8 @@ class BoutiqueGoogleSheetSyncService
                 'Publica la hoja en la web o compártela con enlace.',
                 'Carga la hoja, asigna cada columna de tu Sheet al campo del sistema y luego sincroniza.',
                 'El campo SKU es obligatorio para importar.',
+                'En Imágenes puedes pegar enlaces de Google Drive (compartir → cualquier persona con el enlace); se descargan y suben al catálogo automáticamente.',
+                'También acepta URLs directas a .jpg/.png (varias separadas por coma).',
             ],
             'columns' => self::columnCatalog(),
             'fields' => $this->columnMapper->fieldDefinitions(),
@@ -219,6 +222,7 @@ class BoutiqueGoogleSheetSyncService
             'variants_updated' => 0,
             'categories' => 0,
             'images' => 0,
+            'images_failed' => 0,
             'skipped' => 0,
             'not_found' => 0,
             'errors' => 0,
@@ -622,6 +626,17 @@ class BoutiqueGoogleSheetSyncService
             if ($url === '' || ! filter_var($url, FILTER_VALIDATE_URL)) {
                 continue;
             }
+
+            if ($this->imageImporter->isGoogleDriveUrl($url)) {
+                if ($this->imageImporter->importDriveImage($product, $url, $order++)) {
+                    $stats['images']++;
+                } else {
+                    $stats['images_failed']++;
+                }
+
+                continue;
+            }
+
             BoutiqueProductImage::create([
                 'product_id' => $product->id,
                 'image_path' => $url,
