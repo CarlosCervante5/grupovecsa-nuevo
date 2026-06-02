@@ -2099,6 +2099,15 @@
             <div class="stat-icon" style="background:#f1f5f9;color:#64748b;"><span class="material-icons">skip_next</span></div>
             <div class="stat-info"><span class="stat-value">{{ gsPreview.stats.would_skip }}</span><span class="stat-label">Omitirían</span></div>
           </div>
+          @if (gsPreview.stats.images_planned) {
+            <div class="stat-card">
+              <div class="stat-icon" style="background:#e0f2fe;color:#0284c7;"><span class="material-icons">image</span></div>
+              <div class="stat-info">
+                <span class="stat-value">{{ gsPreview.stats.images_planned }}</span>
+                <span class="stat-label">Imágenes previstas</span>
+              </div>
+            </div>
+          }
         </div>
       }
 
@@ -2124,8 +2133,20 @@
           </div>
           <div class="stat-card">
             <div class="stat-icon" style="background:#e0f2fe;color:#0284c7;"><span class="material-icons">image</span></div>
-            <div class="stat-info"><span class="stat-value">{{ gsResult.stats.images || 0 }}</span><span class="stat-label">Imágenes</span></div>
+            <div class="stat-info">
+              <span class="stat-value">{{ gsResult.stats.images || 0 }}</span>
+              <span class="stat-label">{{ gsResult.dry_run ? 'Imágenes previstas' : 'Imágenes' }}</span>
+            </div>
           </div>
+          @if (gsResult.dry_run && gsResult.stats.images_drive_planned) {
+            <div class="stat-card">
+              <div class="stat-icon" style="background:#e0e7ff;color:#4338ca;"><span class="material-icons">cloud_download</span></div>
+              <div class="stat-info">
+                <span class="stat-value">{{ gsResult.stats.images_drive_planned }}</span>
+                <span class="stat-label">Desde Drive (previstas)</span>
+              </div>
+            </div>
+          }
           @if (gsResult.stats.images_failed) {
             <div class="stat-card">
               <div class="stat-icon" style="background:#fef3c7;color:#d97706;"><span class="material-icons">broken_image</span></div>
@@ -2138,7 +2159,14 @@
           </div>
         </div>
         @if (gsResult.dry_run) {
-          <p style="font-size:0.82rem;color:#047857;margin:0 0 12px;">Simulación completada — no se modificó la base de datos.</p>
+          <p style="font-size:0.82rem;color:#047857;margin:0 0 12px;">
+            Simulación completada — no se modificó la base de datos ni se descargaron imágenes.
+            @if (gsResult.stats.images) {
+              Se importarían {{ gsResult.stats.images }} imagen(es) al ejecutar «Importar ahora» ({{ gsResult.stats.images_drive_planned || 0 }} desde Google Drive).
+            } @else if (gsResult.stats.images_drive_planned === 0 && gsResult.stats.images === 0) {
+              No hay imágenes pendientes: revisa que la columna Imágenes esté mapeada, que el producto no tenga fotos ya, y que uses modo Completo para filas nuevas.
+            }
+          </p>
         }
       }
     }

@@ -175,12 +175,17 @@ class BoutiqueGoogleSheetSyncService
             'would_create' => 0,
             'would_skip' => 0,
             'not_found' => 0,
+            'images_planned' => 0,
+            'images_drive_planned' => 0,
         ];
         $samples = [];
 
         foreach ($normalized as $row) {
             $action = $this->classifyRow($row, $mode);
             $stats[$action]++;
+            $imagePlan = $this->planImagesForRow($row, $mode, $action);
+            $stats['images_planned'] += $imagePlan['total'];
+            $stats['images_drive_planned'] += $imagePlan['drive'];
             if (count($samples) < 12) {
                 $samples[] = ['sku' => $row['sku'] ?? '', 'action' => $action, 'tipo' => $row['tipo'] ?? ''];
             }
@@ -223,6 +228,7 @@ class BoutiqueGoogleSheetSyncService
             'categories' => 0,
             'images' => 0,
             'images_failed' => 0,
+            'images_drive_planned' => 0,
             'skipped' => 0,
             'not_found' => 0,
             'errors' => 0,
@@ -251,6 +257,10 @@ class BoutiqueGoogleSheetSyncService
                 } else {
                     $stats['skipped']++;
                 }
+
+                $imagePlan = $this->planImagesForRow($row, $mode, $action);
+                $stats['images'] += $imagePlan['total'];
+                $stats['images_drive_planned'] += $imagePlan['drive'];
             }
 
             return [
@@ -259,6 +269,7 @@ class BoutiqueGoogleSheetSyncService
                 'column_mapping' => $prepared['mapping'],
                 'mode' => $mode,
                 'stats' => $stats,
+                'simulation_note' => 'La simulación no descarga ni guarda imágenes. El contador de imágenes indica cuántas se procesarían al importar sin simular.',
             ];
         }
 
@@ -328,6 +339,9 @@ class BoutiqueGoogleSheetSyncService
         $product = BoutiqueProduct::query()->where('sku', $sku)->first();
         if ($product) {
             $this->applyProductUpdates($product, $row, $stats, true);
+            if (! empty($row['imagenes'])) {
+                $this->attachImagesIfMissing($product, $row['imagenes'], $stats);
+            }
 
             return;
         }
@@ -434,6 +448,9 @@ class BoutiqueGoogleSheetSyncService
                         $this->parsePublished($row['publicado'])
                     ),
                 ]);
+            }
+            if (! empty($row['imagenes'])) {
+                $this->attachImagesIfMissing($product, $row['imagenes'], $stats);
             }
             $this->parentSkuToId[$sku] = (int) $product->id;
             $this->syncAttributeParentIds[(int) $product->id] = true;
@@ -619,14 +636,94 @@ class BoutiqueGoogleSheetSyncService
         $this->createImages($product, $imageString, $stats);
     }
 
+    /**
+     * @return list<string>
+     */
+    private function parseImageUrls(string $imageString): array
+    {
+        $urls = [];
+        foreach (array_map('trim', explode(',', $imageString)) as $url) {
+            if ($url !== '' && filter_var($url, FILTER_VALIDATE_URL)) {
+                $urls[] = $url;
+            }
+        }
+
+        return $urls;
+    }
+
+    /**
+     * Estima imágenes que se importarían (simulación / vista previa).
+     *
+     * @param  array<string, string>  $row
+     * @return array{total: int, drive: int}
+     */
+    private function planImagesForRow(array $row, string $mode, string $action): array
+    {
+        $empty = ['total' => 0, 'drive' => 0];
+        $imagenes = trim($row['imagenes'] ?? '');
+        if ($imagenes === '') {
+            return $empty;
+        }
+
+        $urls = $this->parseImageUrls($imagenes);
+        if ($urls === []) {
+            return $empty;
+        }
+
+        if (in_array($action, ['would_skip', 'not_found'], true)) {
+            return $empty;
+        }
+
+        $tipo = $this->resolveTipo($row['tipo'] ?? 'producto');
+        if ($tipo === 'variante') {
+            return $empty;
+        }
+
+        if ($action === 'would_create') {
+            if ($mode === 'inventory') {
+                return $empty;
+            }
+
+            return $this->summarizeImagePlan($urls);
+        }
+
+        if ($action !== 'would_update') {
+            return $empty;
+        }
+
+        $sku = trim($row['sku'] ?? '');
+        if ($sku === '') {
+            return $empty;
+        }
+
+        $product = BoutiqueProduct::query()->where('sku', $sku)->first();
+        if (! $product || $product->images()->exists()) {
+            return $empty;
+        }
+
+        return $this->summarizeImagePlan($urls);
+    }
+
+    /**
+     * @param  list<string>  $urls
+     * @return array{total: int, drive: int}
+     */
+    private function summarizeImagePlan(array $urls): array
+    {
+        $drive = 0;
+        foreach ($urls as $url) {
+            if ($this->imageImporter->isGoogleDriveUrl($url)) {
+                $drive++;
+            }
+        }
+
+        return ['total' => count($urls), 'drive' => $drive];
+    }
+
     private function createImages(BoutiqueProduct $product, string $imageString, array &$stats): void
     {
         $order = (int) ($product->images()->max('sort_id') ?? -1) + 1;
-        foreach (array_map('trim', explode(',', $imageString)) as $url) {
-            if ($url === '' || ! filter_var($url, FILTER_VALIDATE_URL)) {
-                continue;
-            }
-
+        foreach ($this->parseImageUrls($imageString) as $url) {
             if ($this->imageImporter->isGoogleDriveUrl($url)) {
                 if ($this->imageImporter->importDriveImage($product, $url, $order++)) {
                     $stats['images']++;
