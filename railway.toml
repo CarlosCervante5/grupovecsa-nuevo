@@ -1,10 +1,10 @@
-# Railway producción (rama grupovecsaFrontendRailway) — build production + serve estático.
-# Rama sandbox: usar buildCommand = "npm run build" (environment.sandbox.ts).
+# Railway sandbox (rama sandboxRailwayGrupoVecsaFrontend) — mismo código que prod, build sandbox.
+# Producción (grupovecsaFrontendRailway): buildCommand = "npm run prod"
 
 [build]
 builder = "nixpacks"
 # No repetir npm ci aquí; nixpacks.toml ya instala en [phases.install]
-buildCommand = "npm run prod"
+buildCommand = "npm run build"
 
 [deploy]
 startCommand = "npm start"
