@@ -267,6 +267,25 @@ c-vender-autos-vehicle {
     cursor: pointer;
 }
 
+/* Inventario (/compra-tu-auto): columnas iguales; minmax(0,1fr) + min-width:0 en hijos */
+.vehicles-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  width: 100%;
+}
+
+.vehicles-grid > div {
+  min-width: 0 !important;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.vehicles-grid c-vender-autos-vehicle {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
 /* Inventario (/compra-tu-auto): mismo alto de foto en todas las tarjetas (global; vence Tailwind img{height:auto}) */
 .vehicles-grid c-vender-autos-vehicle .card-element .price-container {
     position: relative;
