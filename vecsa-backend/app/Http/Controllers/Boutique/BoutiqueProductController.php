@@ -12,6 +12,7 @@ use App\Models\Boutique\BoutiqueProductAttribute;
 use App\Models\Boutique\BoutiqueProductAttributeValue;
 use App\Models\Boutique\BoutiqueProductVariant;
 use App\Models\Boutique\BoutiqueVariantAttributeValue;
+use App\Services\Boutique\BoutiqueInventoryCsvExportService;
 use App\Services\Boutique\BoutiqueProductPublicationService;
 use App\Services\DealershipAccessService;
 use App\Support\BoutiqueDealershipPresenter;
@@ -23,7 +24,10 @@ use Illuminate\Validation\ValidationException;
 
 class BoutiqueProductController extends Controller
 {
-    public function __construct(protected DealershipAccessService $dealershipAccess) {}
+    public function __construct(
+        protected DealershipAccessService $dealershipAccess,
+        protected BoutiqueInventoryCsvExportService $inventoryCsvExport,
+    ) {}
 
     public function search(Request $request)
     {
@@ -84,6 +88,21 @@ class BoutiqueProductController extends Controller
             return ApiResponseHelper::apiSuccess(200, 'Productos obtenidos exitosamente', ['products' => $products]);
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al obtener productos', $e->getMessage(), 500, 'GET_PRODUCTS_ERROR');
+        }
+    }
+
+    /**
+     * POST /api/boutique/admin/products/export-csv
+     * Mismos filtros que search (search, category_uuid, active). Descarga inventario completo filtrado.
+     */
+    public function exportCsv(Request $request)
+    {
+        try {
+            return $this->inventoryCsvExport->streamDownload($request);
+        } catch (AuthorizationException $e) {
+            return ApiResponseHelper::apiError($e->getMessage(), null, 403, 'INVENTORY_FORBIDDEN');
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al exportar inventario', $e->getMessage(), 500, 'EXPORT_INVENTORY_CSV_ERROR');
         }
     }
 

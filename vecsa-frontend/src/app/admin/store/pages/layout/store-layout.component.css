@@ -801,3 +801,81 @@
 .gs-alert {
   margin-bottom: 16px;
 }
+.gs-log-card {
+  margin-top: 16px;
+}
+.gs-log-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.gs-log-table-wrap {
+  overflow-x: auto;
+  margin-top: 12px;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background: #fffafb;
+  max-height: 320px;
+  overflow-y: auto;
+}
+.gs-log-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+.gs-log-table th {
+  position: sticky;
+  top: 0;
+  background: #fef2f2;
+  color: #991b1b;
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid #fecaca;
+  z-index: 1;
+}
+.gs-log-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #fee2e2;
+  vertical-align: top;
+  color: #334155;
+}
+.gs-log-table tr:last-child td {
+  border-bottom: none;
+}
+.gs-log-url {
+  max-width: 220px;
+  word-break: break-all;
+  font-family: ui-monospace, monospace;
+  font-size: 0.72rem;
+}
+.gs-log-hint {
+  color: #047857;
+  max-width: 260px;
+}
+.gs-log-type {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.gs-log-type-image {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+.gs-log-type-image_skip {
+  background: #fef3c7;
+  color: #b45309;
+}
+.gs-log-type-row {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+.gs-log-truncated {
+  margin-top: 10px;
+  font-size: 0.78rem;
+  color: #b45309;
+}

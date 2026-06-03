@@ -108,7 +108,7 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   categoryTotal = 0;
   readonly categoryPageSize = 15;
   categorySectionLoading = false;
-  /** Hasta 500 categorías para selects (padre en modal, filtro productos). */
+  /** Hasta 500 categorías para selects (edición de producto, modal categorías). */
   categorySelectorRows: any[] = [];
   categoryModalOpen = false;
   categoryModalMode: 'create' | 'edit' = 'create';
@@ -123,6 +123,7 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   };
   /** Filtro de listado de productos por categoría (uuid vacío = todas). */
   productCategoryFilter = '';
+  productExporting = false;
   editVariants: any[] = [];
   productMode: 'edit' | 'create' = 'edit';
   hasVariants = false;
@@ -758,6 +759,62 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     this.productPage = 1;
     this.loadProducts();
   }
+
+  /** Descarga CSV del inventario (respeta búsqueda y filtro de categoría actual). */
+  downloadProductInventoryCsv(): void {
+    if (this.productExporting) {
+      return;
+    }
+    this.productExporting = true;
+    const token = localStorage.getItem('user_token') || '';
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest',
+      Authorization: `Bearer ${token}`,
+    });
+    const body: Record<string, string> = {};
+    if (this.productSearch?.trim()) {
+      body['search'] = this.productSearch.trim();
+    }
+    if (this.productCategoryFilter?.trim()) {
+      body['category_uuid'] = this.productCategoryFilter.trim();
+    }
+    this.http
+      .post(`${environment.baseUrl}/api/boutique/admin/products/export-csv`, body, {
+        headers,
+        responseType: 'blob',
+      })
+      .subscribe({
+        next: (blob: Blob) => {
+          const stamp = new Date().toISOString().slice(0, 10);
+          const url = URL.createObjectURL(blob);
+          const anchor = document.createElement('a');
+          anchor.href = url;
+          anchor.download = `inventario-boutique-${stamp}.csv`;
+          anchor.click();
+          URL.revokeObjectURL(url);
+          this.productExporting = false;
+        },
+        error: async (err: any) => {
+          this.productExporting = false;
+          let message = 'No se pudo descargar el inventario.';
+          const blob = err?.error;
+          if (blob instanceof Blob) {
+            try {
+              const text = await blob.text();
+              const parsed = JSON.parse(text);
+              message = parsed?.message || message;
+            } catch {
+              /* respuesta no JSON */
+            }
+          } else if (err?.error?.message) {
+            message = err.error.message;
+          }
+          alert(message);
+        },
+      });
+  }
+
   prevProductPage(): void { if (this.productPage > 1) { this.productPage--; this.loadProducts(); } }
   nextProductPage(): void { if (this.productPage < this.productLastPage) { this.productPage++; this.loadProducts(); } }
 
@@ -832,6 +889,17 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.selectedProductAttributes.length > 0) {
       this.hasVariants = true;
     }
+  }
+
+  isRootCategory(c: any): boolean {
+    if (!c) {
+      return false;
+    }
+    if (c.parent?.uuid) {
+      return false;
+    }
+
+    return c.parent_id == null || c.parent_id === 0 || c.parent_id === '';
   }
 
   /** Etiqueta jerárquica para selects y tablas de categorías. */
@@ -2147,6 +2215,17 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     return Object.values(this.gsColumnMapping).filter((h) => !!h?.trim()).length;
   }
 
+  /** Solo categorías padre (sin parent_id) para el filtro del listado de productos. */
+  get categoryFilterOptions(): { uuid: string; name: string }[] {
+    return this.categorySelectorRows
+      .filter((c: any) => this.isRootCategory(c))
+      .map((c: any) => ({ uuid: c.uuid, name: c.name }));
+  }
+
+  get gsImportLog(): { type: string; sku: string; url: string | null; message: string; hint: string | null }[] {
+    return this.gsResult?.import_log ?? [];
+  }
+
   loadGoogleSheetTemplate(): void {
     if (this.gsTemplate) {
       return;
@@ -2322,5 +2401,45 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
       return '—';
     }
     return row[header]?.trim() || '—';
+  }
+
+  googleSheetLogTypeLabel(type: string): string {
+    switch (type) {
+      case 'image':
+        return 'Imagen';
+      case 'image_skip':
+        return 'Omitida';
+      case 'row':
+        return 'Fila';
+      default:
+        return type;
+    }
+  }
+
+  googleSheetLogTypeClass(type: string): string {
+    if (type === 'image_skip') {
+      return 'gs-log-type gs-log-type-image_skip';
+    }
+    if (type === 'row') {
+      return 'gs-log-type gs-log-type-row';
+    }
+    return 'gs-log-type gs-log-type-image';
+  }
+
+  copyGoogleSheetImportLog(): void {
+    const lines = this.gsImportLog.map((e) => {
+      const parts = [
+        `[${this.googleSheetLogTypeLabel(e.type)}]`,
+        `SKU: ${e.sku}`,
+        e.url ? `URL: ${e.url}` : '',
+        `Problema: ${e.message}`,
+        e.hint ? `Corrección: ${e.hint}` : '',
+      ].filter(Boolean);
+      return parts.join(' | ');
+    });
+    const text = lines.join('\n');
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(text).catch(() => undefined);
+    }
   }
 }
