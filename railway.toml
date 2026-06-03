@@ -4,7 +4,7 @@
 [build]
 builder = "nixpacks"
 # No repetir npm ci aquí; nixpacks.toml ya instala en [phases.install]
-buildCommand = "npm run prod"
+buildCommand = "npm run build"
 
 [deploy]
 startCommand = "npm start"
