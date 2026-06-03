@@ -55,6 +55,7 @@ import { SwiperComponent } from './shared/components/swiper/swiper.component';
 import { ChatAssistantComponent } from './shared/components/chat-assistant/chat-assistant.component';
 import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { AuthInterceptor } from './auth/interceptors/auth.interceptor';
+import { SkCubeComponent } from '@components/sk-cube/sk-cube.component';
 
 
 
@@ -112,6 +113,7 @@ import { AuthInterceptor } from './auth/interceptors/auth.interceptor';
     NavCarcareComponent,
     NavRewardsComponent,
     NewNavComponent,
+    SkCubeComponent,
   ],
   providers: [
     Title,

@@ -36,6 +36,7 @@ export class HomeFooterComponent {
     { label: 'Aviso de Privacidad', url: '/aviso-privacidad', external: false },
     { label: 'Condiciones de Uso', url: '/condiciones-uso', external: false },
     { label: 'Políticas de Devolución', url: '/politicas-devolucion', external: false },
+    { label: 'Programa de Lealtad', url: '/programa-lealtad', external: false },
     { label: 'Uso de Cookies', url: '/uso-cookies', external: false },
   ];
 

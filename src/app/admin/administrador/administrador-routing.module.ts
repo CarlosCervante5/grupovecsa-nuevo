@@ -13,6 +13,8 @@ import { BenchmarkGuard } from '../shared/benchmark/benchmark.guard';
 import { AdminManualsComponent } from './pages/manuales/admin-manuals.component';
 import { AdminManualDetailComponent } from './pages/manuales/admin-manual-detail.component';
 import { AdminDealershipsComponent } from './pages/admin-dealerships/admin-dealerships.component';
+import { AdminLegalesListComponent } from './pages/legales/admin-legales-list.component';
+import { AdminLegalEditComponent } from './pages/legales/admin-legal-edit.component';
 
 const routes: Routes = [
   {
@@ -23,6 +25,8 @@ const routes: Routes = [
       { path: 'sucursales', component: AdminDealershipsComponent },
       { path: 'users', component: AdminUsersComponent },
       { path: 'permissions', component: AdminPermisosComponent },
+      { path: 'legales', component: AdminLegalesListComponent },
+      { path: 'legales/:slug', component: AdminLegalEditComponent },
       { path: 'manuales', component: AdminManualsComponent },
       { path: 'manuales/:panel', component: AdminManualDetailComponent },
       {

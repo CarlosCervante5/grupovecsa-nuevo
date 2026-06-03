@@ -7,6 +7,7 @@ import { AuthService } from '../../services/auth.service';
 import { LoginResponse } from '@interfaces/auth.interface';
 import { BoutiqueCartService } from 'src/app/boutique/services/boutique-cart.service';
 import { adminRouteSegmentForRole } from 'src/app/admin/utils/admin-route.util';
+import { beginPostLoginTransition } from '../../constants/post-login-loading';
 
 @Component({
     selector: 'app-login',
@@ -90,10 +91,12 @@ export class LoginComponent {
                   localStorage.setItem('permissions', JSON.stringify(loginResponse.data.permissions));
                 }
 
-                const dest = loginResponse.data.role === 'client'
-                    ? ['/auth/mi-cuenta']
-                    : ['/admin', adminRouteSegmentForRole(loginResponse.data.role)];
-                this._router.navigate(dest).finally(() => { this.spinner = false; });
+                beginPostLoginTransition();
+                window.location.replace(
+                    loginResponse.data.role === 'client'
+                        ? '/auth/mi-cuenta'
+                        : `/admin/${adminRouteSegmentForRole(loginResponse.data.role)}`,
+                );
 
                 // Carrito en segundo plano: no retrasa la navegación percibida tras login
                 this._cartService.syncLocalCartToServer().subscribe();

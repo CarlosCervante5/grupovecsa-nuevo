@@ -8,6 +8,7 @@ import { AuthService } from '../../services/auth.service';
 import { LoginResponse } from '@interfaces/auth.interface';
 import { BoutiqueCartService } from 'src/app/boutique/services/boutique-cart.service';
 import { adminRouteSegmentForRole } from 'src/app/admin/utils/admin-route.util';
+import { beginPostLoginTransition } from '../../constants/post-login-loading';
 
 @Component({
     selector: 'app-login2',
@@ -49,10 +50,13 @@ export class Login2Component implements OnInit {
             role === 'client'
                 ? '/auth/mi-cuenta'
                 : `/admin/${adminRouteSegmentForRole(role)}`;
-        if (dest === '/admin/') {
+        if (!dest || dest === '/admin/') {
             return;
         }
-        void this._router.navigateByUrl(dest);
+        // Sesión válida en pantalla de login (p. ej. guard): solo preloader, sin formulario.
+        this.spinner = true;
+        beginPostLoginTransition();
+        window.location.replace(dest);
     }
 
     /**
@@ -118,15 +122,15 @@ export class Login2Component implements OnInit {
                 afterCartSync$.pipe(
                     finalize(() => {
                         sessionStorage.removeItem('vecsa_chunk_reload');
+                        beginPostLoginTransition();
                         if (safeReturnUrl) {
-                            window.location.assign(safeReturnUrl);
+                            window.location.replace(safeReturnUrl);
                         } else if (loginResponse.data.role === 'client') {
-                            window.location.assign('/auth/mi-cuenta');
+                            window.location.replace('/auth/mi-cuenta');
                         } else {
                             const seg = adminRouteSegmentForRole(loginResponse.data.role);
-                            window.location.assign(seg ? `/admin/${seg}` : '/');
+                            window.location.replace(seg ? `/admin/${seg}` : '/');
                         }
-                        this.spinner = false;
                     }),
                 ).subscribe();
 

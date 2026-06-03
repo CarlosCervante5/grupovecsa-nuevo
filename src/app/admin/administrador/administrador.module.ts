@@ -19,6 +19,9 @@ import { BenchmarkModule } from '../shared/benchmark/benchmark.module';
 import { AdminManualsComponent } from './pages/manuales/admin-manuals.component';
 import { AdminManualDetailComponent } from './pages/manuales/admin-manual-detail.component';
 import { AdminDealershipsComponent } from './pages/admin-dealerships/admin-dealerships.component';
+import { AdminLegalesListComponent } from './pages/legales/admin-legales-list.component';
+import { AdminLegalEditComponent } from './pages/legales/admin-legal-edit.component';
+import { EditorModule, TINYMCE_SCRIPT_SRC } from '@tinymce/tinymce-angular';
 
 @NgModule({
     declarations: [
@@ -31,6 +34,8 @@ import { AdminDealershipsComponent } from './pages/admin-dealerships/admin-deale
         AdminManualsComponent,
         AdminManualDetailComponent,
         AdminDealershipsComponent,
+        AdminLegalesListComponent,
+        AdminLegalEditComponent,
     ],
     imports: [
         CommonModule,
@@ -45,6 +50,10 @@ import { AdminDealershipsComponent } from './pages/admin-dealerships/admin-deale
         AssistantChatsSharedModule,
         VehicleStockModule,
         BenchmarkModule,
-    ]
+        EditorModule,
+    ],
+    providers: [
+        { provide: TINYMCE_SCRIPT_SRC, useValue: '/tinymce/tinymce.min.js' },
+    ],
   })
   export class AdministradorModule { }

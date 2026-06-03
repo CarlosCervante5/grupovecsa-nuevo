@@ -1,4 +1,5 @@
 <div class="login-page">
+  @if (!spinner) {
   <div class="login-card">
 
     <h1 class="login-title">Iniciar sesión</h1>
@@ -65,4 +66,11 @@
     </div>
 
   </div>
+  }
+
+  @if (spinner) {
+    <div class="login-page-preloader">
+      <app-sk-cube></app-sk-cube>
+    </div>
+  }
 </div>
