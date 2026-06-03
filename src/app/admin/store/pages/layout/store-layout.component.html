@@ -245,9 +245,9 @@
         <input type="text" class="filter-input" placeholder="Buscar por nombre o SKU..."
           [(ngModel)]="productSearch" (keyup.enter)="onProductSearch()" style="flex:1;max-width:400px;" />
         <select class="filter-input" [(ngModel)]="productCategoryFilter" (change)="onProductCategoryFilter()"
-          title="Filtrar por categoría" style="max-width:240px;min-width:160px;cursor:pointer;">
+          title="Filtrar por categoría padre (incluye sus subcategorías)" style="max-width:240px;min-width:160px;cursor:pointer;">
           <option value="">Todas las categorías</option>
-          @for (cat of categoryOptions; track cat.uuid) {
+          @for (cat of categoryFilterOptions; track cat.uuid) {
             <option [value]="cat.uuid">{{ cat.name }}</option>
           }
         </select>
@@ -259,6 +259,19 @@
         </select>
         <button class="filter-btn" (click)="onProductSearch()">
           <span class="material-icons">search</span> Buscar
+        </button>
+        <button
+          type="button"
+          class="filter-btn"
+          (click)="downloadProductInventoryCsv()"
+          [disabled]="productExporting"
+          title="Descargar inventario en CSV (usa los filtros actuales)"
+        >
+          @if (productExporting) {
+            <div class="spinner-sm"></div> Exportando...
+          } @else {
+            <span class="material-icons">download</span> Descargar CSV
+          }
         </button>
       </div>
 
@@ -2167,6 +2180,59 @@
               No hay imágenes pendientes: revisa que la columna Imágenes esté mapeada, que el producto no tenga fotos ya, y que uses modo Completo para filas nuevas.
             }
           </p>
+        }
+
+        @if (gsImportLog.length) {
+          <div class="store-card gs-card gs-log-card">
+            <div class="gs-card-head">
+              <h3 class="card-title" style="margin:0;">
+                <span class="material-icons gs-icon-green" style="color:#dc2626;">receipt_long</span>
+                Log de importación ({{ gsImportLog.length }})
+              </h3>
+              <div class="gs-log-actions">
+                <button type="button" class="gs-link-btn" (click)="copyGoogleSheetImportLog()">
+                  <span class="material-icons">content_copy</span> Copiar log
+                </button>
+              </div>
+            </div>
+            <p class="gs-hint" style="margin-top:0;">
+              Corrige estos puntos en tu Google Sheet y vuelve a importar. Los fallos de Drive suelen deberse a permisos o enlaces mal copiados.
+            </p>
+            <div class="gs-log-table-wrap">
+              <table class="gs-log-table">
+                <thead>
+                  <tr>
+                    <th>Tipo</th>
+                    <th>SKU</th>
+                    <th>URL / valor</th>
+                    <th>Problema</th>
+                    <th>Cómo corregir</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (entry of gsImportLog; track $index) {
+                    <tr>
+                      <td>
+                        <span class="gs-log-type" [class]="googleSheetLogTypeClass(entry.type)">
+                          {{ googleSheetLogTypeLabel(entry.type) }}
+                        </span>
+                      </td>
+                      <td><strong>{{ entry.sku }}</strong></td>
+                      <td class="gs-log-url">{{ entry.url || '—' }}</td>
+                      <td>{{ entry.message }}</td>
+                      <td class="gs-log-hint">{{ entry.hint || '—' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            @if (gsResult.import_log_truncated) {
+              <p class="gs-log-truncated">
+                <span class="material-icons" style="font-size:16px;vertical-align:middle;">info</span>
+                Se muestran las primeras incidencias; hay más filas con problemas no listadas.
+              </p>
+            }
+          </div>
         }
       }
     }
