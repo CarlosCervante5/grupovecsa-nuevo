@@ -25,32 +25,36 @@ class BoutiqueExternalImageImporter
         return $this->urlResolver->isGoogleDriveUrl($url);
     }
 
-    /**
-     * Importa una imagen de Drive al CDN y crea el registro. Devuelve false si falla.
-     */
-    public function importDriveImage(BoutiqueProduct $product, string $rawUrl, int $sortId): bool
+    public function extractDriveFileId(string $url): ?string
+    {
+        return $this->urlResolver->extractDriveFileId($url);
+    }
+
+    public function importDriveImage(BoutiqueProduct $product, string $rawUrl, int $sortId): BoutiqueExternalImageImportResult
     {
         $rawUrl = trim($rawUrl);
         if (! $this->urlResolver->isGoogleDriveUrl($rawUrl)) {
-            return false;
+            return BoutiqueExternalImageImportResult::fail('No es un enlace de Google Drive.');
         }
 
         $fileId = $this->urlResolver->extractDriveFileId($rawUrl);
         if ($fileId === null) {
-            Log::warning('Google Sheet image: Drive URL sin ID reconocible', [
-                'product_uuid' => $product->uuid,
-                'url' => $rawUrl,
-            ]);
-
-            return false;
+            return BoutiqueExternalImageImportResult::fail(
+                'Enlace de Drive no reconocido (no se encontró el ID del archivo).',
+                'Usa el enlace de compartir tipo drive.google.com/file/d/ID/view'
+            );
         }
 
         try {
-            $binary = $this->downloadDriveFile($fileId);
-            if ($binary === null) {
-                return false;
+            $download = $this->downloadDriveFile($fileId);
+            if (! $download['success']) {
+                return BoutiqueExternalImageImportResult::fail(
+                    $download['message'],
+                    $download['hint'] ?? null
+                );
             }
 
+            $binary = $download['data'];
             $extension = $this->detectImageExtension($binary['body'], $binary['content_type']);
             $stored = $this->storage->storeBoutiqueImageBinary(
                 $product->uuid,
@@ -67,7 +71,7 @@ class BoutiqueExternalImageImporter
                 'status' => 'uploaded',
             ]);
 
-            return true;
+            return BoutiqueExternalImageImportResult::ok();
         } catch (\Throwable $e) {
             Log::warning('Google Sheet image: fallo al importar desde Drive', [
                 'product_uuid' => $product->uuid,
@@ -75,25 +79,27 @@ class BoutiqueExternalImageImporter
                 'message' => $e->getMessage(),
             ]);
 
-            return false;
+            return BoutiqueExternalImageImportResult::fail(
+                'Error al publicar la imagen en el servidor: '.$e->getMessage(),
+                'Verifica Cloudinary/S3 en el entorno o intenta de nuevo más tarde.'
+            );
         }
     }
 
     /**
-     * @return array{body: string, content_type: string|null}|null
+     * @return array{success: bool, message?: string, hint?: string, data?: array{body: string, content_type: string|null}}
      */
-    private function downloadDriveFile(string $fileId): ?array
+    private function downloadDriveFile(string $fileId): array
     {
         $baseUrl = $this->urlResolver->directDownloadUrl($fileId);
 
         $response = $this->httpClient()->get($baseUrl);
         if (! $response->successful()) {
-            Log::warning('Google Sheet image: HTTP error al descargar Drive', [
-                'file_id' => $fileId,
-                'status' => $response->status(),
-            ]);
-
-            return null;
+            return [
+                'success' => false,
+                'message' => 'No se pudo descargar desde Drive (HTTP '.$response->status().').',
+                'hint' => 'Comprueba que el archivo exista y esté compartido como «Cualquier persona con el enlace».',
+            ];
         }
 
         $contentType = strtolower((string) $response->header('Content-Type'));
@@ -111,28 +117,35 @@ class BoutiqueExternalImageImporter
         }
 
         if ($this->looksLikeHtml($contentType, $body)) {
-            Log::warning('Google Sheet image: Drive devolvió HTML (permisos o enlace inválido)', [
-                'file_id' => $fileId,
-            ]);
-
-            return null;
+            return [
+                'success' => false,
+                'message' => 'Drive devolvió una página web en lugar de la imagen.',
+                'hint' => 'En Drive: Compartir → Acceso general → «Cualquier persona con el enlace» (lector).',
+            ];
         }
 
         if (strlen($body) > self::MAX_BYTES) {
-            Log::warning('Google Sheet image: archivo demasiado grande', ['file_id' => $fileId]);
-
-            return null;
+            return [
+                'success' => false,
+                'message' => 'La imagen supera el límite de 15 MB.',
+                'hint' => 'Comprime la imagen o súbela manualmente desde el panel del producto.',
+            ];
         }
 
         if (! $this->isImageBinary($body)) {
-            Log::warning('Google Sheet image: contenido no es imagen', ['file_id' => $fileId]);
-
-            return null;
+            return [
+                'success' => false,
+                'message' => 'El archivo descargado no es una imagen válida.',
+                'hint' => 'Asegúrate de que el enlace apunte a JPG, PNG, WEBP o GIF.',
+            ];
         }
 
         return [
-            'body' => $body,
-            'content_type' => $contentType !== '' ? $contentType : null,
+            'success' => true,
+            'data' => [
+                'body' => $body,
+                'content_type' => $contentType !== '' ? $contentType : null,
+            ],
         ];
     }
 
