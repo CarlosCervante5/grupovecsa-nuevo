@@ -21,6 +21,8 @@ class BoutiqueGoogleSheetSyncService
     /** @var array<int, true> */
     private array $syncAttributeParentIds = [];
 
+    private ?BoutiqueGoogleSheetImportLogger $importLogger = null;
+
     public function __construct(
         private readonly BoutiqueGoogleSheetUrlResolver $urlResolver,
         private readonly BoutiqueGoogleSheetColumnMapper $columnMapper,
@@ -234,6 +236,7 @@ class BoutiqueGoogleSheetSyncService
             'errors' => 0,
         ];
         $errors = [];
+        $this->importLogger = new BoutiqueGoogleSheetImportLogger();
 
         if ($dryRun) {
             foreach ($rows as $row) {
@@ -261,16 +264,17 @@ class BoutiqueGoogleSheetSyncService
                 $imagePlan = $this->planImagesForRow($row, $mode, $action);
                 $stats['images'] += $imagePlan['total'];
                 $stats['images_drive_planned'] += $imagePlan['drive'];
+                $this->logImageCellIssues($row, $mode, $action);
             }
 
-            return [
+            return array_merge([
                 'dry_run' => true,
                 'export_url' => $sheet['export_url'],
                 'column_mapping' => $prepared['mapping'],
                 'mode' => $mode,
                 'stats' => $stats,
                 'simulation_note' => 'La simulación no descarga ni guarda imágenes. El contador de imágenes indica cuántas se procesarían al importar sin simular.',
-            ];
+            ], $this->importLogPayload());
         }
 
         $this->categoryCache = [];
@@ -295,7 +299,9 @@ class BoutiqueGoogleSheetSyncService
                 }
             } catch (\Throwable $e) {
                 $stats['errors']++;
-                $errors[] = ['sku' => $row['sku'] ?? '', 'error' => $e->getMessage()];
+                $sku = trim($row['sku'] ?? '');
+                $errors[] = ['sku' => $sku, 'error' => $e->getMessage()];
+                $this->importLogger?->add('row', $sku, $e->getMessage(), null, 'Revisa SKU, tipo de fila y columnas obligatorias.');
             }
         }
 
@@ -306,7 +312,7 @@ class BoutiqueGoogleSheetSyncService
             );
         }
 
-        return [
+        return array_merge([
             'dry_run' => false,
             'export_url' => $sheet['export_url'],
             'column_mapping' => $prepared['mapping'],
@@ -314,7 +320,7 @@ class BoutiqueGoogleSheetSyncService
             'stats' => $stats,
             'error_details' => array_slice($errors, 0, 30),
             'attribute_catalog_sync' => $catalogStats,
-        ];
+        ], $this->importLogPayload());
     }
 
     /**
@@ -631,6 +637,8 @@ class BoutiqueGoogleSheetSyncService
     private function attachImagesIfMissing(BoutiqueProduct $product, string $imageString, array &$stats): void
     {
         if ($product->images()->exists()) {
+            $this->logSkippedImagesBecauseProductHasPhotos($product, $imageString);
+
             return;
         }
         $this->createImages($product, $imageString, $stats);
@@ -722,13 +730,24 @@ class BoutiqueGoogleSheetSyncService
 
     private function createImages(BoutiqueProduct $product, string $imageString, array &$stats): void
     {
+        $sku = trim((string) $product->sku);
+        $this->logInvalidImageTokens($sku, $imageString);
+
         $order = (int) ($product->images()->max('sort_id') ?? -1) + 1;
         foreach ($this->parseImageUrls($imageString) as $url) {
             if ($this->imageImporter->isGoogleDriveUrl($url)) {
-                if ($this->imageImporter->importDriveImage($product, $url, $order++)) {
+                $result = $this->imageImporter->importDriveImage($product, $url, $order++);
+                if ($result->success) {
                     $stats['images']++;
                 } else {
                     $stats['images_failed']++;
+                    $this->importLogger?->add(
+                        'image',
+                        $sku,
+                        $result->errorMessage ?? 'No se pudo importar la imagen desde Drive.',
+                        $url,
+                        $result->hint
+                    );
                 }
 
                 continue;
@@ -742,6 +761,87 @@ class BoutiqueGoogleSheetSyncService
             ]);
             $stats['images']++;
         }
+    }
+
+    /**
+     * @return array{import_log: list<array<string, mixed>>, import_log_truncated: bool}
+     */
+    private function importLogPayload(): array
+    {
+        return [
+            'import_log' => $this->importLogger?->entries() ?? [],
+            'import_log_truncated' => $this->importLogger?->isTruncated() ?? false,
+        ];
+    }
+
+    /**
+     * @param  array<string, string>  $row
+     */
+    private function logImageCellIssues(array $row, string $mode, string $action): void
+    {
+        $imagenes = trim($row['imagenes'] ?? '');
+        if ($imagenes === '') {
+            return;
+        }
+
+        $sku = trim($row['sku'] ?? '');
+        $this->logInvalidImageTokens($sku, $imagenes);
+
+        $plan = $this->planImagesForRow($row, $mode, $action);
+        if ($plan['total'] === 0 && $this->parseImageUrls($imagenes) !== []) {
+            $this->importLogger?->add(
+                'image_skip',
+                $sku,
+                'Las URLs de la fila no se importarían en esta ejecución.',
+                null,
+                'SKU no encontrado, producto ya con fotos, fila variante, modo Inventario en producto nuevo, o fila omitida.'
+            );
+        }
+
+        foreach ($this->parseImageUrls($imagenes) as $url) {
+            if ($this->imageImporter->isGoogleDriveUrl($url) && $this->imageImporter->extractDriveFileId($url) === null) {
+                $this->importLogger?->add(
+                    'image',
+                    $sku,
+                    'Enlace de Drive con formato no reconocido.',
+                    $url,
+                    'Copia el enlace desde Compartir → Copiar enlace del archivo en Drive.'
+                );
+            }
+        }
+    }
+
+    private function logInvalidImageTokens(string $sku, string $imageString): void
+    {
+        foreach (array_map('trim', explode(',', $imageString)) as $part) {
+            if ($part === '') {
+                continue;
+            }
+            if (! filter_var($part, FILTER_VALIDATE_URL)) {
+                $this->importLogger?->add(
+                    'image',
+                    $sku,
+                    'Texto en columna Imágenes que no es una URL válida.',
+                    $part,
+                    'Separa varias URLs con coma. Cada una debe empezar con https://'
+                );
+            }
+        }
+    }
+
+    private function logSkippedImagesBecauseProductHasPhotos(BoutiqueProduct $product, string $imageString): void
+    {
+        if (trim($imageString) === '') {
+            return;
+        }
+
+        $this->importLogger?->add(
+            'image_skip',
+            trim((string) $product->sku),
+            'El producto ya tiene imágenes en el catálogo; no se añadieron las de la hoja.',
+            null,
+            'Elimina las fotos actuales en el panel del producto si quieres reimportar desde la hoja.'
+        );
     }
 
     private function ensureCategories(string $catString, array &$stats): void

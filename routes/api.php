@@ -684,6 +684,7 @@ Route::prefix('boutique/admin')->middleware(['bandwidth_usage', 'auth:sanctum'])
 
     // Products
     Route::post('/products/search', [BoutiqueProductController::class, 'search']);
+    Route::post('/products/export-csv', [BoutiqueProductController::class, 'exportCsv']);
     Route::post('/products/store', [BoutiqueProductController::class, 'store']);
     Route::post('/products/update', [BoutiqueProductController::class, 'update']);
     Route::post('/products/delete', [BoutiqueProductController::class, 'delete']);
