@@ -72,17 +72,22 @@ if [[ -n "$DB_PASS" ]]; then
 fi
 MYSQL+=("$DB_NAME")
 
-echo "🧹 Vaciando tablas boutique (orden seguro)..."
-{
-  echo "SET FOREIGN_KEY_CHECKS=0;"
-  for table in "${TABLES[@]}"; do
-    echo "DELETE FROM \`${table}\`;"
-  done
-  echo "SET FOREIGN_KEY_CHECKS=1;"
-} | "${MYSQL[@]}"
+if command -v mysql >/dev/null 2>&1; then
+  echo "🧹 Vaciando tablas boutique (orden seguro)..."
+  {
+    echo "SET FOREIGN_KEY_CHECKS=0;"
+    for table in "${TABLES[@]}"; do
+      echo "DELETE FROM \`${table}\`;"
+    done
+    echo "SET FOREIGN_KEY_CHECKS=1;"
+  } | "${MYSQL[@]}"
 
-echo "📥 Importando dump..."
-"${MYSQL[@]}" < "$DUMP_FILE"
+  echo "📥 Importando dump (mysql)..."
+  "${MYSQL[@]}" < "$DUMP_FILE"
+else
+  echo "   mysql no disponible; usando php artisan boutique:catalog-import-sql"
+  php artisan boutique:catalog-import-sql "$DUMP_FILE" --truncate
+fi
 
 echo "🔧 Fixup dealership_id..."
 FIXUP_ARGS=(boutique:catalog-import-fixup --remap-dealerships)

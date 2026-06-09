@@ -56,25 +56,30 @@ echo "🗺️  Exportando mapa de sucursales (sandbox)..."
 php artisan boutique:catalog-export-dealership-map --output="$MAP_FILE"
 
 echo "📦 Generando dump SQL..."
-{
-  echo "-- Boutique catalog export ${TIMESTAMP}"
-  echo "-- Source DB: ${DB_NAME}"
-  echo "SET NAMES utf8mb4;"
-  echo "SET FOREIGN_KEY_CHECKS=0;"
-  mysqldump \
-    --no-create-info \
-    --complete-insert \
-    --single-transaction \
-    --skip-triggers \
-    --set-gtid-purged=OFF \
-    -h "$DB_HOST" \
-    -P "$DB_PORT" \
-    -u "$DB_USER" \
-    ${DB_PASS:+-p"$DB_PASS"} \
-    "$DB_NAME" \
-    "${TABLES[@]}"
-  echo "SET FOREIGN_KEY_CHECKS=1;"
-} > "$DUMP_FILE"
+if command -v mysqldump >/dev/null 2>&1; then
+  {
+    echo "-- Boutique catalog export ${TIMESTAMP}"
+    echo "-- Source DB: ${DB_NAME}"
+    echo "SET NAMES utf8mb4;"
+    echo "SET FOREIGN_KEY_CHECKS=0;"
+    mysqldump \
+      --no-create-info \
+      --complete-insert \
+      --single-transaction \
+      --skip-triggers \
+      --set-gtid-purged=OFF \
+      -h "$DB_HOST" \
+      -P "$DB_PORT" \
+      -u "$DB_USER" \
+      ${DB_PASS:+-p"$DB_PASS"} \
+      "$DB_NAME" \
+      "${TABLES[@]}"
+    echo "SET FOREIGN_KEY_CHECKS=1;"
+  } > "$DUMP_FILE"
+else
+  echo "   mysqldump no disponible; usando php artisan boutique:catalog-export-sql"
+  php artisan boutique:catalog-export-sql --output="$DUMP_FILE"
+fi
 
 ln -sf "$(basename "$DUMP_FILE")" "$LATEST_LINK"
 
