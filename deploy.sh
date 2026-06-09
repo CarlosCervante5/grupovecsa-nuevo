@@ -11,7 +11,7 @@ php artisan config:clear 2>/dev/null || true
 echo "📦 Running migrations..."
 php artisan migrate --force --no-interaction
 
-# Run seeders (safe to re-run - they use firstOrCreate patterns)
+# Seeders idempotentes: firstOrCreate por SKU/nombre; boutique demo se omite si hay catálogo real importado
 echo "🌱 Running seeders..."
 php artisan db:seed --class=DeveloperUserSeeder --force 2>/dev/null || echo "⚠️ DeveloperUserSeeder skipped"
 php artisan db:seed --class=HomeContentSeeder --force 2>/dev/null || echo "⚠️ HomeContentSeeder skipped"

@@ -3,12 +3,19 @@
 namespace Database\Seeders;
 
 use App\Models\Boutique\BoutiqueBanner;
+use App\Support\BoutiqueDemoCatalog;
 use Illuminate\Database\Seeder;
 
 class BoutiqueBannerSeeder extends Seeder
 {
     public function run(): void
     {
+        if (! BoutiqueDemoCatalog::shouldSeedDemoCatalog()) {
+            $this->command?->info('BoutiqueBannerSeeder: catálogo real detectado; se omite seed demo.');
+
+            return;
+        }
+
         $banners = [
             [
                 'title' => 'Boutique BMW',
@@ -39,11 +46,17 @@ class BoutiqueBannerSeeder extends Seeder
             ],
         ];
 
+        $created = 0;
         foreach ($banners as $banner) {
-            BoutiqueBanner::firstOrCreate(
+            $model = BoutiqueBanner::firstOrCreate(
                 ['title' => $banner['title']],
                 $banner
             );
+            if ($model->wasRecentlyCreated) {
+                $created++;
+            }
         }
+
+        $this->command?->info("BoutiqueBannerSeeder: {$created} banner(es) demo nuevo(s); resto ya existía.");
     }
 }
