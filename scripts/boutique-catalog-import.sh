@@ -7,9 +7,15 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
+# shellcheck source=lib/load-db-env.sh
+source "${ROOT_DIR}/scripts/lib/load-db-env.sh"
+boutique_load_db_env || true
+
 DUMP_FILE="${1:-storage/app/boutique-catalog-export/latest.sql}"
 MAP_FILE="${MAP_FILE:-storage/app/boutique-catalog-export/boutique-dealership-map.json}"
 CONFIRM="${CONFIRM:-}"
+# 1 = rechaza dump con URLs WordPress; 0 = permite mix WP + CDN
+REQUIRE_CDN_ONLY="${REQUIRE_CDN_ONLY:-1}"
 
 if [[ ! -f "$DUMP_FILE" ]]; then
   echo "❌ No existe el dump: $DUMP_FILE"
@@ -24,7 +30,7 @@ DB_PASS="${DB_PASSWORD:-${MYSQLPASSWORD:-}}"
 DB_NAME="${DB_DATABASE:-${MYSQLDATABASE:-}}"
 
 if [[ -z "$DB_HOST" || -z "$DB_USER" || -z "$DB_NAME" ]]; then
-  echo "❌ Faltan variables DB_HOST / DB_USERNAME / DB_DATABASE."
+  echo "❌ No se pudieron leer credenciales MySQL (shell ni Laravel)."
   exit 1
 fi
 
@@ -50,11 +56,15 @@ fi
 echo "📋 Auditoría del dump (URLs WordPress en el SQL)..."
 WP_COUNT="$(grep -Eo 'https?://[^\"'\'' ]*vecsaboutique\.com[^\"'\'' ]*' "$DUMP_FILE" | wc -l | tr -d ' ')"
 if [[ "$WP_COUNT" != "0" ]]; then
-  echo "❌ El dump contiene ${WP_COUNT} referencia(s) a vecsaboutique.com."
-  echo "   Migra en sandbox antes de exportar, o revisa el archivo."
-  exit 1
+  if [[ "$REQUIRE_CDN_ONLY" == "1" ]]; then
+    echo "❌ El dump contiene ${WP_COUNT} referencia(s) a vecsaboutique.com."
+    echo "   Migra en sandbox, o importa con REQUIRE_CDN_ONLY=0 si WordPress seguirá activo."
+    exit 1
+  fi
+  echo "   ⚠️  Dump con ${WP_COUNT} URL(s) WordPress (permitido: REQUIRE_CDN_ONLY=0)."
+else
+  echo "   OK: sin URLs WordPress detectadas en el dump."
 fi
-echo "   OK: sin URLs WordPress detectadas en el dump."
 
 MYSQL=(mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER")
 if [[ -n "$DB_PASS" ]]; then
@@ -85,6 +95,10 @@ fi
 php artisan "${FIXUP_ARGS[@]}"
 
 echo "📋 Auditoría post-import..."
-php artisan boutique:catalog-audit --show-samples=3 --require-cdn-only
+AUDIT_ARGS=(boutique:catalog-audit --show-samples=3)
+if [[ "$REQUIRE_CDN_ONLY" == "1" ]]; then
+  AUDIT_ARGS+=(--require-cdn-only)
+fi
+php artisan "${AUDIT_ARGS[@]}"
 
 echo "✅ Import completado."

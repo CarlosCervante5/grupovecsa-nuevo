@@ -6,7 +6,12 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
+# shellcheck source=lib/load-db-env.sh
+source "${ROOT_DIR}/scripts/lib/load-db-env.sh"
+boutique_load_db_env || true
+
 OUTPUT_DIR="${OUTPUT_DIR:-storage/app/boutique-catalog-export}"
+# 1 = solo CloudFront/Cloudinary; 0 = permite mix con WordPress (vecsaboutique.com)
 REQUIRE_CDN_ONLY="${REQUIRE_CDN_ONLY:-1}"
 TIMESTAMP="$(date -u +%Y%m%d_%H%M%S)"
 DUMP_FILE="${OUTPUT_DIR}/boutique_catalog_${TIMESTAMP}.sql"
@@ -21,7 +26,8 @@ DB_PASS="${DB_PASSWORD:-${MYSQLPASSWORD:-}}"
 DB_NAME="${DB_DATABASE:-${MYSQLDATABASE:-}}"
 
 if [[ -z "$DB_HOST" || -z "$DB_USER" || -z "$DB_NAME" ]]; then
-  echo "❌ Faltan variables DB_HOST / DB_USERNAME / DB_DATABASE (o MYSQL* en Railway)."
+  echo "❌ No se pudieron leer credenciales MySQL (shell ni Laravel)."
+  echo "   Prueba: php artisan tinker --execute=\"echo config('database.connections.mysql.host');\""
   exit 1
 fi
 
