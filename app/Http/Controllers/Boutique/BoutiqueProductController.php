@@ -92,6 +92,47 @@ class BoutiqueProductController extends Controller
     }
 
     /**
+     * POST /api/boutique/admin/products/detail
+     */
+    public function detail(DeleteBoutiqueProductRequest $request)
+    {
+        try {
+            $data = $request->validated();
+
+            $product = BoutiqueProduct::findByUuid($data['uuid']);
+            if (! $product) {
+                return ApiResponseHelper::apiError('El producto no existe', 'No existe el uuid: '.$data['uuid'], 404, 'PRODUCT_NOT_FOUND');
+            }
+
+            $this->dealershipAccess->assertProductDealershipAccessible($request->user(), $product->dealership_id);
+
+            $product->load([
+                'category',
+                'dealership',
+                'images' => function ($q) {
+                    $q->orderBy('sort_id');
+                },
+                'attributes.values',
+                'variants.attributeValues.attribute',
+            ]);
+
+            $product->low_stock = $product->stock <= 5;
+            if ($product->relationLoaded('dealership')) {
+                $product->setAttribute(
+                    'dealership',
+                    BoutiqueDealershipPresenter::catalogSummary($product->dealership)
+                );
+            }
+
+            return ApiResponseHelper::apiSuccess(200, 'Detalle del producto obtenido exitosamente', ['product' => $product]);
+        } catch (AuthorizationException $e) {
+            return ApiResponseHelper::apiError($e->getMessage(), null, 403, 'INVENTORY_FORBIDDEN');
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al obtener el detalle del producto', $e->getMessage(), 500, 'GET_PRODUCT_DETAIL_ERROR');
+        }
+    }
+
+    /**
      * POST /api/boutique/admin/products/export-csv
      * Mismos filtros que search (search, category_uuid, active). Descarga inventario completo filtrado.
      */
