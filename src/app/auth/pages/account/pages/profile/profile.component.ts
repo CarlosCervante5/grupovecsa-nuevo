@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, HostListener, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, ViewChild, ElementRef, HostListener, Output, EventEmitter } from '@angular/core';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { Title } from '@angular/platform-browser';
 import * as echarts from 'echarts/core';
@@ -24,7 +24,7 @@ import { TableCouponsComponent } from 'src/app/admin/staff/components/table-coup
     standalone: false
 })
 
-export class ProfileComponent implements AfterViewInit, OnInit{
+export class ProfileComponent implements AfterViewInit, OnInit, OnDestroy {
   
     @ViewChild('myModal') modal!: ElementRef;
     @ViewChild('myImg') imgM!: ElementRef;
@@ -55,8 +55,8 @@ export class ProfileComponent implements AfterViewInit, OnInit{
     public puntosGrafica: number[] = [];
     showScrollButton = false;
 
-    private myChart!: echarts.ECharts;
-    private chartDomT!: HTMLElement;
+    private myChart: echarts.ECharts | null = null;
+    private chartDomT: HTMLElement | null = null;
 
     public ancho!: number;
     public anchoCards!: number;
@@ -83,10 +83,10 @@ export class ProfileComponent implements AfterViewInit, OnInit{
     ngAfterViewInit(): void {
       this.userSessionStorage();
       this.cubetime();
-      setTimeout(() => {
-        this.initChart();
-      }, 500);
+    }
 
+    ngOnDestroy(): void {
+      this.disposeChart();
     }
 
     ngOnInit(): void {
@@ -111,9 +111,10 @@ export class ProfileComponent implements AfterViewInit, OnInit{
         this.customer_uuid = profile.uuid;
     }
 
-    cubetime () : void {
+    cubetime (): void {
         setTimeout(() => {
             this.spinner = false;
+            this.scheduleChartRefresh();
         }, 500);
     }
 
@@ -123,20 +124,35 @@ export class ProfileComponent implements AfterViewInit, OnInit{
     } 
 
     // se detecta el tamaño de la pantalla y se determina posición de etiquetas
-    public getAxisLabelPosition = () => {
+  public getAxisLabelPosition = () => {
+      if (!this.chartDomT) {
+        return 0;
+      }
       const containerWidth = this.chartDomT.clientWidth;
       return containerWidth < 600 ? 45 : 0;
     };
     public getAxisLabelSize = () => {
+      if (!this.chartDomT) {
+        return 17;
+      }
       const containerWidth = this.chartDomT.clientWidth;
       return containerWidth < 600 ? 10 : 17;
     };
 
-    public initChart():void {
-      const chartDom = document.getElementById('linea')!;
-      this.chartDomT = chartDom;
-      this.myChart = echarts.init(chartDom);
-      const option = {
+    private scheduleChartRefresh(): void {
+      setTimeout(() => this.refreshChart(), 0);
+    }
+
+    private disposeChart(): void {
+      if (this.myChart && !this.myChart.isDisposed()) {
+        this.myChart.dispose();
+      }
+      this.myChart = null;
+      this.chartDomT = null;
+    }
+
+    private buildChartOption(): echarts.EChartsCoreOption {
+      return {
         legend: {
           data: ['Puntos', 'Kilometros']
         },
@@ -151,7 +167,7 @@ export class ProfileComponent implements AfterViewInit, OnInit{
             color: '#fff',
             fontSize: 17,
             fontFamily: 'Mulish',
-        }
+          }
         },
         yAxis: {
           type: 'value',
@@ -160,7 +176,7 @@ export class ProfileComponent implements AfterViewInit, OnInit{
             fontSize: this.getAxisLabelSize(),
             rotate: this.getAxisLabelPosition(),
             fontFamily: 'Mulish',
-        }
+          }
         },
         series: [
           {
@@ -168,8 +184,8 @@ export class ProfileComponent implements AfterViewInit, OnInit{
             type: 'line',
             stack: 'Total',
             areaStyle: {
-                  color: '#86BEDA' 
-                },
+              color: '#86BEDA'
+            },
             emphasis: {
               focus: 'series'
             },
@@ -177,21 +193,53 @@ export class ProfileComponent implements AfterViewInit, OnInit{
           },
         ]
       };
+    }
 
-      this.myChart.setOption(option);
+    private renderChart(): void {
+      if (this.activeTab !== 'perfil' || this.spinner) {
+        return;
+      }
+
+      const chartDom = document.getElementById('linea');
+      if (!chartDom) {
+        return;
+      }
+
+      this.chartDomT = chartDom;
+      this.disposeChart();
+      this.myChart = echarts.init(chartDom);
+      this.myChart.setOption(this.buildChartOption());
+    }
+
+    private refreshChart(): void {
+      if (this.activeTab !== 'perfil' || this.spinner) {
+        return;
+      }
+
+      if (this.myChart && !this.myChart.isDisposed()) {
+        this.myChart.setOption(this.buildChartOption());
+        this.myChart.resize();
+        return;
+      }
+
+      this.renderChart();
     }
 
     updateAxisLabelPosition(): void {
-      const option = this.myChart.getOption() as echarts.EChartsCoreOption; 
-  
+      if (!this.myChart || this.myChart.isDisposed()) {
+        return;
+      }
+
+      const option = this.myChart.getOption() as echarts.EChartsCoreOption;
+
       if (Array.isArray(option.yAxis)) {
-        const yAxis = option.yAxis[0] as any; 
-        if (yAxis && yAxis.axisLabel) {
-          yAxis.axisLabel.rotate = this.getAxisLabelPosition(); // Cambia la posición
-          yAxis.axisLabel.fontSize = this.getAxisLabelSize(); // Cambia la posición
+        const yAxis = option.yAxis[0] as { axisLabel?: { rotate?: number; fontSize?: number } };
+        if (yAxis?.axisLabel) {
+          yAxis.axisLabel.rotate = this.getAxisLabelPosition();
+          yAxis.axisLabel.fontSize = this.getAxisLabelSize();
         }
       }
-  
+
       this.myChart.setOption(option);
     }
 
@@ -232,10 +280,10 @@ export class ProfileComponent implements AfterViewInit, OnInit{
         }
     }
 
-    @HostListener('window:resize',['$event'])
+    @HostListener('window:resize')
     onResize(): void {
-        if (this.myChart) {
-            this.myChart.resize();  // Ajusta el tamaño de la gráfica
+        if (this.myChart && !this.myChart.isDisposed()) {
+            this.myChart.resize();
             this.updateAxisLabelPosition();
         }
         this.anchoW = window.innerWidth;
@@ -295,6 +343,7 @@ export class ProfileComponent implements AfterViewInit, OnInit{
                 this.puntos_mes = response.data.profile.month_points;
                 this.puntos_acum = response.data.profile.total_points;
                 this.puntosGrafica = this.floorArray(response.data.months);
+                this.scheduleChartRefresh();
             },
             error: (error:any) => {
                 reload(error, this._router);
@@ -320,6 +369,9 @@ export class ProfileComponent implements AfterViewInit, OnInit{
 
     selectTab(tab: string): void {
         this.activeTab = tab;
+        if (tab === 'perfil') {
+          this.scheduleChartRefresh();
+        }
     }
 
     redeemPoints(): void {
