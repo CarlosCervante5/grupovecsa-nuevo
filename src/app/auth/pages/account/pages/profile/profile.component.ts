@@ -114,7 +114,7 @@ export class ProfileComponent implements AfterViewInit, OnInit, OnDestroy {
     cubetime (): void {
         setTimeout(() => {
             this.spinner = false;
-            this.scheduleChartRefresh();
+            this.scheduleChartRender();
         }, 500);
     }
 
@@ -141,6 +141,31 @@ export class ProfileComponent implements AfterViewInit, OnInit, OnDestroy {
 
     private scheduleChartRefresh(): void {
       setTimeout(() => this.refreshChart(), 0);
+    }
+
+    /** Espera a que *ngIf vuelva a montar #linea tras cambiar de pestaña. */
+    private scheduleChartRender(attempt = 0): void {
+      const maxAttempts = 8;
+      setTimeout(() => {
+        if (this.activeTab !== 'perfil' || this.spinner) {
+          return;
+        }
+        if (document.getElementById('linea')) {
+          this.renderChart();
+          return;
+        }
+        if (attempt < maxAttempts) {
+          this.scheduleChartRender(attempt + 1);
+        }
+      }, attempt === 0 ? 0 : 50);
+    }
+
+    private isChartDomMounted(): boolean {
+      if (!this.myChart || this.myChart.isDisposed()) {
+        return false;
+      }
+      const dom = this.myChart.getDom();
+      return !!dom?.isConnected && dom.id === 'linea';
     }
 
     private disposeChart(): void {
@@ -216,13 +241,14 @@ export class ProfileComponent implements AfterViewInit, OnInit, OnDestroy {
         return;
       }
 
-      if (this.myChart && !this.myChart.isDisposed()) {
-        this.myChart.setOption(this.buildChartOption());
-        this.myChart.resize();
+      if (this.isChartDomMounted()) {
+        this.myChart!.setOption(this.buildChartOption());
+        this.myChart!.resize();
         return;
       }
 
-      this.renderChart();
+      this.disposeChart();
+      this.scheduleChartRender();
     }
 
     updateAxisLabelPosition(): void {
@@ -368,9 +394,12 @@ export class ProfileComponent implements AfterViewInit, OnInit, OnDestroy {
     }
 
     selectTab(tab: string): void {
+        if (tab !== 'perfil' && this.activeTab === 'perfil') {
+          this.disposeChart();
+        }
         this.activeTab = tab;
         if (tab === 'perfil') {
-          this.scheduleChartRefresh();
+          this.scheduleChartRender();
         }
     }
 
