@@ -18,7 +18,7 @@ export class AppointmentsService {
     const headers = new HttpHeaders().set('Authorization', `Bearer ${user_token}`);
     return this._http.post<AppointmentsResponse>(
       `${this.url}/api/appointment/search`,
-      { type: '', keyword: '', paginate: 100 },
+      { keyword: '', paginate: 100 },
       { headers }
     );
   }
