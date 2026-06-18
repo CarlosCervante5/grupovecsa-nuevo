@@ -428,6 +428,12 @@ export class RegisterComponent {
         this.validateAccesories();
     }
 
+    get affinityQuizzes(): Quiz[] {
+        return this.accesories.filter(quiz =>
+            !this.sizeQuestionTypes.includes(quiz.question_type)
+        );
+    }
+
     get sizeQuizzes(): Quiz[] {
         const affinitySizes = this.accesories.filter(quiz =>
             this.sizeQuestionTypes.includes(quiz.question_type)
@@ -496,6 +502,10 @@ export class RegisterComponent {
         }
     }
     
+    private normalizeBrand(brand: string | null | undefined): string {
+        return (brand ?? '').trim().toLowerCase();
+    }
+
     public onChipBrandChange(event: MatChipListboxChange, quiz_uuid: string) {
 
         this.brand_quiz!.selected_value = event.value
@@ -506,7 +516,9 @@ export class RegisterComponent {
 
         if(event.value != undefined){
 
-            if(event.value == 'bmw' || event.value == 'mini'){
+            const brand = this.normalizeBrand(event.value);
+
+            if(brand === 'bmw' || brand === 'mini'){
                 
                 this.defaultBrandSelected = true;
                 this.motorradBrandSelected = false;
@@ -517,7 +529,7 @@ export class RegisterComponent {
                 this.validateQuestionForm( this.default_validation );
             }
 
-            if(event.value == 'motorrad'){
+            if(brand === 'motorrad'){
                 
                 this.defaultBrandSelected = false;
                 this.motorradBrandSelected = true;
@@ -528,7 +540,7 @@ export class RegisterComponent {
                 this.validateQuestionForm( this.default_validation );
             }
 
-            if(event.value == 'chevrolet'){
+            if(brand === 'chevrolet'){
                 
                 this.defaultBrandSelected = false;
                 this.motorradBrandSelected = false;
@@ -539,7 +551,7 @@ export class RegisterComponent {
                 this.validateQuestionForm( this.chevrolet_validation );
             }
 
-            this.assignCards(event.value);
+            this.assignCards(brand);
 
         } else {
 
@@ -575,9 +587,12 @@ export class RegisterComponent {
     }
 
     public avatar () {
-        const dialogRef = this.dialog.open(AvatarsProfileComponent, { 
-            width: '900px', 
-            height: '600px',
+        const dialogRef = this.dialog.open(AvatarsProfileComponent, {
+            width: '920px',
+            maxWidth: '95vw',
+            maxHeight: '90vh',
+            panelClass: 'avatar-picker-dialog',
+            autoFocus: false,
             data: {
                 page: 'register'
             }
@@ -651,13 +666,13 @@ export class RegisterComponent {
                     return;
                 }
 
-                this.clothes_gender = quizzes.data[0];
+                this.clothes_gender = quizzes.data.find(quiz => quiz.group_name === 'profile_gender') ?? quizzes.data[0];
 
-                this.gender =  (quizzes.data[0].selected_value == "undefined")? 'null':  quizzes.data[0].selected_value;
+                this.gender =  (this.clothes_gender.selected_value == "undefined")? 'null':  this.clothes_gender.selected_value;
 
                 this.accesories = quizzes.data.filter(quiz => quiz.group_name === 'profile_affinities');
 
-                this.brand_quiz = quizzes.data[11];
+                this.brand_quiz = quizzes.data.find(quiz => quiz.group_name === 'brand_preference') ?? null;
 
                 this.motorrad_cards = quizzes.data.filter(quiz => quiz.group_name === 'event_preferences');
 
@@ -697,22 +712,24 @@ export class RegisterComponent {
 
     public assignCards( brand: string){
 
-        if(brand == 'bmw'){
+        const normalizedBrand = this.normalizeBrand(brand);
+
+        if(normalizedBrand === 'bmw'){
 
             this.cards = this.bmw_cards;
         }
 
-        if(brand == 'mini'){
+        if(normalizedBrand === 'mini'){
 
             this.cards = this.mini_cards;
         }
 
-        if(brand == 'motorrad'){
+        if(normalizedBrand === 'motorrad'){
 
             this.cards = this.motorrad_cards;
         }
 
-        if(brand == 'chevrolet'){
+        if(normalizedBrand === 'chevrolet'){
 
             this.cards = this.chevrolet_cards;
         }

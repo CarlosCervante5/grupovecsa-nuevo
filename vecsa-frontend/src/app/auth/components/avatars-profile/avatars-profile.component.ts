@@ -15,7 +15,7 @@ import { Router } from '@angular/router';
 
 export class AvatarsProfileComponent {
 
-  @ViewChild(' videoElement', { static: false }) videoElement: ElementRef | undefined;
+  @ViewChild('videoElement', { static: false }) videoElement: ElementRef | undefined;
   public capturedImage: string | undefined;  // Imagen capturada
   public mensaje: string ='';
   public cameraActive: boolean = false;
@@ -187,6 +187,8 @@ export class AvatarsProfileComponent {
 
   // Función para filtrar los iconos según la categoría seleccionada
   filtrarIconos(categoria: string) {
+    this.selectedCategory = categoria;
+
     if (categoria === 'todos') {
       this.filteredIcons = this.iconos;
     } else {

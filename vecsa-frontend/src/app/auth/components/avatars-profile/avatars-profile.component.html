@@ -1,76 +1,92 @@
-<div class="contenedor">
-    <div class="header">
-        <h1>Elegir Avatar</h1>
-
-        <div class="buttons-header">
-            <button mat-icon-button (click)="onClose()" class="close-button">
-                <mat-icon>close</mat-icon>
-            </button>
-        </div>
+<div class="avatar-picker">
+  <header class="avatar-picker__header">
+    <div class="avatar-picker__heading">
+      <h2>Elegir avatar</h2>
+      <p>Selecciona un ícono de la colección o toma una foto para tu perfil.</p>
     </div>
+    <button type="button" class="avatar-picker__close" (click)="onClose()" aria-label="Cerrar">
+      <mat-icon>close</mat-icon>
+    </button>
+  </header>
 
-
-    <div class="picture-camera">
-        <!-- Botón para abrir o volver a abrir la cámara -->
-        <span>Clasificación: </span>
-        <div class="icon-button" *ngIf="!capturedImage" (click)="openCamera()">
-            <i class="fa-solid fa-camera-retro"></i>
-            <span>Abrir Cámara</span>
-        </div>
+  <div class="avatar-picker__toolbar" *ngIf="!cameraActive && !capturedImage">
+    <div class="avatar-picker__toolbar-row">
+      <span class="avatar-picker__label">Clasificación</span>
+      <button type="button" class="avatar-picker__camera" (click)="openCamera()">
+        <mat-icon>photo_camera</mat-icon>
+        <span>Abrir cámara</span>
+      </button>
     </div>
-
-    <div class="camera-preview" *ngIf="cameraActive">
-        <video #videoElement autoplay muted></video>
-
-        <div class="instrucciones">
-            Se tomara la foto en 4 seg. Asegurate de que tu rostro este dentro del marco, antes de tomar la foto.
-        </div>
+    <div class="avatar-picker__filters" role="tablist" aria-label="Filtrar avatares">
+      <button
+        type="button"
+        role="tab"
+        class="avatar-picker__filter"
+        [class.avatar-picker__filter--active]="selectedCategory === 'todos'"
+        [attr.aria-selected]="selectedCategory === 'todos'"
+        (click)="filtrarIconos('todos')">
+        Todos
+      </button>
+      <button
+        type="button"
+        role="tab"
+        class="avatar-picker__filter"
+        [class.avatar-picker__filter--active]="selectedCategory === 'autos'"
+        [attr.aria-selected]="selectedCategory === 'autos'"
+        (click)="filtrarIconos('autos')">
+        Vehículos
+      </button>
+      <button
+        type="button"
+        role="tab"
+        class="avatar-picker__filter"
+        [class.avatar-picker__filter--active]="selectedCategory === 'motos'"
+        [attr.aria-selected]="selectedCategory === 'motos'"
+        (click)="filtrarIconos('motos')">
+        Motos
+      </button>
     </div>
+  </div>
 
-    <div class="camera">
-        <!--Imagen capturada-->
-        <img *ngIf="capturedImage" [src]="capturedImage" alt="Imagen capturada" />
-
-        <!-- Botones para confirmar o cancelar -->
-        <div class="buttons" *ngIf="capturedImage">
-            <button mat-button class="seleccionar" (click)="confirmPhoto()">Confirmar</button>
-            <button mat-button class="new" (click)="retakePhoto()">Volver a tomar foto</button>
-            <button mat-button class="cancelar" (click)="cancelPhoto()">Cancelar</button>
-        </div>
+  <section class="avatar-picker__camera" *ngIf="cameraActive">
+    <div class="avatar-picker__camera-frame">
+      <video #videoElement autoplay muted playsinline></video>
+      <p class="avatar-picker__camera-hint">{{ mensaje || 'Centra tu rostro en el marco. La foto se tomará en unos segundos.' }}</p>
     </div>
+  </section>
 
-    <div class="categorias">
-        <!--Bontones para seleccionar categoría-->
-        <button (click)="filtrarIconos ('todos')">Todos</button>
-        <button (click)="filtrarIconos ('autos')">Vehículos</button>
-        <button (click)="filtrarIconos ('motos')">Motos</button>
+  <section class="avatar-picker__preview" *ngIf="capturedImage && !cameraActive">
+    <img [src]="capturedImage" alt="Vista previa de tu foto" class="avatar-picker__preview-img" />
+    <div class="avatar-picker__preview-actions">
+      <button type="button" class="avatar-picker__btn avatar-picker__btn--primary" (click)="confirmPhoto()">Confirmar foto</button>
+      <button type="button" class="avatar-picker__btn avatar-picker__btn--secondary" (click)="retakePhoto()">Volver a tomar</button>
+      <button type="button" class="avatar-picker__btn avatar-picker__btn--ghost" (click)="cancelPhoto()">Cancelar</button>
     </div>
+  </section>
 
-    <hr>
-
-    <div class="buttons">
-        <button 
-            mat-raised-button
-            type="button"
-            class="abcars-background-color-blue btnEnviar"
-            (click)="enviarIcon()"
-            [disabled]="!iconButton"
-            [ngClass]="[!iconButton ? 'btnDisabled' : 'abcars-background-color-blue']"
-        >
-            Seleccionar
-        </button>
+  <section class="avatar-picker__body" *ngIf="!cameraActive && !capturedImage">
+    <div class="avatar-picker__grid">
+      <button
+        type="button"
+        class="avatar-picker__item"
+        *ngFor="let icon of filteredIcons"
+        [class.avatar-picker__item--selected]="selectedIcon === icon.src"
+        (click)="setIcon(icon.src)"
+        [attr.aria-label]="'Seleccionar avatar'">
+        <img [src]="icon.src" alt="" loading="lazy" />
+      </button>
     </div>
+    <p class="avatar-picker__empty" *ngIf="filteredIcons.length === 0">No hay avatares en esta categoría.</p>
+  </section>
 
-    <div class="avatars">
-        <div class="row">
-            <div class="col-12 columnaImagenes">
-                <div class="row">
-                    <div class="col-2" *ngFor="let icon of filteredIcons" (click)="setIcon(icon.src)">
-                        <img [src]="icon.src" alt="Avatar" class="avatar" [class.selected]="selectedIcon === icon.src">
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
+  <footer class="avatar-picker__footer" *ngIf="!cameraActive && !capturedImage">
+    <button
+      type="button"
+      class="avatar-picker__submit"
+      (click)="enviarIcon()"
+      [disabled]="!iconButton">
+      <mat-icon>check_circle</mat-icon>
+      Seleccionar avatar
+    </button>
+  </footer>
 </div>

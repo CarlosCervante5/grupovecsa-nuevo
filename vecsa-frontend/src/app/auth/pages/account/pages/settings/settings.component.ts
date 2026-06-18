@@ -318,9 +318,12 @@ export class SettingsComponent {
     }
 
     public avatar () {
-        const dialogRef = this.dialog.open(AvatarsProfileComponent, { 
-            width: '900px', 
-            height: '600px',
+        const dialogRef = this.dialog.open(AvatarsProfileComponent, {
+            width: '920px',
+            maxWidth: '95vw',
+            maxHeight: '90vh',
+            panelClass: 'avatar-picker-dialog',
+            autoFocus: false,
             data: {
                 page: 'edit'
             }

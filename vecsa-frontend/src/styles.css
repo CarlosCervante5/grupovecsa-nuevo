@@ -570,3 +570,12 @@ input[type=password]::-ms-clear
 {
   display: none;
 }
+
+/* Modal elegir avatar (registro / perfil) */
+.avatar-picker-dialog .mat-mdc-dialog-container,
+.avatar-picker-dialog .mat-mdc-dialog-surface {
+  padding: 0 !important;
+  border-radius: 20px !important;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.18) !important;
+}
