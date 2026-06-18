@@ -821,20 +821,44 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   viewProductDetail(product: any): void {
     this.productSaveError = '';
     this.productSaveSuccess = '';
-    // Load full product detail with attributes from backend
+    this.loadProductDetail(product.uuid, product, true);
+  }
+
+  /** Recarga detalle admin (imágenes, variantes, atributos). Reintenta si hay imágenes pending. */
+  private loadProductDetail(uuid: string, fallback: any, startEdit = false, pollAttempt = 0): void {
     const token = localStorage.getItem('user_token') || '';
     const headers = new HttpHeaders({ 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', Authorization: `Bearer ${token}` });
-    this.http.post(`${environment.baseUrl}/api/boutique/admin/products/detail`, { uuid: product.uuid }, { headers }).subscribe({
+    this.http.post(`${environment.baseUrl}/api/boutique/admin/products/detail`, { uuid }, { headers }).subscribe({
       next: (res: any) => {
-        const p = res?.data?.product || res?.data || product;
+        const p = res?.data?.product || res?.data || fallback;
         this.selectedProduct = { ...p };
-        this.startEditProduct();
+        if (startEdit) {
+          this.startEditProduct();
+        }
+        const images = p?.images || [];
+        const hasPending = images.some((img: any) => img.status === 'pending');
+        const hasFailed = images.some((img: any) => img.status === 'failed');
+        if (hasPending && pollAttempt < 12) {
+          setTimeout(() => this.loadProductDetail(uuid, fallback, false, pollAttempt + 1), 3000);
+        } else if (hasFailed) {
+          this.productSaveError = 'La imagen no se procesó; revisa logs del backend o vuelve a subir.';
+        } else if (pollAttempt > 0 && images.some((img: any) => img.status === 'uploaded' && img.image_path)) {
+          this.productSaveSuccess = 'Imagen subida correctamente';
+          setTimeout(() => (this.productSaveSuccess = ''), 4000);
+        }
       },
       error: () => {
-        this.selectedProduct = { ...product };
-        this.startEditProduct();
+        this.selectedProduct = { ...fallback };
+        if (startEdit) {
+          this.startEditProduct();
+        }
       },
     });
+  }
+
+  private refreshSelectedProductDetail(pollAttempt = 0): void {
+    if (!this.selectedProduct?.uuid) return;
+    this.loadProductDetail(this.selectedProduct.uuid, this.selectedProduct, false, pollAttempt);
   }
 
   backToProducts(): void { this.selectedProduct = null; this.productEditing = false; this.productMode = 'edit'; }
@@ -1446,7 +1470,11 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     fd.append('image', file);
     const headers = new HttpHeaders({ 'X-Requested-With': 'XMLHttpRequest', Authorization: `Bearer ${token}` });
     this.http.post(`${environment.baseUrl}/api/boutique/admin/product_images/store`, fd, { headers }).subscribe({
-      next: () => { this.productSaveSuccess = 'Imagen subida correctamente'; input.value = ''; },
+      next: () => {
+        this.productSaveSuccess = 'Imagen en proceso de subida';
+        input.value = '';
+        this.refreshSelectedProductDetail(0);
+      },
       error: (err: any) => { this.productSaveError = err?.error?.message || 'Error al subir imagen'; },
     });
   }

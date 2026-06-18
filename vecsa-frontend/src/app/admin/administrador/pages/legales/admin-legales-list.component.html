@@ -1,0 +1,30 @@
+<div class="legales-page">
+  <h1 class="title">Legales</h1>
+  <p class="subtitle">Contenido legal del sitio. Cada documento se publica en su URL pública.</p>
+
+  @if (loading) {
+    <app-sk-cube></app-sk-cube>
+  } @else if (error) {
+    <p class="error-msg">No se pudo cargar el listado. Recarga la página.</p>
+  } @else {
+    <div class="cards">
+      @for (doc of documents; track doc.slug) {
+        <article class="card">
+          <div class="card-head">
+            <span class="material-icons">{{ doc.icon }}</span>
+            <div>
+              <h2>{{ doc.label }}</h2>
+              <span class="status" [ngClass]="statusClass(doc.slug)">{{ statusLabel(doc.slug) }}</span>
+            </div>
+          </div>
+          <p>{{ doc.summary }}</p>
+          <p class="public-path">Pública: <code>{{ doc.publicPath }}</code></p>
+          <div class="actions">
+            <a mat-stroked-button color="primary" [routerLink]="['/admin/administrator/legales', doc.slug]">Editar</a>
+            <a mat-button [href]="doc.publicPath" target="_blank" rel="noopener">Ver sitio</a>
+          </div>
+        </article>
+      }
+    </div>
+  }
+</div>

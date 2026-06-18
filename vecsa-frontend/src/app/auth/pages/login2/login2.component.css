@@ -5,6 +5,7 @@
   align-items: center;
   justify-content: center;
   padding: 40px 16px;
+  position: relative;
 }
 
 .login-card {
@@ -146,6 +147,16 @@
 .spinner-sm { width: 20px; height: 20px; border-width: 2px; }
 .spinner-white { border-color: rgba(255,255,255,0.3); border-top-color: #fff; }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+.login-page-preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+}
 
 @media (max-width: 480px) {
   .login-card { padding: 28px 20px; border-radius: 16px; }

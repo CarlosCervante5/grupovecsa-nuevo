@@ -44,6 +44,60 @@
         <strong>We're sorry but vecsa doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
     </noscript>
 
+    <div id="vecsa-post-login-overlay" hidden aria-live="polite" aria-busy="true">
+        <div class="vecsa-post-login-cube-grid">
+            <div class="vecsa-post-login-cube vecsa-post-login-cube1"></div>
+            <div class="vecsa-post-login-cube vecsa-post-login-cube2"></div>
+            <div class="vecsa-post-login-cube vecsa-post-login-cube3"></div>
+            <div class="vecsa-post-login-cube vecsa-post-login-cube4"></div>
+            <div class="vecsa-post-login-cube vecsa-post-login-cube5"></div>
+            <div class="vecsa-post-login-cube vecsa-post-login-cube6"></div>
+            <div class="vecsa-post-login-cube vecsa-post-login-cube7"></div>
+            <div class="vecsa-post-login-cube vecsa-post-login-cube8"></div>
+            <div class="vecsa-post-login-cube vecsa-post-login-cube9"></div>
+        </div>
+    </div>
+    <style>
+        #vecsa-post-login-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 2147483646;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+        }
+        #vecsa-post-login-overlay[hidden] { display: none !important; }
+        .vecsa-post-login-cube-grid { width: 90px; height: 90px; }
+        .vecsa-post-login-cube-grid .vecsa-post-login-cube {
+            width: 33%; height: 33%; background-color: #008bcc; float: left;
+            animation: vecsaPostLoginCubeGridScaleDelay 1.3s infinite ease-in-out;
+        }
+        .vecsa-post-login-cube1 { animation-delay: 0.2s; }
+        .vecsa-post-login-cube2 { animation-delay: 0.3s; }
+        .vecsa-post-login-cube3 { animation-delay: 0.4s; }
+        .vecsa-post-login-cube4 { animation-delay: 0.1s; }
+        .vecsa-post-login-cube5 { animation-delay: 0.2s; }
+        .vecsa-post-login-cube6 { animation-delay: 0.3s; }
+        .vecsa-post-login-cube7 { animation-delay: 0s; }
+        .vecsa-post-login-cube8 { animation-delay: 0.1s; }
+        .vecsa-post-login-cube9 { animation-delay: 0.2s; }
+        @keyframes vecsaPostLoginCubeGridScaleDelay {
+            0%, 70%, 100% { transform: scale3D(1, 1, 1); }
+            35% { transform: scale3D(0, 0, 1); }
+        }
+    </style>
+    <script>
+        (function () {
+            try {
+                if (sessionStorage.getItem('vecsa_post_login') === '1') {
+                    var el = document.getElementById('vecsa-post-login-overlay');
+                    if (el) { el.hidden = false; }
+                }
+            } catch (e) { /* ignore */ }
+        })();
+    </script>
+
     <!-- App ROOT -->
     <app-root></app-root>
 

@@ -13,7 +13,7 @@ import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { CompraTuAutoService } from '@services/compra-tu-auto.service';
 
 // Interfaces
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Params, Router } from '@angular/router';
 import { FiltersResponse, SearchResponse, Vehicle, linksImage} from '@interfaces/vehicle_data.interface';
 import { register } from 'swiper/element/bundle';
 // register Swiper custom elements
@@ -275,107 +275,9 @@ export class CompraTuAutoComponent implements OnInit, AfterViewInit, OnDestroy {
         this.status = true;
         this.isMobile = false;
       }
-    this._activatedRoute.params.subscribe(
-      params => {
-        this.pageIndex = params['page'];
-
-        if(this.pageIndex > 1) {
-          // this.scrollTop();
-        }
-
-        // Categories
-        if(params['categories'] && params['categories'] != 'sin-categorias') {
-          this.categories = params['categories'].split(',');
-        } else {
-          this.categories = [];
-        }
-
-        // Brands
-        if(params['brands'] && params['brands'] != 'sin-marcas') {
-          this.brands = params['brands'].split(',');
-        } else {
-          this.brands = [];
-        }
-
-        // Lines
-        if(params['lines'] && params['lines'] != 'sin-lineas') {
-          this.lines = params['lines'].split(',');
-        } else {
-          this.lines = [];
-        }
-
-        // Versions
-        if(params['versions'] && params['versions'] != 'sin-versiones') {
-          this.versions = params['versions'].split(',');
-        } else {
-          this.versions = [];
-        }
-
-        // Bodies
-        if(params['bodies'] && params['bodies'] != 'sin-carrocerias') {
-          this.bodies = params['bodies'].split(',');
-        } else {
-          this.bodies = [];
-        }
-
-        // Models
-        if(params['models'] && params['models'] != 'sin-modelos') {
-          this.models = params['models'].split(',');
-        } else {
-          this.models = [];
-        }
-
-        // Years
-        if(params['years'] && params['years'] != 'sin-anios') {
-          this.years = params['years'].split(',');
-        } else {
-          this.years = [];
-        }
-
-        // States
-        if(params['states'] && params['states'] != 'sin-estados') {
-          this.states = params['states'].split(',');
-        } else {
-          this.states = [];
-        }
-
-        // Transmissions
-        if(params['transmissions'] && params['transmissions'] != 'sin-transmisiones') {
-          this.transmissions = params['transmissions'].split(',');
-        } else {
-          this.transmissions = [];
-        }
-
-        // ExtColors
-        if(params['ext_colors'] && params['ext_colors'] != 'sin-colores') {
-          this.extColors = params['ext_colors'].split(',');
-        } else {
-          this.extColors = [];
-        }
-
-        // IntColors
-        if(params['int_colors'] && params['int_colors'] != 'sin-colores') {
-          this.intColors = params['int_colors'].split(',');
-        } else {
-          this.intColors = [];
-        }
-        
-        // Price
-        if (params['min_price']) {
-          this.min_price = params['min_price'];
-        }
-        if (params['max_price']) {
-          this.max_price = params['max_price'];
-        }
-
-        // Word
-        if(params['word'] && params['word'] != 'sin-busqueda'){
-          this.palabra_busqueda = params['word'];
-        }
-
-        this.executeSearch(this.pageIndex);
-      }
-    );
+    this._activatedRoute.params.subscribe(params => {
+      this.applyRouteParams(params);
+    });
   }
 
   ngAfterViewInit(): void {
@@ -809,7 +711,57 @@ export class CompraTuAutoComponent implements OnInit, AfterViewInit, OnDestroy {
           
   }
 
+  private paramToList(value: string | undefined, emptyToken: string): string[] {
+    if (!value || value === emptyToken) {
+      return [];
+    }
+    return value.split('-');
+  }
+
+  private applyRouteParams(params: Params): void {
+    if (params['pagina'] == null) {
+      this.executeSearch(this.pageIndex || 1);
+      return;
+    }
+
+    const page = Number(params['pagina']);
+    this.pageIndex = Number.isFinite(page) && page > 0 ? page : 1;
+
+    this.categories = this.paramToList(params['categoria'], 'sin-categorias');
+    this.brands = this.paramToList(params['marca'], 'sin-marcas');
+    this.lines = this.paramToList(params['linea'], 'sin-lineas');
+    this.models = this.paramToList(params['modelo'], 'sin-modelos');
+    this.bodies = this.paramToList(params['carroceria'], 'sin-carrocerias');
+    this.versions = this.paramToList(params['version'], 'sin-versiones');
+    this.years = this.paramToList(params['anio'], 'sin-anios');
+    this.states = this.paramToList(params['estado'], 'sin-estados');
+    this.transmissions = this.paramToList(params['transmision'], 'sin-transmisiones');
+    this.extColors = this.paramToList(params['exterior_color'], 'sin-colores');
+    this.intColors = this.paramToList(params['interior_color'], 'sin-colores');
+
+    if (params['minprecio']) {
+      this.hitchMin = Number(params['minprecio']) + 500;
+    }
+    if (params['maxprecio']) {
+      this.hitchMax = Number(params['maxprecio']) - 500;
+    }
+
+    if (params['busqueda'] && params['busqueda'] !== 'sin-busqueda') {
+      this.palabra_busqueda = params['busqueda'];
+    } else {
+      this.palabra_busqueda = '';
+    }
+
+    if (params['order']) {
+      this.orden = params['order'];
+    }
+
+    this.executeSearch(this.pageIndex);
+  }
+
   public executeSearch( page:number ){
+
+    const searchPage = page > 0 ? page : 1;
 
     this.allCategories = [];
     this.allBrands = [];
@@ -823,7 +775,7 @@ export class CompraTuAutoComponent implements OnInit, AfterViewInit, OnDestroy {
     this.allLines = [];
 
     this._compraTuAutoService.getVehicles( this.categories, this.brands, this.lines, this.models, this.bodies, this.versions, this.years,
-                                                [(this.hitchMin -1 ), (this.hitchMax + 1)], this.palabra_busqueda, page, 
+                                                [(this.hitchMin -1 ), (this.hitchMax + 1)], this.palabra_busqueda, searchPage, 
                                                 this.states, this.transmissions, 
                                                 this.extColors, this.intColors, this.orden
                                               ).subscribe({
@@ -836,7 +788,7 @@ export class CompraTuAutoComponent implements OnInit, AfterViewInit, OnDestroy {
                                               });
 
     this._compraTuAutoService.getFilters( this.categories, this.brands, this.lines, this.models, this.bodies, this.versions, this.years,
-                                          [(this.hitchMin -1 ), (this.hitchMax + 1)], this.palabra_busqueda, page, this.states, this.transmissions, this.extColors, this.intColors,
+                                          [(this.hitchMin -1 ), (this.hitchMax + 1)], this.palabra_busqueda, searchPage, this.states, this.transmissions, this.extColors, this.intColors,
                                           true, this.orden
                                           )
     .subscribe({

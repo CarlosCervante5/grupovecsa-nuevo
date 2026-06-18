@@ -116,7 +116,8 @@
                  class="banner-thumb"
                  cdkDragHandle />
             <span *ngIf="!banner.desktop_image_path"
-                  class="material-icons thumb-placeholder">image</span>
+                  class="material-icons thumb-placeholder"
+                  title="Sin imagen desktop (en cola o pendiente de subir)">hourglass_empty</span>
           </td>
           <td class="cell-title">
             <span class="title-text">{{ banner.title || 'Sin título' }}</span>

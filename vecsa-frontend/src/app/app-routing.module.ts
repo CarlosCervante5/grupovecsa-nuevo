@@ -40,7 +40,7 @@ const routes: Routes = [
     path: 'aviso-privacidad',
     loadComponent: () => import('./legal/legal-page.component').then((m) => m.LegalPageComponent),
     data: {
-      legalAsset: 'aviso-privacidad',
+      legalSlug: 'privacidad',
       pageTitle: 'Aviso de Privacidad | Grupo VECSA',
       metaDescription: 'Información sobre el tratamiento y protección de sus datos personales en Grupo VECSA.',
     },
@@ -49,7 +49,7 @@ const routes: Routes = [
     path: 'condiciones-uso',
     loadComponent: () => import('./legal/legal-page.component').then((m) => m.LegalPageComponent),
     data: {
-      legalAsset: 'condiciones-uso',
+      legalSlug: 'condiciones',
       pageTitle: 'Condiciones de Uso | Grupo VECSA',
       metaDescription: 'Términos y condiciones de uso de los sitios y servicios de Grupo VECSA.',
     },
@@ -58,16 +58,25 @@ const routes: Routes = [
     path: 'politicas-devolucion',
     loadComponent: () => import('./legal/legal-page.component').then((m) => m.LegalPageComponent),
     data: {
-      legalAsset: 'politicas-devolucion',
+      legalSlug: 'devoluciones',
       pageTitle: 'Políticas de Devolución | Grupo VECSA',
       metaDescription: 'Políticas de devolución y reembolso de productos y servicios de Grupo VECSA.',
+    },
+  },
+  {
+    path: 'programa-lealtad',
+    loadComponent: () => import('./legal/legal-page.component').then((m) => m.LegalPageComponent),
+    data: {
+      legalSlug: 'lealtad',
+      pageTitle: 'Programa de Lealtad | Grupo VECSA',
+      metaDescription: 'Términos y condiciones del programa de lealtad de Grupo VECSA.',
     },
   },
   {
     path: 'uso-cookies',
     loadComponent: () => import('./legal/legal-page.component').then((m) => m.LegalPageComponent),
     data: {
-      legalAsset: 'uso-cookies',
+      legalSlug: 'cookies',
       pageTitle: 'Uso de Cookies | Grupo VECSA',
       metaDescription: 'Información sobre cookies y tecnologías de rastreo en el sitio de Grupo VECSA.',
     },

@@ -13,7 +13,7 @@ import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http
 import { environment } from '@environments/environment';
 
 // Interfaces
-import { RecoverAccount , ResetPassword, LoginResponse, LogoutResponse, RegisterResponse, AuthMeResponse } from '@interfaces/auth.interface';
+import { RecoverAccount , ResetPassword, LoginResponse, LogoutResponse, RegisterResponse, AuthMeResponse, Data } from '@interfaces/auth.interface';
 
 
 @Injectable({
@@ -180,6 +180,7 @@ export class AuthService {
                     const { token, ...userData } = full.data;
                     localStorage.setItem('user_data', JSON.stringify(userData));
                     localStorage.setItem('permissions', JSON.stringify(full.data.permissions ?? []));
+                    this.persistSessionKeys(full.data);
                     this.permissionsRevision.next(this.permissionsRevision.value + 1);
                     this.authStatus.next(true);
                 }
@@ -215,6 +216,33 @@ export class AuthService {
             return JSON.parse(userData);
         }
         return null;
+    }
+
+    /** Claves que guards y perfil leen aparte de `user_data` (p. ej. login desde /rewards). */
+    public persistSessionKeys(data: Pick<Data, 'user' | 'role' | 'profile'>): void {
+        if (data.user) {
+            localStorage.setItem('user', JSON.stringify(data.user));
+        }
+        if (data.role) {
+            localStorage.setItem('role', data.role);
+        }
+        if (data.profile) {
+            localStorage.setItem('profile', JSON.stringify(data.profile));
+        }
+    }
+
+    /** Repara sesiones antiguas que solo tienen `user_data` tras login en Rewards. */
+    public syncSessionKeysFromUserData(): void {
+        const userData = this.getUserFromStorage();
+        if (!userData) {
+            return;
+        }
+        this.persistSessionKeys(userData);
+    }
+
+    public getCustomerUuidFromStorage(): string | null {
+        const userData = this.getUserFromStorage();
+        return userData?.profile?.uuid ?? userData?.user?.uuid ?? null;
     }
 
     /**

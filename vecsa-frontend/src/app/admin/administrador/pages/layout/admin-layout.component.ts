@@ -26,6 +26,7 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
     { label: 'Sucursales', icon: 'store', route: '/admin/administrator/sucursales' },
     { label: 'Usuarios', icon: 'people', route: '/admin/administrator/users' },
     { label: 'Permisos', icon: 'vpn_key', route: '/admin/administrator/permissions' },
+    { label: 'Legales', icon: 'policy', route: '/admin/administrator/legales' },
     { label: 'Manuales', icon: 'menu_book', route: '/admin/administrator/manuales' },
     {
       label: 'Experience (WordPress)',

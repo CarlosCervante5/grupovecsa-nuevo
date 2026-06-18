@@ -54,6 +54,37 @@ export class BoutiqueBannersComponent {
     });
   }
 
+  /** Tras subir imágenes async, reintenta hasta que las rutas estén en BD o timeout. */
+  private pollBannersUntilImagesReady(
+    bannerUuid: string,
+    expectDesktop: boolean,
+    expectMobile: boolean,
+    attempt: number,
+  ): void {
+    if (attempt > 12) {
+      this.openSnackBar('La imagen sigue en cola o falló; revisa logs del backend', 'top', 'snack-error');
+      return;
+    }
+    const delayMs = attempt === 0 ? 2000 : 3000;
+    setTimeout(() => {
+      this._bannerService.search().subscribe({
+        next: (response: BoutiqueBannersResponse) => {
+          this.banners = response.data.banners;
+          this.loading = false;
+          const banner = this.banners.find((b) => b.uuid === bannerUuid);
+          const desktopReady = !expectDesktop || (banner?.desktop_image_path?.length ?? 0) > 0;
+          const mobileReady = !expectMobile || (banner?.mobile_image_path?.length ?? 0) > 0;
+          if ((!desktopReady || !mobileReady) && attempt < 12) {
+            this.pollBannersUntilImagesReady(bannerUuid, expectDesktop, expectMobile, attempt + 1);
+          } else if (desktopReady && mobileReady) {
+            this.openSnackBar('Imagen(es) del banner listas', 'top', 'snack-success');
+          }
+        },
+        error: (error: any) => reload(error, this._router),
+      });
+    }, delayMs);
+  }
+
   openCreateForm(): void {
     this.resetForm();
     this.editingBanner = null;
@@ -119,6 +150,8 @@ export class BoutiqueBannersComponent {
     }
 
     this.saving = true;
+    const hadDesktopImage = !!this.desktopImageFile;
+    const hadMobileImage = !!this.mobileImageFile;
     const formData = new FormData();
     formData.append('title', this.title);
     formData.append('subtitle', this.subtitle);
@@ -131,24 +164,34 @@ export class BoutiqueBannersComponent {
 
     if (this.editingBanner) {
       formData.append('uuid', this.editingBanner.uuid);
+      const bannerUuid = this.editingBanner.uuid;
       this._bannerService.update(formData).subscribe({
         next: () => {
-          this.openSnackBar('Banner actualizado correctamente', 'top', 'snack-success');
+          this.openSnackBar('Banner guardado; imagen en proceso de subida', 'top', 'snack-success');
           this.showForm = false;
           this.resetForm();
           this.saving = false;
-          this.loadBanners();
+          if (hadDesktopImage || hadMobileImage) {
+            this.pollBannersUntilImagesReady(bannerUuid, hadDesktopImage, hadMobileImage, 0);
+          } else {
+            this.loadBanners();
+          }
         },
         error: (error: any) => { this.saving = false; reload(error, this._router); }
       });
     } else {
       this._bannerService.store(formData).subscribe({
-        next: () => {
-          this.openSnackBar('Banner creado correctamente', 'top', 'snack-success');
+        next: (res: any) => {
+          const bannerUuid = res?.data?.banner?.uuid as string | undefined;
+          this.openSnackBar('Banner creado; imagen en proceso de subida', 'top', 'snack-success');
           this.showForm = false;
           this.resetForm();
           this.saving = false;
-          this.loadBanners();
+          if (bannerUuid && (hadDesktopImage || hadMobileImage)) {
+            this.pollBannersUntilImagesReady(bannerUuid, hadDesktopImage, hadMobileImage, 0);
+          } else {
+            this.loadBanners();
+          }
         },
         error: (error: any) => { this.saving = false; reload(error, this._router); }
       });

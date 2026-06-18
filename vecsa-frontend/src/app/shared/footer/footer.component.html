@@ -2,41 +2,17 @@
     <div class="container">
         <hr/>
         <div class="row d-flex justify-content-center" style="padding: 10px;">
-            
-            <div class="col-12 col-md-12 col-lg-2" style="padding: 10px 20px;">
-                <a href="https://grupovecsa.com/aviso-de-privacidad/">
-                    Aviso de privacidad.
-                </a>
-            </div>
 
+            @for (link of legalLinks; track link.url) {
             <div class="col-12 col-md-12 col-lg-2" style="padding: 10px 20px;">
-                <a href="https://grupovecsa.com/condiciones-de-uso/">
-                    Condiciones de Uso.
-                </a>
+                <a [routerLink]="link.url">{{ link.label }}</a>
             </div>
-            
-            <div class="col-12 col-md-12 col-lg-2" style="padding: 10px 20px;">
-                <a href="https://grupovecsa.com/refund_returns/">
-                    Políticas de devolución.
-                </a>
-            </div>
-
-            <div class="col-12 col-md-12 col-lg-2" style="padding: 10px 20px;">
-                <a href="https://grupovecsa.com/rewards/">
-                    Programa de lealtad.
-                </a>
-            </div>
-
-            <div class="col-12 col-md-12 col-lg-2" style="padding: 10px 20px;">
-                <a href="https://grupovecsa.com/uso-de-cookies-en-nuestro-sitio-web/">
-                    Uso de cookies.
-                </a>
-            </div>
+            }
 
         </div>
         <hr>
         <div class="col-12 col-md-12 col-lg-12 mt-5">
-            <h3 style="font-size: small;">© 2024 GRUPO VECSA TODOS LOS DERECHOS RESERVADOS.</h3>
+            <h3 style="font-size: small;">© {{ date }} GRUPO VECSA TODOS LOS DERECHOS RESERVADOS.</h3>
         </div>
     </div>
 </footer>

@@ -85,6 +85,10 @@
       "destination": "/index.html"
     },
     {
+      "source": "/programa-lealtad",
+      "destination": "/index.html"
+    },
+    {
       "source": "/uso-cookies",
       "destination": "/index.html"
     }

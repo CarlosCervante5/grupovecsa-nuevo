@@ -1,5 +1,5 @@
-# Railway sandbox/producción — SPA Angular (build sandbox + serve estático).
-# Si el dashboard define otro Start Command, alinéalo con `npm start` o borra startCommand aquí.
+# Railway producción (rama grupovecsaFrontendRailway) — build production + serve estático.
+# Rama sandbox: buildCommand = "npm run build" (environment.sandbox.ts).
 
 [build]
 builder = "nixpacks"

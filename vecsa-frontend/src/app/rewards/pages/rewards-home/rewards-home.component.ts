@@ -3,7 +3,6 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../auth/services/auth.service';
 import { RewardsService } from '@services/rewards.service';
-import { CustomerPoints } from '@interfaces/rewards.interface';
 
 @Component({
   selector: 'app-rewards-home',
@@ -35,15 +34,16 @@ export class RewardsHomeComponent implements OnInit {
   ngOnInit(): void {
     const token = localStorage.getItem('user_token');
     if (token) {
+      this.authService.syncSessionKeysFromUserData();
       this.isLoggedIn = true;
       this.loadPoints();
     }
   }
 
   loadPoints(): void {
-    const userData = this.authService.getUserFromStorage();
-    if (userData?.uuid) {
-      this.rewardsService.customerPoints(userData.uuid).subscribe({
+    const uuid = this.authService.getCustomerUuidFromStorage();
+    if (uuid) {
+      this.rewardsService.customerPoints(uuid).subscribe({
         next: (res) => {
           this.totalPoints = res.data?.total_earned_points ?? 0;
         },
@@ -71,6 +71,6 @@ export class RewardsHomeComponent implements OnInit {
   }
 
   goToRegister(): void {
-    this.router.navigate(['/auth/register']);
+    this.router.navigate(['/auth/registro']);
   }
 }

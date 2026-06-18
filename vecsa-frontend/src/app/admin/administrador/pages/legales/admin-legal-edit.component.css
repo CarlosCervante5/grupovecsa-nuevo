@@ -1,0 +1,10 @@
+.legal-edit-page { max-width: 960px; }
+.page-head { margin-bottom: 20px; }
+.title { margin: 8px 0 4px; font-size: 1.5rem; font-weight: 700; color: #0f172a; }
+.subtitle { margin: 0; color: #64748b; font-size: 0.9rem; }
+.subtitle a { color: #1c69d4; }
+.error-msg { color: #dc2626; }
+.legal-form { display: flex; flex-direction: column; gap: 16px; }
+.full-width { width: 100%; }
+.editor-label { font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: -8px; }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }

@@ -169,8 +169,26 @@
 /* ===== VEHICLES GRID ===== */
 .vehicles-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  /* minmax(0,1fr): evita que una tarjeta (título largo / imagen) ensanche su columna */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 20px;
+  align-items: stretch;
+  width: 100%;
+}
+
+.vehicles-grid > div {
+  display: flex;
+  min-height: 0;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.vehicles-grid c-vender-autos-vehicle {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
 }
 
 /* ===== PAGINATOR ===== */
@@ -294,7 +312,7 @@ mat-slider { width: 100%; }
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 1200px) {
-  .vehicles-grid { grid-template-columns: repeat(2, 1fr); }
+  .vehicles-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 900px) {
@@ -319,7 +337,7 @@ mat-slider { width: 100%; }
 }
 
 @media (max-width: 600px) {
-  .vehicles-grid { grid-template-columns: 1fr; }
+  .vehicles-grid { grid-template-columns: minmax(0, 1fr); }
   .inv-topbar { flex-direction: column; align-items: stretch; }
   .search-wrap { max-width: 100%; }
 }
