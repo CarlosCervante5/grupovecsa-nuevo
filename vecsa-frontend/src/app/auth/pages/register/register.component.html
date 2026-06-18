@@ -334,7 +334,7 @@
                                 <div class="col-auto">
                                     <h3 class="fw-bold mb-0" style="font-size: x-large;">Gustos y afinidades</h3>
                                     <br>
-                                    <h6 class="fw-light texto" style="text-align: justify;">Sé parte de nuestra comunidad. Queremos conocerte un poco más sobre tus gustos para crear experiencias únicas solo para ti.</h6>
+                                    <h6 class="fw-light texto" style="text-align: justify;">Indica qué tan afín te sientes con cada tema. Usa el control deslizante: a la izquierda menos afinidad, a la derecha más afinidad (0–100%).</h6>
                                 </div>
                                 <div class="col-auto"></div>
                             </div>
@@ -362,56 +362,39 @@
                             </div>
 
                             <div class="row mb-3" *ngIf="defaultBrandSelected || motorradBrandSelected">
-                                <ng-container *ngIf="hasInterestAffinities">
-                                    <ng-container *ngFor="let quiz of affinityQuizzes">
-                                        <div class="col-12 col-lg-6 mt-3 mb-3" style="padding: 0;" *ngIf="shouldShowSizeQuiz(quiz)">
-                                            <div class="row align-items-center">
-                                                <div class="col-2 d-flex justify-content-center" *ngIf="quiz.image_path">
-                                                    <div class="image_container">
-                                                        <img class="image_quiz" [src]="quiz.image_path" [alt]="quiz.name">
-                                                    </div>
+                                <ng-container *ngFor="let item of gustosQuizzes">
+                                    <div class="col-12 col-lg-6 mt-3 mb-3 affinity-card">
+                                        <div class="row align-items-center">
+                                            <div class="col-2 d-flex justify-content-center" *ngIf="item.quiz.image_path">
+                                                <div class="image_container">
+                                                    <img class="image_quiz" [src]="item.quiz.image_path" [alt]="item.quiz.name">
                                                 </div>
-                                                <div [class.col-10]="quiz.image_path" [class.col-12]="!quiz.image_path">
-                                                    <div class="mb-2 mt-2">
-                                                        <h6 class="fw-light mb-0" style="font-size: medium;">{{ quiz.name }}:</h6>
+                                            </div>
+                                            <div [class.col-10]="item.quiz.image_path" [class.col-12]="!item.quiz.image_path">
+                                                <div class="mb-2 mt-2 d-flex align-items-center justify-content-between gap-2">
+                                                    <h6 class="fw-light mb-0" style="font-size: medium;">{{ item.quiz.name }}</h6>
+                                                    <span class="affinity-percent-badge">{{ getAffinityPercent(item.quiz) }}%</span>
+                                                </div>
+                                                <p class="affinity-slider-hint mb-2" *ngIf="item.quiz.description">{{ item.quiz.description }}</p>
+                                                <div class="affinity-slider-wrap">
+                                                    <div class="affinity-slider-labels">
+                                                        <span>Menos</span>
+                                                        <span>Más afinidad</span>
                                                     </div>
-                                                    <div class="d-flex flex-wrap">
-                                                        <mat-chip-listbox class="mat-chip-grid" [attr.aria-label]="quiz.name"
-                                                            (change)="onChipSelectionChange($event, quiz.uuid)">
-                                                            <div *ngFor="let value of quiz.values">
-                                                                <mat-chip-option
-                                                                    class="chip-option"
-                                                                    [value]="value"
-                                                                    [selected]="value === quiz.selected_value">
-                                                                    {{ value }}
-                                                                </mat-chip-option>
-                                                            </div>
-                                                        </mat-chip-listbox>
-                                                    </div>
+                                                    <input
+                                                        type="range"
+                                                        class="affinity-slider"
+                                                        min="0"
+                                                        max="100"
+                                                        step="5"
+                                                        [value]="getAffinityPercent(item.quiz)"
+                                                        [attr.aria-label]="'Afinidad con ' + item.quiz.name"
+                                                        (input)="onAffinityPercentChange(item.quiz.uuid, $any($event.target).value, item.source)"
+                                                    />
                                                 </div>
                                             </div>
                                         </div>
-                                    </ng-container>
-                                </ng-container>
-
-                                <ng-container *ngIf="!hasInterestAffinities">
-                                    <ng-container *ngFor="let question of default_questions; let i = index">
-                                        <div class="col-12 col-md-6">
-                                            <h4 style="align-content:center; min-height: 50px;">{{ question.name }}</h4>
-                                            <div class="field-group">
-                                                <input
-                                                    class="field-input"
-                                                    type="text"
-                                                    placeholder="Tu respuesta..."
-                                                    [value]="question.selected_value || ''"
-                                                    (input)="onInputChange($event, question.uuid)"
-                                                    required>
-                                                <span class="field-error" *ngIf="default_validation[i]?.invalid">
-                                                    {{ default_validation[i].validation_message }}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </ng-container>
+                                    </div>
                                 </ng-container>
                             </div>
 

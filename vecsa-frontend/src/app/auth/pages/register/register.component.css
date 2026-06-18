@@ -691,3 +691,74 @@ a.abcars-color-hover:hover {
   .step-circle { width: 30px; height: 30px; font-size: 12px; }
   .step-btn-next, .step-btn-prev { padding: 8px 16px; font-size: 13px; }
 }
+
+/* ── Gustos: slider de afinidad ── */
+.affinity-card {
+  padding: 0;
+}
+
+.affinity-percent-badge {
+  min-width: 52px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(28, 105, 212, 0.12);
+  color: #1c69d4;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.affinity-slider-hint {
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.affinity-slider-wrap {
+  width: 100%;
+}
+
+.affinity-slider-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #94a3b8;
+  margin-bottom: 6px;
+}
+
+.affinity-slider {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  appearance: none;
+  background: linear-gradient(90deg, #dbeafe 0%, #1c69d4 100%);
+  outline: none;
+  cursor: pointer;
+}
+
+.affinity-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid #1c69d4;
+  box-shadow: 0 2px 8px rgba(28, 105, 212, 0.35);
+  cursor: pointer;
+}
+
+.affinity-slider::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid #1c69d4;
+  box-shadow: 0 2px 8px rgba(28, 105, 212, 0.35);
+  cursor: pointer;
+}
+
+.affinity-slider::-moz-range-track {
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #dbeafe 0%, #1c69d4 100%);
+}

@@ -85,6 +85,7 @@ export class RegisterComponent {
     public default_validation: Validator[] = [];
 
     private readonly sizeQuestionTypes = ['ropa', 'ropa masculina', 'ropa femenina'];
+    private readonly defaultAffinityPercent = 50;
 
     // Form References
     public form!: UntypedFormGroup;
@@ -413,6 +414,64 @@ export class RegisterComponent {
         this.validateAccesories();
     }
 
+    public getAffinityPercent(quiz: Quiz): number {
+        const parsed = Number(quiz.selected_value);
+
+        if (!Number.isFinite(parsed)) {
+            return this.defaultAffinityPercent;
+        }
+
+        return Math.min(100, Math.max(0, Math.round(parsed)));
+    }
+
+    public onAffinityPercentChange(
+        quiz_uuid: string,
+        rawValue: string | number,
+        source: 'accesories' | 'default_questions' = 'accesories'
+    ): void {
+        const value = Math.min(100, Math.max(0, Math.round(Number(rawValue))));
+        const percent = String(value);
+
+        if (source === 'default_questions') {
+            const index = this.default_questions.findIndex(quiz => quiz.uuid === quiz_uuid);
+
+            if (index !== -1) {
+                this.default_questions[index].selected_value = percent;
+                this.default_validation[index].invalid = false;
+            }
+
+            this.validateQuestionForm(this.default_validation);
+            return;
+        }
+
+        const index = this.accesories.findIndex(quiz => quiz.uuid === quiz_uuid);
+
+        if (index !== -1) {
+            this.accesories[index].selected_value = percent;
+        }
+    }
+
+    private initializeGustosPercents(): void {
+        if (this.hasInterestAffinities) {
+            for (const quiz of this.affinityQuizzes) {
+                if (quiz.selected_value == null || quiz.selected_value === '') {
+                    quiz.selected_value = String(this.defaultAffinityPercent);
+                }
+            }
+            return;
+        }
+
+        this.default_questions.forEach((quiz, index) => {
+            if (quiz.selected_value == null || quiz.selected_value === '') {
+                quiz.selected_value = String(this.defaultAffinityPercent);
+            }
+
+            this.default_validation[index].invalid = false;
+        });
+
+        this.validateQuestionForm(this.default_validation);
+    }
+
     public onSizeQuizChange(event: MatChipListboxChange, quiz: Quiz): void {
         if (this.usesDefaultQuestionsForSizes) {
             quiz.selected_value = event.value;
@@ -438,6 +497,19 @@ export class RegisterComponent {
 
     get hasInterestAffinities(): boolean {
         return this.affinityQuizzes.length > 0;
+    }
+
+    get gustosQuizzes(): Array<{ quiz: Quiz; source: 'accesories' | 'default_questions' }> {
+        if (this.hasInterestAffinities) {
+            return this.affinityQuizzes
+                .filter(quiz => this.shouldShowSizeQuiz(quiz))
+                .map(quiz => ({ quiz, source: 'accesories' as const }));
+        }
+
+        return this.default_questions.map(quiz => ({
+            quiz,
+            source: 'default_questions' as const,
+        }));
     }
 
     get brandValues(): string[] {
@@ -802,6 +874,8 @@ export class RegisterComponent {
                     invalid: true,
                     validation_message: ''
                 }));
+
+                this.initializeGustosPercents();
 
                 
                 this.quiz_active = false;
