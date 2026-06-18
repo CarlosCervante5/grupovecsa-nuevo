@@ -84,6 +84,8 @@ export class RegisterComponent {
     public chevrolet_validation: Validator[] = [];
     public default_validation: Validator[] = [];
 
+    private readonly sizeQuestionTypes = ['ropa', 'ropa masculina', 'ropa femenina'];
+
     // Form References
     public form!: UntypedFormGroup;
     public auth!: UntypedFormGroup;
@@ -298,13 +300,17 @@ export class RegisterComponent {
 
                 this.attachQuizzes(this.customer_uuid , default_questions_uuids, default_questions_values);
 
-                if(this.file != null){
-                    await this.updateImage(this.file);
-                }
-
                 localStorage.setItem('user_token', response.data.token);
                 localStorage.setItem('user', JSON.stringify( response.data.user));
                 localStorage.setItem('role', response.data.role);
+
+                if(this.file != null){
+                    const imageResponse = await this.updateImage(this.file) as { data?: { picture?: string } };
+                    if (imageResponse?.data?.picture) {
+                        response.data.profile.picture = imageResponse.data.picture;
+                    }
+                }
+
                 localStorage.setItem('profile', JSON.stringify( response.data.profile));
 
                 Swal.fire({
@@ -350,7 +356,7 @@ export class RegisterComponent {
         
         try {
             return await firstValueFrom(
-                this._accountService.updateImage(this.user_uuid, file)
+                this._accountService.updateImageProfile(this.user_uuid, file)
             );
         } catch (error: any) {
             console.error('Error al subir la imagen:', error);
@@ -405,20 +411,63 @@ export class RegisterComponent {
         this.validateAccesories();
     }
 
+    public onSizeQuizChange(event: MatChipListboxChange, quiz: Quiz): void {
+        if (this.usesDefaultQuestionsForSizes) {
+            quiz.selected_value = event.value;
+            this.validateQuestion(
+                this.default_questions,
+                this.default_validation,
+                quiz.uuid,
+                event.value
+            );
+            this.validateQuestionForm(this.default_validation);
+        } else {
+            this.onChipSelectionChange(event, quiz.uuid);
+        }
+
+        this.validateAccesories();
+    }
+
+    get sizeQuizzes(): Quiz[] {
+        const affinitySizes = this.accesories.filter(quiz =>
+            this.sizeQuestionTypes.includes(quiz.question_type)
+        );
+
+        return affinitySizes.length > 0 ? affinitySizes : this.default_questions;
+    }
+
+    get usesDefaultQuestionsForSizes(): boolean {
+        return !this.accesories.some(quiz => this.sizeQuestionTypes.includes(quiz.question_type));
+    }
+
+    shouldShowSizeQuiz(quiz: Quiz): boolean {
+        if (quiz.question_type === 'ropa femenina' && this.gender != 'M') {
+            return false;
+        }
+
+        if (quiz.question_type === 'ropa masculina' && this.gender == 'M') {
+            return false;
+        }
+
+        return true;
+    }
+
     public validateAccesories(){
 
         if( this.defaultBrandSelected ){
 
-            let otherClothesValid = false;
-
-            if( 
-                this.accesories[0].selected_value !== null && this.accesories[0].selected_value !== undefined &&
-                this.accesories[3].selected_value !== null && this.accesories[3].selected_value !== undefined &&
-                this.accesories[5].selected_value !== null && this.accesories[5].selected_value !== undefined
-            ) {
-                otherClothesValid = true;
+            if (this.usesDefaultQuestionsForSizes) {
+                this.isFormValid = this.default_validation.every(quiz => quiz.invalid === false);
+                return;
             }
 
+            const sizeItems = this.accesories.filter(quiz =>
+                this.sizeQuestionTypes.includes(quiz.question_type) && quiz.name !== 'Pantalón'
+            );
+
+            const otherClothesValid = sizeItems.every(quiz =>
+                quiz.selected_value !== null && quiz.selected_value !== undefined
+            );
 
             let pantalonValid = this.validateVariants('Pantalón');
 
@@ -427,6 +476,11 @@ export class RegisterComponent {
         }
 
         if( this.motorradBrandSelected ){
+
+            if (this.usesDefaultQuestionsForSizes) {
+                this.isFormValid = this.default_validation.every(quiz => quiz.invalid === false);
+                return;
+            }
 
             let otherClothesValid = this.accesories
             .filter(quiz => quiz.question_type === 'ropa')
@@ -729,6 +783,9 @@ export class RegisterComponent {
     // ── Step Navigation ──
     nextStep(): void {
       if (this.currentStep < this.totalSteps) {
+        if (this.currentStep === 3) {
+          this.validateAccesories();
+        }
         this.currentStep++;
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
@@ -753,7 +810,14 @@ export class RegisterComponent {
         case 1: return this.form.valid && this.image_path !== 'assets/img/user.jpeg';
         case 2: return this.statusBrand && !!this.gender;
         case 3: return true;
-        case 4: return true;
+        case 4:
+          if (this.chevroletBrandSelected) {
+            return true;
+          }
+          if (this.usesDefaultQuestionsForSizes && (this.defaultBrandSelected || this.motorradBrandSelected)) {
+            return this.default_validation.every(quiz => quiz.invalid === false);
+          }
+          return this.isFormValid;
         default: return true;
       }
     }

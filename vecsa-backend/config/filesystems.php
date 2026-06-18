@@ -81,5 +81,7 @@ return [
     'cloudfront_url' => env('AWS_CLOUDFRONT_URL', ''),
     'vehicles_folder_base' => env('AWS_VEHICLES_FOLDER_BASE', 'default_folder'),
     'boutique_folder_base' => env('CLOUDINARY_BOUTIQUE_FOLDER_BASE', 'vecsa_boutique_products'),
+    'boutique_banners_folder_base' => env('CLOUDINARY_BOUTIQUE_BANNERS_FOLDER_BASE', 'boutique_banners'),
+    'profile_folder_base' => env('AWS_PROFILE_FOLDER_BASE', 'default_folder'),
 
 ];

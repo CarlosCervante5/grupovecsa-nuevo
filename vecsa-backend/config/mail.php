@@ -18,6 +18,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Mailer transaccional (Resend)
+    |--------------------------------------------------------------------------
+    | Registro, recuperar contraseña, pedidos boutique, citas, formularios.
+    */
+    'transactional_mailer' => env('MAIL_TRANSACTIONAL_MAILER', env('BOUTIQUE_MAIL_MAILER', 'resend')),
+
+    'transactional_from' => [
+        'address' => env('MAIL_TRANSACTIONAL_FROM_ADDRESS', env('BOUTIQUE_MAIL_FROM_ADDRESS', env('MAIL_FROM_ADDRESS', 'hello@example.com'))),
+        'name' => env('MAIL_TRANSACTIONAL_FROM_NAME', env('BOUTIQUE_MAIL_FROM_NAME', env('MAIL_FROM_NAME', 'Example'))),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Mailer Configurations
     |--------------------------------------------------------------------------
     |

@@ -14,7 +14,7 @@ use App\Models\Leads\ReceptionForm;
 use App\Models\Leads\RidersQuiz;
 use App\Models\Vehicle;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Mail;
+use App\Support\TransactionalMail;
 use Illuminate\Validation\ValidationException;
 
 class LeadController extends Controller
@@ -282,8 +282,7 @@ class LeadController extends Controller
 
     public function receptionNotification(){
 
-        Mail::to('financiera.pachuca@bmwvecsa.com')->send(new ReceptionNotification);
-        // Mail::to('olezama@codecreativity.mx')->send(new ReceptionNotification);
+        TransactionalMail::send(new ReceptionNotification, env('RECEPTION_NOTIFY_MAIL', 'financiera.pachuca@bmwvecsa.com'));
 
         return ApiResponseHelper::apiSuccess(201, 'Notificación enviada.');
 

@@ -444,174 +444,26 @@
         
                         <div class="row mb-3" [hidden]="currentStep !== 4" *ngIf="defaultBrandSelected || motorradBrandSelected || chevroletBrandSelected;">
 
-                            <ng-container *ngIf="defaultBrandSelected;">
-                            
-                                <div class="col-12 col-lg-6 mt-3 mb-3" style="padding: 0;">
-                                    <div class="row align-items-center">
-                                        <div class="col-2 d-flex justify-content-center">
-                                            <div class="image_container">
-                                            <img class="image_quiz" src="{{ accesories[0].image_path }}" alt="{{ accesories[0].name }}">
-                                            </div>
-                                        </div>
-                                
-                                        <div class="col-10">
-                                            <div class="mb-2 mt-2">
-                                                <h6 class="fw-light mb-0" style="font-size: medium;">{{ accesories[0].name }}:</h6>
-                                            </div>
-                                            <div class="d-flex flex-wrap">
-                                                <mat-chip-listbox class="mat-chip-grid" aria-label="{{ accesories[0].name }}" 
-                                                                    (change)="onChipSelectionChange($event, accesories[0].uuid)">
-                                                    <div *ngFor="let value of accesories[0].values; let j = index">
-                                                    <mat-chip-option 
-                                                        class="chip-option"
-                                                        [value]="value"
-                                                        [selected]="value === accesories[0].selected_value">
-                                                        {{ value }}
-                                                    </mat-chip-option>
-                                                    </div>
-                                                </mat-chip-listbox>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-    
-                                <div class="col-12 col-lg-6 mt-3 mb-3" style="padding: 0;">
-                                    <div class="row align-items-center">
-                                        <div class="col-2 d-flex justify-content-center">
-                                            <div class="image_container">
-                                                <img class="image_quiz" src="{{ accesories[3].image_path }}" alt="{{ accesories[3].name }}">
-                                            </div>
-                                        </div>
-                                
-                                        <div class="col-10">
-                                            <div class="mb-2 mt-2">
-                                                <h6 class="fw-light mb-0" style="font-size: medium;">{{ accesories[3].name }}:</h6>
-                                            </div>
-                                            <div class="d-flex flex-wrap">
-                                                <mat-chip-listbox class="mat-chip-grid" aria-label="{{ accesories[3].name }}" 
-                                                                    (change)="onChipSelectionChange($event, accesories[3].uuid)">
-                                                    <div *ngFor="let value of accesories[3].values; let j = index">
-                                                    <mat-chip-option 
-                                                        class="chip-option"
-                                                        [value]="value"
-                                                        [selected]="value === accesories[3].selected_value">
-                                                        {{ value }}
-                                                    </mat-chip-option>
-                                                    </div>
-                                                </mat-chip-listbox>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-    
-                                <div class="col-12 col-lg-6 mt-3 mb-3" style="padding: 0;">
-                                    <div class="row align-items-center">
-                                        <div class="col-2 d-flex justify-content-center">
-                                            <div class="image_container">
-                                                <img class="image_quiz" src="{{ accesories[5].image_path }}" alt="{{ accesories[5].name }}">
-                                            </div>
-                                        </div>
-                                
-                                        <div class="col-10">
-                                            <div class="mb-2 mt-2">
-                                                <h6 class="fw-light mb-0" style="font-size: medium;">{{ accesories[5].name }}:</h6>
-                                            </div>
-                                            <div class="d-flex flex-wrap">
-                                                <mat-chip-listbox class="mat-chip-grid" aria-label="{{ accesories[5].name }}" 
-                                                                    (change)="onChipSelectionChange($event, accesories[5].uuid)">
-                                                    <div *ngFor="let value of accesories[5].values; let j = index">
-                                                    <mat-chip-option 
-                                                        class="chip-option"
-                                                        [value]="value"
-                                                        [selected]="value === accesories[5].selected_value">
-                                                        {{ value }}
-                                                    </mat-chip-option>
-                                                    </div>
-                                                </mat-chip-listbox>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-    
-                                <div class="col-12 col-lg-6 mt-3 mb-3" style="padding: 0;" *ngIf="!(((accesories[7].question_type == 'ropa femenina' && (gender != 'M'))  || (accesories[7].question_type == 'ropa masculina'  && (gender == 'M'))))">
-                                    <div class="row align-items-center">
-                                        <div class="col-2 d-flex justify-content-center">
-                                            <div class="image_container">
-                                            <img class="image_quiz" src="{{ accesories[7].image_path }}" alt="{{ accesories[7].name }}">
-                                            </div>
-                                        </div>
-                                
-                                        <div class="col-10">
-                                            <div class="mb-2 mt-2">
-                                                <h6 class="fw-light mb-0" style="font-size: medium;">{{ accesories[7].name }}:</h6>
-                                            </div>
-                                            <div class="d-flex flex-wrap">
-                                                <mat-chip-listbox class="mat-chip-grid" aria-label="{{ accesories[7].name }}" 
-                                                                    (change)="onChipSelectionChange($event, accesories[7].uuid)">
-                                                    <div *ngFor="let value of accesories[7].values; let j = index">
-                                                    <mat-chip-option 
-                                                        class="chip-option"
-                                                        [value]="value"
-                                                        [selected]="value === accesories[7].selected_value">
-                                                        {{ value }}
-                                                    </mat-chip-option>
-                                                    </div>
-                                                </mat-chip-listbox>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-    
-                                <div class="col-12 col-lg-6 mt-3 mb-3" style="padding: 0;" *ngIf="!(((accesories[8].question_type == 'ropa femenina' && (gender != 'M'))  || (accesories[8].question_type == 'ropa masculina'  && (gender == 'M'))))">
-                                    <div class="row align-items-center">
-                                        <div class="col-2 d-flex justify-content-center">
-                                            <div class="image_container">
-                                            <img class="image_quiz" src="{{ accesories[8].image_path }}" alt="{{ accesories[8].name }}">
-                                            </div>
-                                        </div>
-                                
-                                        <div class="col-10">
-                                            <div class="mb-2 mt-2">
-                                                <h6 class="fw-light mb-0" style="font-size: medium;">{{ accesories[8].name }}:</h6>
-                                            </div>
-                                            <div class="d-flex flex-wrap">
-                                                <mat-chip-listbox class="mat-chip-grid" aria-label="{{ accesories[8].name }}" 
-                                                                    (change)="onChipSelectionChange($event, accesories[8].uuid)">
-                                                    <div *ngFor="let value of accesories[8].values; let j = index">
-                                                    <mat-chip-option 
-                                                        class="chip-option"
-                                                        [value]="value"
-                                                        [selected]="value === accesories[8].selected_value">
-                                                        {{ value }}
-                                                    </mat-chip-option>
-                                                    </div>
-                                                </mat-chip-listbox>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-    
-                            </ng-container>
-    
-                            <ng-container *ngIf="motorradBrandSelected;">
-    
-                                <ng-container *ngFor="let quiz of accesories; let i = index">
-                                    <div class="col-12 col-lg-6 mt-3 mb-3" style="padding: 0;" *ngIf="!(((quiz.question_type == 'ropa femenina' && (gender != 'M'))  || ( quiz.question_type == 'ropa masculina'  && (gender == 'M'))))">
+                            <ng-container *ngIf="defaultBrandSelected || motorradBrandSelected">
+
+                                <ng-container *ngFor="let quiz of sizeQuizzes">
+                                    <div class="col-12 col-lg-6 mt-3 mb-3" style="padding: 0;" *ngIf="shouldShowSizeQuiz(quiz)">
                                         <div class="row align-items-center">
-                                            <div class="col-2 d-flex justify-content-center">
+                                            <div class="col-2 d-flex justify-content-center" *ngIf="quiz.image_path">
                                                 <div class="image_container">
-                                                    <img class="image_quiz" src="{{ quiz.image_path }}" alt="{{ quiz.name }}">
+                                                    <img class="image_quiz" [src]="quiz.image_path" [alt]="quiz.name">
                                                 </div>
                                             </div>
-                                            
-                                            <div class="col-10">
+
+                                            <div [class.col-10]="quiz.image_path" [class.col-12]="!quiz.image_path">
                                                 <div class="mb-2 mt-2">
                                                     <h6 class="fw-light mb-0" style="font-size: medium;">{{ quiz.name }}:</h6>
                                                 </div>
                                                 <div class="d-flex flex-wrap">
-                                                    <mat-chip-listbox class="mat-chip-grid" aria-label="{{ quiz.name }}" (change)="onChipSelectionChange($event, quiz.uuid)">
-                                                        <div *ngFor="let value of quiz.values; let i = index">
-                                                            <mat-chip-option 
+                                                    <mat-chip-listbox class="mat-chip-grid" [attr.aria-label]="quiz.name"
+                                                        (change)="onSizeQuizChange($event, quiz)">
+                                                        <div *ngFor="let value of quiz.values">
+                                                            <mat-chip-option
                                                                 class="chip-option"
                                                                 [value]="value"
                                                                 [selected]="value === quiz.selected_value">
@@ -624,7 +476,13 @@
                                         </div>
                                     </div>
                                 </ng-container>
-    
+
+                            </ng-container>
+
+                            <ng-container *ngIf="chevroletBrandSelected && currentStep === 4">
+                                <div class="col-12 text-center py-4">
+                                    <p class="text-muted mb-0">No hay tallas adicionales para Chevrolet. Continúa al siguiente paso.</p>
+                                </div>
                             </ng-container>
     
                             <!-- Step 4 nav -->

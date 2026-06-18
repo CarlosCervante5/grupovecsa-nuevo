@@ -2,62 +2,41 @@
 
 namespace App\Notifications;
 
+use App\Notifications\Concerns\UsesTransactionalMail;
 use Illuminate\Bus\Queueable;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class InternallyRegisterNotification extends Notification
 {
     use Queueable;
+    use UsesTransactionalMail;
 
     protected $password;
 
-    /**
-     * Create a notification instance.
-     *
-     * @param  string  $token
-     * @return void
-     */
     public function __construct($password)
     {
         $this->password = $password;
     }
 
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
-     */
     public function via(object $notifiable): array
     {
         return ['mail'];
     }
 
-    /**
-     * Get the mail representation of the notification.
-     */
-    public function toMail(object $notifiable): MailMessage
+    public function toMail(object $notifiable): \Illuminate\Notifications\Messages\MailMessage
     {
-        $url = config('app.frontend_url') . '/auth/recuperar';
+        $url = rtrim((string) config('app.frontend_url', config('app.url')), '/').'/auth/recuperar';
 
-        return (new MailMessage)
-            ->subject('¡Registro exitoso en Grupovecsa!')
-            ->line('Estás recibiendo este correo electrónico porque recibimos una solicitud de registro con este correo.')
-            ->line('Esta es tu contraseña temporal.')
-            ->line($this->password)
-            ->line('¡No olvides cambiar tu contraseña por seguridad de tus datos!')
-            ->action('¡Sigue el enlace para cambiar tu contraseña mediante nuestro proceso de recuperar cuenta!', $url);
+        return $this->transactionalMailMessage()
+            ->subject('¡Registro exitoso en Grupo VECSA!')
+            ->line('Se creó tu cuenta con este correo.')
+            ->line('Contraseña temporal: '.$this->password)
+            ->line('Por seguridad, cámbiala lo antes posible.')
+            ->action('Cambiar contraseña', $url);
     }
 
-    /**
-     * Get the array representation of the notification.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(object $notifiable): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 }

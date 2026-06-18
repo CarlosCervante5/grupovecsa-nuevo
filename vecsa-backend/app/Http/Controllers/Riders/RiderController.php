@@ -22,8 +22,8 @@ use App\Models\CustomerVehicle;
 use App\Models\Quiz;
 use App\Models\Reward;
 use App\Models\RewardPoint;
+use App\Support\TransactionalMail;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
 
 class RiderController extends Controller
 {
@@ -368,8 +368,10 @@ class RiderController extends Controller
                 'vehicle_id' => $customer_vehicle->id
             ]);
             
-            Mail::to(env('CRM_MAIL_1', ''))->send(new RewardNotification($customer, $data['model'], $data['year']));
-            Mail::to(env('CRM_MAIL_2', ''))->send(new RewardNotification($customer, $data['model'], $data['year']));
+            TransactionalMail::send(
+                new RewardNotification($customer, $data['model'], $data['year']),
+                [env('CRM_MAIL_1', ''), env('CRM_MAIL_2', '')]
+            );
  
             // Retornar respuesta exitosa
             return ApiResponseHelper::apiSuccess(201, 'Ride almacenado correctamente');

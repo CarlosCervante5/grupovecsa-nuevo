@@ -20,6 +20,9 @@ class BoutiqueOrderPaidMail extends Mailable
     public function envelope(): Envelope
     {
         $from = config('boutique.mail_from', []);
+        if (empty($from['address'])) {
+            $from = \App\Support\TransactionalMail::from();
+        }
 
         return new Envelope(
             from: ! empty($from['address'])

@@ -19,9 +19,9 @@ class BoutiqueOrderMailService
         }
 
         try {
-            SendBoutiqueOrderEmailJob::dispatch($order->uuid, 'placed', $email);
+            SendBoutiqueOrderEmailJob::dispatchSync($order->uuid, 'placed', $email);
         } catch (\Throwable $e) {
-            Log::error('Boutique: no se pudo encolar correo de pedido creado', [
+            Log::error('Boutique: no se pudo enviar correo de pedido creado', [
                 'order_uuid' => $order->uuid,
                 'message' => $e->getMessage(),
             ]);
@@ -36,9 +36,9 @@ class BoutiqueOrderMailService
         }
 
         try {
-            SendBoutiqueOrderEmailJob::dispatch($order->uuid, 'paid', $email);
+            SendBoutiqueOrderEmailJob::dispatchSync($order->uuid, 'paid', $email);
         } catch (\Throwable $e) {
-            Log::error('Boutique: no se pudo encolar correo de pago confirmado', [
+            Log::error('Boutique: no se pudo enviar correo de pago confirmado', [
                 'order_uuid' => $order->uuid,
                 'message' => $e->getMessage(),
             ]);

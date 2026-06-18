@@ -443,7 +443,12 @@ class AuthController extends Controller
 
             UploadProfileImage::dispatchSync($path, $user, $image->getClientOriginalName());
 
-            return ApiResponseHelper::apiSuccess(200, 'Perfil actualizado');
+            $user->refresh();
+            $roleProfile = $user->getRoleProfile();
+
+            return ApiResponseHelper::apiSuccess(200, 'Perfil actualizado', [
+                'picture' => $roleProfile['profile']->picture ?? null,
+            ]);
 
         } catch (\Exception $e) {
 

@@ -2,9 +2,8 @@
 
 namespace App\Jobs;
 
-use App\Helpers\ApiResponseHelper;
 use App\Models\Boutique\BoutiqueBanner;
-use Cloudinary\Cloudinary;
+use App\Services\Media\CloudinaryImageStorageService;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -12,7 +11,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 
 class UploadBoutiqueBannerImage implements ShouldQueue
 {
@@ -24,8 +22,6 @@ class UploadBoutiqueBannerImage implements ShouldQueue
     protected $original_filename;
     public $tries = 5;
     public $backoff = 60;
-    protected $base_folder;
-    protected $aws_url;
 
     public function __construct(string $path, string $banner_uuid, string $image_type, string $original_filename)
     {
@@ -33,53 +29,40 @@ class UploadBoutiqueBannerImage implements ShouldQueue
         $this->banner_uuid = $banner_uuid;
         $this->image_type = $image_type;
         $this->original_filename = $original_filename;
-        $this->base_folder = env('CLOUDINARY_BOUTIQUE_BANNERS_FOLDER_BASE', 'boutique_banners');
-        $this->aws_url = env('AWS_CLOUDFRONT_URL');
     }
 
-    public function handle(Cloudinary $cloudinary): void
+    public function handle(CloudinaryImageStorageService $storage): void
     {
+        $banner = BoutiqueBanner::findByUuid($this->banner_uuid);
+        if (! $banner) {
+            Log::error('BoutiqueBanner not found for UUID: '.$this->banner_uuid);
+
+            return;
+        }
+
         try {
-            $banner = BoutiqueBanner::findByUuid($this->banner_uuid);
-            if (!$banner) {
-                Log::error('BoutiqueBanner not found for UUID: ' . $this->banner_uuid);
-                return;
-            }
+            $result = $storage->storeFromTempRelativePath(
+                trim((string) config('filesystems.boutique_banners_folder_base', 'boutique_banners')),
+                $banner->uuid,
+                $this->path,
+                $this->image_type
+            );
 
-            $name = time() . '_' . $this->image_type;
+            $field = $this->image_type === 'desktop' ? 'desktop_image_path' : 'mobile_image_path';
+            $banner->update([$field => $result['url']]);
 
-            $cloudinary_file = $cloudinary->uploadApi()->upload(storage_path('app/' . $this->path), [
-                'public_id' => $name,
-                'folder' => $this->base_folder . '/' . $banner->uuid,
-                'transformation' => ['quality' => 'auto', 'fetch_format' => 'jpg']
+            Log::info('UploadBoutiqueBannerImage DONE', [
+                'banner_uuid' => $this->banner_uuid,
+                'image_type' => $this->image_type,
+                'path' => $result['url'],
             ]);
-
-            $s3_path = $this->base_folder . '/' . $banner->uuid . '/' . $name . '.jpg';
-            $image_contents = file_get_contents($cloudinary_file['secure_url']);
-            $s3_result = Storage::disk('s3')->put($s3_path, $image_contents);
-
-            if ($s3_result) {
-                $field = $this->image_type === 'desktop' ? 'desktop_image_path' : 'mobile_image_path';
-                $banner->update([$field => $this->aws_url . '/' . $s3_path]);
-
-                Log::info('UploadBoutiqueBannerImage DONE', [
-                    'banner_uuid' => $this->banner_uuid,
-                    'image_type' => $this->image_type,
-                    'path' => $this->aws_url . '/' . $s3_path,
-                ]);
-            } else {
-                throw new Exception('Failed to upload image to S3');
-            }
-
-            $cloudinary->uploadApi()->destroy($cloudinary_file['public_id']);
-            Storage::delete($this->path);
-
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Error uploading boutique banner image:', [
                 'banner_uuid' => $this->banner_uuid,
                 'image_type' => $this->image_type,
                 'exception' => $e->getMessage(),
             ]);
+
             throw $e;
         }
     }

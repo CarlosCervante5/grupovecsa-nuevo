@@ -53,6 +53,35 @@ final class CloudinaryImageStorageService
     }
 
     /**
+     * Sube un archivo ya guardado en storage/app (p. ej. temp de UploadableImage).
+     *
+     * @return array{url: string, public_id: string|null}
+     */
+    public function storeFromTempRelativePath(
+        string $baseFolder,
+        string $entityUuid,
+        string $tempRelativePath,
+        ?string $nameSuffix = null,
+        string $extension = 'jpg'
+    ): array {
+        $fullPath = storage_path('app/'.$tempRelativePath);
+        if (! is_file($fullPath)) {
+            throw new \RuntimeException('Archivo temporal de imagen no encontrado.');
+        }
+
+        $contents = file_get_contents($fullPath);
+        if ($contents === false || $contents === '') {
+            throw new \RuntimeException('No se pudo leer la imagen temporal.');
+        }
+
+        try {
+            return $this->uploadBinary($baseFolder, $entityUuid, $contents, $extension, $nameSuffix);
+        } finally {
+            Storage::delete($tempRelativePath);
+        }
+    }
+
+    /**
      * @return array{url: string, public_id: string|null}
      */
     private function uploadBinary(

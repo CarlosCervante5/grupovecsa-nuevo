@@ -43,10 +43,10 @@ class BoutiqueProductImageController extends Controller
             if ($request->hasFile('image')) {
                 $image = $request->file('image');
                 $path = \App\Support\UploadableImage::storeTemp($image);
-                UploadBoutiqueProductImage::dispatch($path, $product->uuid, $image->getClientOriginalName());
+                UploadBoutiqueProductImage::dispatchSync($path, $product->uuid, $image->getClientOriginalName());
             }
 
-            return ApiResponseHelper::apiSuccess(201, 'Imagen en proceso de subida', ['image' => $productImage]);
+            return ApiResponseHelper::apiSuccess(201, 'Imagen subida', ['image' => $productImage->fresh()]);
         } catch (AuthorizationException $e) {
             return ApiResponseHelper::apiError($e->getMessage(), null, 403, 'INVENTORY_FORBIDDEN');
         } catch (\Exception $e) {

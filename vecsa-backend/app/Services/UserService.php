@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Helpers\PasswordHelper;
-use App\Jobs\SendUserNotification;
 use App\Models\Quiz;
 use App\Models\User;
 use App\Models\Valuations\ValuationUpdate;
@@ -13,6 +12,7 @@ use App\Notifications\RegisterNotification;
 use Faker\Factory as Faker;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 class UserService
 {       
@@ -143,8 +143,15 @@ class UserService
         $token = $user->createToken('Login: ' . $user->email, ['*'], $expiresAt);
         $role = $user->getRoleNames()->first();
 
-        // Por ahora no se envía la notificación
-        // SendUserNotification::dispatch($user, $notification);
+        try {
+            $user->notify($notification);
+        } catch (\Throwable $e) {
+            Log::error('No se pudo enviar correo de bienvenida al registrarse', [
+                'user_uuid' => $user->uuid,
+                'email' => $user->email,
+                'message' => $e->getMessage(),
+            ]);
+        }
 
         return [
             'token' => $token->plainTextToken,

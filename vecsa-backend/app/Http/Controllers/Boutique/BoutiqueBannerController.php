@@ -52,13 +52,15 @@ class BoutiqueBannerController extends Controller
             if ($request->hasFile('desktop_image')) {
                 $image = $request->file('desktop_image');
                 $path = \App\Support\UploadableImage::storeTemp($image);
-                UploadBoutiqueBannerImage::dispatch($path, $banner->uuid, 'desktop', $image->getClientOriginalName());
+                UploadBoutiqueBannerImage::dispatchSync($path, $banner->uuid, 'desktop', $image->getClientOriginalName());
             }
             if ($request->hasFile('mobile_image')) {
                 $image = $request->file('mobile_image');
                 $path = \App\Support\UploadableImage::storeTemp($image);
-                UploadBoutiqueBannerImage::dispatch($path, $banner->uuid, 'mobile', $image->getClientOriginalName());
+                UploadBoutiqueBannerImage::dispatchSync($path, $banner->uuid, 'mobile', $image->getClientOriginalName());
             }
+
+            $banner->refresh();
 
             return ApiResponseHelper::apiSuccess(201, 'Banner creado exitosamente', ['banner' => $banner]);
         } catch (\Exception $e) {
@@ -88,13 +90,15 @@ class BoutiqueBannerController extends Controller
             if ($request->hasFile('desktop_image')) {
                 $image = $request->file('desktop_image');
                 $path = \App\Support\UploadableImage::storeTemp($image);
-                UploadBoutiqueBannerImage::dispatch($path, $banner->uuid, 'desktop', $image->getClientOriginalName());
+                UploadBoutiqueBannerImage::dispatchSync($path, $banner->uuid, 'desktop', $image->getClientOriginalName());
             }
             if ($request->hasFile('mobile_image')) {
                 $image = $request->file('mobile_image');
                 $path = \App\Support\UploadableImage::storeTemp($image);
-                UploadBoutiqueBannerImage::dispatch($path, $banner->uuid, 'mobile', $image->getClientOriginalName());
+                UploadBoutiqueBannerImage::dispatchSync($path, $banner->uuid, 'mobile', $image->getClientOriginalName());
             }
+
+            $banner->refresh();
 
             return ApiResponseHelper::apiSuccess(200, 'Banner actualizado exitosamente', ['banner' => $banner]);
         } catch (\Exception $e) {

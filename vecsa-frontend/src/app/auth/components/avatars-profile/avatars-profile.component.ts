@@ -25,7 +25,7 @@ export class AvatarsProfileComponent {
   public selectedIcon: string | null = null;
   public selectedCategory: string = 'todos';
   public iconos: { src: string, categoria: string }[] = [
-   { src: "assets/iconos_avatares/ 128ti.png", categoria: 'autos' },
+   { src: "assets/iconos_avatares/128ti.png", categoria: 'autos' },
    { src: "assets/iconos_avatares/ i5 M60 xDrive.png", categoria: 'autos'},
    { src: "assets/iconos_avatares/ i7.png", categoria: 'autos'},
    { src: "assets/iconos_avatares/ R 18 Classic. CU1.png", categoria: 'motos'},
@@ -224,7 +224,14 @@ export class AvatarsProfileComponent {
   // Función separada para procesar el envío de la foto
   private procesarEnvioDeFoto(file: File, uuid: string) {
     this._accountService.updateImageProfile(uuid, file).subscribe({
-      next: () => {
+      next: (response: { data?: { picture?: string } }) => {
+        const picture = response?.data?.picture;
+        if (picture) {
+          const profile = JSON.parse(localStorage.getItem('profile') || '{}');
+          profile.picture = picture;
+          localStorage.setItem('profile', JSON.stringify(profile));
+        }
+
         Swal.fire({
           icon: 'success',
           title: 'Actualización',

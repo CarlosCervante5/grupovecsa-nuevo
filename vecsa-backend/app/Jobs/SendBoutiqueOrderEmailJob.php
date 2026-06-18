@@ -11,6 +11,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use App\Support\TransactionalMail;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -40,7 +41,7 @@ class SendBoutiqueOrderEmailJob implements ShouldQueue
             return;
         }
 
-        $mailer = config('boutique.mail_mailer', 'resend');
+        $mailer = config('boutique.mail_mailer', TransactionalMail::mailer());
 
         $mailable = match ($this->type) {
             'placed' => new BoutiqueOrderPlacedMail(

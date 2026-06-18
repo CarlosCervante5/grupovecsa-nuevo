@@ -619,7 +619,7 @@ class BoutiqueCheckoutController extends Controller
         try {
             $this->orderMailService->sendOrderPlaced($order);
         } catch (\Throwable $e) {
-            Log::warning('Boutique: pedido creado pero falló encolar correo', [
+            Log::warning('Boutique: pedido creado pero falló el correo', [
                 'order_uuid' => $order->uuid,
                 'message' => $e->getMessage(),
             ]);

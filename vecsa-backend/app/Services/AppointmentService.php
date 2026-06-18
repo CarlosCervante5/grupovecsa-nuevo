@@ -6,7 +6,7 @@ use App\Mail\ValuationNotification;
 use App\Models\Customer;
 use App\Models\CustomerAppointment;
 use App\Models\CustomerVehicle;
-use Illuminate\Support\Facades\Mail;
+use App\Support\TransactionalMail;
 
 class AppointmentService
 {   
@@ -36,9 +36,15 @@ class AppointmentService
         ]);
 
         if( $data['dealership_name'] != 'vecsa hidalgo') {
-            Mail::to(env('VALUATION_PUEBLA_MAIL', ''))->send(new ValuationNotification($customer, $customer_vehicle, $customer_appointment));
+            TransactionalMail::send(
+                new ValuationNotification($customer, $customer_vehicle, $customer_appointment),
+                env('VALUATION_PUEBLA_MAIL', '')
+            );
         } else {
-            Mail::to(env('VALUATION_HIDALGO_MAIL', ''))->send(new ValuationNotification($customer, $customer_vehicle, $customer_appointment));
+            TransactionalMail::send(
+                new ValuationNotification($customer, $customer_vehicle, $customer_appointment),
+                env('VALUATION_HIDALGO_MAIL', '')
+            );
         }
 
         return $customer_appointment;

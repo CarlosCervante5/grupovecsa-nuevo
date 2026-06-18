@@ -2,53 +2,35 @@
 
 namespace App\Notifications;
 
+use App\Notifications\Concerns\UsesTransactionalMail;
 use Illuminate\Bus\Queueable;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class RegisterNotification extends Notification
 {
     use Queueable;
+    use UsesTransactionalMail;
 
-    /**
-     * Create a notification instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-    }
-
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
-     */
     public function via(object $notifiable): array
     {
         return ['mail'];
     }
 
-    /**
-     * Get the mail representation of the notification.
-     */
-    public function toMail(object $notifiable): MailMessage
+    public function toMail(object $notifiable): \Illuminate\Notifications\Messages\MailMessage
     {
-        return (new MailMessage)
-            ->subject('¡Registro exitoso en Grupovecsa!')
-            ->line('Estás recibiendo este correo electrónico porque recibimos una solicitud de registro con este correo.')
-            ->line('¡Bienvenido a GRUPOVECSA!');
+        $frontendUrl = rtrim((string) config('app.frontend_url', config('app.url')), '/');
+
+        return $this->transactionalMailMessage()
+            ->subject('¡Registro exitoso en Grupo VECSA!')
+            ->greeting('¡Bienvenido a Grupo VECSA!')
+            ->line('Tu cuenta se creó correctamente con este correo.')
+            ->line('Ya puedes iniciar sesión y completar tu perfil de rider.')
+            ->action('Ir a mi cuenta', $frontendUrl.'/auth/mi-cuenta')
+            ->line('Si no solicitaste este registro, ignora este mensaje.');
     }
 
-    /**
-     * Get the array representation of the notification.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(object $notifiable): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 }
