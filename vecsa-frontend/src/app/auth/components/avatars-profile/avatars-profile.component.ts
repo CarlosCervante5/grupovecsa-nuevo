@@ -3,6 +3,7 @@ import { Component, ViewChild, ElementRef, Inject } from '@angular/core';
 import Swal from 'sweetalert2';
 
 import { AccountService } from '@services/account.service';
+import { ImageData } from '@interfaces/auth.interface';
 import {reload} from '../../../shared/helpers/session.helper';
 import { Router } from '@angular/router';
 
@@ -226,8 +227,8 @@ export class AvatarsProfileComponent {
   // Función separada para procesar el envío de la foto
   private procesarEnvioDeFoto(file: File, uuid: string) {
     this._accountService.updateImageProfile(uuid, file).subscribe({
-      next: (response: { data?: { picture?: string } }) => {
-        const picture = response?.data?.picture;
+      next: (response: ImageData) => {
+        const picture = response?.user?.picture;
         if (picture) {
           const profile = JSON.parse(localStorage.getItem('profile') || '{}');
           profile.picture = picture;
