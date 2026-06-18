@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Appointments;
 use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Appointments\AttatchAppointmentRequest;
+use App\Http\Requests\Appointments\SearchAppointmentRequest;
 use App\Http\Requests\Appointments\StoreAppointmentRequest;
-use App\Http\Requests\Riders\SearchRiderRequest;
 use App\Models\CustomerAppointment;
 use App\Models\User;
 use App\Services\AppointmentService;
@@ -32,7 +32,7 @@ class AppointmentController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function search( SearchRiderRequest $request)
+    public function search(SearchAppointmentRequest $request)
     {
         try {
 
@@ -62,7 +62,12 @@ class AppointmentController extends Controller
                 'users.uuid as valuator_uuid'
             );
 
-            if (isset($data['type'])) {
+            $user = auth()->user();
+            if ($user?->customerProfile) {
+                $query->where('app_vecsa_customers.id', $user->customerProfile->id);
+            }
+
+            if (!empty($data['type'])) {
                 $query->where('app_vecsa_customer_appointments.type', $data['type']);
             }
 

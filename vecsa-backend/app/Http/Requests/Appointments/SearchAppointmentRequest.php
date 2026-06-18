@@ -22,20 +22,24 @@ class SearchAppointmentRequest extends FormRequest
     public function rules()
     {
         return [
-            'category' => 'sometimes|string|nullable',
+            'type' => 'sometimes|string|nullable',
             'keyword' => 'sometimes|string|nullable',
             'paginate' => 'sometimes|integer|min:1',
         ];
     }
 
-
     protected function prepareForValidation()
     {
-
-        $this->merge([
-            'category' => $this->input('category','rider'),
+        $payload = [
             'keyword' => $this->input('keyword', ''),
             'paginate' => $this->input('paginate', 15),
-        ]);
+        ];
+
+        $type = $this->input('type');
+        if ($type !== null && $type !== '') {
+            $payload['type'] = $type;
+        }
+
+        $this->merge($payload);
     }
 }

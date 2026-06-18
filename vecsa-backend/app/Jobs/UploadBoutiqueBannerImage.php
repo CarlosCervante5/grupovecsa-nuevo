@@ -61,6 +61,12 @@ class UploadBoutiqueBannerImage implements ShouldQueue
             if ($s3_result) {
                 $field = $this->image_type === 'desktop' ? 'desktop_image_path' : 'mobile_image_path';
                 $banner->update([$field => $this->aws_url . '/' . $s3_path]);
+
+                Log::info('UploadBoutiqueBannerImage DONE', [
+                    'banner_uuid' => $this->banner_uuid,
+                    'image_type' => $this->image_type,
+                    'path' => $this->aws_url . '/' . $s3_path,
+                ]);
             } else {
                 throw new Exception('Failed to upload image to S3');
             }
@@ -69,7 +75,12 @@ class UploadBoutiqueBannerImage implements ShouldQueue
             Storage::delete($this->path);
 
         } catch (Exception $e) {
-            Log::error('Error uploading boutique banner image:', ['exception' => $e->getMessage()]);
+            Log::error('Error uploading boutique banner image:', [
+                'banner_uuid' => $this->banner_uuid,
+                'image_type' => $this->image_type,
+                'exception' => $e->getMessage(),
+            ]);
+            throw $e;
         }
     }
 }

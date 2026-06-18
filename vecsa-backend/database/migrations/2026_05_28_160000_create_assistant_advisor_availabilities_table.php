@@ -25,8 +25,8 @@ return new class extends Migration
             $blueprint->timestamp('available_since')->nullable();
             $blueprint->timestamps();
 
-            $blueprint->unique(['user_id', 'dealership_id']);
-            $blueprint->index(['dealership_id', 'is_available']);
+            $blueprint->unique(['user_id', 'dealership_id'], 'asst_adv_avail_user_dealer_uq');
+            $blueprint->index(['dealership_id', 'is_available'], 'asst_adv_avail_dealer_avail_idx');
 
             $blueprint->foreign('user_id')->references('id')->on($users)->cascadeOnDelete();
             $blueprint->foreign('dealership_id')->references('id')->on($dealerships)->cascadeOnDelete();

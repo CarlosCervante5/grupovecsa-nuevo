@@ -2,15 +2,25 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Boutique\BoutiqueCategory;
 use App\Models\Boutique\BoutiqueProduct;
 use App\Models\Boutique\BoutiqueProductVariant;
+use App\Support\BoutiqueDemoCatalog;
+use Illuminate\Database\Seeder;
 
 class BoutiqueProductsSeeder extends Seeder
 {
     public function run(): void
     {
+        if (! BoutiqueDemoCatalog::shouldSeedDemoCatalog()) {
+            $this->command?->info('BoutiqueProductsSeeder: catálogo real detectado; se omite seed demo.');
+
+            return;
+        }
+
+        $productsCreated = 0;
+        $variantsCreated = 0;
+
         // ── Simple products (no variants) ─────────────────────────────────────
         $simpleProducts = [
             // Accesorios
@@ -36,7 +46,7 @@ class BoutiqueProductsSeeder extends Seeder
                 $this->command->warn("Categoría '{$data['category']}' no encontrada, omitiendo {$data['name']}");
                 continue;
             }
-            BoutiqueProduct::firstOrCreate(
+            $product = BoutiqueProduct::firstOrCreate(
                 ['sku' => $data['sku']],
                 [
                     'category_id' => $category->id,
@@ -47,6 +57,9 @@ class BoutiqueProductsSeeder extends Seeder
                     'active'      => true,
                 ]
             );
+            if ($product->wasRecentlyCreated) {
+                $productsCreated++;
+            }
         }
 
         // ── Variable products (with color + size variants) ────────────────────
@@ -172,14 +185,16 @@ class BoutiqueProductsSeeder extends Seeder
         foreach ($simpleOnly as $data) {
             $category = BoutiqueCategory::where('name', $data['category'])->first();
             if (!$category) continue;
-            BoutiqueProduct::firstOrCreate(
+            $product = BoutiqueProduct::firstOrCreate(
                 ['sku' => $data['sku']],
                 ['category_id' => $category->id, 'name' => $data['name'], 'description' => $data['description'], 'price' => $data['price'], 'stock' => $data['stock'], 'active' => true]
             );
+            if ($product->wasRecentlyCreated) {
+                $productsCreated++;
+            }
         }
 
         // Variable products with variants
-        $variantCount = 0;
         foreach ($variableProducts as $data) {
             $category = BoutiqueCategory::where('name', $data['category'])->first();
             if (!$category) {
@@ -198,9 +213,12 @@ class BoutiqueProductsSeeder extends Seeder
                     'active'      => true,
                 ]
             );
+            if ($product->wasRecentlyCreated) {
+                $productsCreated++;
+            }
 
             foreach ($data['variants'] as $v) {
-                BoutiqueProductVariant::firstOrCreate(
+                $variant = BoutiqueProductVariant::firstOrCreate(
                     ['sku' => $v['sku']],
                     [
                         'product_id' => $product->id,
@@ -211,11 +229,12 @@ class BoutiqueProductsSeeder extends Seeder
                         'active'     => true,
                     ]
                 );
-                $variantCount++;
+                if ($variant->wasRecentlyCreated) {
+                    $variantsCreated++;
+                }
             }
         }
 
-        $this->command->info('Productos simples creados/actualizados.');
-        $this->command->info("Productos variables creados con {$variantCount} variantes.");
+        $this->command?->info("BoutiqueProductsSeeder: {$productsCreated} producto(s) demo nuevo(s), {$variantsCreated} variante(s) demo nueva(s); resto ya existía.");
     }
 }

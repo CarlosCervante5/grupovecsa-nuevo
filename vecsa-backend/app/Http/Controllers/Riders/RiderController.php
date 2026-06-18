@@ -222,6 +222,7 @@ class RiderController extends Controller
         try {
         
             $year = date('Y');
+            $yearSum = $this->sqlSumEarnedPointsInYear('rp.created_at', 'rp.earned_points', $year);
 
             $points = DB::table('app_vecsa_customers as c')
                 ->leftJoin('app_vecsa_customer_reward as cr', 'c.id', '=', 'cr.customer_id')
@@ -233,8 +234,8 @@ class RiderController extends Controller
                 ->select(
                     'c.picture',
                     'u.nickname',
-                    DB::raw("COALESCE(SUM(CASE WHEN strftime('%Y', rp.created_at) = '" . $year . "' THEN rp.earned_points ELSE 0 END), 0) as total_earned_points"),
-                    DB::raw("ROW_NUMBER() OVER (ORDER BY COALESCE(SUM(CASE WHEN strftime('%Y', rp.created_at) = '" . $year . "' THEN rp.earned_points ELSE 0 END), 0) DESC) as position")
+                    DB::raw("{$yearSum} as total_earned_points"),
+                    DB::raw("ROW_NUMBER() OVER (ORDER BY {$yearSum} DESC) as position")
                 )
                 ->whereNull('c.deleted_at')
                 ->groupBy('c.id', 'u.nickname', 'c.picture')
@@ -258,6 +259,8 @@ class RiderController extends Controller
             $year = date('Y');
             $month = date('m');
             $months = collect(range(1, 12));
+            $yearSum = $this->sqlSumEarnedPointsInYear('rp.created_at', 'rp.earned_points', $year);
+            $monthSum = $this->sqlSumEarnedPointsInYearMonth('rp.created_at', 'rp.earned_points', $year, $month);
 
             $points = DB::table('app_vecsa_customers as c')
                 ->leftJoin('app_vecsa_customer_reward as cr', 'c.id', '=', 'cr.customer_id')
@@ -268,15 +271,17 @@ class RiderController extends Controller
                 ->leftJoin('users as u', 'c.user_id', '=', 'u.id')
                 ->select(
                     'c.uuid',
-                    DB::raw("COALESCE(SUM(CASE WHEN strftime('%Y', rp.created_at) = '" . $year . "' THEN rp.earned_points ELSE 0 END), 0) as total_points"),
-                    DB::raw("COALESCE(SUM(CASE WHEN strftime('%Y', rp.created_at) = '" . $year . "' AND strftime('%m', rp.created_at) = '" . str_pad($month, 2, '0', STR_PAD_LEFT) . "' THEN rp.earned_points ELSE 0 END), 0) as month_points"),
-                    DB::raw("ROW_NUMBER() OVER (ORDER BY COALESCE(SUM(CASE WHEN strftime('%Y', rp.created_at) = '" . $year . "' THEN rp.earned_points ELSE 0 END), 0) DESC) as position")
+                    DB::raw("{$yearSum} as total_points"),
+                    DB::raw("{$monthSum} as month_points"),
+                    DB::raw("ROW_NUMBER() OVER (ORDER BY {$yearSum} DESC) as position")
                 )
                 ->whereNull('c.deleted_at')
                 ->groupBy('c.uuid')
                 ->get();
 
             $customer = $points->where('uuid', $data['customer_uuid'])->first();
+
+            $monthNumberExpr = $this->sqlMonthNumberFromCreatedAt('rp.created_at');
 
             $monthly_points = DB::table('app_vecsa_customers as c')
                 ->leftJoin('app_vecsa_customer_reward as cr', 'c.id', '=', 'cr.customer_id')
@@ -285,8 +290,8 @@ class RiderController extends Controller
                          ->where('rp.redeemed', '=', 0);
                 })
                 ->select(
-                    DB::raw("CAST(strftime('%m', rp.created_at) AS INTEGER) as month"),
-                    DB::raw("COALESCE(SUM(CASE WHEN strftime('%Y', rp.created_at) = '" . $year . "' THEN rp.earned_points ELSE 0 END), 0) as monthly_points")
+                    DB::raw("{$monthNumberExpr} as month"),
+                    DB::raw("{$yearSum} as monthly_points")
                 )
                 ->where('c.uuid', $data['customer_uuid'])
                 ->groupBy('month')
@@ -598,5 +603,55 @@ class RiderController extends Controller
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al eliminar el vehiculo', $e->getMessage(), 500, 'RIDE_DELETE_ERROR');
         }
+    }
+
+    private function usesSqlite(): bool
+    {
+        return DB::connection()->getDriverName() === 'sqlite';
+    }
+
+    private function sqlCreatedAtInYear(string $dateColumn, int|string $year): string
+    {
+        $year = (int) $year;
+        if ($this->usesSqlite()) {
+            return "strftime('%Y', {$dateColumn}) = '{$year}'";
+        }
+
+        return "YEAR({$dateColumn}) = {$year}";
+    }
+
+    private function sqlCreatedAtInYearMonth(string $dateColumn, int|string $year, int|string $month): string
+    {
+        $yearCond = $this->sqlCreatedAtInYear($dateColumn, $year);
+        if ($this->usesSqlite()) {
+            $monthPadded = str_pad((string) (int) $month, 2, '0', STR_PAD_LEFT);
+
+            return "{$yearCond} AND strftime('%m', {$dateColumn}) = '{$monthPadded}'";
+        }
+
+        return "{$yearCond} AND MONTH({$dateColumn}) = " . (int) $month;
+    }
+
+    private function sqlSumEarnedPointsInYear(string $dateColumn, string $pointsColumn, int|string $year): string
+    {
+        $cond = $this->sqlCreatedAtInYear($dateColumn, $year);
+
+        return "COALESCE(SUM(CASE WHEN {$cond} THEN {$pointsColumn} ELSE 0 END), 0)";
+    }
+
+    private function sqlSumEarnedPointsInYearMonth(string $dateColumn, string $pointsColumn, int|string $year, int|string $month): string
+    {
+        $cond = $this->sqlCreatedAtInYearMonth($dateColumn, $year, $month);
+
+        return "COALESCE(SUM(CASE WHEN {$cond} THEN {$pointsColumn} ELSE 0 END), 0)";
+    }
+
+    private function sqlMonthNumberFromCreatedAt(string $dateColumn): string
+    {
+        if ($this->usesSqlite()) {
+            return "CAST(strftime('%m', {$dateColumn}) AS INTEGER)";
+        }
+
+        return "MONTH({$dateColumn})";
     }
 }

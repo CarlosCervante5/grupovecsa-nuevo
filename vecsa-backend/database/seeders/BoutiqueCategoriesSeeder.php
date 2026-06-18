@@ -2,13 +2,20 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Boutique\BoutiqueCategory;
+use App\Support\BoutiqueDemoCatalog;
+use Illuminate\Database\Seeder;
 
 class BoutiqueCategoriesSeeder extends Seeder
 {
     public function run(): void
     {
+        if (! BoutiqueDemoCatalog::shouldSeedDemoCatalog()) {
+            $this->command?->info('BoutiqueCategoriesSeeder: catálogo real detectado; se omite seed demo.');
+
+            return;
+        }
+
         $categories = [
             [
                 'name'        => 'Accesorios',
@@ -37,13 +44,17 @@ class BoutiqueCategoriesSeeder extends Seeder
             ],
         ];
 
+        $created = 0;
         foreach ($categories as $category) {
-            BoutiqueCategory::firstOrCreate(
+            $model = BoutiqueCategory::firstOrCreate(
                 ['name' => $category['name']],
                 $category
             );
+            if ($model->wasRecentlyCreated) {
+                $created++;
+            }
         }
 
-        $this->command->info('Categorías de boutique creadas: ' . BoutiqueCategory::count());
+        $this->command?->info("BoutiqueCategoriesSeeder: {$created} categoría(s) demo nueva(s); resto ya existía.");
     }
 }
