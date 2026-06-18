@@ -398,6 +398,8 @@ export class RegisterComponent {
         
         this.status = (this.statusClothes && this.statusBrand) ? true : false;
 
+        this.validateAccesories();
+
     }
 
     public onChipSelectionChange(event: MatChipListboxChange, quiz_uuid: string) {
@@ -470,6 +472,11 @@ export class RegisterComponent {
         return true;
     }
 
+    private isSizeValueSelected(quiz: Quiz): boolean {
+        const value = quiz.selected_value;
+        return value !== null && value !== undefined && value !== '';
+    }
+
     public validateAccesories(){
 
         if( this.defaultBrandSelected ){
@@ -480,12 +487,12 @@ export class RegisterComponent {
             }
 
             const sizeItems = this.accesories.filter(quiz =>
-                this.sizeQuestionTypes.includes(quiz.question_type) && quiz.name !== 'Pantalón'
+                this.sizeQuestionTypes.includes(quiz.question_type) &&
+                quiz.name !== 'Pantalón' &&
+                this.shouldShowSizeQuiz(quiz)
             );
 
-            const otherClothesValid = sizeItems.every(quiz =>
-                quiz.selected_value !== null && quiz.selected_value !== undefined
-            );
+            const otherClothesValid = sizeItems.every(quiz => this.isSizeValueSelected(quiz));
 
             let pantalonValid = this.validateVariants('Pantalón');
 
@@ -501,8 +508,8 @@ export class RegisterComponent {
             }
 
             let otherClothesValid = this.accesories
-            .filter(quiz => quiz.question_type === 'ropa')
-            .every(quiz => quiz.selected_value !== null && quiz.selected_value !== undefined);
+            .filter(quiz => quiz.question_type === 'ropa' && this.shouldShowSizeQuiz(quiz))
+            .every(quiz => this.isSizeValueSelected(quiz));
 
 
             let calzadoValid = this.validateVariants('Calzado');
@@ -511,6 +518,10 @@ export class RegisterComponent {
 
             this.isFormValid = otherClothesValid && calzadoValid && pantalonValid;
 
+        }
+
+        if (this.chevroletBrandSelected) {
+            this.isFormValid = true;
         }
     }
     
@@ -647,13 +658,17 @@ export class RegisterComponent {
 
     public validateVariants = (name: string): boolean => {
 
-        let variantMasculina = this.accesories.find(quiz => quiz.name === name && quiz.question_type === 'ropa masculina');
-        let variantFemenina = this.accesories.find(quiz => quiz.name === name && quiz.question_type === 'ropa femenina');
+        const variants = this.accesories.filter(quiz =>
+            quiz.name === name &&
+            this.sizeQuestionTypes.includes(quiz.question_type) &&
+            this.shouldShowSizeQuiz(quiz)
+        );
 
-        const isMasculinaValid = variantMasculina ? variantMasculina.selected_value !== null && variantMasculina.selected_value !== undefined : false;
-        const isFemeninaValid = variantFemenina ? variantFemenina.selected_value !== null && variantFemenina.selected_value !== undefined : false;
-    
-        return isMasculinaValid || isFemeninaValid;
+        if (variants.length === 0) {
+            return true;
+        }
+
+        return variants.every(quiz => this.isSizeValueSelected(quiz));
     };
 
     public drop(event: CdkDragDrop<Quiz[]>) {
@@ -924,6 +939,7 @@ export class RegisterComponent {
           if (this.usesDefaultQuestionsForSizes && (this.defaultBrandSelected || this.motorradBrandSelected)) {
             return this.default_validation.every(quiz => quiz.invalid === false);
           }
+          this.validateAccesories();
           return this.isFormValid;
         default: return true;
       }
