@@ -434,6 +434,14 @@ export class RegisterComponent {
         );
     }
 
+    get brandValues(): string[] {
+        return this.brand_quiz ? this.quizValues(this.brand_quiz) : [];
+    }
+
+    get genderValues(): string[] {
+        return this.clothes_gender ? this.quizValues(this.clothes_gender) : [];
+    }
+
     get sizeQuizzes(): Quiz[] {
         const affinitySizes = this.accesories.filter(quiz =>
             this.sizeQuestionTypes.includes(quiz.question_type)
@@ -504,6 +512,70 @@ export class RegisterComponent {
     
     private normalizeBrand(brand: string | null | undefined): string {
         return (brand ?? '').trim().toLowerCase();
+    }
+
+    private quizValues(quiz: Quiz | null | undefined): string[] {
+        if (!quiz?.values) {
+            return [];
+        }
+
+        const values = quiz.values as string[] | string;
+
+        if (Array.isArray(values)) {
+            return values.map(value => value.trim()).filter(Boolean);
+        }
+
+        return String(values).split(',').map(value => value.trim()).filter(Boolean);
+    }
+
+    private normalizeQuiz(quiz: Quiz): Quiz {
+        return {
+            ...quiz,
+            values: this.quizValues(quiz),
+        };
+    }
+
+    private isBrandQuiz(quiz: Quiz): boolean {
+        const values = this.quizValues(quiz).map(value => this.normalizeBrand(value));
+        const brandOptions = ['bmw', 'mini', 'motorrad', 'chevrolet'];
+
+        return brandOptions.some(option => values.includes(option));
+    }
+
+    private resolveBrandQuiz(quizzes: Quiz[]): Quiz | null {
+        const byGroup = quizzes.find(quiz => quiz.group_name === 'brand_preference');
+        if (byGroup) {
+            return this.normalizeQuiz(byGroup);
+        }
+
+        const byChip = quizzes.find(quiz => quiz.element_type === 'chip' && this.isBrandQuiz(quiz));
+        if (byChip) {
+            return this.normalizeQuiz(byChip);
+        }
+
+        const byName = quizzes.find(quiz => /marca/i.test(quiz.name));
+        if (byName) {
+            return this.normalizeQuiz(byName);
+        }
+
+        if (quizzes[11]) {
+            return this.normalizeQuiz(quizzes[11]);
+        }
+
+        return null;
+    }
+
+    private resolveGenderQuiz(quizzes: Quiz[]): Quiz | null {
+        const byGroup = quizzes.find(quiz => quiz.group_name === 'profile_gender');
+        if (byGroup) {
+            return this.normalizeQuiz(byGroup);
+        }
+
+        if (quizzes[0]) {
+            return this.normalizeQuiz(quizzes[0]);
+        }
+
+        return null;
     }
 
     public onChipBrandChange(event: MatChipListboxChange, quiz_uuid: string) {
@@ -666,13 +738,17 @@ export class RegisterComponent {
                     return;
                 }
 
-                this.clothes_gender = quizzes.data.find(quiz => quiz.group_name === 'profile_gender') ?? quizzes.data[0];
+                this.clothes_gender = this.resolveGenderQuiz(quizzes.data);
 
-                this.gender =  (this.clothes_gender.selected_value == "undefined")? 'null':  this.clothes_gender.selected_value;
+                this.gender = (this.clothes_gender?.selected_value == "undefined")
+                    ? 'null'
+                    : (this.clothes_gender?.selected_value ?? null);
 
-                this.accesories = quizzes.data.filter(quiz => quiz.group_name === 'profile_affinities');
+                this.accesories = quizzes.data
+                    .filter(quiz => quiz.group_name === 'profile_affinities')
+                    .map(quiz => this.normalizeQuiz(quiz));
 
-                this.brand_quiz = quizzes.data.find(quiz => quiz.group_name === 'brand_preference') ?? null;
+                this.brand_quiz = this.resolveBrandQuiz(quizzes.data);
 
                 this.motorrad_cards = quizzes.data.filter(quiz => quiz.group_name === 'event_preferences');
 

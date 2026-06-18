@@ -279,7 +279,7 @@
                                         <div class="d-flex align-items-center justify-content-end" style="height: 100%;">
                                             <h6 class="fw-light mb-0" style="font-size: medium; padding-right: 20px;">Tu marca actual:</h6>
                                             <mat-chip-listbox class="mat-chip-grid" aria-label="{{ brand_quiz?.name }}" (change)="onChipBrandChange($event, brand_quiz?.uuid || '')">
-                                                <div *ngFor="let value of brand_quiz?.values; let i = index">
+                                                <div *ngFor="let value of brandValues; let i = index">
                                                     <mat-chip-option
                                                         class="chip-option"
                                                         [value]="value"
@@ -306,7 +306,7 @@
                                         <div class="d-flex align-items-center justify-content-end" style="height: 100%;">
                                             <h6 class="fw-light me-2 mb-0" style="font-size: medium; padding-right: 10px;">Género:</h6>
                                             <mat-chip-listbox class="mat-chip-grid" aria-label="{{ clothes_gender?.name }}" (change)="onChipGenderChange($event, clothes_gender?.uuid || '')">
-                                                <div *ngFor="let value of clothes_gender?.values; let i = index">
+                                                <div *ngFor="let value of genderValues; let i = index">
                                                     <mat-chip-option
                                                         class="chip-option"
                                                         [value]="value"
