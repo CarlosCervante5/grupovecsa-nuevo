@@ -434,6 +434,10 @@ export class RegisterComponent {
         );
     }
 
+    get hasInterestAffinities(): boolean {
+        return this.affinityQuizzes.length > 0;
+    }
+
     get brandValues(): string[] {
         return this.brand_quiz ? this.quizValues(this.brand_quiz) : [];
     }
@@ -543,7 +547,9 @@ export class RegisterComponent {
     }
 
     private resolveBrandQuiz(quizzes: Quiz[]): Quiz | null {
-        const byGroup = quizzes.find(quiz => quiz.group_name === 'brand_preference');
+        const byGroup = quizzes.find(quiz =>
+            quiz.group_name === 'brand_preference' || quiz.group_name === 'brand'
+        );
         if (byGroup) {
             return this.normalizeQuiz(byGroup);
         }
@@ -566,7 +572,9 @@ export class RegisterComponent {
     }
 
     private resolveGenderQuiz(quizzes: Quiz[]): Quiz | null {
-        const byGroup = quizzes.find(quiz => quiz.group_name === 'profile_gender');
+        const byGroup = quizzes.find(quiz =>
+            quiz.group_name === 'profile_gender' || quiz.group_name === 'clothes_gender'
+        );
         if (byGroup) {
             return this.normalizeQuiz(byGroup);
         }
@@ -750,7 +758,9 @@ export class RegisterComponent {
 
                 this.brand_quiz = this.resolveBrandQuiz(quizzes.data);
 
-                this.motorrad_cards = quizzes.data.filter(quiz => quiz.group_name === 'event_preferences');
+                this.motorrad_cards = quizzes.data.filter(quiz =>
+                    quiz.group_name === 'event_preferences' || quiz.group_name === 'motorrad_event_preferences'
+                );
 
                 this.bmw_cards = quizzes.data.filter(quiz => quiz.group_name === 'bmw_event_preferences');
 
@@ -758,9 +768,13 @@ export class RegisterComponent {
 
                 this.chevrolet_cards = quizzes.data.filter(quiz => quiz.group_name === 'chevrolet_event_preferences');
 
-                this.chevrolet_questions = quizzes.data.filter(quiz => quiz.group_name === 'chevrolet_questions')
+                this.chevrolet_questions = quizzes.data
+                    .filter(quiz => quiz.group_name === 'chevrolet_questions')
+                    .map(quiz => this.normalizeQuiz(quiz));
 
-                this.default_questions = quizzes.data.filter(quiz => quiz.group_name === 'default_questions')
+                this.default_questions = quizzes.data
+                    .filter(quiz => quiz.group_name === 'default_questions')
+                    .map(quiz => this.normalizeQuiz(quiz));
 
                 this.chevrolet_validation = this.chevrolet_questions.map(q => ({
                     uuid: q.uuid,

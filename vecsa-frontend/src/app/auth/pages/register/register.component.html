@@ -362,34 +362,56 @@
                             </div>
 
                             <div class="row mb-3" *ngIf="defaultBrandSelected || motorradBrandSelected">
-                                <ng-container *ngFor="let quiz of affinityQuizzes">
-                                    <div class="col-12 col-lg-6 mt-3 mb-3" style="padding: 0;" *ngIf="shouldShowSizeQuiz(quiz)">
-                                        <div class="row align-items-center">
-                                            <div class="col-2 d-flex justify-content-center" *ngIf="quiz.image_path">
-                                                <div class="image_container">
-                                                    <img class="image_quiz" [src]="quiz.image_path" [alt]="quiz.name">
+                                <ng-container *ngIf="hasInterestAffinities">
+                                    <ng-container *ngFor="let quiz of affinityQuizzes">
+                                        <div class="col-12 col-lg-6 mt-3 mb-3" style="padding: 0;" *ngIf="shouldShowSizeQuiz(quiz)">
+                                            <div class="row align-items-center">
+                                                <div class="col-2 d-flex justify-content-center" *ngIf="quiz.image_path">
+                                                    <div class="image_container">
+                                                        <img class="image_quiz" [src]="quiz.image_path" [alt]="quiz.name">
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div [class.col-10]="quiz.image_path" [class.col-12]="!quiz.image_path">
-                                                <div class="mb-2 mt-2">
-                                                    <h6 class="fw-light mb-0" style="font-size: medium;">{{ quiz.name }}:</h6>
-                                                </div>
-                                                <div class="d-flex flex-wrap">
-                                                    <mat-chip-listbox class="mat-chip-grid" [attr.aria-label]="quiz.name"
-                                                        (change)="onChipSelectionChange($event, quiz.uuid)">
-                                                        <div *ngFor="let value of quiz.values">
-                                                            <mat-chip-option
-                                                                class="chip-option"
-                                                                [value]="value"
-                                                                [selected]="value === quiz.selected_value">
-                                                                {{ value }}
-                                                            </mat-chip-option>
-                                                        </div>
-                                                    </mat-chip-listbox>
+                                                <div [class.col-10]="quiz.image_path" [class.col-12]="!quiz.image_path">
+                                                    <div class="mb-2 mt-2">
+                                                        <h6 class="fw-light mb-0" style="font-size: medium;">{{ quiz.name }}:</h6>
+                                                    </div>
+                                                    <div class="d-flex flex-wrap">
+                                                        <mat-chip-listbox class="mat-chip-grid" [attr.aria-label]="quiz.name"
+                                                            (change)="onChipSelectionChange($event, quiz.uuid)">
+                                                            <div *ngFor="let value of quiz.values">
+                                                                <mat-chip-option
+                                                                    class="chip-option"
+                                                                    [value]="value"
+                                                                    [selected]="value === quiz.selected_value">
+                                                                    {{ value }}
+                                                                </mat-chip-option>
+                                                            </div>
+                                                        </mat-chip-listbox>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    </ng-container>
+                                </ng-container>
+
+                                <ng-container *ngIf="!hasInterestAffinities">
+                                    <ng-container *ngFor="let question of default_questions; let i = index">
+                                        <div class="col-12 col-md-6">
+                                            <h4 style="align-content:center; min-height: 50px;">{{ question.name }}</h4>
+                                            <div class="field-group">
+                                                <input
+                                                    class="field-input"
+                                                    type="text"
+                                                    placeholder="Tu respuesta..."
+                                                    [value]="question.selected_value || ''"
+                                                    (input)="onInputChange($event, question.uuid)"
+                                                    required>
+                                                <span class="field-error" *ngIf="default_validation[i]?.invalid">
+                                                    {{ default_validation[i].validation_message }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </ng-container>
                                 </ng-container>
                             </div>
 
