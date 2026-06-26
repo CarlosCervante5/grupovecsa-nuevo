@@ -250,10 +250,38 @@ final class ImageAiProcessingService
         return [
             [
                 'id' => 'studio_white',
-                'label' => 'Fondo blanco (estudio)',
-                'description' => 'Solo fondo blanco y luz suave; sin añadir portaplacas, placas ni accesorios nuevos.',
+                'label' => 'Estudio completo',
+                'description' => 'Fondo blanco y luz suave de catálogo. Uso general cuando la foto necesita fondo y corrección ligera.',
+            ],
+            [
+                'id' => 'background_only',
+                'label' => 'Solo quitar fondo',
+                'description' => 'Reemplaza el fondo por blanco puro sin tocar brillo, color ni encuadre del auto.',
+            ],
+            [
+                'id' => 'brightness_boost',
+                'label' => 'Más brillo',
+                'description' => 'Sube exposición y brillo para fotos oscuras o con poca luz, sin cambiar el color de la pintura.',
+            ],
+            [
+                'id' => 'clean_wheels',
+                'label' => 'Limpiar llantas',
+                'description' => 'Quita suciedad, polvo y manchas visibles en llantas y neumáticos sin cambiar el diseño del rin.',
+            ],
+            [
+                'id' => 'crop_only',
+                'label' => 'Solo recorte',
+                'description' => 'Centra y recorta el encuadre tipo catálogo sin modificar color, fondo ni iluminación del auto.',
             ],
         ];
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function allowedActionIds(): array
+    {
+        return array_column($this->availableActions(), 'id');
     }
 
     private function apiKey(): string
@@ -331,7 +359,22 @@ TEXT;
     private function promptForAction(string $action, string $context): string
     {
         if ($context === 'product') {
-            return <<<'PROMPT'
+            return match ($action) {
+                'background_only' => <<<'PROMPT'
+Using the photograph above (the only source of truth), produce ONE edited version.
+
+TASK: Replace ONLY the background with pure seamless white (#FFFFFF).
+
+FORBIDDEN:
+- No exposure, brightness, white balance, or color changes on the product.
+- No cropping, reframing, or relighting.
+- No new labels, tags, packaging, or props.
+
+PRESERVE EXACTLY: same product, colors, materials, angle, framing, and scale as the input.
+
+Output: one photo with white background; product pixels unchanged.
+PROMPT,
+                default => <<<'PROMPT'
 Using the photograph above (the only source of truth), produce ONE edited version.
 
 ALLOWED:
@@ -348,27 +391,105 @@ PRESERVE EXACTLY:
 - Do not change the product type or generate a different item.
 
 Output: one photorealistic catalog photo. Background white; product unchanged except subtle light correction.
-PROMPT;
+PROMPT,
+            };
         }
 
-        return <<<'PROMPT'
-Using the photograph above (the only source of truth), produce ONE edited version.
-
-ALLOWED:
-1. Replace the background with pure seamless white (#FFFFFF) studio backdrop.
-2. Subtle catalog lighting on the existing car only: light exposure/white-balance correction, soft shadow under tires. No relighting that changes how the car looks.
-
+        $vehicleBaseRules = <<<'RULES'
 ZERO INVENTION — do not add anything not in the photo:
 - No new portaplacas, plate frames, plates, screws, badges, logos, trim, moldings, mirrors, wipers, or body parts.
 - No "cleaning up" or "completing" the bumper, grille, or license area by drawing new objects.
 - If something is absent, cropped, or unclear in the input, leave it absent or unclear. Do not guess.
 
 PRESERVE EXACTLY:
-- Same car identity, color, wheels, tires, glass, interior glimpses, angle, framing, scale, dents, scratches, reflections, and all visible text/plates.
-- Do not change model, body shape, paint, or swap components. Do not generate a different vehicle.
+- Same car identity, wheels, tires, glass, interior glimpses, dents, scratches, reflections, and all visible text/plates.
+- Do not change model, body shape, or swap components. Do not generate a different vehicle.
+RULES;
+
+        $vehiclePrompt = match ($action) {
+            'background_only' => <<<'PROMPT'
+Using the photograph above (the only source of truth), produce ONE edited version.
+
+TASK: Replace ONLY the background with pure seamless white (#FFFFFF).
+
+FORBIDDEN:
+- No exposure, brightness, white balance, or color changes on the vehicle.
+- No cropping, reframing, shadows added/removed on the car, or surface retouching.
+
+PRESERVE EXACTLY: same car paint color (hue and saturation), angle, framing, scale, and lighting on the vehicle as the input.
+
+Output: one photo with white background; vehicle pixels unchanged except background replacement.
+PROMPT,
+            'brightness_boost' => <<<PROMPT
+Using the photograph above (the only source of truth), produce ONE edited version.
+
+TASK: Fix underexposed or dim photos by increasing exposure and brightness so the car is clearly visible and well lit for a catalog.
+
+ALLOWED:
+1. Raise exposure, brightness, and lift shadows on the existing car only (outdoor, garage, or poor-lighting photos).
+2. Gentle white-balance correction if the scene is clearly too warm/cool — but keep the paint color hue faithful to the real car.
+3. Optional pure white (#FFFFFF) background if the original background is very cluttered; otherwise prefer keeping a clean neutral backdrop.
+
+FORBIDDEN:
+- Do not recolor the paint or change body color.
+- Do not invent parts, portaplacas, or accessories.
+
+{$vehicleBaseRules}
+
+Output: one brighter, clearer photorealistic photo; same vehicle and paint color identity.
+PROMPT,
+            'clean_wheels' => <<<PROMPT
+Using the photograph above (the only source of truth), produce ONE edited version.
+
+TASK: Clean visible dirt, mud, brake dust, and grime from tires and wheels shown in the photograph.
+
+ALLOWED:
+1. Remove surface dirt and stains on tires, sidewalls, and wheel rims that are clearly grime (not design elements).
+2. Keep the same wheel design, rim style, bolt pattern, and tire branding text if visible.
+
+FORBIDDEN:
+- Do not replace, resize, or redesign wheels or tires.
+- Do not add chrome, polish, or shine beyond what cleaning would reveal in the original.
+- No body paint color changes and no new accessories.
+
+{$vehicleBaseRules}
+
+Output: same photo with cleaner wheels/tires; rest of the car unchanged unless minor dust was on wheel arches only.
+PROMPT,
+            'crop_only' => <<<'PROMPT'
+Using the photograph above (the only source of truth), produce ONE edited version.
+
+TASK: Crop and straighten framing only — professional catalog composition with the vehicle centered.
+
+ALLOWED:
+1. Crop excess margins, tilt correction, and reframe so the car fills the frame appropriately.
+2. Remove distracting empty edges.
+
+FORBIDDEN:
+- NO background replacement or blur.
+- NO exposure, brightness, white balance, or color changes on the vehicle.
+- NO surface retouching, cleaning, or relighting.
+- Paint color, shadows, and lighting on the car must match the input exactly.
+
+PRESERVE EXACTLY: same car, paint color, wheels, background content (only cropped tighter), and natural lighting.
+
+Output: one reframed photo; vehicle appearance identical to input.
+PROMPT,
+            default => <<<PROMPT
+Using the photograph above (the only source of truth), produce ONE edited version.
+
+ALLOWED:
+1. Replace the background with pure seamless white (#FFFFFF) studio backdrop.
+2. Subtle catalog lighting on the existing car only: light exposure/white-balance correction, soft shadow under tires. No relighting that changes how the car looks.
+
+{$vehicleBaseRules}
+- Do not change paint color or swap components.
 
 Output: one photorealistic catalog photo. Background white; car unchanged except subtle light correction.
-PROMPT;
+PROMPT,
+        };
+
+        return $vehiclePrompt;
     }
 
     private function normalizeImageMime(string $headerMime, string $sourceUrl): string

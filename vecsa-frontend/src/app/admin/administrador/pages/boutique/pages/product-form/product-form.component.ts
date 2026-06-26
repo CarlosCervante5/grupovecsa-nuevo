@@ -306,7 +306,7 @@ export class ProductFormComponent implements OnInit {
       this.showSnackBar('La imagen debe estar subida antes de usar IA.', true);
       return;
     }
-    const ref = this._dialog.open(ImageAiDialogComponent, {
+    this._dialog.open(ImageAiDialogComponent, {
       width: '640px',
       maxWidth: '95vw',
       data: {
@@ -314,13 +314,11 @@ export class ProductFormComponent implements OnInit {
         targetType: 'boutique_product_image',
         targetUuid: image.uuid,
         title: 'Fondo blanco — foto del producto',
+        onSaved: (imageUrl: string) => {
+          this.images[index].image_path = imageUrl;
+          this.showSnackBar('Imagen del producto actualizada');
+        },
       },
-    });
-    ref.afterClosed().subscribe((result) => {
-      if (result?.saved && result.imageUrl) {
-        this.images[index].image_path = result.imageUrl;
-        this.showSnackBar('Imagen del producto actualizada');
-      }
     });
   }
 

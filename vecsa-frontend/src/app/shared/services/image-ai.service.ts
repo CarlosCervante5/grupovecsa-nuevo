@@ -3,7 +3,12 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '@environments/environment';
 
-export type ImageAiActionId = 'studio_white';
+export type ImageAiActionId =
+  | 'studio_white'
+  | 'background_only'
+  | 'brightness_boost'
+  | 'clean_wheels'
+  | 'crop_only';
 
 export type ImageAiTargetType = 'preview_only' | 'vehicle_image' | 'boutique_product_image';
 
@@ -48,6 +53,16 @@ interface ApiWrap<T> {
   status: number;
   message: string;
   data: T;
+}
+
+/** Evita caché del navegador/CDN tras reemplazar una imagen con la misma URL base. */
+export function cacheBustImageUrl(url: string): string {
+  if (!url || url.startsWith('data:')) {
+    return url;
+  }
+  const withoutV = url.replace(/([?&])v=\d+/g, '$1').replace(/[?&]$/, '');
+  const separator = withoutV.includes('?') ? '&' : '?';
+  return `${withoutV}${separator}v=${Date.now()}`;
 }
 
 @Injectable({ providedIn: 'root' })

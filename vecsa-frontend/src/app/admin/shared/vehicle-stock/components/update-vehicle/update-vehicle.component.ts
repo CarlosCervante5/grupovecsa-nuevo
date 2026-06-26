@@ -91,6 +91,7 @@ export class UpdateVehicleComponent implements OnInit {
   photoUploadDisabled = true;
   photoUploading = false;
   imagesChanged = false;
+  vehicleDataSaved = false;
 
   constructor(
     @Inject(MAT_BOTTOM_SHEET_DATA) public data: any,
@@ -310,14 +311,58 @@ export class UpdateVehicleComponent implements OnInit {
     }));
   }
 
-  private refreshVehicleImages(): void {
+  private refreshVehicleImages(onDone?: () => void): void {
     this._vehicleService.getVehicle(this.vehicle_uuid).subscribe({
       next: (detailResponse: FullDetailResponse) => {
         this.vehicle.images = detailResponse.data.images ?? [];
         this.syncImagesFromVehicle();
         this.imagesChanged = true;
+        onDone?.();
       },
       error: (err) => reload(err, this._router),
+    });
+  }
+
+  private pollForNewImages(expectedCount: number, attempt = 0): void {
+    const maxAttempts = 30;
+    if (attempt >= maxAttempts) {
+      this.photoUploading = false;
+      this.photoUploadDisabled = true;
+      this.refreshVehicleImages();
+      Swal.fire({
+        icon: 'info',
+        title: 'Procesando fotos',
+        text: 'Las imágenes siguen en cola. Aparecerán en unos segundos; puedes cerrar y volver a abrir el panel.',
+        showConfirmButton: true,
+        confirmButtonColor: '#1c69d4',
+      });
+      return;
+    }
+
+    this._vehicleService.getVehicle(this.vehicle_uuid).subscribe({
+      next: (detailResponse: FullDetailResponse) => {
+        const imgs = detailResponse.data?.images ?? [];
+        if (imgs.length >= expectedCount) {
+          this.vehicle.images = imgs;
+          this.syncImagesFromVehicle();
+          this.imagesChanged = true;
+          this.photoUploading = false;
+          this.photoUploadDisabled = true;
+          Swal.fire({
+            icon: 'success',
+            title: 'Imágenes cargadas',
+            showConfirmButton: false,
+            timer: 2200,
+          });
+          return;
+        }
+        setTimeout(() => this.pollForNewImages(expectedCount, attempt + 1), 2000);
+      },
+      error: (err) => {
+        this.photoUploading = false;
+        this.photoUploadDisabled = false;
+        reload(err, this._router);
+      },
     });
   }
 
@@ -352,7 +397,7 @@ export class UpdateVehicleComponent implements OnInit {
   }
 
   openPhotoAi(image: ImageOrder, index: number): void {
-    const ref = this._dialog.open(ImageAiDialogComponent, {
+    this._dialog.open(ImageAiDialogComponent, {
       width: '640px',
       maxWidth: '95vw',
       data: {
@@ -360,19 +405,11 @@ export class UpdateVehicleComponent implements OnInit {
         targetType: 'vehicle_image',
         targetUuid: image.id,
         title: 'Mejorar foto del vehículo',
+        onSaved: (imageUrl: string) => {
+          this.vehicleImages[index].path = imageUrl;
+          this.imagesChanged = true;
+        },
       },
-    });
-    ref.afterClosed().subscribe((result) => {
-      if (result?.saved && result.imageUrl) {
-        this.vehicleImages[index].path = result.imageUrl;
-        this.imagesChanged = true;
-        Swal.fire({
-          icon: 'success',
-          title: 'Imagen actualizada con IA',
-          showConfirmButton: false,
-          timer: 2200,
-        });
-      }
     });
   }
 
@@ -413,19 +450,13 @@ export class UpdateVehicleComponent implements OnInit {
     if (!this.photoFiles.length || this.photoUploading) {
       return;
     }
+    const expectedCount = this.vehicleImages.length + this.photoFiles.length;
     this.photoUploading = true;
     this.photoUploadDisabled = true;
     this._imagesService.setImage(this.vehicle_uuid, this.photoFiles).subscribe({
       next: () => {
-        this.photoUploading = false;
         this.photoFiles = [];
-        Swal.fire({
-          icon: 'success',
-          title: 'Imágenes cargadas',
-          showConfirmButton: false,
-          timer: 2200,
-        });
-        this.refreshVehicleImages();
+        this.pollForNewImages(expectedCount);
       },
       error: (err) => {
         this.photoUploading = false;
@@ -553,9 +584,7 @@ export class UpdateVehicleComponent implements OnInit {
             timer: 2000
           });
 
-          this._bottomSheetRef.dismiss(
-            {reload: true}
-          );
+          this.vehicleDataSaved = true;
       },
       error: (error) => {
         reload(error, this._router);
@@ -573,9 +602,7 @@ export class UpdateVehicleComponent implements OnInit {
               timer: 2000
             });
 
-            this._bottomSheetRef.dismiss(
-              {reload: true}
-            );
+            this.vehicleDataSaved = true;
         },
         error: (error) => {
           reload(error, this._router);
@@ -699,7 +726,7 @@ export class UpdateVehicleComponent implements OnInit {
   }
 
   public close(): void {
-    if (this.imagesChanged) {
+    if (this.imagesChanged || this.vehicleDataSaved) {
       this._bottomSheetRef.dismiss({ reload: true });
       return;
     }

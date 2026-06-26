@@ -22,10 +22,30 @@
       }
     </div>
 
+    <p class="image-ai-section-label">Tipo de edición</p>
+    <div class="image-ai-actions">
+      @for (action of actions; track action.id) {
+        <button
+          type="button"
+          class="image-ai-action"
+          [class.image-ai-action--selected]="selectedAction === action.id"
+          [disabled]="processing"
+          (click)="selectAction(action.id)"
+        >
+          <span class="image-ai-action-label">{{ action.label }}</span>
+          <span class="image-ai-action-desc">{{ action.description }}</span>
+        </button>
+      }
+    </div>
+
     <p class="image-ai-hint">
-      Quita el fondo y ajusta la luz de forma suave. Compara la vista previa con el original: no debe aparecer nada nuevo
-      (portaplacas, placas, accesorios). Si algo cambió, no guardes y vuelve a generar la vista previa.
+      Elige el preset según la foto: fondo sucio, poca luz, llantas con polvo o solo encuadre.
+      Compara la vista previa con el original antes de guardar.
     </p>
+  }
+
+  @if (successMessage) {
+    <p class="image-ai-success">{{ successMessage }}</p>
   }
 
   @if (error) {
@@ -34,7 +54,7 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end" class="image-ai-actions-bar">
-  <button type="button" mat-button (click)="close()" [disabled]="processing">Cancelar</button>
+  <button type="button" mat-button (click)="close()" [disabled]="processing">Cerrar</button>
   @if (enabled) {
     <button type="button" mat-stroked-button (click)="runPreview()" [disabled]="processing">
       @if (processing && !previewUrl) { Procesando… } @else { Vista previa }

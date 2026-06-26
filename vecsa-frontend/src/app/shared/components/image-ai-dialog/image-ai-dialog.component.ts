@@ -3,13 +3,22 @@ import { CommonModule } from '@angular/common';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { ImageAiEditContext, ImageAiService, ImageAiTargetType } from '../../services/image-ai.service';
+import {
+  cacheBustImageUrl,
+  ImageAiAction,
+  ImageAiActionId,
+  ImageAiEditContext,
+  ImageAiService,
+  ImageAiTargetType,
+} from '../../services/image-ai.service';
 
 export interface ImageAiDialogData {
   sourceUrl: string;
   targetType: ImageAiTargetType;
   targetUuid?: string;
   title?: string;
+  /** Actualiza la miniatura en el panel padre sin cerrar este diálogo. */
+  onSaved?: (imageUrl: string) => void;
 }
 
 @Component({
@@ -23,11 +32,13 @@ export class ImageAiDialogComponent implements OnInit {
   loadingConfig = true;
   processing = false;
   enabled = false;
-  private readonly action = 'studio_white' as const;
+  actions: ImageAiAction[] = [];
+  selectedAction: ImageAiActionId = 'studio_white';
   previewUrl: string | null = null;
   private previewBase64: string | null = null;
   private previewMime = 'image/jpeg';
   error = '';
+  successMessage = '';
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: ImageAiDialogData,
@@ -40,6 +51,10 @@ export class ImageAiDialogComponent implements OnInit {
       next: (res) => {
         const cfg = res.data;
         this.enabled = !!cfg?.enabled && !!cfg?.configured;
+        this.actions = (cfg?.actions ?? []).filter((a) => !!a?.id);
+        if (this.actions.length) {
+          this.selectedAction = this.actions[0].id;
+        }
         this.loadingConfig = false;
       },
       error: () => {
@@ -52,6 +67,20 @@ export class ImageAiDialogComponent implements OnInit {
 
   get dialogTitle(): string {
     return this.data.title ?? 'Editar foto con IA';
+  }
+
+  get selectedActionMeta(): ImageAiAction | undefined {
+    return this.actions.find((a) => a.id === this.selectedAction);
+  }
+
+  selectAction(actionId: ImageAiActionId): void {
+    if (this.selectedAction === actionId || this.processing) {
+      return;
+    }
+    this.selectedAction = actionId;
+    this.clearPreview();
+    this.successMessage = '';
+    this.error = '';
   }
 
   runPreview(): void {
@@ -73,10 +102,11 @@ export class ImageAiDialogComponent implements OnInit {
     }
     this.processing = true;
     this.error = '';
+    this.successMessage = '';
 
     this.imageAi
       .process({
-        action: this.action,
+        action: this.selectedAction,
         source_url: this.data.sourceUrl,
         target_type: this.data.targetType,
         target_uuid: this.data.targetUuid,
@@ -90,7 +120,11 @@ export class ImageAiDialogComponent implements OnInit {
           this.processing = false;
           const url = res.data?.image_url;
           if (res.data?.saved && url) {
-            this.dialogRef.close({ saved: true, imageUrl: url });
+            const busted = cacheBustImageUrl(url);
+            this.data.sourceUrl = busted;
+            this.clearPreview();
+            this.successMessage = 'Imagen guardada. Puedes seguir editando o cerrar cuando termines.';
+            this.data.onSaved?.(busted);
             return;
           }
           this.error = 'No se pudo guardar la imagen.';
@@ -105,12 +139,13 @@ export class ImageAiDialogComponent implements OnInit {
     }
     this.processing = true;
     this.error = '';
+    this.successMessage = '';
     this.previewUrl = null;
     this.previewBase64 = null;
 
     this.imageAi
       .process({
-        action: this.action,
+        action: this.selectedAction,
         source_url: this.data.sourceUrl,
         target_type: 'preview_only',
         replace_original: false,

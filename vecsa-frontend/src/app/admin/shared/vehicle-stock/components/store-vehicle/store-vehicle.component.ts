@@ -336,6 +336,59 @@ export class StoreVehicleComponent  implements OnInit{
     });
   }
 
+  private pollForNewImages(expectedCount: number, attempt = 0): void {
+    if (!this.vehicle_uuid) {
+      return;
+    }
+    const maxAttempts = 30;
+    if (attempt >= maxAttempts) {
+      this.photoUploading = false;
+      this.photoUploadDisabled = true;
+      this.refreshVehicleImages();
+      Swal.fire({
+        icon: 'info',
+        title: 'Procesando fotos',
+        text: 'Las imágenes siguen en cola. Aparecerán en unos segundos.',
+        showConfirmButton: true,
+        confirmButtonColor: '#1c69d4',
+      });
+      return;
+    }
+
+    this._vehicleService.getVehicle(this.vehicle_uuid).subscribe({
+      next: (detailResponse: FullDetailResponse) => {
+        const imgs = detailResponse.data?.images ?? [];
+        if (imgs.length >= expectedCount) {
+          this.vehicleImages = imgs.map((img) => ({
+            id: img.uuid ?? '',
+            sort_id: String(img.sort_id ?? ''),
+            path: img.service_image_url,
+            path_public: img.service_public_id ?? '',
+            external_website: 'no',
+            selected: false,
+          }));
+          this.imagesChanged = true;
+          this.listNeedsReload = true;
+          this.photoUploading = false;
+          this.photoUploadDisabled = true;
+          Swal.fire({
+            icon: 'success',
+            title: 'Imágenes cargadas',
+            showConfirmButton: false,
+            timer: 2200,
+          });
+          return;
+        }
+        setTimeout(() => this.pollForNewImages(expectedCount, attempt + 1), 2000);
+      },
+      error: (err) => {
+        this.photoUploading = false;
+        this.photoUploadDisabled = false;
+        reload(err, this._router);
+      },
+    });
+  }
+
   dropPhoto(event: CdkDragDrop<ImageOrder[]>): void {
     const selected = this.vehicleImages.filter((image) => image.selected);
     if (selected.length > 0) {
@@ -368,7 +421,7 @@ export class StoreVehicleComponent  implements OnInit{
   }
 
   openPhotoAi(image: ImageOrder, index: number): void {
-    const ref = this._dialog.open(ImageAiDialogComponent, {
+    this._dialog.open(ImageAiDialogComponent, {
       width: '640px',
       maxWidth: '95vw',
       data: {
@@ -376,20 +429,12 @@ export class StoreVehicleComponent  implements OnInit{
         targetType: 'vehicle_image',
         targetUuid: image.id,
         title: 'Mejorar foto del vehículo',
+        onSaved: (imageUrl: string) => {
+          this.vehicleImages[index].path = imageUrl;
+          this.imagesChanged = true;
+          this.listNeedsReload = true;
+        },
       },
-    });
-    ref.afterClosed().subscribe((result) => {
-      if (result?.saved && result.imageUrl) {
-        this.vehicleImages[index].path = result.imageUrl;
-        this.imagesChanged = true;
-        this.listNeedsReload = true;
-        Swal.fire({
-          icon: 'success',
-          title: 'Imagen actualizada con IA',
-          showConfirmButton: false,
-          timer: 2200,
-        });
-      }
     });
   }
 
@@ -431,20 +476,14 @@ export class StoreVehicleComponent  implements OnInit{
     if (!this.vehicle_uuid || !this.photoFiles.length || this.photoUploading) {
       return;
     }
+    const expectedCount = this.vehicleImages.length + this.photoFiles.length;
     this.photoUploading = true;
     this.photoUploadDisabled = true;
     this._imagesService.setImage(this.vehicle_uuid, this.photoFiles).subscribe({
       next: () => {
-        this.photoUploading = false;
         this.photoFiles = [];
-        Swal.fire({
-          icon: 'success',
-          title: 'Imágenes cargadas',
-          showConfirmButton: false,
-          timer: 2200,
-        });
         this.listNeedsReload = true;
-        this.refreshVehicleImages();
+        this.pollForNewImages(expectedCount);
       },
       error: (err) => {
         this.photoUploading = false;

@@ -108,7 +108,7 @@ export class UpdateImagesComponent {
   }
 
   openImageAi(image: ImageOrder, index: number): void {
-    const ref = this._dialog.open(ImageAiDialogComponent, {
+    this._dialog.open(ImageAiDialogComponent, {
       width: '640px',
       maxWidth: '95vw',
       data: {
@@ -116,19 +116,11 @@ export class UpdateImagesComponent {
         targetType: 'vehicle_image',
         targetUuid: image.id,
         title: 'Mejorar foto del vehículo',
+        onSaved: (imageUrl: string) => {
+          this.imagesForSlider[index].path = imageUrl;
+          this.result.reload = true;
+        },
       },
-    });
-    ref.afterClosed().subscribe((result) => {
-      if (result?.saved && result.imageUrl) {
-        this.imagesForSlider[index].path = result.imageUrl;
-        this.result.reload = true;
-        Swal.fire({
-          icon: 'success',
-          title: 'Imagen actualizada con IA',
-          showConfirmButton: false,
-          timer: 2200,
-        });
-      }
     });
   }
 

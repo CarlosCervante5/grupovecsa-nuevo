@@ -1438,7 +1438,7 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
       this.productSaveError = 'La imagen debe estar subida antes de usar IA.';
       return;
     }
-    const ref = this.dialog.open(ImageAiDialogComponent, {
+    this.dialog.open(ImageAiDialogComponent, {
       width: '640px',
       maxWidth: '95vw',
       data: {
@@ -1446,17 +1446,17 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
         targetType: 'boutique_product_image',
         targetUuid: uuid,
         title: 'Mejorar foto del producto',
+        onSaved: (imageUrl: string) => {
+          if (this.selectedProduct?.images) {
+            const idx = this.selectedProduct.images.findIndex((i: { uuid?: string }) => i.uuid === uuid);
+            if (idx >= 0) {
+              this.selectedProduct.images[idx].image_path = imageUrl;
+            }
+          }
+          this.productSaveSuccess = 'Imagen del producto actualizada con IA';
+          setTimeout(() => (this.productSaveSuccess = ''), 4000);
+        },
       },
-    });
-    ref.afterClosed().subscribe((result) => {
-      if (result?.saved && result.imageUrl && this.selectedProduct?.images) {
-        const idx = this.selectedProduct.images.findIndex((i: { uuid?: string }) => i.uuid === uuid);
-        if (idx >= 0) {
-          this.selectedProduct.images[idx].image_path = result.imageUrl;
-        }
-        this.productSaveSuccess = 'Imagen del producto actualizada con IA';
-        setTimeout(() => (this.productSaveSuccess = ''), 4000);
-      }
     });
   }
 
