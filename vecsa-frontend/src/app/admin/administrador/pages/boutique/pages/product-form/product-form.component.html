@@ -53,15 +53,32 @@
           </mat-form-field>
         </div>
 
-        <div class="form-row two-cols">
+        <div class="form-row category-cascade">
           <mat-form-field appearance="outline">
-            <mat-label>Categoría</mat-label>
-            <mat-select formControlName="category_uuid">
-              <mat-option *ngFor="let cat of categories" [value]="cat.uuid">{{ categoryOptionLabel(cat) }}</mat-option>
+            <mat-label>Categoría principal</mat-label>
+            <mat-select formControlName="parent_category_uuid">
+              <mat-option *ngFor="let cat of parentCategories" [value]="cat.uuid">{{ cat.name }}</mat-option>
             </mat-select>
-            <mat-error *ngIf="form.get('category_uuid')?.hasError('required')">La categoría es requerida</mat-error>
+            <mat-error *ngIf="form.get('parent_category_uuid')?.hasError('required')">Selecciona la categoría principal</mat-error>
           </mat-form-field>
 
+          <mat-form-field appearance="outline" *ngIf="showSubCategoryField">
+            <mat-label>Subcategoría</mat-label>
+            <mat-select formControlName="subcategory_uuid">
+              <mat-option *ngFor="let cat of subCategories" [value]="cat.uuid">{{ cat.name }}</mat-option>
+            </mat-select>
+            <mat-hint>Requerida cuando la categoría principal tiene subcategorías</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" *ngIf="showSub2CategoryField">
+            <mat-label>Subcategoría específica</mat-label>
+            <mat-select formControlName="subsubcategory_uuid">
+              <mat-option *ngFor="let cat of sub2Categories" [value]="cat.uuid">{{ cat.name }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row two-cols">
           <mat-form-field appearance="outline">
             <mat-label>Sucursal (inventario)</mat-label>
             <mat-select formControlName="dealership_id">

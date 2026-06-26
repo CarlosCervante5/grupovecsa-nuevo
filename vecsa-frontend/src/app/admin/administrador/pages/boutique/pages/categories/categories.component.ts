@@ -17,6 +17,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { BoutiqueAdminCategoryService } from '../../services/boutique-admin-category.service';
 import { BoutiqueCategory } from '../../../../../../boutique/interfaces/boutique.interfaces';
+import { isRootCategory } from '../../../../../../boutique/utils/boutique-category-tree.util';
 import { reload } from '@helpers/session.helper';
 
 @Component({
@@ -276,6 +277,13 @@ export class CategoryDialogComponent implements OnInit {
     }
     return all
       .filter((c: BoutiqueCategory) => !exclude.has(c.uuid))
+      .filter((c: BoutiqueCategory) => {
+        if (isRootCategory(c)) {
+          return true;
+        }
+        const parent = all.find((p) => p.uuid === c.parent?.uuid);
+        return !!parent && isRootCategory(parent);
+      })
       .map((c: BoutiqueCategory) => ({
         uuid: c.uuid,
         label: c.parent?.name ? `${c.parent.name} › ${c.name}` : c.name,

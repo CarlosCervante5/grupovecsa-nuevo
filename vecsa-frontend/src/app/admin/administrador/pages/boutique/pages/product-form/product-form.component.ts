@@ -24,6 +24,13 @@ import {
   BoutiqueProductImage,
   BoutiqueDealershipSummary,
 } from '../../../../../../boutique/interfaces/boutique.interfaces';
+import {
+  categoryHasChildren,
+  categorySelectionError,
+  getChildCategories,
+  resolveCategorySelection,
+  resolveLeafCategoryUuid,
+} from '../../../../../../boutique/utils/boutique-category-tree.util';
 import { reload } from '@helpers/session.helper';
 
 @Component({
@@ -60,6 +67,8 @@ export class ProductFormComponent implements OnInit {
   loading = true;
   saving = false;
   uploadingImage = false;
+  private pendingCategoryUuid = '';
+  private categoriesLoaded = false;
 
   constructor(
     private _fb: FormBuilder,
@@ -76,6 +85,7 @@ export class ProductFormComponent implements OnInit {
     this.initForm();
     this.loadCategories();
     this.loadDealerships();
+    this.setupCategoryCascade();
 
     const uuid = this._route.snapshot.paramMap.get('uuid');
     if (uuid) {
@@ -93,10 +103,57 @@ export class ProductFormComponent implements OnInit {
       description: [''],
       price: [null, [Validators.required, Validators.min(0)]],
       sku: ['', Validators.required],
-      category_uuid: ['', Validators.required],
+      parent_category_uuid: ['', Validators.required],
+      subcategory_uuid: [''],
+      subsubcategory_uuid: [''],
       dealership_id: [null as number | null, Validators.required],
       stock: [0, [Validators.required, Validators.min(0)]],
       active: [true]
+    });
+  }
+
+  private setupCategoryCascade(): void {
+    this.form.get('parent_category_uuid')?.valueChanges.subscribe(() => {
+      this.form.patchValue({ subcategory_uuid: '', subsubcategory_uuid: '' }, { emitEvent: false });
+    });
+    this.form.get('subcategory_uuid')?.valueChanges.subscribe(() => {
+      this.form.patchValue({ subsubcategory_uuid: '' }, { emitEvent: false });
+    });
+  }
+
+  get parentCategories(): BoutiqueCategory[] {
+    return getChildCategories(this.categories, null);
+  }
+
+  get subCategories(): BoutiqueCategory[] {
+    const parentUuid = this.form.get('parent_category_uuid')?.value as string;
+    return parentUuid ? getChildCategories(this.categories, parentUuid) : [];
+  }
+
+  get sub2Categories(): BoutiqueCategory[] {
+    const subUuid = this.form.get('subcategory_uuid')?.value as string;
+    return subUuid ? getChildCategories(this.categories, subUuid) : [];
+  }
+
+  get showSubCategoryField(): boolean {
+    const parentUuid = this.form.get('parent_category_uuid')?.value as string;
+    return !!parentUuid && (this.subCategories.length > 0 || categoryHasChildren(this.categories, parentUuid));
+  }
+
+  get showSub2CategoryField(): boolean {
+    const subUuid = this.form.get('subcategory_uuid')?.value as string;
+    return !!subUuid && (this.sub2Categories.length > 0 || categoryHasChildren(this.categories, subUuid));
+  }
+
+  private applyCategorySelectionFromProduct(): void {
+    if (!this.categoriesLoaded || !this.pendingCategoryUuid) {
+      return;
+    }
+    const selection = resolveCategorySelection(this.pendingCategoryUuid, this.categories);
+    this.form.patchValue({
+      parent_category_uuid: selection.parentUuid,
+      subcategory_uuid: selection.subUuid,
+      subsubcategory_uuid: selection.sub2Uuid,
     });
   }
 
@@ -119,6 +176,8 @@ export class ProductFormComponent implements OnInit {
         const wrapper = response.data as any;
         const categories = wrapper.categories || wrapper.data || wrapper;
         this.categories = Array.isArray(categories) ? categories : (categories.data || []);
+        this.categoriesLoaded = true;
+        this.applyCategorySelectionFromProduct();
       },
       error: (error) => {
         reload(error, this._router);
@@ -142,11 +201,12 @@ export class ProductFormComponent implements OnInit {
             description: found.description || '',
             price: found.price,
             sku: found.sku,
-            category_uuid: found.category?.uuid || '',
             dealership_id: found.dealership_id ?? found.dealership?.id ?? null,
             stock: found.stock,
             active: found.active
           });
+          this.pendingCategoryUuid = found.category?.uuid || '';
+          this.applyCategorySelectionFromProduct();
         }
         this.loading = false;
       },
@@ -163,13 +223,31 @@ export class ProductFormComponent implements OnInit {
       return;
     }
 
-    this.saving = true;
     const formValue = this.form.value;
+    const categoryError = categorySelectionError(
+      formValue.parent_category_uuid,
+      formValue.subcategory_uuid,
+      formValue.subsubcategory_uuid,
+      this.categories,
+    );
+    if (categoryError) {
+      this.showSnackBar(categoryError, true);
+      return;
+    }
+
+    const categoryUuid = resolveLeafCategoryUuid(
+      formValue.parent_category_uuid,
+      formValue.subcategory_uuid,
+      formValue.subsubcategory_uuid,
+      this.categories,
+    );
+
+    this.saving = true;
 
     if (this.isEditMode) {
       this._productService.update({
         uuid: this.productUuid,
-        category_uuid: formValue.category_uuid,
+        category_uuid: categoryUuid,
         dealership_id: formValue.dealership_id,
         name: formValue.name.trim(),
         description: formValue.description?.trim() || undefined,
@@ -193,7 +271,7 @@ export class ProductFormComponent implements OnInit {
       });
     } else {
       this._productService.store({
-        category_uuid: formValue.category_uuid,
+        category_uuid: categoryUuid,
         dealership_id: formValue.dealership_id,
         name: formValue.name.trim(),
         description: formValue.description?.trim() || undefined,
@@ -344,13 +422,6 @@ export class ProductFormComponent implements OnInit {
 
   get pageTitle(): string {
     return this.isEditMode ? 'Editar producto' : 'Nuevo producto';
-  }
-
-  categoryOptionLabel(cat: BoutiqueCategory): string {
-    if (cat.parent?.name) {
-      return `${cat.parent.name} › ${cat.name}`;
-    }
-    return cat.name;
   }
 
   private showSnackBar(message: string, isError = false): void {

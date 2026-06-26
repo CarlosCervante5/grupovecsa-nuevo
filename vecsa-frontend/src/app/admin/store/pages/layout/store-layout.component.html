@@ -504,14 +504,38 @@
                     <input class="field-input" type="number" [(ngModel)]="productEditData.stock" />
                   </div>
                 </div>
-                <div class="field-group">
-                  <label class="field-label">Categoría</label>
-                  <select class="field-input" [(ngModel)]="productEditData.category_uuid">
-                    <option value="">— Seleccionar —</option>
-                    @for (cat of categoryOptions; track cat.uuid) {
-                      <option [value]="cat.uuid">{{ cat.name }}</option>
-                    }
-                  </select>
+                <div class="field-group category-cascade">
+                  <div class="field-group">
+                    <label class="field-label">Categoría principal</label>
+                    <select class="field-input" [(ngModel)]="productEditData.parent_category_uuid" (change)="onProductParentCategoryChange()">
+                      <option value="">— Seleccionar —</option>
+                      @for (cat of productParentCategories; track cat.uuid) {
+                        <option [value]="cat.uuid">{{ cat.name }}</option>
+                      }
+                    </select>
+                  </div>
+                  @if (showProductSubCategoryField) {
+                    <div class="field-group">
+                      <label class="field-label">Subcategoría</label>
+                      <select class="field-input" [(ngModel)]="productEditData.subcategory_uuid" (change)="onProductSubCategoryChange()">
+                        <option value="">— Seleccionar —</option>
+                        @for (cat of productSubCategories; track cat.uuid) {
+                          <option [value]="cat.uuid">{{ cat.name }}</option>
+                        }
+                      </select>
+                    </div>
+                  }
+                  @if (showProductSub2CategoryField) {
+                    <div class="field-group">
+                      <label class="field-label">Subcategoría específica</label>
+                      <select class="field-input" [(ngModel)]="productEditData.subsubcategory_uuid" (change)="onProductSub2CategoryChange()">
+                        <option value="">— Seleccionar —</option>
+                        @for (cat of productSub2Categories; track cat.uuid) {
+                          <option [value]="cat.uuid">{{ cat.name }}</option>
+                        }
+                      </select>
+                    </div>
+                  }
                 </div>
                 <div class="field-group">
                   <label class="field-label">Descripción</label>

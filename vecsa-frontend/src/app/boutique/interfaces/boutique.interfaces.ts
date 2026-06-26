@@ -44,6 +44,7 @@ export interface BoutiqueCategory {
   created_at: string;
   /** Categoría padre cuando es subcategoría (API admin). */
   parent?: { uuid: string; name: string } | null;
+  parent_id?: number | null;
   children?: BoutiqueCategory[];
 }
 

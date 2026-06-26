@@ -8,6 +8,13 @@ import { StoreService } from '../../services/store.service';
 import { environment } from '@environments/environment';
 import { adminDashboardUrl } from 'src/app/admin/utils/admin-route.util';
 import { DashboardStat, CouponCreate, PointAdjustment } from '../../interfaces/store.interfaces';
+import {
+  categoryHasChildren,
+  categorySelectionError,
+  getChildCategories,
+  resolveCategorySelection,
+  resolveLeafCategoryUuid,
+} from 'src/app/boutique/utils/boutique-category-tree.util';
 import * as echarts from 'echarts';
 
 @Component({
@@ -867,7 +874,18 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     this.selectedProduct = { images: [], variants: [] };
     this.productMode = 'create';
     this.productEditing = true;
-    this.productEditData = { name: '', description: '', sku: '', price: 0, stock: 0, active: false, category_uuid: '' };
+    this.productEditData = {
+      name: '',
+      description: '',
+      sku: '',
+      price: 0,
+      stock: 0,
+      active: false,
+      category_uuid: '',
+      parent_category_uuid: '',
+      subcategory_uuid: '',
+      subsubcategory_uuid: '',
+    };
     this.editVariants = [];
     this.hasVariants = false;
     this.selectedProductAttributes = [];
@@ -892,7 +910,11 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
       stock: this.selectedProduct.stock || 0,
       active: this.selectedProduct.active ?? true,
       category_uuid: this.selectedProduct.category?.uuid || '',
+      parent_category_uuid: '',
+      subcategory_uuid: '',
+      subsubcategory_uuid: '',
     };
+    this.applyProductCategorySelection(this.productEditData.category_uuid);
     this.editVariants = (this.selectedProduct.variants || []).map((v: any) => ({
       ...v,
       description: v.description || this.buildVariantDescription(v),
@@ -934,7 +956,7 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     return c?.name || '—';
   }
 
-  /** Opciones de categoría padre al editar (excluye la propia rama). */
+  /** Opciones de categoría padre al editar (raíz o subcategoría de primer nivel). */
   categoryParentSelectOptions(): { uuid: string; label: string }[] {
     const editing = this.categoryForm.uuid;
     const exclude = new Set<string>();
@@ -953,6 +975,13 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     return this.categorySelectorRows
       .filter((c: any) => !exclude.has(c.uuid))
+      .filter((c: any) => {
+        if (this.isRootCategory(c)) {
+          return true;
+        }
+        const parent = this.categorySelectorRows.find((p: any) => p.uuid === c.parent?.uuid);
+        return !!parent && this.isRootCategory(parent);
+      })
       .map((c: any) => ({ uuid: c.uuid, label: this.categoryTreeLabel(c) }));
   }
 
@@ -996,7 +1025,12 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
           const d = res?.data?.categories || res?.data || {};
           const list = d.data || [];
           this.categorySelectorRows = list;
-          this.categoryOptions = list.map((c: any) => ({ uuid: c.uuid, name: this.categoryTreeLabel(c) }));
+          this.categoryOptions = list
+            .filter((c: any) => this.isRootCategory(c))
+            .map((c: any) => ({ uuid: c.uuid, name: c.name }));
+          if (this.productEditing && this.productEditData.category_uuid) {
+            this.applyProductCategorySelection(this.productEditData.category_uuid);
+          }
         },
         error: () => {
           this.categorySelectorRows = [];
@@ -1404,6 +1438,18 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   cancelEditProduct(): void { this.productEditing = false; }
 
   saveProduct(): void {
+    this.syncProductCategoryUuid();
+    const categoryError = categorySelectionError(
+      String(this.productEditData.parent_category_uuid || ''),
+      String(this.productEditData.subcategory_uuid || ''),
+      String(this.productEditData.subsubcategory_uuid || ''),
+      this.categorySelectorRows,
+    );
+    if (categoryError) {
+      this.productSaveError = categoryError;
+      return;
+    }
+
     this.productSaving = true;
     this.productSaveError = '';
     this.productSaveSuccess = '';
@@ -2248,6 +2294,68 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.categorySelectorRows
       .filter((c: any) => this.isRootCategory(c))
       .map((c: any) => ({ uuid: c.uuid, name: c.name }));
+  }
+
+  get productParentCategories(): { uuid: string; name: string }[] {
+    return getChildCategories(this.categorySelectorRows, null).map((c) => ({ uuid: c.uuid, name: c.name }));
+  }
+
+  get productSubCategories(): { uuid: string; name: string }[] {
+    const parentUuid = String(this.productEditData.parent_category_uuid || '');
+    if (!parentUuid) {
+      return [];
+    }
+    return getChildCategories(this.categorySelectorRows, parentUuid).map((c) => ({ uuid: c.uuid, name: c.name }));
+  }
+
+  get productSub2Categories(): { uuid: string; name: string }[] {
+    const subUuid = String(this.productEditData.subcategory_uuid || '');
+    if (!subUuid) {
+      return [];
+    }
+    return getChildCategories(this.categorySelectorRows, subUuid).map((c) => ({ uuid: c.uuid, name: c.name }));
+  }
+
+  get showProductSubCategoryField(): boolean {
+    const parentUuid = String(this.productEditData.parent_category_uuid || '');
+    return !!parentUuid && this.productSubCategories.length > 0;
+  }
+
+  get showProductSub2CategoryField(): boolean {
+    const subUuid = String(this.productEditData.subcategory_uuid || '');
+    return !!subUuid && this.productSub2Categories.length > 0;
+  }
+
+  onProductParentCategoryChange(): void {
+    this.productEditData.subcategory_uuid = '';
+    this.productEditData.subsubcategory_uuid = '';
+    this.syncProductCategoryUuid();
+  }
+
+  onProductSubCategoryChange(): void {
+    this.productEditData.subsubcategory_uuid = '';
+    this.syncProductCategoryUuid();
+  }
+
+  onProductSub2CategoryChange(): void {
+    this.syncProductCategoryUuid();
+  }
+
+  private applyProductCategorySelection(categoryUuid: string): void {
+    const selection = resolveCategorySelection(categoryUuid, this.categorySelectorRows);
+    this.productEditData.parent_category_uuid = selection.parentUuid;
+    this.productEditData.subcategory_uuid = selection.subUuid;
+    this.productEditData.subsubcategory_uuid = selection.sub2Uuid;
+    this.syncProductCategoryUuid();
+  }
+
+  private syncProductCategoryUuid(): void {
+    this.productEditData.category_uuid = resolveLeafCategoryUuid(
+      String(this.productEditData.parent_category_uuid || ''),
+      String(this.productEditData.subcategory_uuid || ''),
+      String(this.productEditData.subsubcategory_uuid || ''),
+      this.categorySelectorRows,
+    );
   }
 
   get gsImportLog(): { type: string; sku: string; url: string | null; message: string; hint: string | null }[] {
