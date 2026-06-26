@@ -7,14 +7,28 @@ export interface CategorySelection {
   leafUuid: string;
 }
 
+/** UUID del padre de una categoría (parent anidado o parent_uuid del API). */
+export function categoryParentUuid(cat: BoutiqueCategory | null | undefined): string | undefined {
+  if (!cat) {
+    return undefined;
+  }
+  if (cat.parent_uuid) {
+    return cat.parent_uuid;
+  }
+  if (cat.parent?.uuid) {
+    return cat.parent.uuid;
+  }
+  return undefined;
+}
+
 export function isRootCategory(cat: BoutiqueCategory | null | undefined): boolean {
   if (!cat) {
     return false;
   }
-  if (cat.parent?.uuid) {
+  if (categoryParentUuid(cat)) {
     return false;
   }
-  const pid = (cat as BoutiqueCategory & { parent_id?: number | null }).parent_id;
+  const pid = cat.parent_id;
   return pid == null || pid === 0;
 }
 
@@ -26,11 +40,26 @@ export function getChildCategories(categories: BoutiqueCategory[], parentUuid: s
   if (!parentUuid) {
     return sortCategoriesByName(categories.filter((c) => isRootCategory(c)));
   }
-  return sortCategoriesByName(categories.filter((c) => c.parent?.uuid === parentUuid));
+  return sortCategoriesByName(categories.filter((c) => categoryParentUuid(c) === parentUuid));
 }
 
 export function categoryHasChildren(categories: BoutiqueCategory[], categoryUuid: string): boolean {
-  return categories.some((c) => c.parent?.uuid === categoryUuid);
+  return categories.some((c) => categoryParentUuid(c) === categoryUuid);
+}
+
+/** Ruta legible: Padre › Sub › Sub-sub */
+export function formatCategoryPath(category: BoutiqueCategory | null | undefined): string {
+  if (!category?.name) {
+    return '—';
+  }
+  const parts: string[] = [];
+  let node: BoutiqueCategory | null | undefined = category;
+  let guard = 0;
+  while (node && guard++ < 10) {
+    parts.unshift(node.name);
+    node = node.parent ?? null;
+  }
+  return parts.join(' › ');
 }
 
 /** Reconstruye la selección en cascada a partir del uuid guardado en el producto. */
@@ -44,14 +73,14 @@ export function resolveCategorySelection(
   }
 
   const chain: BoutiqueCategory[] = [];
-  let current = categories.find((c) => c.uuid === categoryUuid);
+  let current: BoutiqueCategory | undefined = categories.find((c) => c.uuid === categoryUuid);
   if (!current) {
     return empty;
   }
 
   while (current) {
     chain.unshift(current);
-    const parentUuid: string | undefined = current.parent?.uuid;
+    const parentUuid: string | undefined = categoryParentUuid(current);
     if (!parentUuid) {
       break;
     }

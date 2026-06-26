@@ -11,6 +11,7 @@ import { DashboardStat, CouponCreate, PointAdjustment } from '../../interfaces/s
 import {
   categoryHasChildren,
   categorySelectionError,
+  formatCategoryPath,
   getChildCategories,
   resolveCategorySelection,
   resolveLeafCategoryUuid,
@@ -941,7 +942,7 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!c) {
       return false;
     }
-    if (c.parent?.uuid) {
+    if (c.parent_uuid || c.parent?.uuid) {
       return false;
     }
 
@@ -1014,18 +1015,28 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  /** Opciones de categoría para filtro de productos y modal (hasta 500). */
+  /** Opciones de categoría para filtro de productos y modal (todas las páginas). */
   private loadCategorySelectorsFromApi(): void {
+    this.fetchAllCategorySelectorPages(1, []);
+  }
+
+  private fetchAllCategorySelectorPages(page: number, accumulated: any[]): void {
     const token = localStorage.getItem('user_token') || '';
     const headers = new HttpHeaders({ 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', Authorization: `Bearer ${token}` });
     this.http
-      .post(`${environment.baseUrl}/api/boutique/admin/categories/search`, { page: 1, per_page: 500 }, { headers })
+      .post(`${environment.baseUrl}/api/boutique/admin/categories/search`, { page, per_page: 500 }, { headers })
       .subscribe({
         next: (res: any) => {
           const d = res?.data?.categories || res?.data || {};
           const list = d.data || [];
-          this.categorySelectorRows = list;
-          this.categoryOptions = list
+          const all = accumulated.concat(list);
+          const lastPage = d.last_page ?? 1;
+          if (page < lastPage) {
+            this.fetchAllCategorySelectorPages(page + 1, all);
+            return;
+          }
+          this.categorySelectorRows = all;
+          this.categoryOptions = all
             .filter((c: any) => this.isRootCategory(c))
             .map((c: any) => ({ uuid: c.uuid, name: c.name }));
           if (this.productEditing && this.productEditData.category_uuid) {
@@ -1456,25 +1467,43 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     const token = localStorage.getItem('user_token') || '';
     const headers = new HttpHeaders({ 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', Authorization: `Bearer ${token}` });
     const endpoint = this.productMode === 'create' ? 'products/store' : 'products/update';
-    this.http.post(`${environment.baseUrl}/api/boutique/admin/${endpoint}`, this.productEditData, { headers }).subscribe({
+    const payload = {
+      uuid: this.productEditData.uuid,
+      category_uuid: this.productEditData.category_uuid,
+      name: String(this.productEditData.name || '').trim(),
+      description: this.productEditData.description?.trim() || undefined,
+      price: this.productEditData.price,
+      sku: String(this.productEditData.sku || '').trim(),
+      stock: this.productEditData.stock,
+      active: this.productEditData.active,
+    };
+    this.http.post(`${environment.baseUrl}/api/boutique/admin/${endpoint}`, payload, { headers }).subscribe({
       next: (res: any) => {
         this.productSaving = false;
         this.productSaveSuccess = this.productMode === 'create' ? 'Producto creado correctamente' : 'Producto actualizado correctamente';
-        const saved = res?.data?.product || res?.data || this.productEditData;
+        const saved = res?.data?.product || res?.data || payload;
         if (this.productMode === 'create') {
           this.selectedProduct = saved;
           this.productMode = 'edit';
+          this.productEditData.uuid = saved.uuid;
         } else {
           Object.assign(this.selectedProduct, saved);
         }
         this.productEditing = false;
         this.loadProducts();
+        if (saved?.uuid) {
+          this.loadProductDetail(saved.uuid, this.selectedProduct, false);
+        }
       },
       error: (err: any) => {
         this.productSaving = false;
-        this.productSaveError = err?.error?.message || 'Error al guardar producto';
+        this.productSaveError = this.formatBoutiqueAdminHttpError(err);
       },
     });
+  }
+
+  formatProductCategoryPath(category: any): string {
+    return formatCategoryPath(category);
   }
 
   openProductImageAi(img: { uuid?: string; image_path?: string }): void {
@@ -2318,12 +2347,12 @@ export class StoreLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
 
   get showProductSubCategoryField(): boolean {
     const parentUuid = String(this.productEditData.parent_category_uuid || '');
-    return !!parentUuid && this.productSubCategories.length > 0;
+    return !!parentUuid && (this.productSubCategories.length > 0 || categoryHasChildren(this.categorySelectorRows, parentUuid));
   }
 
   get showProductSub2CategoryField(): boolean {
     const subUuid = String(this.productEditData.subcategory_uuid || '');
-    return !!subUuid && this.productSub2Categories.length > 0;
+    return !!subUuid && (this.productSub2Categories.length > 0 || categoryHasChildren(this.categorySelectorRows, subUuid));
   }
 
   onProductParentCategoryChange(): void {

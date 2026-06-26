@@ -17,6 +17,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { BoutiqueAdminProductService } from '../../services/boutique-admin-product.service';
 import { BoutiqueAdminCategoryService } from '../../services/boutique-admin-category.service';
 import { BoutiqueProduct, BoutiqueCategory } from '../../../../../../boutique/interfaces/boutique.interfaces';
+import { formatCategoryPath } from '../../../../../../boutique/utils/boutique-category-tree.util';
 import { reload } from '@helpers/session.helper';
 
 @Component({
@@ -149,6 +150,10 @@ export class ProductsComponent implements OnInit {
         });
       }
     });
+  }
+
+  formatProductCategory(product: BoutiqueProduct): string {
+    return formatCategoryPath(product.category);
   }
 
   getProductThumbnail(product: BoutiqueProduct): string | null {

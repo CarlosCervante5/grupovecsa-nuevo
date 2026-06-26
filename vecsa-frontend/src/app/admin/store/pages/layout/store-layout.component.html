@@ -311,7 +311,7 @@
                     }
                   </td>
                   <td style="font-weight:600;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ row.name || '—' }}</td>
-                  <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.85rem;color:#64748b;">{{ row.category?.name || '—' }}</td>
+                  <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.85rem;color:#64748b;">{{ formatProductCategoryPath(row.category) }}</td>
                   <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.85rem;">{{ row.dealership?.name || '—' }}</td>
                   <td>{{ row.sku || '—' }}</td>
                   <td>{{ formatCurrency(row.price) }}</td>
@@ -401,7 +401,7 @@
                 </div>
                 <div class="product-meta-item">
                   <span class="product-meta-label">Categoría</span>
-                  <span class="product-meta-value">{{ selectedProduct.category?.name || selectedProduct.category_name || '—' }}</span>
+                  <span class="product-meta-value">{{ formatProductCategoryPath(selectedProduct.category) }}</span>
                 </div>
               </div>
 

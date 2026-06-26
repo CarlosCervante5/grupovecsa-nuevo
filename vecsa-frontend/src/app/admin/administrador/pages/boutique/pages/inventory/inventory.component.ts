@@ -22,6 +22,7 @@ import {
   BoutiqueInventoryMovement
 } from '../../../../../../boutique/interfaces/boutique.interfaces';
 import { BoutiqueAdminCategoryService } from '../../services/boutique-admin-category.service';
+import { formatCategoryPath } from '../../../../../../boutique/utils/boutique-category-tree.util';
 import { InventoryAlertComponent } from '../../components/inventory-alert/inventory-alert.component';
 import { reload } from '@helpers/session.helper';
 
@@ -161,6 +162,10 @@ export class InventoryComponent implements OnInit {
       maxHeight: '80vh',
       data: { product, inventoryService: this._inventoryService }
     });
+  }
+
+  formatProductCategory(product: BoutiqueProduct): string {
+    return formatCategoryPath(product.category);
   }
 
   isLowStock(stock: number): boolean {

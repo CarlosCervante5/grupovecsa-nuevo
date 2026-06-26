@@ -154,7 +154,7 @@ export class ProductFormComponent implements OnInit {
       parent_category_uuid: selection.parentUuid,
       subcategory_uuid: selection.subUuid,
       subsubcategory_uuid: selection.sub2Uuid,
-    });
+    }, { emitEvent: false });
   }
 
   private loadDealerships(): void {
@@ -171,11 +171,23 @@ export class ProductFormComponent implements OnInit {
   }
 
   private loadCategories(): void {
-    this._categoryService.search({ page: 1, per_page: 500 }).subscribe({
+    this.fetchAllCategories(1, []);
+  }
+
+  private fetchAllCategories(page: number, accumulated: BoutiqueCategory[]): void {
+    this._categoryService.search({ page, per_page: 500 }).subscribe({
       next: (response) => {
         const wrapper = response.data as any;
-        const categories = wrapper.categories || wrapper.data || wrapper;
-        this.categories = Array.isArray(categories) ? categories : (categories.data || []);
+        const paginated = wrapper.categories || wrapper;
+        const categories = paginated.data || (Array.isArray(paginated) ? paginated : []);
+        const list = Array.isArray(categories) ? categories : [];
+        const all = accumulated.concat(list);
+        const lastPage = paginated.last_page ?? 1;
+        if (page < lastPage) {
+          this.fetchAllCategories(page + 1, all);
+          return;
+        }
+        this.categories = all;
         this.categoriesLoaded = true;
         this.applyCategorySelectionFromProduct();
       },
@@ -187,12 +199,10 @@ export class ProductFormComponent implements OnInit {
 
   private loadProduct(uuid: string): void {
     this.loading = true;
-    this._productService.search({ search: undefined, page: 1, per_page: 100 }).subscribe({
+    this._productService.detail(uuid).subscribe({
       next: (response) => {
         const wrapper = response.data as any;
-        const paginated = wrapper.products || wrapper;
-        const products: BoutiqueProduct[] = paginated.data || paginated;
-        const found = products.find(p => p.uuid === uuid);
+        const found: BoutiqueProduct | undefined = wrapper.product || wrapper;
         if (found) {
           this.product = found;
           this.images = [...(found.images || [])].sort((a, b) => a.sort_id - b.sort_id);

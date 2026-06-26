@@ -42,8 +42,10 @@ export interface BoutiqueCategory {
   description: string | null;
   active: boolean;
   created_at: string;
+  /** UUID del padre (API admin). */
+  parent_uuid?: string | null;
   /** Categoría padre cuando es subcategoría (API admin). */
-  parent?: { uuid: string; name: string } | null;
+  parent?: BoutiqueCategory | null;
   parent_id?: number | null;
   children?: BoutiqueCategory[];
 }

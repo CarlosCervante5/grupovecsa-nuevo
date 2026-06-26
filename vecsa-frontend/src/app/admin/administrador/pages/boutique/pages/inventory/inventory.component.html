@@ -83,7 +83,7 @@
       <!-- Category -->
       <ng-container matColumnDef="category">
         <th mat-header-cell *matHeaderCellDef>Categoría</th>
-        <td mat-cell *matCellDef="let product">{{ product.category?.name || '—' }}</td>
+        <td mat-cell *matCellDef="let product">{{ formatProductCategory(product) }}</td>
       </ng-container>
 
       <!-- Price -->

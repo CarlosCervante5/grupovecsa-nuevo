@@ -49,6 +49,10 @@ class BoutiqueCategory extends Model
         'active' => 'boolean',
     ];
 
+    protected $appends = [
+        'parent_uuid',
+    ];
+
     protected function description(): Attribute
     {
         return Attribute::make(
@@ -77,6 +81,18 @@ class BoutiqueCategory extends Model
     public static function findByUuid($uuid)
     {
         return self::where('uuid', $uuid)->first();
+    }
+
+    public function getParentUuidAttribute(): ?string
+    {
+        if ($this->parent_id === null) {
+            return null;
+        }
+        if ($this->relationLoaded('parent') && $this->parent) {
+            return $this->parent->uuid;
+        }
+
+        return static::where('id', $this->parent_id)->value('uuid');
     }
 
     /**

@@ -24,6 +24,9 @@ use Illuminate\Validation\ValidationException;
 
 class BoutiqueProductController extends Controller
 {
+    /** Relaciones de categoría con ancestros para selects en cascada y listados. */
+    private const CATEGORY_RELATIONS = ['category.parent.parent'];
+
     public function __construct(
         protected DealershipAccessService $dealershipAccess,
         protected BoutiqueInventoryCsvExportService $inventoryCsvExport,
@@ -32,13 +35,12 @@ class BoutiqueProductController extends Controller
     public function search(Request $request)
     {
         try {
-            $query = BoutiqueProduct::with([
-                'category',
+            $query = BoutiqueProduct::with(array_merge(self::CATEGORY_RELATIONS, [
                 'dealership',
                 'images' => function ($q) {
                     $q->orderBy('sort_id')->limit(1);
                 },
-            ]);
+            ]));
 
             $scopeIds = $this->dealershipAccess->inventoryDealershipIds($request->user());
             $productsTable = (new BoutiqueProduct)->getTable();
@@ -106,15 +108,14 @@ class BoutiqueProductController extends Controller
 
             $this->dealershipAccess->assertProductDealershipAccessible($request->user(), $product->dealership_id);
 
-            $product->load([
-                'category',
+            $product->load(array_merge(self::CATEGORY_RELATIONS, [
                 'dealership',
                 'images' => function ($q) {
                     $q->orderBy('sort_id');
                 },
                 'attributes.values',
                 'variants.attributeValues.attribute',
-            ]);
+            ]));
 
             $product->low_stock = $product->stock <= 5;
             if ($product->relationLoaded('dealership')) {
@@ -194,6 +195,8 @@ class BoutiqueProductController extends Controller
                 $this->syncProductAttributes($product, $request->input('attributes'));
             }
 
+            $product->load(self::CATEGORY_RELATIONS);
+
             return ApiResponseHelper::apiSuccess(201, 'Producto creado exitosamente', ['product' => $product]);
         } catch (ValidationException $e) {
             return ApiResponseHelper::validationError($e);
@@ -261,6 +264,8 @@ class BoutiqueProductController extends Controller
             if ($request->has('attributes') && is_array($request->input('attributes'))) {
                 $this->syncProductAttributes($product, $request->input('attributes'));
             }
+
+            $product->load(self::CATEGORY_RELATIONS);
 
             return ApiResponseHelper::apiSuccess(200, 'Producto actualizado exitosamente', ['product' => $product]);
         } catch (AuthorizationException $e) {

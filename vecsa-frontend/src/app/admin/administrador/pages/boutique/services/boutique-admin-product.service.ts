@@ -37,6 +37,14 @@ export class BoutiqueAdminProductService {
     );
   }
 
+  public detail(uuid: string): Observable<ApiResponse<{ product: BoutiqueProduct }>> {
+    return this._http.post<ApiResponse<{ product: BoutiqueProduct }>>(
+      `${this.url}/api/boutique/admin/products/detail`,
+      { uuid },
+      { headers: this.getHeaders() }
+    );
+  }
+
   public store(params: {
     category_uuid: string;
     name: string;
