@@ -51,7 +51,7 @@ export function resolveCategorySelection(
 
   while (current) {
     chain.unshift(current);
-    const parentUuid = current.parent?.uuid;
+    const parentUuid: string | undefined = current.parent?.uuid;
     if (!parentUuid) {
       break;
     }
