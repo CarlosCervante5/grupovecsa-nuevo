@@ -105,13 +105,15 @@ final class CloudinaryImageStorageService
             $name = time().($nameSuffix !== null && $nameSuffix !== '' ? '_'.$nameSuffix : '');
             $folder = $baseFolder.'/'.$entityUuid;
 
-            $cloudinaryFile = $this->cloudinary->uploadApi()->upload(storage_path('app/'.$tempRelative), [
-                'public_id' => $name,
-                'folder' => $folder,
-                'transformation' => $cloudinaryFormat === 'jpg'
-                    ? UploadableImage::cloudinaryJpgTransformation()
-                    : ['quality' => 'auto', 'fetch_format' => 'png'],
-            ]);
+            $cloudinaryFile = $this->normalizeCloudinaryUploadResponse(
+                $this->cloudinary->uploadApi()->upload(storage_path('app/'.$tempRelative), [
+                    'public_id' => $name,
+                    'folder' => $folder,
+                    'transformation' => $cloudinaryFormat === 'jpg'
+                        ? UploadableImage::cloudinaryJpgTransformation()
+                        : ['quality' => 'auto', 'fetch_format' => 'png'],
+                ])
+            );
 
             $publicId = (string) ($cloudinaryFile['public_id'] ?? '');
             $secureUrl = (string) ($cloudinaryFile['secure_url'] ?? '');
@@ -207,5 +209,23 @@ final class CloudinaryImageStorageService
     private function boutiqueFolderBase(): string
     {
         return trim((string) config('filesystems.boutique_folder_base', 'vecsa_boutique_products'));
+    }
+
+    /**
+     * Cloudinary SDK ≥3 devuelve ApiResponse (ArrayObject), no array nativo.
+     *
+     * @return array<string, mixed>
+     */
+    private function normalizeCloudinaryUploadResponse(mixed $response): array
+    {
+        if (is_array($response)) {
+            return $response;
+        }
+
+        if ($response instanceof \ArrayObject) {
+            return $response->getArrayCopy();
+        }
+
+        throw new \RuntimeException('Respuesta inesperada al subir imagen a Cloudinary.');
     }
 }

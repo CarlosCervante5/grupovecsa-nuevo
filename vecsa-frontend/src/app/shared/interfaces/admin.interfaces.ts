@@ -642,6 +642,11 @@ export interface Dealership {
     id?:         number;
     name:        string;
     location:    string;
+    state?:      string | null;
+    phone?:      string | null;
+    image_url?:  string | null;
+    latitude?:   number | null;
+    longitude?:  number | null;
     description: null;
     created_at:  Date;
 }
@@ -739,4 +744,20 @@ export interface BoutiqueBanner {
 
 export interface BoutiqueBannersResponse extends GralResponse {
   data: { banners: BoutiqueBanner[] };
+}
+
+export interface CarCareBanner {
+  uuid: string;
+  title: string;
+  subtitle: string;
+  disclaimer: string;
+  desktop_image_path: string;
+  mobile_image_path: string;
+  active: boolean;
+  sort_id: number;
+  created_at: string;
+}
+
+export interface CarCareBannersResponse extends GralResponse {
+  data: { banners: CarCareBanner[] };
 }

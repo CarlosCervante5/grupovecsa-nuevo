@@ -18,6 +18,7 @@ import { ComprarAutosLayoutComponent } from './layout/comprar-autos-layout.compo
 import { MatDialogModule } from '@angular/material/dialog';
 import { SkCubeComponent } from '@components/sk-cube/sk-cube.component';
 import { NewNavComponent } from 'src/app/shared/versiones-nav/new-nav/new-nav.component';
+import { VehicleDealershipStatePipe } from 'src/app/shared/pipes/vehicle-dealership-state.pipe';
 
 
 @NgModule({
@@ -38,7 +39,8 @@ import { NewNavComponent } from 'src/app/shared/versiones-nav/new-nav/new-nav.co
     MatDialogModule,
     SkCubeComponent,
     NewNavComponent,
-    ComprarAutosLayoutComponent
+    ComprarAutosLayoutComponent,
+    VehicleDealershipStatePipe,
   ],
   exports: [
     VehicleComponent,

@@ -25,3 +25,26 @@
     margin-top: 5rem;
   }
 }
+
+/* CTA — contraste en hover (global a:hover no debe dejar texto blanco sobre fondo blanco) */
+.hero-slide-cta {
+  border: 2px solid #fff;
+  color: #fff;
+  text-decoration: none;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.hero-slide-cta:hover,
+.hero-slide-cta:focus-visible {
+  background-color: #fff;
+  border-color: #fff;
+  color: #111827 !important;
+  text-decoration: none;
+}
+
+.hero-slide-cta--mobile {
+  background-color: rgb(255 255 255 / 10%);
+  backdrop-filter: blur(4px);
+  border-width: 1px;
+  border-color: rgb(255 255 255 / 50%);
+}

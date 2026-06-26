@@ -14,8 +14,8 @@
   <!-- Info -->
   <div class="card-body">
     <h2>{{ vehicle.name }}</h2>
-    <p>{{ vehicle.mileage | number:'' }} km &nbsp;·&nbsp; {{ vehicle.transmission | titlecase }} &nbsp;·&nbsp; {{ vehicle.model.year }}</p>
-    <p>{{ vehicle.dealership?.location ? (vehicle.dealership.location | titlecase) : '—' }}</p>
+    <p>{{ vehicle.mileage | number:'' }} km &nbsp;·&nbsp; {{ vehicle.transmission | titlecase }}<ng-container *ngIf="vehicle.model as model"> &nbsp;·&nbsp; {{ model.year }}</ng-container></p>
+    <p>{{ vehicle.dealership | vehicleDealershipState | titlecase }}</p>
     <p *ngFor="let camp of vehicle.campaigns">{{ camp.name }}</p>
   </div>
 

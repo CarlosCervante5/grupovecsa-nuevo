@@ -18,7 +18,8 @@ export class AdminDashboardService {
     });
   }
 
-  getMetrics(): Observable<any> {
-    return this.http.post(`${this.baseUrl}/api/admin-dashboard/metrics`, {}, { headers: this.headers });
+  getMetrics(panel?: 'gestor' | 'manager'): Observable<any> {
+    const body = panel ? { panel } : {};
+    return this.http.post(`${this.baseUrl}/api/admin-dashboard/metrics`, body, { headers: this.headers });
   }
 }

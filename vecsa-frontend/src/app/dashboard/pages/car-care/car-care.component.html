@@ -1,3 +1,53 @@
+<div class="cc-hero" *ngIf="bannerSlides.length > 0">
+  <div class="cc-hero-slider">
+    <div
+      class="cc-hero-slide"
+      *ngFor="let slide of bannerSlides; let i = index"
+      [class.cc-hero-slide--active]="i === currentBannerSlide"
+    >
+      <picture class="cc-hero-picture" *ngIf="slide.desktop_image_path || slide.mobile_image_path">
+        <source
+          *ngIf="slide.desktop_image_path"
+          media="(min-width: 768px)"
+          [attr.srcset]="slide.desktop_image_path"
+        />
+        <img
+          [src]="slide.mobile_image_path || slide.desktop_image_path"
+          [alt]="slide.title || 'Banner Car Care'"
+          class="cc-hero-image"
+          loading="lazy"
+        />
+      </picture>
+
+      <div class="cc-hero-overlay"></div>
+
+      <div class="cc-hero-content">
+        <h1 class="cc-hero-title" *ngIf="slide.title">{{ slide.title }}</h1>
+        <p class="cc-hero-subtitle" *ngIf="slide.subtitle">{{ slide.subtitle }}</p>
+        <p class="cc-hero-disclaimer" *ngIf="slide.disclaimer">{{ slide.disclaimer }}</p>
+      </div>
+    </div>
+
+    <button type="button" class="cc-hero-nav cc-hero-nav--prev" (click)="prevBannerSlide()" aria-label="Anterior">
+      <span>&#8249;</span>
+    </button>
+    <button type="button" class="cc-hero-nav cc-hero-nav--next" (click)="nextBannerSlide()" aria-label="Siguiente">
+      <span>&#8250;</span>
+    </button>
+
+    <div class="cc-hero-dots" *ngIf="bannerSlides.length > 1">
+      <button
+        type="button"
+        class="cc-hero-dot"
+        *ngFor="let slide of bannerSlides; let i = index"
+        [class.cc-hero-dot--active]="i === currentBannerSlide"
+        (click)="goToBannerSlide(i)"
+        [attr.aria-label]="'Ir al banner ' + (i + 1)"
+      ></button>
+    </div>
+  </div>
+</div>
+
 <div class="cc-container">
 
   <!-- Intro + Form -->

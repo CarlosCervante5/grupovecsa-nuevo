@@ -1,0 +1,153 @@
+<div class="banners-page">
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Banners Carcare</h1>
+      <p class="page-subtitle">{{ banners.length }} banners registrados</p>
+    </div>
+    <div class="header-actions">
+      <button class="action-btn primary-btn" (click)="openCreateForm()">
+        <span class="material-icons">add_photo_alternate</span>
+        Agregar banner
+      </button>
+    </div>
+  </div>
+
+  <div class="admin-media-specs" role="note">
+    <strong>Medidas recomendadas para banners Car Care</strong>
+    <ul>
+      <li><strong>Desktop:</strong> 1920 × 700–900 px (ancho completo tipo carrusel); JPG o WebP.</li>
+      <li><strong>Móvil:</strong> 1080 × 1200–1600 px (vertical); misma composición que en desktop, con zona segura centrada.</li>
+    </ul>
+    <span class="admin-media-specs__note">Mantén logos y textos en el centro para que no se corten en móvil.</span>
+  </div>
+
+  <div class="upload-card" *ngIf="showForm">
+    <div class="upload-card-header">
+      <h3>{{ editingBanner ? 'Editar banner' : 'Nuevo banner' }}</h3>
+      <button class="action-btn" (click)="cancelForm()">
+        <span class="material-icons">close</span> Cancelar
+      </button>
+    </div>
+    <div class="upload-card-body">
+
+      <div class="upload-previews">
+        <div class="upload-preview" *ngIf="desktopImagePreview">
+          <span class="field-label">Desktop</span>
+          <img [src]="desktopImagePreview" alt="Desktop preview" class="preview-img preview-img-landscape" />
+        </div>
+        <div class="upload-preview" *ngIf="mobileImagePreview">
+          <span class="field-label">Mobile</span>
+          <img [src]="mobileImagePreview" alt="Mobile preview" class="preview-img preview-img-mobile" />
+        </div>
+      </div>
+
+      <div class="upload-fields-grid">
+        <div class="field-group">
+          <label class="field-label">Título *</label>
+          <input type="text" class="field-input" [(ngModel)]="title" placeholder="Título del banner" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">Subtítulo</label>
+          <input type="text" class="field-input" [(ngModel)]="subtitle" placeholder="Subtítulo" />
+        </div>
+        <div class="field-group field-group--full">
+          <label class="field-label">Disclaimer</label>
+          <textarea class="field-input field-textarea" [(ngModel)]="disclaimer" placeholder="Texto legal" rows="3"></textarea>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Imagen Desktop</label>
+          <input type="file" class="field-input field-file" accept="image/jpeg,image/png,image/jpg,image/gif,image/webp,image/heic,image/heif,.heic,.heif" (change)="onDesktopImageSelected($event)" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">Imagen Mobile</label>
+          <input type="file" class="field-input field-file" accept="image/jpeg,image/png,image/jpg,image/gif,image/webp,image/heic,image/heif,.heic,.heif" (change)="onMobileImageSelected($event)" />
+        </div>
+      </div>
+
+      <button class="action-btn primary-btn save-btn" (click)="saveBanner()" [disabled]="saving || !title.trim()">
+        <span class="material-icons">cloud_upload</span>
+        {{ saving ? 'Guardando...' : (editingBanner ? 'Actualizar banner' : 'Guardar banner') }}
+      </button>
+    </div>
+  </div>
+
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Cargando banners...</p>
+  </div>
+
+  <div class="table-wrap" *ngIf="!loading && banners.length > 0">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th class="th-num">#</th>
+          <th>Imagen</th>
+          <th>Título</th>
+          <th>Disclaimer</th>
+          <th>Orden</th>
+          <th>Activo</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody cdkDropList (cdkDropListDropped)="drop($event)">
+        <tr *ngFor="let banner of banners; let i = index" cdkDrag>
+          <td *cdkDragPlaceholder colspan="7" class="drag-placeholder-row"></td>
+
+          <td class="cell-num">{{ i + 1 }}</td>
+          <td>
+            <img *ngIf="banner.desktop_image_path"
+                 [src]="banner.desktop_image_path"
+                 [alt]="banner.title || 'Banner'"
+                 class="banner-thumb"
+                 cdkDragHandle />
+            <span *ngIf="!banner.desktop_image_path"
+                  class="material-icons thumb-placeholder"
+                  title="Sin imagen desktop (en cola o pendiente de subir)">hourglass_empty</span>
+          </td>
+          <td class="cell-title">
+            <span class="title-text">{{ banner.title || 'Sin título' }}</span>
+            <span *ngIf="banner.subtitle" class="subtitle-text">{{ banner.subtitle }}</span>
+          </td>
+          <td class="cell-disclaimer">
+            <span class="disclaimer-text">{{ banner.disclaimer || '—' }}</span>
+          </td>
+          <td class="cell-order">
+            <span class="order-badge">{{ banner.sort_id || i + 1 }}</span>
+          </td>
+          <td>
+            <span class="badge" [ngClass]="banner.active ? 'badge-active' : 'badge-inactive'">
+              {{ banner.active ? 'Activo' : 'Inactivo' }}
+            </span>
+          </td>
+          <td>
+            <div class="row-actions">
+              <button class="act-btn toggle"
+                      [class.active]="banner.active"
+                      (click)="toggleActive(banner)"
+                      [title]="banner.active ? 'Desactivar' : 'Activar'">
+                <span class="material-icons">{{ banner.active ? 'visibility' : 'visibility_off' }}</span>
+              </button>
+              <button class="act-btn edit" (click)="openEditForm(banner)" title="Editar">
+                <span class="material-icons">edit</span>
+              </button>
+              <button class="act-btn drag-handle" cdkDragHandle title="Arrastrar para reordenar">
+                <span class="material-icons">drag_indicator</span>
+              </button>
+              <button class="act-btn delete" (click)="deleteBanner(banner)" title="Eliminar">
+                <span class="material-icons">delete</span>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="empty-state" *ngIf="!loading && banners.length === 0 && !showForm">
+    <span class="material-icons">view_carousel</span>
+    <p>No hay banners registrados</p>
+    <span class="empty-hint">Agrega el primer banner usando el botón de arriba</span>
+  </div>
+
+</div>

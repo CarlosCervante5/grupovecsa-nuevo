@@ -1,9 +1,20 @@
-import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
 import { MatSelectChange } from '@angular/material/select';
 import { Camp, Campaign, GetcampaingResponse, GralResponse, promos, Promotion } from '@interfaces/admin.interfaces';
 import { CampaingService } from '@services/campaing.service';
+import { CarCareBannerService } from '@services/carcare-banner.service';
+import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
+
+interface CarCareHeroSlide {
+  uuid: string;
+  title: string;
+  subtitle: string;
+  disclaimer: string;
+  desktop_image_path: string;
+  mobile_image_path: string;
+}
 
 @Component({
     selector: 'app-car-care',
@@ -11,7 +22,7 @@ import Swal from 'sweetalert2';
     styleUrls: ['./car-care.component.css'],
     standalone: false
 })
-export class CarCareComponent {
+export class CarCareComponent implements OnInit, OnDestroy {
   public form !: FormGroup;
   public otherB =  false;
   public promos: Campaign[] = []; 
@@ -20,6 +31,10 @@ export class CarCareComponent {
   public anchoW!: number;
 
   public specificationsLink!: string|null;
+  public bannerSlides: CarCareHeroSlide[] = [];
+  public currentBannerSlide = 0;
+  private bannerSub?: Subscription;
+  private bannerInterval?: ReturnType<typeof setInterval>;
 
 
   @ViewChild('myModal') modal!: ElementRef;
@@ -30,9 +45,79 @@ export class CarCareComponent {
   constructor(
     private _formBuilder: UntypedFormBuilder, 
     private _campaingService: CampaingService,
+    private _carCareBannerService: CarCareBannerService,
   ){
     this.createForm();
     this.promosServ();
+  }
+
+  ngOnInit(): void {
+    this.loadBanners();
+  }
+
+  ngOnDestroy(): void {
+    this.bannerSub?.unsubscribe();
+    this.stopBannerAutoplay();
+  }
+
+  private loadBanners(): void {
+    this.bannerSub = this._carCareBannerService.publicList().subscribe({
+      next: (res) => {
+        const banners = res?.data?.banners;
+        if (!Array.isArray(banners) || banners.length === 0) {
+          this.bannerSlides = [];
+          return;
+        }
+
+        this.bannerSlides = banners.map((b) => ({
+          uuid: b.uuid,
+          title: b.title || '',
+          subtitle: b.subtitle || '',
+          disclaimer: b.disclaimer || '',
+          desktop_image_path: b.desktop_image_path || '',
+          mobile_image_path: b.mobile_image_path || '',
+        }));
+        this.currentBannerSlide = 0;
+        this.startBannerAutoplay();
+      },
+      error: () => {
+        this.bannerSlides = [];
+      },
+    });
+  }
+
+  private startBannerAutoplay(): void {
+    this.stopBannerAutoplay();
+    if (this.bannerSlides.length <= 1) {
+      return;
+    }
+    this.bannerInterval = setInterval(() => {
+      this.nextBannerSlide();
+    }, 5000);
+  }
+
+  private stopBannerAutoplay(): void {
+    if (this.bannerInterval) {
+      clearInterval(this.bannerInterval);
+      this.bannerInterval = undefined;
+    }
+  }
+
+  goToBannerSlide(index: number): void {
+    this.currentBannerSlide = index;
+    this.startBannerAutoplay();
+  }
+
+  prevBannerSlide(): void {
+    if (this.bannerSlides.length === 0) return;
+    this.currentBannerSlide =
+      (this.currentBannerSlide - 1 + this.bannerSlides.length) % this.bannerSlides.length;
+    this.startBannerAutoplay();
+  }
+
+  nextBannerSlide(): void {
+    if (this.bannerSlides.length === 0) return;
+    this.currentBannerSlide = (this.currentBannerSlide + 1) % this.bannerSlides.length;
   }
     public createForm() {
         this.form = this._formBuilder.group({

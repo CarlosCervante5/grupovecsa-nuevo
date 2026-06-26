@@ -11,6 +11,7 @@ import { SkCubeComponent } from '@components/sk-cube/sk-cube.component';
 import { HomeSlidesComponent } from './pages/home-slides/home-slides.component';
 import { HomeTestimonialsComponent } from './pages/home-testimonials/home-testimonials.component';
 import { BoutiqueBannersComponent } from './pages/boutique-banners/boutique-banners.component';
+import { CarcareBannersComponent } from './pages/carcare-banners/carcare-banners.component';
 import { MarketingLayoutComponent } from './pages/layout/marketing-layout.component';
 import { ExperienceStoriesSharedModule } from '../shared/experience-stories/experience-stories-shared.module';
 import { AssistantChatsSharedModule } from '../shared/assistant-chats/assistant-chats-shared.module';
@@ -23,6 +24,7 @@ import { BenchmarkModule } from '../shared/benchmark/benchmark.module';
     HomeSlidesComponent,
     HomeTestimonialsComponent,
     BoutiqueBannersComponent,
+    CarcareBannersComponent,
     MarketingLayoutComponent,
   ],
   imports: [

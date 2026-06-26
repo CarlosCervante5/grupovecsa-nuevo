@@ -333,6 +333,7 @@
           [length]="length"
           [pageSize]="pageSize"
           [pageIndex]="pageIndex - 1"
+          [disabled]="spinner"
           aria-label="Paginación"
           (page)="paginationChange($event)">
         </mat-paginator>

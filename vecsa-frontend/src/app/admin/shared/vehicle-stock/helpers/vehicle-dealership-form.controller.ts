@@ -6,12 +6,15 @@ import { reload } from '@helpers/session.helper';
 import {
   readSignedInUserEmail,
   readSignedInUserUuid,
+  readSignedInUserRole,
+  resolveSelectableDealershipsForVehicleForm,
   resolveAssignedDealerships,
   vehicleDealershipFallbackNamesForEmail,
   vehicleDealershipFormModeForEmail,
   vehicleDealershipNameForUserEmail,
   VehicleDealershipFormMode,
   vehicleLocationFallbackForDealershipName,
+  vehicleLocationLabelForDealership,
 } from './vehicle-dealership-by-user.helper';
 
 export interface VehicleDealershipFormApplyOptions {
@@ -53,9 +56,7 @@ export class VehicleDealershipFormController {
     if (!match) {
       return;
     }
-    const location =
-      match.location?.trim() ||
-      vehicleLocationFallbackForDealershipName(match.name);
+    const location = vehicleLocationLabelForDealership(match);
     this.patchDealership(match.name, location);
     const form = this.getForm();
     form.get('location')?.markAsDirty();
@@ -86,6 +87,7 @@ export class VehicleDealershipFormController {
         preferredMode,
         assigned,
         fallbackNames,
+        catalog,
         options,
       );
     };
@@ -115,16 +117,21 @@ export class VehicleDealershipFormController {
     preferredMode: VehicleDealershipFormMode,
     assigned: Dealership[],
     fallbackNames: readonly string[],
+    catalog: Dealership[],
     options?: VehicleDealershipFormApplyOptions,
   ): void {
     const preserve = options?.preserveFormValues === true;
+    const role = readSignedInUserRole();
 
     if (preferredMode === 'select' || assigned.length > 1) {
       this.dealershipMode = 'select';
-      this.selectableDealerships =
-        assigned.length > 0
-          ? assigned
-          : this.buildDealershipStubs(fallbackNames);
+      this.selectableDealerships = resolveSelectableDealershipsForVehicleForm(
+        catalog,
+        email,
+        role,
+        assigned,
+        fallbackNames,
+      );
       return;
     }
 
@@ -155,10 +162,7 @@ export class VehicleDealershipFormController {
   }
 
   private lockDealershipFromRecord(dealership: Dealership): void {
-    const location =
-      dealership.location?.trim() ||
-      vehicleLocationFallbackForDealershipName(dealership.name);
-    this.patchDealership(dealership.name, location);
+    this.patchDealership(dealership.name, vehicleLocationLabelForDealership(dealership));
   }
 
   private patchDealership(dealershipName: string, location: string): void {

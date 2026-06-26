@@ -82,6 +82,7 @@ return [
     'vehicles_folder_base' => env('AWS_VEHICLES_FOLDER_BASE', 'default_folder'),
     'boutique_folder_base' => env('CLOUDINARY_BOUTIQUE_FOLDER_BASE', 'vecsa_boutique_products'),
     'boutique_banners_folder_base' => env('CLOUDINARY_BOUTIQUE_BANNERS_FOLDER_BASE', 'boutique_banners'),
-    'profile_folder_base' => env('AWS_PROFILE_FOLDER_BASE', 'default_folder'),
+    'carcare_banners_folder_base' => env('CLOUDINARY_CARCARE_BANNERS_FOLDER_BASE', 'carcare_banners'),
+    'profile_folder_base' => env('AWS_PROFILE_FOLDER_BASE', env('CLOUDINARY_PROFILE_FOLDER_BASE', 'default_folder')),
 
 ];

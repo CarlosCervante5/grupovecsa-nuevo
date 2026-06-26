@@ -144,7 +144,8 @@ export class DetailComponent implements OnInit{
   }
 
   public getVehicle() {
-    
+    this.imagesForSlider = [];
+
     this._detailService.getVehicleDetail(`${ this.uuid }`)
     .subscribe({
       next: ( response: DetailResponse ) => {
@@ -163,8 +164,9 @@ export class DetailComponent implements OnInit{
           )
         });
 
+        const modelFilter = this.modelFilterSlug();
         this.pathStockBrand = `/compra-tu-auto/${ this.vehicle.category == 'new' ? `Nuevo` : 'Seminuevo' }/${ this.vehicle.brand.name }/sin-lineas/sin-modelos/sin-carrocerias/sin-versiones/sin-anios/100000/5000000/sin-estados/sin-busqueda/sin-transmisiones/sin-colores/sin-colores/ninguno/1`;
-        this.pathStockCarmodel = `/compra-tu-auto/${ this.vehicle.category == 'new' ? `Nuevo` : 'Seminuevo' }/${ this.vehicle.brand.name }/sin-lineas/${ this.vehicle.model.name }/sin-carrocerias/sin-versiones/sin-anios/100000/5000000/sin-estados/sin-busqueda/sin-transmisiones/sin-colores/sin-colores/ninguno/1`;
+        this.pathStockCarmodel = `/compra-tu-auto/${ this.vehicle.category == 'new' ? `Nuevo` : 'Seminuevo' }/${ this.vehicle.brand.name }/sin-lineas/${ modelFilter }/sin-carrocerias/sin-versiones/sin-anios/100000/5000000/sin-estados/sin-busqueda/sin-transmisiones/sin-colores/sin-colores/ninguno/1`;
 
           
         if (this.description != null) {
@@ -252,7 +254,7 @@ export class DetailComponent implements OnInit{
         vehicle_uuid: this.vehicle.uuid,
         vehicle: vehicle.name,
         brand: vehicle.brand.name,
-        year: vehicle.model.year,
+        year: vehicle.model?.year ?? this.modelDisplayYear,
         dealership_name: vehicle.dealership.name
       }
     });
@@ -293,6 +295,35 @@ export class DetailComponent implements OnInit{
 
   goBack(): void {
     this.location.back();
+  }
+
+  /** Nombre de modelo para UI y rutas cuando `vehicle.model` viene null (inventario migrado). */
+  public modelDisplayName(): string {
+    if (this.vehicle?.model?.name) {
+      return this.vehicle.model.name;
+    }
+    if (this.vehicle?.line?.name) {
+      return this.vehicle.line.name;
+    }
+    return this.vehicle?.name ?? '';
+  }
+
+  public modelDisplayYear(): string | number {
+    if (this.vehicle?.model?.year != null) {
+      return this.vehicle.model.year;
+    }
+    const match = this.vehicle?.name?.match(/\b(19|20)\d{2}\b/);
+    return match ? match[0] : '';
+  }
+
+  private modelFilterSlug(): string {
+    if (this.vehicle?.model?.name) {
+      return this.vehicle.model.name;
+    }
+    if (this.vehicle?.line?.name) {
+      return this.vehicle.line.name;
+    }
+    return 'sin-modelos';
   }
 
   /**

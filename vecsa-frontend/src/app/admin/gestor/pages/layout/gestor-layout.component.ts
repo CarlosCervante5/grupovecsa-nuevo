@@ -5,6 +5,7 @@ import { AuthService } from 'src/app/auth/services/auth.service';
 import {
   adminBenchmarkUrl,
   adminDashboardUrl,
+  adminGestorPanelBaseFromRouterUrl,
   adminVehicleInventoryUrl,
 } from 'src/app/admin/utils/admin-route.util';
 import { expandLegacyGestorPermissions, GESTOR_FEATURE_PERMISSIONS } from 'src/app/admin/utils/gestor-feature-permissions';
@@ -68,8 +69,12 @@ export class GestorLayoutComponent implements OnInit, OnDestroy {
     this.name = profile?.name || this.user?.nickname || 'Usuario';
   }
 
+  private gestorPanelBase(): string {
+    return adminGestorPanelBaseFromRouterUrl(this.router.url) || adminDashboardUrl(this.role);
+  }
+
   private rebuildSidebar(): void {
-    const base = adminDashboardUrl(this.role);
+    const base = this.gestorPanelBase();
     this.navItems = [{ label: 'Dashboard', icon: 'dashboard', route: base }];
 
     const effective = expandLegacyGestorPermissions(this.permissions, this.role);
@@ -112,7 +117,7 @@ export class GestorLayoutComponent implements OnInit, OnDestroy {
   }
 
   get panelBaseUrl(): string {
-    return adminDashboardUrl(this.role);
+    return this.gestorPanelBase();
   }
 
   /** Etiqueta lateral según URL (/admin/manager vs /admin/gestor). */

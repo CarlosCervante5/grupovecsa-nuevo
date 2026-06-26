@@ -2,7 +2,11 @@ import { Component, OnInit, AfterViewInit, ElementRef, ViewChild, OnDestroy } fr
 import { Router } from '@angular/router';
 import { AdminDashboardService } from '../../../shared/services/admin-dashboard.service';
 import * as echarts from 'echarts';
-import { adminBenchmarkUrl, adminDashboardUrl } from 'src/app/admin/utils/admin-route.util';
+import {
+  adminBenchmarkUrl,
+  adminDashboardUrl,
+  adminGestorPanelBaseFromRouterUrl,
+} from 'src/app/admin/utils/admin-route.util';
 import { expandLegacyGestorPermissions, GESTOR_FEATURE_PERMISSIONS } from 'src/app/admin/utils/gestor-feature-permissions';
 
 @Component({
@@ -67,7 +71,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     const role = localStorage.getItem('role');
     const permissions = expandLegacyGestorPermissions(raw, role);
-    const base = adminDashboardUrl(role);
+    const base = adminGestorPanelBaseFromRouterUrl(this.router.url) || adminDashboardUrl(role);
 
     this.showEventsChart = this.canSee(permissions, GESTOR_FEATURE_PERMISSIONS.scheduledEvents);
 
@@ -117,7 +121,8 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private loadMetrics(): void {
-    this.dashboardService.getMetrics().subscribe({
+    const panel = this.resolveGestorPanel();
+    this.dashboardService.getMetrics(panel).subscribe({
       next: (res: any) => {
         const data = res?.data;
         if (data?.stats) {
@@ -176,5 +181,17 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   navigateTo(route: string): void {
     this.router.navigateByUrl(route);
+  }
+
+  /** Indica al backend qué métricas devolver (gestor/manager), también si entra administrator. */
+  private resolveGestorPanel(): 'gestor' | 'manager' | undefined {
+    const base = adminGestorPanelBaseFromRouterUrl(this.router.url);
+    if (base.endsWith('/manager')) {
+      return 'manager';
+    }
+    if (base.endsWith('/gestor')) {
+      return 'gestor';
+    }
+    return undefined;
   }
 }

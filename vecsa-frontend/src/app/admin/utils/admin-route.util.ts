@@ -111,3 +111,14 @@ export function adminBenchmarkUrl(role: string | null | undefined): string | nul
   }
   return `/admin/${seg}/benchmark`;
 }
+
+/**
+ * Base del panel gestor/manager según la URL actual (`/admin/gestor` o `/admin/manager`).
+ * Necesario cuando administrator/developer entra al módulo gestor: los enlaces hijos deben
+ * quedar bajo ese segmento, no bajo `/admin/administrator`.
+ */
+export function adminGestorPanelBaseFromRouterUrl(urlPath: string): string {
+  const path = (urlPath || '').split('?')[0];
+  const match = path.match(/^\/admin\/(gestor|manager)(?:\/|$)/);
+  return match ? `/admin/${match[1]}` : '';
+}

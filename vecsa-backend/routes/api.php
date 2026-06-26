@@ -48,6 +48,7 @@ use App\Http\Controllers\Boutique\BoutiqueAdminOrderController;
 use App\Http\Controllers\Boutique\BoutiqueInventoryController;
 use App\Http\Controllers\Boutique\BoutiqueAttributeController;
 use App\Http\Controllers\Boutique\BoutiqueBannerController;
+use App\Http\Controllers\CarCare\CarCareBannerController;
 use App\Http\Controllers\Experience\ExperienceController;
 use App\Http\Controllers\Benchmark\BenchmarkAdsController;
 use App\Http\Controllers\Assistant\AssistantChatAdminController;
@@ -633,6 +634,25 @@ Route::prefix('home_testimonials')->middleware(['bandwidth_usage', 'auth:sanctum
 });
 
 // Fin Home Testimonials
+
+
+// Segmento Car Care Banners (admin)
+
+Route::prefix('carcare/admin')->middleware(['bandwidth_usage', 'auth:sanctum'])->group(function () {
+    Route::post('/banners/search', [CarCareBannerController::class, 'search']);
+    Route::post('/banners/store', [CarCareBannerController::class, 'store']);
+    Route::post('/banners/update', [CarCareBannerController::class, 'update']);
+    Route::post('/banners/delete', [CarCareBannerController::class, 'delete']);
+    Route::post('/banners/sort_update', [CarCareBannerController::class, 'sortUpdate']);
+    Route::post('/banners/toggle', [CarCareBannerController::class, 'toggle']);
+});
+
+// Car Care Banners público
+Route::prefix('carcare')->middleware('bandwidth_usage')->group(function () {
+    Route::post('/banners', [CarCareBannerController::class, 'publicList']);
+});
+
+// Fin Car Care Banners
 
 
 // Segmento Boutique

@@ -16,20 +16,36 @@ export class HomeFooterComponent {
   currentYear = new Date().getFullYear();
 
   vehicleLinks: FooterLink[] = [
-    { label: 'Vehículos BMW', url: 'https://grupovecsa.com/inventory/compra-tu-auto/Nuevo/Bmw/sin-lineas/sin-modelos/sin-carrocerias/sin-versiones/sin-anios/10000/60000000/sin-estados/sin-busqueda/sin-transmisiones/sin-colores/sin-colores/ninguno/1', external: true },
-    { label: 'Vehículos MINI', url: 'https://grupovecsa.com/inventory/compra-tu-auto/Nuevo-Demo/Mini/sin-lineas/sin-modelos/sin-carrocerias/sin-versiones/sin-anios/1000/60000000/sin-estados/sin-busqueda/sin-transmisiones/sin-colores/sin-colores/ninguno/1', external: true },
-    { label: 'BMW Motorrad', url: 'https://grupovecsa.com/inventory/compra-tu-auto/Nuevo-Demo/Motorrad/sin-lineas/sin-modelos/sin-carrocerias/sin-versiones/sin-anios/10000/60000000/sin-estados/sin-busqueda/sin-transmisiones/sin-colores/sin-colores/ninguno/1', external: true },
-    { label: 'Seminuevos Ejecutivos', url: 'https://grupovecsa.com/inventory/compra-tu-auto/Seminuevo/sin-marcas/sin-lineas/sin-modelos/sin-carrocerias/sin-versiones/sin-anios/10000/60000000/sin-estados/sin-busqueda/sin-transmisiones/sin-colores/sin-colores/ninguno/1', external: true },
-    { label: 'ABCars Seminuevos', url: 'https://abcars.mx/compra-tu-auto/sin-marcas/sin-modelos/sin-anios/100000/5000000/sin-carrocerias/sin-estados/sin-busqueda/sin-transmisiones/1', external: true },
+    {
+      label: 'Vehículos BMW',
+      url: '/compra-tu-auto/sin-categorias/Bmw/sin-lineas/sin-modelos/sin-carrocerias/sin-versiones/sin-anios/9500/30000500/sin-estados/sin-busqueda/sin-transmisiones/sin-colores/sin-colores/ninguno/1',
+      external: false,
+    },
+    {
+      label: 'Vehículos MINI',
+      url: '/compra-tu-auto/sin-categorias/Mini/sin-lineas/sin-modelos/sin-carrocerias/sin-versiones/sin-anios/9500/30000500/sin-estados/sin-busqueda/sin-transmisiones/sin-colores/sin-colores/ninguno/1',
+      external: false,
+    },
+    {
+      label: 'BMW Motorrad',
+      url: '/compra-tu-auto/sin-categorias/Motorrad/sin-lineas/sin-modelos/sin-carrocerias/sin-versiones/sin-anios/9500/30000500/sin-estados/sin-busqueda/sin-transmisiones/sin-colores/sin-colores/ninguno/1',
+      external: false,
+    },
+    {
+      label: 'Seminuevos Ejecutivos',
+      url: '/compra-tu-auto/Seminuevo/sin-marcas/sin-lineas/sin-modelos/sin-carrocerias/sin-versiones/sin-anios/9500/30000500/sin-estados/sin-busqueda/sin-transmisiones/sin-colores/sin-colores/ninguno/1',
+      external: false,
+    },
+    { label: 'ABCars Seminuevos', url: 'https://www.abcars.mx/inventario', external: true },
   ];
 
   serviceLinks: FooterLink[] = [
     { label: 'Sucursales', url: '/sucursales', external: false },
-    { label: 'VECSA Boutique', url: 'https://vecsaboutique.com/', external: true },
-    { label: 'VECSA Rewards', url: 'https://grupovecsa.com/inventory/auth/login', external: true },
-    { label: 'VECSA Experience', url: 'https://vecsaexperience.com/', external: true },
-    { label: 'Car Care', url: 'https://grupovecsa.com/inventory/carcare', external: true },
-    { label: 'Promociones', url: 'https://grupovecsa.com/inventory/promotions', external: true },
+    { label: 'VECSA Boutique', url: '/boutique', external: false },
+    { label: 'VECSA Rewards', url: '/rewards', external: false },
+    { label: 'VECSA Experience', url: '/experience', external: false },
+    { label: 'Car Care', url: '/carcare', external: false },
+    { label: 'Promociones', url: '/promociones', external: false },
   ];
 
   legalLinks: FooterLink[] = [

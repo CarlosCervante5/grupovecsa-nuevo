@@ -1,5 +1,5 @@
 import { Component, OnInit, ElementRef, ViewChild, HostListener, AfterViewInit, OnDestroy } from '@angular/core';
-import { Observable } from 'rxjs';
+import { forkJoin, Observable, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { FormControl } from '@angular/forms';
 
@@ -14,7 +14,7 @@ import { CompraTuAutoService } from '@services/compra-tu-auto.service';
 
 // Interfaces
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { FiltersResponse, SearchResponse, Vehicle, linksImage} from '@interfaces/vehicle_data.interface';
+import { FiltersResponse, Vehicle, linksImage} from '@interfaces/vehicle_data.interface';
 import { register } from 'swiper/element/bundle';
 // register Swiper custom elements
 register();
@@ -199,11 +199,13 @@ export class CompraTuAutoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // MatPaginator Inputs
   public length = 0;
-  public pageSize = 25;  
+  public pageSize = 15;
   public pageIndex: number = 1;
 
   // MatPaginator Output
   public pageEvent!: PageEvent;
+
+  private searchSubscription?: Subscription;
 
   constructor(
     private _compraTuAutoService: CompraTuAutoService,
@@ -286,7 +288,9 @@ export class CompraTuAutoComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  ngOnDestroy(): void {}
+  ngOnDestroy(): void {
+    this.searchSubscription?.unsubscribe();
+  }
 
   capitalizeFirstLetter(string:string):string {
     return string.charAt(0).toUpperCase() + string.slice(1);
@@ -762,6 +766,10 @@ export class CompraTuAutoComponent implements OnInit, AfterViewInit, OnDestroy {
   public executeSearch( page:number ){
 
     const searchPage = page > 0 ? page : 1;
+    const priceRange = [(this.hitchMin - 1), (this.hitchMax + 1)] as [number, number];
+
+    this.spinner = true;
+    this.searchSubscription?.unsubscribe();
 
     this.allCategories = [];
     this.allBrands = [];
@@ -774,117 +782,143 @@ export class CompraTuAutoComponent implements OnInit, AfterViewInit, OnDestroy {
     this.allIntColors = [];
     this.allLines = [];
 
-    this._compraTuAutoService.getVehicles( this.categories, this.brands, this.lines, this.models, this.bodies, this.versions, this.years,
-                                                [(this.hitchMin -1 ), (this.hitchMax + 1)], this.palabra_busqueda, searchPage, 
-                                                this.states, this.transmissions, 
-                                                this.extColors, this.intColors, this.orden
-                                              ).subscribe({
-                                                next: ( response: SearchResponse ) => {
-                                                  this.vehicles = response.data.data;
-                                                  this.length = response.data.total;
-                                                  this.pageIndex = response.data.current_page;
-                                                  this.pageSize = response.data.per_page;
-                                                }
-                                              });
-
-    this._compraTuAutoService.getFilters( this.categories, this.brands, this.lines, this.models, this.bodies, this.versions, this.years,
-                                          [(this.hitchMin -1 ), (this.hitchMax + 1)], this.palabra_busqueda, searchPage, this.states, this.transmissions, this.extColors, this.intColors,
-                                          true, this.orden
-                                          )
-    .subscribe({
-      next: ( response: FiltersResponse ) => {
-        
+    this.searchSubscription = forkJoin({
+      vehicles: this._compraTuAutoService.getVehicles(
+        this.categories, this.brands, this.lines, this.models, this.bodies, this.versions, this.years,
+        priceRange, this.palabra_busqueda, searchPage,
+        this.states, this.transmissions,
+        this.extColors, this.intColors, this.orden
+      ),
+      filters: this._compraTuAutoService.getFilters(
+        this.categories, this.brands, this.lines, this.models, this.bodies, this.versions, this.years,
+        priceRange, this.palabra_busqueda, searchPage, this.states, this.transmissions, this.extColors, this.intColors,
+        true, this.orden
+      ),
+    }).subscribe({
+      next: ({ vehicles, filters }) => {
+        this.vehicles = vehicles.data.data;
+        this.length = vehicles.data.total;
+        this.pageIndex = vehicles.data.current_page;
+        this.pageSize = vehicles.data.per_page;
+        this.applyFiltersResponse(filters);
         this.spinner = false;
+      },
+      error: () => {
+        this.spinner = false;
+      },
+    });
+  }
 
-        (response.data.categories ?? []).filter(Boolean).map( category => {
-          if (!this.existsInArray( this.categories, this.titleCase(category))) {
-            this.allCategories.push(category == 'new' ? 'nuevo' : category == 'pre_owned' ? 'seminuevo' : category);
-          }
-          this.filteredCategories = this.categoryCtrl.valueChanges.pipe(startWith(null),
-            map((category: string | null) => category ? this._filterCategories(category) : this.allCategories.slice()));
-        });
-
-        (response.data.brands ?? []).filter(Boolean).map( brand => { 
-          if( !this.existsInArray( this.brands, this.titleCase(brand)) ){
-            this.allBrands.push( brand );
-          }
-          this.filteredBrands = this.brandCtrl.valueChanges.pipe(startWith(null),
-            map((brand: string | null) => brand ? this._filterBrands(brand) : this.allBrands.slice()));
-        });   
-
-        (response.data.lines ?? []).filter(Boolean).map( line => {
-          if (!this.existsInArray( this.lines, this.titleCase(line))) {
-            this.allLines.push( line );
-          }
-          this.filteredLines = this.lineCtrl.valueChanges.pipe(startWith(null),
-            map((line: string | null) => line ? this._filterLines(line) : this.allLines.slice()));
-        });
-
-        (response.data.versions ?? []).filter(Boolean).map( version => {
-          if (!this.existsInArray( this.versions, this.titleCase(version))) {
-            this.allVersions.push( version );
-          }
-          this.filteredVersions = this.versionCtrl.valueChanges.pipe(startWith(null),
-            map((version: string | null) => version ? this._filterVersions(version) : this.allVersions.slice()));
-        });
-
-        (response.data.bodies ?? []).filter(Boolean).map( body => {
-          if (!this.existsInArray( this.bodies, this.titleCase(body))) {
-            this.allBodies.push( body );
-          }
-          this.filteredBodies = this.bodyCtrl.valueChanges.pipe(startWith(null),
-            map((body: string | null) => body ? this._filterBodies(body) : this.allBodies.slice()));
-        });
-
-        (response.data.models ?? []).filter(Boolean).map( model => {
-          if( !this.existsInArray( this.models, this.titleCase(model)) ){
-            this.allModels.push( model );
-          }
-          this.filteredModels = this.modelCtrl.valueChanges.pipe(startWith(null),
-            map((model: string | null) => model ? this._filterModels(model) : this.allModels.slice()));
-        });
-
-        (response.data.years ?? []).filter((y): y is number => y != null).map( year => {
-          if( !this.existsInArray( this.years, `${year}`) ){
-            this.allYears.push(`${year}`);
-          }
-          this.filteredYears = this.yearCtrl.valueChanges.pipe(startWith(null),
-            map((year: string | null) => year ? this._filterYears(year) : this.allYears.slice()));
-        });
-
-        (response.data.transmissions ?? []).filter(Boolean).map( transmission => {
-          if( !this.existsInArray( this.transmissions, this.titleCase(transmission)) ){
-            this.allTransmissions.push(transmission);
-          }
-          this.filteredTransmissions = this.transmissionCtrl.valueChanges.pipe(startWith(null),
-            map((transmission: string | null) => transmission ? this._filterTransmissions(transmission) : this.allTransmissions.slice()));
-        });
-
-        (response.data.exterior_colors ?? []).filter(Boolean).map( color => {          
-          if( !this.existsInArray( this.extColors, this.titleCase(color)) ){
-            this.allExtColors.push(color);            
-          }
-          this.filteredExtColors = this.extColorCtrl.valueChanges.pipe(startWith(null),
-            map((extColor: string | null) => extColor ? this._filterExtColors(extColor) : this.allExtColors.slice()));
-        });
-
-        (response.data.interior_colors ?? []).filter(Boolean).map( color => {          
-          if( !this.existsInArray( this.intColors, this.titleCase(color)) ){
-            this.allIntColors.push(color);            
-          }
-          this.filteredIntColors = this.intColorCtrl.valueChanges.pipe(startWith(null),
-            map((intColor: string | null) => intColor ? this._filterIntColors(intColor) : this.allIntColors.slice()));
-        });
-
-        (response.data.locations ?? []).filter(Boolean).map( location => {          
-          if( !this.existsInArray( this.states, this.titleCase(location)) ){
-            this.allStates.push(location);            
-          }
-          this.filteredStates = this.stateCtrl.valueChanges.pipe(startWith(null),
-            map((state: string | null) => state ? this._filterStates(state) : this.allStates.slice()));
-        });
+  private applyFiltersResponse(response: FiltersResponse): void {
+    (response.data.categories ?? []).filter(Boolean).forEach(category => {
+      if (!this.existsInArray(this.categories, this.titleCase(category))) {
+        this.allCategories.push(category == 'new' ? 'nuevo' : category == 'pre_owned' ? 'seminuevo' : category);
       }
     });
+    this.filteredCategories = this.categoryCtrl.valueChanges.pipe(
+      startWith(null),
+      map((category: string | null) => category ? this._filterCategories(category) : this.allCategories.slice())
+    );
+
+    (response.data.brands ?? []).filter(Boolean).forEach(brand => {
+      if (!this.existsInArray(this.brands, this.titleCase(brand))) {
+        this.allBrands.push(brand);
+      }
+    });
+    this.filteredBrands = this.brandCtrl.valueChanges.pipe(
+      startWith(null),
+      map((brand: string | null) => brand ? this._filterBrands(brand) : this.allBrands.slice())
+    );
+
+    (response.data.lines ?? []).filter(Boolean).forEach(line => {
+      if (!this.existsInArray(this.lines, this.titleCase(line))) {
+        this.allLines.push(line);
+      }
+    });
+    this.filteredLines = this.lineCtrl.valueChanges.pipe(
+      startWith(null),
+      map((line: string | null) => line ? this._filterLines(line) : this.allLines.slice())
+    );
+
+    (response.data.versions ?? []).filter(Boolean).forEach(version => {
+      if (!this.existsInArray(this.versions, this.titleCase(version))) {
+        this.allVersions.push(version);
+      }
+    });
+    this.filteredVersions = this.versionCtrl.valueChanges.pipe(
+      startWith(null),
+      map((version: string | null) => version ? this._filterVersions(version) : this.allVersions.slice())
+    );
+
+    (response.data.bodies ?? []).filter(Boolean).forEach(body => {
+      if (!this.existsInArray(this.bodies, this.titleCase(body))) {
+        this.allBodies.push(body);
+      }
+    });
+    this.filteredBodies = this.bodyCtrl.valueChanges.pipe(
+      startWith(null),
+      map((body: string | null) => body ? this._filterBodies(body) : this.allBodies.slice())
+    );
+
+    (response.data.models ?? []).filter(Boolean).forEach(model => {
+      if (!this.existsInArray(this.models, this.titleCase(model))) {
+        this.allModels.push(model);
+      }
+    });
+    this.filteredModels = this.modelCtrl.valueChanges.pipe(
+      startWith(null),
+      map((model: string | null) => model ? this._filterModels(model) : this.allModels.slice())
+    );
+
+    (response.data.years ?? []).filter((y): y is number => y != null).forEach(year => {
+      if (!this.existsInArray(this.years, `${year}`)) {
+        this.allYears.push(`${year}`);
+      }
+    });
+    this.filteredYears = this.yearCtrl.valueChanges.pipe(
+      startWith(null),
+      map((year: string | null) => year ? this._filterYears(year) : this.allYears.slice())
+    );
+
+    (response.data.transmissions ?? []).filter(Boolean).forEach(transmission => {
+      if (!this.existsInArray(this.transmissions, this.titleCase(transmission))) {
+        this.allTransmissions.push(transmission);
+      }
+    });
+    this.filteredTransmissions = this.transmissionCtrl.valueChanges.pipe(
+      startWith(null),
+      map((transmission: string | null) => transmission ? this._filterTransmissions(transmission) : this.allTransmissions.slice())
+    );
+
+    (response.data.exterior_colors ?? []).filter(Boolean).forEach(color => {
+      if (!this.existsInArray(this.extColors, this.titleCase(color))) {
+        this.allExtColors.push(color);
+      }
+    });
+    this.filteredExtColors = this.extColorCtrl.valueChanges.pipe(
+      startWith(null),
+      map((extColor: string | null) => extColor ? this._filterExtColors(extColor) : this.allExtColors.slice())
+    );
+
+    (response.data.interior_colors ?? []).filter(Boolean).forEach(color => {
+      if (!this.existsInArray(this.intColors, this.titleCase(color))) {
+        this.allIntColors.push(color);
+      }
+    });
+    this.filteredIntColors = this.intColorCtrl.valueChanges.pipe(
+      startWith(null),
+      map((intColor: string | null) => intColor ? this._filterIntColors(intColor) : this.allIntColors.slice())
+    );
+
+    (response.data.locations ?? []).filter(Boolean).forEach(location => {
+      if (!this.existsInArray(this.states, this.titleCase(location))) {
+        this.allStates.push(location);
+      }
+    });
+    this.filteredStates = this.stateCtrl.valueChanges.pipe(
+      startWith(null),
+      map((state: string | null) => state ? this._filterStates(state) : this.allStates.slice())
+    );
   }
 
   public paginationChange( pageEvent:PageEvent ){

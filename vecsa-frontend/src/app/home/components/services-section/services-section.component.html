@@ -7,10 +7,8 @@
 
     <div class="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-6 auto-rows-fr">
       <a *ngFor="let service of services"
-         [href]="service.url"
-         target="_blank"
-         rel="noopener noreferrer"
-         class="service-card group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500"
+         [routerLink]="service.url"
+         class="service-card group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 no-underline"
          [ngClass]="{
            'md:col-span-2 md:row-span-2': service.span === '2x2',
            'md:col-span-1 md:row-span-1 aspect-[4/3] md:aspect-auto': service.span === '1x1'
@@ -28,7 +26,7 @@
              [ngClass]="service.span === '2x2' ? 'text-base mb-6' : 'text-sm mb-4'">
             {{ service.description }}
           </p>
-          <div class="w-full border-2 border-white text-white rounded-full font-medium hover:bg-white hover:text-gray-900 transition-colors text-center"
+          <div class="service-card-cta w-full rounded-full font-medium text-center"
                [ngClass]="service.span === '2x2' ? 'py-4 px-8' : 'py-3 px-6'">
             {{ service.buttonText }}
           </div>

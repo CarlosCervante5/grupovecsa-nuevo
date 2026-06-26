@@ -16,7 +16,7 @@ import { ImageOrder } from 'src/app/dashboard/pages/comprar-autos/interfaces/det
 
 import {UpdateVehicle,  FullDetailResponse, BrandsResponse, Brand, Line, LinesResponse, Model, Body, ModelsResponse, VersionsResponse, Version, BodiesResponse, VehicleUpdateResponse, GralResponse} from '@interfaces/vehicle_data.interface';
 import { Dealership, GetcampaingResponse } from '@interfaces/admin.interfaces';
-import { VehicleDealershipFormMode } from '../../helpers/vehicle-dealership-by-user.helper';
+import { VehicleDealershipFormMode, vehicleLocationLabelForDealership } from '../../helpers/vehicle-dealership-by-user.helper';
 import { VehicleDealershipFormController } from '../../helpers/vehicle-dealership-form.controller';
 // import { CampaingService } from 'src/app/admin/gestor/services/campaing.service';
 import { AdminService } from '@services/admin.service';
@@ -266,7 +266,7 @@ export class UpdateVehicleComponent implements OnInit {
               name: this.vehicle.name,
               description: this.vehicle.description,
               dealership_name: this.vehicle.dealership.name,
-              location: this.vehicle.dealership.location,
+              location: vehicleLocationLabelForDealership(this.vehicle.dealership),
               vin: this.vehicle.vin,
               year: this.vehicle.model.year,
               purchase_date: this.vehicle.purchase_date,

@@ -9,7 +9,7 @@
                         <!-- Esto es para ambas pantallas-->
                         <div class="">
                             <span style="font-size:medium;" class="ellipsis">{{vehicle.brand.name}}: </span>
-                            <b style="font-size:medium;" class="ellipsis">{{vehicle.model.name}}</b>
+                            <b style="font-size:medium;" class="ellipsis">{{ modelDisplayName() | titlecase }}</b>
                         </div>
 
                         <div class="pull-rigth" >
@@ -40,7 +40,7 @@
                                [routerLink]="[pathStockBrand]">{{ vehicle.brand.name | titlecase }}</a>
                             <span class="vd-breadcrumb-sep" aria-hidden="true">/</span>
                             <a class="vd-breadcrumb-current text-truncate d-inline-block" style="max-width: 42vw;"
-                               [routerLink]="[pathStockCarmodel]">{{ vehicle.model.name | titlecase }}</a>
+                               [routerLink]="[pathStockCarmodel]">{{ modelDisplayName() | titlecase }}</a>
                         </div>
                     </nav>
             </div>
@@ -288,7 +288,7 @@
                                                                         width="32" height="32" alt="Icon Year Vehicle" />
                                                                     <span class="detail-text">Año</span>
                                                                     <span
-                                                                        class="detail-content fw-bold">{{ vehicle != undefined ? (vehicle.model.year) : '' }}</span>
+                                                                        class="detail-content fw-bold">{{ modelDisplayYear() }}</span>
                                                                 </div>
                                                             </div>
                                                         
@@ -331,7 +331,7 @@
                                                                         alt="Icon Location Vehicle" />
                                                                     <span class="detail-text">Ubicación</span>
                                                                     <span
-                                                                        class="detail-content fw-bold">{{ vehicle.dealership?.location ? (vehicle.dealership.location | titlecase) : '—' }}</span>
+                                                                        class="detail-content fw-bold">{{ vehicle.dealership | vehicleDealershipState | titlecase }}</span>
                                                                 </div>
                                                             </div>
                                                 

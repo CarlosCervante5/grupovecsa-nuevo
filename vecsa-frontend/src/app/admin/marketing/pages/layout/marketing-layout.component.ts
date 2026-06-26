@@ -26,6 +26,7 @@ export class MarketingLayoutComponent implements OnInit, OnDestroy {
     { label: 'Home Slides', icon: 'image', route: '/admin/marketing/home-slides' },
     { label: 'Testimonios', icon: 'format_quote', route: '/admin/marketing/home-testimonials' },
     { label: 'Banners Boutique', icon: 'view_carousel', route: '/admin/marketing/boutique-banners' },
+    { label: 'Banners Carcare', icon: 'view_carousel', route: '/admin/marketing/carcare-banners' },
     { label: 'Experience — Historias', icon: 'auto_stories', route: '/admin/marketing/experience-stories' },
     {
       label: 'Chats asistente',

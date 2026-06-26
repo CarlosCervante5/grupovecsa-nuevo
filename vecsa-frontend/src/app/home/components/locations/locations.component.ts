@@ -4,6 +4,8 @@ import { HttpClient } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 
 import { environment } from '@environments/environment';
+import { Dealership } from '@interfaces/admin.interfaces';
+import { dedupeDealershipCatalog, canonicalDealershipName } from 'src/app/admin/shared/vehicle-stock/helpers/vehicle-dealership-by-user.helper';
 import { SafeUrlPipe } from '../../pipes/safe-url.pipe';
 
 const PLACEHOLDER_IMAGE = 'assets/images/placeholder-product.svg';
@@ -72,7 +74,10 @@ export class LocationsComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (res) => {
           const rows = Array.isArray(res?.data) ? res.data : [];
-          this.locations = rows.map((d) => this.mapDealershipToLocation(d)).sort((a, b) => a.name.localeCompare(b.name));
+          const uniqueRows = this.dedupeDealershipRows(rows);
+          this.locations = uniqueRows
+            .map((d) => this.mapDealershipToLocation(d))
+            .sort((a, b) => a.name.localeCompare(b.name, 'es'));
           this.loading = false;
           this.loadError = false;
           if (this.locations.length > 0) {
@@ -192,6 +197,34 @@ export class LocationsComponent implements OnInit, OnDestroy {
     return loc.id;
   }
 
+  /** Una sucursal por ubicación real; ante duplicados en BD conserva el registro más completo. */
+  private dedupeDealershipRows(rows: DealershipApiRow[]): DealershipApiRow[] {
+    if (rows.length <= 1) {
+      return rows;
+    }
+
+    const catalog: Dealership[] = rows.map((d) => ({
+      id: d.id,
+      name: d.name,
+      location: d.location,
+      state: d.state ?? null,
+      phone: d.phone ?? null,
+      image_url: d.image_url ?? null,
+      latitude: d.latitude ?? null,
+      longitude: d.longitude ?? null,
+      description: null,
+      created_at: new Date(),
+    }));
+
+    const winnerIds = new Set(
+      dedupeDealershipCatalog(catalog)
+        .map((d) => d.id)
+        .filter((id): id is number => id != null && id > 0),
+    );
+
+    return rows.filter((d) => winnerIds.has(d.id));
+  }
+
   private mapDealershipToLocation(d: DealershipApiRow): Location {
     const stateLabel = this.resolveStateLabel(d);
     const filter = this.resolveFilter(d, stateLabel);
@@ -202,7 +235,7 @@ export class LocationsComponent implements OnInit, OnDestroy {
 
     return {
       id: String(d.id),
-      name: d.name || 'Sucursal',
+      name: canonicalDealershipName(d.name || 'Sucursal'),
       address: (d.location || '').trim() || '—',
       phone: (d.phone || '').trim() || '—',
       email: d.email?.trim() || undefined,
